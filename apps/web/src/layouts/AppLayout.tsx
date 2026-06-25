@@ -59,23 +59,24 @@ export function AppLayout() {
     <div className="h-screen flex flex-col">
       {/* Title Bar */}
       <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2 shrink-0">
           <circle cx="16" cy="16" r="14" fill="white"/>
           <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">MV</text>
         </svg>
-        Mâm Vị - Quản Lý Kho Nguyên Liệu
+        <span className="hidden sm:inline">Mâm Vị - Quản Lý Kho Nguyên Liệu</span>
+        <span className="sm:hidden">Mâm Vị</span>
       </div>
 
       {/* Menu Bar */}
-      <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0">
+      <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 overflow-x-auto">
         <MenuDrop label="Hệ thống" items={[{ label: '🏠 Dashboard', route: '/dashboard' }, ...(hasPermission('users:read') ? [{ label: '👥 Users', route: '/users' }, { label: '📋 Audit Logs', route: '/audit-logs' }] : [])]} onNav={(r) => navigate({ to: r })} />
         {hasPermission('ingredients:read') && <MenuDrop label="Kho" items={[{ label: '📦 Nguyên liệu', route: '/ingredients' }, ...(hasPermission('import_orders:read') ? [{ label: '📥 Nhập kho', route: '/import-orders' }] : []), ...(hasPermission('stock_exports:read') ? [{ label: '📤 Xuất kho', route: '/stock-exports' }] : []), ...(hasPermission('suppliers:read') ? [{ label: '🏢 Nhà cung cấp', route: '/suppliers' }] : [])]} onNav={(r) => navigate({ to: r })} />}
         {hasPermission('recipes:read') && <MenuDrop label="Công thức" items={[{ label: '🍳 Công thức', route: '/recipes' }]} onNav={(r) => navigate({ to: r })} />}
         {hasPermission('reports:read') && <MenuDrop label="Báo cáo" items={[{ label: '📊 Báo cáo', route: '/reports' }]} onNav={(r) => navigate({ to: r })} />}
         <div className="flex-1" />
-        <div className="flex items-center gap-2 pr-2">
+        <div className="flex items-center gap-2 pr-2 shrink-0">
           <Bell size={14} className="cursor-pointer" />
-          <span className="text-[11px]">👤 {user?.full_name ?? 'Guest'}</span>
+          <span className="text-[11px] hidden md:inline">👤 {user?.full_name ?? 'Guest'}</span>
           <button onClick={() => { logout(); navigate({ to: '/login' }) }} className="text-[11px] text-win-error hover:underline cursor-pointer">Đăng xuất</button>
         </div>
       </div>
@@ -91,16 +92,19 @@ export function AppLayout() {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar - overlay on mobile, inline on desktop */}
         {sidebarExpanded && (
-          <div className="w-[200px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0">
-            <WinTreeView
-              nodes={filteredTree}
-              activeId={activeNode}
-              onSelect={(node) => node.route && navigate({ to: node.route })}
-            />
-          </div>
+          <>
+            <div className="md:hidden fixed inset-0 bg-black/30 z-30" onClick={toggleSidebar} />
+            <div className="w-[200px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0 absolute md:relative z-40 h-full">
+              <WinTreeView
+                nodes={filteredTree}
+                activeId={activeNode}
+                onSelect={(node) => { node.route && navigate({ to: node.route }); if (window.innerWidth < 768) toggleSidebar() }}
+              />
+            </div>
+          </>
         )}
 
         {/* Content Area */}

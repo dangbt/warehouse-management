@@ -43,7 +43,7 @@ export function DashboardPage() {
         <button onClick={fetchData} className="flex items-center gap-1 text-[11px] text-win-active-title hover:underline cursor-pointer"><RefreshCw size={12} /> Refresh</button>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         {cards.map((s) => (
           <div key={s.label} className="border border-win-grid-border bg-win-control rounded p-3 flex items-center gap-3">
             <div className={s.color}>{s.icon}</div>
@@ -55,7 +55,7 @@ export function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Low Stock */}
         <WinGroupBox title="⚠️ Tồn kho thấp">
           {lowStockItems.length > 0 ? (

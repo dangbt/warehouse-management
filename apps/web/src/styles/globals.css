@@ -22,3 +22,7 @@ body {
   color: var(--color-win-text);
   overflow: hidden;
 }
+
+@media (max-width: 768px) {
+  body { font-size: 13px; }
+}

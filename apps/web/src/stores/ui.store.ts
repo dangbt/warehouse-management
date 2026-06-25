@@ -6,6 +6,6 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>()((set) => ({
-  sidebarExpanded: true,
+  sidebarExpanded: typeof window !== 'undefined' ? window.innerWidth >= 768 : true,
   toggleSidebar: () => set((s) => ({ sidebarExpanded: !s.sidebarExpanded })),
 }))
