@@ -1,13 +1,15 @@
 import { Controller, Get, Post, Body, Query, UseGuards, Req, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('stock-exports')
 export class StockExportsController {
   constructor(private prisma: PrismaService) {}
 
   @Get()
+  @RequirePermissions('stock_exports:read')
   async findAll(@Query() q: { page?: string; limit?: string }) {
     const page = +(q.page || 1), limit = +(q.limit || 20);
     const [data, total] = await Promise.all([
@@ -18,6 +20,7 @@ export class StockExportsController {
   }
 
   @Post()
+  @RequirePermissions('stock_exports:create')
   async create(@Req() req, @Body() body: { ingredient_id: string; quantity: number; reason: string; note?: string }) {
     if (!body.ingredient_id || !body.quantity || body.quantity <= 0 || !body.reason) {
       throw new BadRequestException('Thiếu thông tin hoặc số lượng không hợp lệ');

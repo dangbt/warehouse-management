@@ -1,15 +1,17 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@RequirePermissions('audit_logs:read')
 @Controller('audit-logs')
 export class AuditLogsController {
   constructor(private prisma: PrismaService) {}
 
   @Get()
   async findAll(@Query() q: { page?: string; limit?: string; user_id?: string; action?: string; resource?: string }) {
-    const page = +(q.page || 1), limit = +(q.limit || 50);
+    const page = Math.max(1, +(q.page || 1)), limit = Math.min(50, Math.max(1, +(q.limit || 20)));
     const where: any = {};
     if (q.user_id) where.userId = q.user_id;
     if (q.action) where.action = q.action;

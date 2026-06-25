@@ -1,13 +1,15 @@
 import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('recipes')
 export class RecipesController {
   constructor(private prisma: PrismaService) {}
 
   @Get()
+  @RequirePermissions('recipes:read')
   async findAll(@Query() q: { page?: string; limit?: string }) {
     const page = Math.max(1, +(q.page || 1)), limit = Math.min(100, Math.max(1, +(q.limit || 20)));
     const [data, total] = await Promise.all([
@@ -18,6 +20,7 @@ export class RecipesController {
   }
 
   @Post()
+  @RequirePermissions('recipes:create')
   create(@Body() body: { menu_item_id: string; name: string; serving_size: number; ingredients: { ingredient_id: string; quantity: number; unit: string }[] }) {
     return this.prisma.recipe.create({
       data: {
@@ -31,6 +34,7 @@ export class RecipesController {
   }
 
   @Put(':id')
+  @RequirePermissions('recipes:update')
   async update(@Param('id') id: string, @Body() body: { name?: string; serving_size?: number; ingredients?: { ingredient_id: string; quantity: number; unit: string }[] }) {
     const exists = await this.prisma.recipe.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Công thức không tồn tại');

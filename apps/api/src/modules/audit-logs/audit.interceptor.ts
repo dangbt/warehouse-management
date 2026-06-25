@@ -29,7 +29,7 @@ export class AuditInterceptor implements NestInterceptor {
     const action = this.getAction(method, path);
     const resource = this.getResource(path);
     const resourceId = req.params?.id || null;
-    const ip = req.ip || req.headers['x-forwarded-for'] || '';
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || req.socket?.remoteAddress || '';
     const userAgent = req.headers['user-agent'] || '';
 
     return next.handle().pipe(

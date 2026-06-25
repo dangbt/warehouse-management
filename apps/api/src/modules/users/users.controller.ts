@@ -2,8 +2,11 @@ import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, NotFoundExce
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@RequirePermissions('users:read')
+
 @Controller('users')
 export class UsersController {
   constructor(private prisma: PrismaService) {}
