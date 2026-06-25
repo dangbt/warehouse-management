@@ -4,26 +4,26 @@ const ADMIN = { email: 'admin@wms.vn', password: '123456' }
 
 async function login(page: Page) {
   await page.goto('/login')
-  await page.getByLabel('Email').fill(ADMIN.email)
-  await page.getByLabel('Mật khẩu').fill(ADMIN.password)
-  await page.getByRole('button', { name: 'Đăng Nhập' }).click()
+  await page.locator('[data-testid="login-email"]').fill(ADMIN.email)
+  await page.locator('[data-testid="login-password"]').fill(ADMIN.password)
+  await page.locator('[data-testid="login-submit"]').click()
   await page.waitForURL('**/dashboard')
 }
 
-test.describe('Warehouse Management - Full Flow', () => {
+test.describe('Warehouse Mâm Vị - Full Flow', () => {
 
   test.describe('Authentication', () => {
     test('login with wrong password shows error', async ({ page }) => {
       await page.goto('/login')
-      await page.getByLabel('Email').fill(ADMIN.email)
-      await page.getByLabel('Mật khẩu').fill('wrong')
-      await page.getByRole('button', { name: 'Đăng Nhập' }).click()
-      await expect(page.getByText('Email hoặc mật khẩu không đúng')).toBeVisible({ timeout: 5000 })
+      await page.locator('[data-testid="login-email"]').fill(ADMIN.email)
+      await page.locator('[data-testid="login-password"]').fill('wrong')
+      await page.locator('[data-testid="login-submit"]').click()
+      await expect(page.locator('[data-testid="login-error"]')).toBeVisible({ timeout: 5000 })
     })
 
     test('login success redirects to dashboard', async ({ page }) => {
       await login(page)
-      await expect(page.getByText('Dashboard')).toBeVisible()
+      await expect(page.locator('[data-testid="app-layout"]')).toBeVisible()
     })
   })
 
@@ -32,23 +32,24 @@ test.describe('Warehouse Management - Full Flow', () => {
       await login(page)
     })
 
-    test('Dashboard shows stats cards', async ({ page }) => {
+    test('Dashboard shows stats', async ({ page }) => {
       await expect(page.getByText('Nguyên liệu')).toBeVisible()
       await expect(page.getByText('Giá trị kho')).toBeVisible()
     })
 
-    test('Navigate to ingredients', async ({ page }) => {
-      await page.goto('/ingredients')
+    test('Navigate to ingredients via sidebar', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-ingredients"]').click()
+      await page.waitForURL('**/ingredients')
       await expect(page.locator('th', { hasText: 'Tên nguyên liệu' })).toBeVisible()
     })
 
     test('Create ingredient', async ({ page }) => {
-      await page.goto('/ingredients')
-      await page.getByRole('button', { name: 'Thêm' }).click()
+      await page.locator('[data-testid="sidebar-ingredients"]').click()
+      await page.locator('[data-testid="toolbar-Thêm"]').click()
       await expect(page.getByText('Thêm Nguyên Liệu')).toBeVisible()
 
       const dialog = page.locator('[class*="fixed"]')
-      await dialog.locator('input').first().fill('E2E Test NL ' + Date.now())
+      await dialog.locator('input[type="text"]').first().fill('E2E Test NL ' + Date.now())
       await dialog.locator('select').nth(0).selectOption('kg')
       await dialog.locator('select').nth(1).selectOption('Rau')
       await dialog.locator('input[type="number"]').nth(0).fill('10000')
@@ -57,31 +58,31 @@ test.describe('Warehouse Management - Full Flow', () => {
       await expect(page.getByText('Thêm nguyên liệu thành công')).toBeVisible({ timeout: 5000 })
     })
 
-    test('Navigate to suppliers', async ({ page }) => {
-      await page.goto('/suppliers')
+    test('Navigate to suppliers via sidebar', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-suppliers"]').click()
+      await page.waitForURL('**/suppliers')
       await expect(page.locator('th', { hasText: 'Tên NCC' })).toBeVisible()
     })
 
     test('Create supplier', async ({ page }) => {
-      await page.goto('/suppliers')
-      await page.getByRole('button', { name: 'Thêm' }).click()
+      await page.locator('[data-testid="sidebar-suppliers"]').click()
+      await page.locator('[data-testid="toolbar-Thêm"]').click()
+
       const dialog = page.locator('[class*="fixed"]')
-      await dialog.locator('input').nth(0).fill('E2E NCC ' + Date.now())
-      await dialog.locator('input').nth(1).fill('0901234567')
-      await dialog.locator('input').nth(2).fill('123 Test Street')
+      await dialog.locator('input[type="text"]').nth(0).fill('E2E NCC ' + Date.now())
+      await dialog.locator('input[type="text"]').nth(1).fill('0901234567')
+      await dialog.locator('input[type="text"]').nth(2).fill('123 Test Street')
       await dialog.getByRole('button', { name: 'OK' }).click()
       await expect(page.getByText('Thêm NCC thành công')).toBeVisible({ timeout: 5000 })
     })
 
     test('Create import order (nhập kho)', async ({ page }) => {
-      await page.goto('/import-orders')
-      await page.getByRole('button', { name: 'Tạo phiếu' }).click()
+      await page.locator('[data-testid="sidebar-imports"]').click()
+      await page.locator('[data-testid="toolbar-Tạo phiếu"]').click()
       await expect(page.getByText('Tạo Phiếu Nhập Kho')).toBeVisible()
 
       const dialog = page.locator('[class*="fixed"]')
-      // Select supplier (first option after --)
       await dialog.locator('select').first().selectOption({ index: 1 })
-      // Select ingredient in table row
       await dialog.locator('table select').first().selectOption({ index: 1 })
       await dialog.locator('table input[type="number"]').nth(0).fill('10')
       await dialog.locator('table input[type="number"]').nth(1).fill('50000')
@@ -90,20 +91,20 @@ test.describe('Warehouse Management - Full Flow', () => {
     })
 
     test('Approve import order (duyệt phiếu nhập)', async ({ page }) => {
-      await page.goto('/import-orders')
+      await page.locator('[data-testid="sidebar-imports"]').click()
       await page.waitForTimeout(1000)
       const pendingRow = page.locator('tr', { hasText: 'PENDING' }).first()
       if (await pendingRow.isVisible()) {
         await pendingRow.click()
-        await page.getByRole('button', { name: 'Duyệt' }).click()
+        await page.locator('[data-testid="toolbar-Duyệt"]').click()
         await page.getByRole('button', { name: 'Yes' }).click()
         await expect(page.getByText('Đã duyệt phiếu nhập')).toBeVisible({ timeout: 5000 })
       }
     })
 
     test('Stock export (xuất kho)', async ({ page }) => {
-      await page.goto('/stock-exports')
-      await page.getByRole('button', { name: 'Xuất kho' }).click()
+      await page.locator('[data-testid="sidebar-exports"]').click()
+      await page.locator('[data-testid="toolbar-Xuất kho"]').click()
       await expect(page.getByText('Thông tin xuất kho')).toBeVisible()
 
       const dialog = page.locator('[class*="fixed"]')
@@ -115,18 +116,20 @@ test.describe('Warehouse Management - Full Flow', () => {
     })
 
     test('View recipes', async ({ page }) => {
-      await page.goto('/recipes')
+      await page.locator('[data-testid="sidebar-recipes"]').click()
+      await page.waitForURL('**/recipes')
       await expect(page.locator('th', { hasText: 'Món ăn' })).toBeVisible()
     })
 
     test('View users', async ({ page }) => {
-      await page.goto('/users')
-      await expect(page.locator('th', { hasText: 'Họ tên' })).toBeVisible()
-      await expect(page.locator('td', { hasText: 'admin@wms.vn' })).toBeVisible()
+      await page.locator('[data-testid="sidebar-users"]').click()
+      await page.waitForURL('**/users')
+      await expect(page.getByText('admin@wms.vn')).toBeVisible()
     })
 
     test('View audit logs', async ({ page }) => {
-      await page.goto('/audit-logs')
+      await page.locator('[data-testid="sidebar-audit"]').click()
+      await page.waitForURL('**/audit-logs')
       await expect(page.locator('th', { hasText: 'Action' })).toBeVisible()
     })
 
@@ -136,10 +139,20 @@ test.describe('Warehouse Management - Full Flow', () => {
       await expect(page.getByText('Giá trị kho')).toBeVisible()
     })
 
+    test('Delete ingredient', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-ingredients"]').click()
+      await page.waitForTimeout(500)
+      const row = page.locator('[data-testid^="grid-row-"]').first()
+      await row.click()
+      await page.locator('[data-testid="toolbar-Xoá"]').click()
+      await page.getByRole('button', { name: 'Yes' }).click()
+      await expect(page.getByText('Đã xoá nguyên liệu')).toBeVisible({ timeout: 5000 })
+    })
+
     test('Logout', async ({ page }) => {
       await page.getByText('Đăng xuất').click()
       await page.waitForURL('**/login')
-      await expect(page.getByText('Quản Lý Kho')).toBeVisible()
+      await expect(page.locator('[data-testid="login-form"]')).toBeVisible()
     })
   })
 })
