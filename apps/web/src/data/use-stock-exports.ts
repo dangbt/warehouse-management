@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
+import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
 
 interface StockExport { id: string; ingredient: { name: string; unit: string }; quantity: string; note: string; createdBy: { fullName: string }; createdAt: string }
@@ -10,13 +11,11 @@ export function useStockExports() {
 }
 
 export function useCreateStockExport() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: { ingredient_id: string; quantity: number; reason: string; note?: string }) => api.post('/stock-exports', data),
     onSuccess: () => {
-      // Refetch since response is just {message}, not the created record
-      qc.invalidateQueries({ queryKey: QUERY_KEYS.stockExports })
-      qc.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.stockExports })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
     },
   })
 }

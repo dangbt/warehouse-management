@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
+import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
 
 interface Recipe { id: string; name: string; menuItemId: string; menuItem: { name: string }; servingSize: number; ingredients: { ingredientId: string; quantity: string; unit: string }[] }
@@ -10,21 +11,19 @@ export function useRecipes() {
 }
 
 export function useCreateRecipe() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: { menu_item_id: string; name: string; serving_size: number; ingredients: { ingredient_id: string; quantity: number; unit: string }[] }) => api.post('/recipes', data),
     onSuccess: (newItem) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.recipes }, (old) => old ? { ...old, data: [...old.data, newItem] } : old)
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.recipes }, (old) => old ? { ...old, data: [...old.data, newItem] } : old)
     },
   })
 }
 
 export function useUpdateRecipe() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...data }: { id: string; name?: string; serving_size?: number; ingredients?: { ingredient_id: string; quantity: number; unit: string }[] }) => api.put(`/recipes/${id}`, data),
     onSuccess: (updated) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.recipes }, (old) => old ? { ...old, data: old.data.map((r) => r.id === updated.id ? updated : r) } : old)
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.recipes }, (old) => old ? { ...old, data: old.data.map((r) => r.id === updated.id ? updated : r) } : old)
     },
   })
 }

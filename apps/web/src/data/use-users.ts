@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
+import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
 
 interface UserRow { id: string; fullName: string; email: string; department: { name: string } | null; departmentId: string; userRoles: { role: { id: string; name: string } }[]; isActive: boolean; phone?: string }
@@ -10,29 +11,26 @@ export function useUsers() {
 }
 
 export function useCreateUser() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: { email: string; full_name: string; phone?: string; department_id: string; role_ids: string[]; password?: string }) => api.post('/users', data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: QUERY_KEYS.users }) },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users }) },
   })
 }
 
 export function useUpdateUser() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...data }: { id: string; full_name?: string; phone?: string; department_id?: string }) => api.put(`/users/${id}`, data),
     onSuccess: (updated) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.users }, (old) => old ? { ...old, data: old.data.map((u) => u.id === updated.id ? { ...u, ...updated } : u) } : old)
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.users }, (old) => old ? { ...old, data: old.data.map((u) => u.id === updated.id ? { ...u, ...updated } : u) } : old)
     },
   })
 }
 
 export function useToggleUserActive() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.put(`/users/${id}/toggle-active`, {}),
     onSuccess: (updated) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.users }, (old) => old ? { ...old, data: old.data.map((u) => u.id === updated.id ? { ...u, isActive: updated.isActive } : u) } : old)
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.users }, (old) => old ? { ...old, data: old.data.map((u) => u.id === updated.id ? { ...u, isActive: updated.isActive } : u) } : old)
     },
   })
 }

@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
+import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
 
 interface Ingredient {
@@ -26,11 +27,10 @@ export function useIngredients(params?: { page?: number; category?: string; sear
 }
 
 export function useCreateIngredient() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (data: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) => api.post('/ingredients', data),
     onSuccess: (newItem) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
         if (!old) return old
         return { ...old, data: [...old.data, newItem], meta: { ...old.meta, total: old.meta.total + 1 } }
       })
@@ -39,11 +39,10 @@ export function useCreateIngredient() {
 }
 
 export function useUpdateIngredient() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, ...data }: { id: string; name?: string; unit?: string; category?: string; cost_per_unit?: number; min_stock?: number }) => api.put(`/ingredients/${id}`, data),
     onSuccess: (updated) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
         if (!old) return old
         return { ...old, data: old.data.map((i) => i.id === updated.id ? updated : i) }
       })
@@ -52,11 +51,10 @@ export function useUpdateIngredient() {
 }
 
 export function useDeleteIngredient() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.delete(`/ingredients/${id}`),
     onSuccess: (_, id) => {
-      qc.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
+      queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
         if (!old) return old
         return { ...old, data: old.data.filter((i) => i.id !== id), meta: { ...old.meta, total: old.meta.total - 1 } }
       })
