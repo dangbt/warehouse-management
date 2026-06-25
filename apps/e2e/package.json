@@ -1,0 +1,13 @@
+{
+  "name": "@wms/e2e",
+  "private": true,
+  "scripts": {
+    "pretest": "cd ../api && npm run build && cd ../web && VITE_API_URL=http://localhost:3000/api/v1 npx vite build",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

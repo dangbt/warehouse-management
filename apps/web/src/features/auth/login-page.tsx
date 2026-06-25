@@ -31,7 +31,7 @@ export function LoginPage() {
 
   return (
     <div className="h-screen flex items-center justify-center bg-win-control">
-      <form onSubmit={handleSubmit(onSubmit)} className="w-[360px] bg-white border border-win-grid-border rounded shadow-md">
+      <form onSubmit={handleSubmit(onSubmit)} data-testid="login-form" className="w-[360px] bg-white border border-win-grid-border rounded shadow-md">
         <div className="px-4 py-3 border-b border-win-grid-border flex items-center gap-2">
           <img src="/logo.svg" alt="Mâm Vị" className="h-6" />
           <span className="text-sm font-semibold">Quản Lý Kho</span>
@@ -39,18 +39,18 @@ export function LoginPage() {
         <div className="p-5 space-y-3">
           <div>
             <label className="text-xs block mb-1">Email:</label>
-            <input {...register('email')} className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus" />
+            <input data-testid="login-email" {...register('email')} className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus" />
             {errors.email && <p className="text-[10px] text-win-error mt-0.5">{errors.email.message}</p>}
           </div>
           <div>
             <label className="text-xs block mb-1">Mật khẩu:</label>
-            <input type="password" {...register('password')} className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus" />
+            <input data-testid="login-password" type="password" {...register('password')} className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus" />
             {errors.password && <p className="text-[10px] text-win-error mt-0.5">{errors.password.message}</p>}
           </div>
-          {error && <p className="text-[10px] text-win-error">{error}</p>}
+          {error && <p data-testid="login-error" className="text-[10px] text-win-error">{error}</p>}
         </div>
         <div className="px-5 pb-4">
-          <button type="submit" className="w-full py-1.5 bg-win-active-title text-white text-xs border border-win-active-title rounded-sm cursor-pointer hover:opacity-90">Đăng Nhập</button>
+          <button data-testid="login-submit" type="submit" className="w-full py-1.5 bg-win-active-title text-white text-xs border border-win-active-title rounded-sm cursor-pointer hover:opacity-90">Đăng Nhập</button>
         </div>
       </form>
     </div>

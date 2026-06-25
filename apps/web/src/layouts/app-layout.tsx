@@ -56,7 +56,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col" data-testid="app-layout">
       {/* Title Bar */}
       <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2 shrink-0">

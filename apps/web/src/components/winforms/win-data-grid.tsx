@@ -52,6 +52,7 @@ export function WinDataGrid<T extends { id?: string }>({
               data.map((row, i) => (
                 <tr
                   key={row.id ?? i}
+                  data-testid={`grid-row-${row.id ?? i}`}
                   className={`border-b border-[#EBEBEB] cursor-pointer
                     ${i % 2 === 1 ? 'bg-win-grid-row-alt' : 'bg-white'}
                     ${selectedId === row.id ? '!bg-win-grid-selected' : 'hover:bg-win-menu-hover'}

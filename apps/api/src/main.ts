@@ -8,6 +8,6 @@ async function bootstrap() {
   const origins = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
   app.enableCors({ origin: origins, credentials: true });
   app.setGlobalPrefix('api/v1');
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
