@@ -47,8 +47,11 @@ export function AppLayout() {
     <div className="h-screen flex flex-col">
       {/* Title Bar */}
       <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
-        <img src="/logo.svg" alt="Mâm Vị" className="h-5 brightness-0 invert mr-2" />
-        Quản Lý Kho Nguyên Liệu
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2">
+          <circle cx="16" cy="16" r="14" fill="white"/>
+          <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">MV</text>
+        </svg>
+        Mâm Vị - Quản Lý Kho Nguyên Liệu
       </div>
 
       {/* Menu Bar */}
