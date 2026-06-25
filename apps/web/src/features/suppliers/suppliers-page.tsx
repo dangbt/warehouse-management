@@ -3,7 +3,7 @@ import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import type { Supplier } from '@/types'
-import { SupplierForm } from './SupplierForm'
+import { SupplierForm } from './supplier-form'
 import { api } from '@/services/api'
 
 const columns: Column<Supplier>[] = [

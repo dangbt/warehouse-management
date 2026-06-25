@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Check, X, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { ImportOrderForm } from './ImportOrderForm'
+import { ImportOrderForm } from './import-order-form'
 import { api } from '@/services/api'
 import { formatDate } from '@wms/shared'
 

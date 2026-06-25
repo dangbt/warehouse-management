@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { RecipeForm } from './RecipeForm'
+import { RecipeForm } from './recipe-form'
 import { api } from '@/services/api'
 
 interface RecipeRow { id: string; name: string; menuItem: { name: string }; ingredients: { ingredientId: string; quantity: string; unit: string }[]; servingSize: number; menuItemId: string }

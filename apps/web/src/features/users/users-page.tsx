@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, RefreshCw, ShieldCheck, ShieldOff } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { UserForm } from './UserForm'
+import { UserForm } from './user-form'
 import { api } from '@/services/api'
 
 interface UserRow { id: string; fullName: string; email: string; phone?: string; departmentId?: string; department: { name: string } | null; userRoles: { role: { id: string; name: string } }[]; isActive: boolean }

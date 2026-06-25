@@ -1,6 +1,6 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
-import { NotFoundPage } from '@/features/errors/NotFoundPage'
-import { ErrorPage } from '@/features/errors/ErrorPage'
+import { NotFoundPage } from '@/features/errors/not-found-page'
+import { ErrorPage } from '@/features/errors/error-page'
 
 export const Route = createRootRoute({
   component: () => <Outlet />,

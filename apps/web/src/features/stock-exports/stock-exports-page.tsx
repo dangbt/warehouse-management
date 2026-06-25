@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { StockExportForm } from './StockExportForm'
+import { StockExportForm } from './stock-export-form'
 import { api } from '@/services/api'
 import { formatDate } from '@wms/shared'
 

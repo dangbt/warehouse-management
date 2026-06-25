@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, Trash2, RefreshCw, Download } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { IngredientForm } from './IngredientForm'
+import { IngredientForm } from './ingredient-form'
 import { api } from '@/services/api'
 
 interface IngredientRow { id: string; name: string; unit: string; currentStock: string; minStock: string; costPerUnit: string; category: string }
