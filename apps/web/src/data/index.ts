@@ -1,4 +1,5 @@
 export { QUERY_KEYS } from './query-keys'
+export { queryClient } from './query-client'
 
 export { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from './use-ingredients'
 export { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from './use-suppliers'
