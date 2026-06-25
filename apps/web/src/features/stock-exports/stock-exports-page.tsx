@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './stock-export-form'
-import { api } from '@/services/api'
+import { useStockExports } from '@/data'
 import { formatDate } from '@wms/shared'
 
 interface StockExport { id: string; ingredient: { name: string; unit: string }; quantity: string; note: string; createdBy: { fullName: string }; createdAt: string }
@@ -18,27 +18,18 @@ const columns: Column<StockExport>[] = [
 ]
 
 export function StockExportsPage() {
-  const [data, setData] = useState<StockExport[]>([])
-  const [loading, setLoading] = useState(true)
   const [formOpen, setFormOpen] = useState(false)
-
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    const res = await api.get('/stock-exports?limit=50')
-    setData(res.data); setLoading(false)
-  }, [])
-
-  useEffect(() => { fetchData() }, [fetchData])
+  const { data: res, isLoading, refetch } = useStockExports()
 
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" onClick={() => setFormOpen(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
+        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid columns={columns} data={data} loading={loading} pagination={{ page: 1, limit: 50, total: data.length }} />
-      <StockExportForm open={formOpen} onClose={() => { setFormOpen(false); fetchData() }} onSave={(d) => api.post('/stock-exports', d)} />
+      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} />
+      <StockExportForm open={formOpen} onClose={() => setFormOpen(false)} />
     </div>
   )
 }

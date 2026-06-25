@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Plus, Pencil, RefreshCw, ShieldCheck, ShieldOff } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { UserForm } from './user-form'
-import { api } from '@/services/api'
+import { useUsers, useToggleUserActive } from '@/data'
 
 interface UserRow { id: string; fullName: string; email: string; phone?: string; departmentId?: string; department: { name: string } | null; userRoles: { role: { id: string; name: string } }[]; isActive: boolean }
 
@@ -16,25 +16,12 @@ const columns: Column<UserRow>[] = [
 ]
 
 export function UsersPage() {
-  const [data, setData] = useState<UserRow[]>([])
-  const [loading, setLoading] = useState(true)
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<UserRow | null>(null)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    const res = await api.get('/users?limit=50')
-    setData(res.data); setLoading(false)
-  }, [])
-
-  useEffect(() => { fetchData() }, [fetchData])
-
-  const toggleActive = async () => {
-    if (!selected) return
-    await api.put(`/users/${selected.id}/toggle-active`, {})
-    fetchData()
-  }
+  const { data: res, isLoading, refetch } = useUsers()
+  const toggleMutation = useToggleUserActive()
 
   return (
     <div className="flex flex-col h-full">
@@ -42,12 +29,12 @@ export function UsersPage() {
         <WinToolbar.Button icon={<Plus size={14} />} label="Thêm" onClick={() => { setFormMode('add'); setSelected(null); setFormOpen(true) }} />
         <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => { setFormMode('edit'); setFormOpen(true) }} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={selected?.isActive ? <ShieldOff size={14} /> : <ShieldCheck size={14} />} label={selected?.isActive ? 'Khoá' : 'Kích hoạt'} danger={selected?.isActive} disabled={!selected} onClick={toggleActive} />
+        <WinToolbar.Button icon={selected?.isActive ? <ShieldOff size={14} /> : <ShieldCheck size={14} />} label={selected?.isActive ? 'Khoá' : 'Kích hoạt'} danger={selected?.isActive} disabled={!selected} onClick={() => selected && toggleMutation.mutate(selected.id)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
+        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid columns={columns} data={data} loading={loading} pagination={{ page: 1, limit: 50, total: data.length }} onRowClick={setSelected} onRowDoubleClick={(r) => { setSelected(r); setFormMode('edit'); setFormOpen(true) }} />
-      <UserForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} onSave={async (d) => { if (formMode === 'add') await api.post('/users', { email: d.email, full_name: d.full_name, phone: d.phone, department_id: d.department_id, role_ids: [d.role_id], password: d.password }); else await api.put(`/users/${selected?.id}`, { full_name: d.full_name, phone: d.phone, department_id: d.department_id }); fetchData() }} />
+      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={(r) => { setSelected(r); setFormMode('edit'); setFormOpen(true) }} />
+      <UserForm open={formOpen} mode={formMode} data={selected as any} onClose={() => { setFormOpen(false); refetch() }} />
     </div>
   )
 }

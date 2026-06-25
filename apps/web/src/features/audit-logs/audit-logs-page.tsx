@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { api } from '@/services/api'
+import { useAuditLogs } from '@/data'
 import { formatDateTime } from '@wms/shared'
 
-interface AuditLog { id: string; user: { fullName: string } | null; action: string; resource: string; resourceId: string; oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null; ipAddress: string; createdAt: string }
+interface AuditLog { id: string; user: { fullName: string } | null; action: string; resource: string; resourceId: string; oldValues: unknown; newValues: unknown; ipAddress: string; createdAt: string }
 
 const columns: Column<AuditLog>[] = [
   { key: 'createdAt', header: 'Thời gian', width: 150, render: (r) => formatDateTime(r.createdAt) },
@@ -16,26 +16,17 @@ const columns: Column<AuditLog>[] = [
 ]
 
 export function AuditLogsPage() {
-  const [data, setData] = useState<AuditLog[]>([])
-  const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<AuditLog | null>(null)
-
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    const res = await api.get('/audit-logs?limit=100')
-    setData(res.data); setLoading(false)
-  }, [])
-
-  useEffect(() => { fetchData() }, [fetchData])
+  const { data: res, isLoading, refetch } = useAuditLogs()
 
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
+        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
-          <WinDataGrid columns={columns} data={data} loading={loading} onRowDoubleClick={setDetail} pagination={{ page: 1, limit: 100, total: data.length }} />
+          <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} onRowDoubleClick={setDetail} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} />
         </div>
         {detail && (
           <div className="h-32 border-t border-win-grid-border bg-win-control p-2 overflow-auto text-[11px] shrink-0">

@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import type { Supplier } from '@/types'
 import { SupplierForm } from './supplier-form'
-import { api } from '@/services/api'
+import { useSuppliers, useDeleteSupplier } from '@/data'
 
 const columns: Column<Supplier>[] = [
   { key: 'name', header: 'Tên NCC', width: 180 },
@@ -14,27 +14,13 @@ const columns: Column<Supplier>[] = [
 ]
 
 export function SuppliersPage() {
-  const [data, setData] = useState<Supplier[]>([])
-  const [loading, setLoading] = useState(true)
-  const [total, setTotal] = useState(0)
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<Supplier | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    const res = await api.get('/suppliers?limit=50')
-    setData(res.data); setTotal(res.meta.total); setLoading(false)
-  }, [])
-
-  useEffect(() => { fetchData() }, [fetchData])
-
-  const handleSave = async (formData: { name: string; phone: string; address: string; note?: string }) => {
-    if (formMode === 'add') await api.post('/suppliers', formData)
-    else await api.put(`/suppliers/${selected?.id}`, formData)
-    fetchData()
-  }
+  const { data: res, isLoading, refetch } = useSuppliers()
+  const deleteMutation = useDeleteSupplier()
 
   return (
     <div className="flex flex-col h-full">
@@ -43,11 +29,11 @@ export function SuppliersPage() {
         <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => { setFormMode('edit'); setFormOpen(true) }} />
         <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
+        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid columns={columns} data={data} loading={loading} pagination={{ page: 1, limit: 50, total }} onRowClick={setSelected} onRowDoubleClick={(r) => { setSelected(r); setFormMode('edit'); setFormOpen(true) }} />
-      <SupplierForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} onSave={handleSave} />
-      <WinMessageBox type="question" title="Xác nhận" message={`Xoá NCC "${selected?.name}"?`} open={confirmDelete} buttons="yes_no" onResult={(r) => { setConfirmDelete(false); if (r === 'yes') { api.delete(`/suppliers/${selected?.id}`); setSelected(null); fetchData() } }} />
+      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 50, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={(r) => { setSelected(r); setFormMode('edit'); setFormOpen(true) }} />
+      <SupplierForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} />
+      <WinMessageBox type="question" title="Xác nhận" message={`Xoá NCC "${selected?.name}"?`} open={confirmDelete} buttons="yes_no" onResult={(r) => { setConfirmDelete(false); if (r === 'yes' && selected) { deleteMutation.mutate(selected.id); setSelected(null) } }} />
     </div>
   )
 }

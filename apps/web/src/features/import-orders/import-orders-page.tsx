@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Plus, Check, X, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
-import { api } from '@/services/api'
+import { useImportOrders, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate } from '@wms/shared'
 
 interface ImportOrder { id: string; code: string; supplier: { name: string }; totalAmount: string; status: string; createdAt: string }
@@ -19,24 +19,19 @@ const columns: Column<ImportOrder>[] = [
 ]
 
 export function ImportOrdersPage() {
-  const [data, setData] = useState<ImportOrder[]>([])
-  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    const res = await api.get('/import-orders?limit=50')
-    setData(res.data); setLoading(false)
-  }, [])
+  const { data: res, isLoading, refetch } = useImportOrders()
+  const approveMutation = useApproveImportOrder()
+  const rejectMutation = useRejectImportOrder()
 
-  useEffect(() => { fetchData() }, [fetchData])
-
-  const handleAction = async (action: 'approve' | 'reject') => {
+  const handleAction = (action: 'approve' | 'reject') => {
     if (!selected) return
-    await api.put(`/import-orders/${selected.id}/${action}`, {})
-    setSelected(null); fetchData()
+    if (action === 'approve') approveMutation.mutate(selected.id)
+    else rejectMutation.mutate({ id: selected.id })
+    setSelected(null)
   }
 
   return (
@@ -47,12 +42,12 @@ export function ImportOrdersPage() {
         <WinToolbar.Button icon={<Check size={14} />} label="Duyệt" disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('approve')} />
         <WinToolbar.Button icon={<X size={14} />} label="Từ chối" danger disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('reject')} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
+        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
-      <WinDataGrid columns={columns} data={data} loading={loading} pagination={{ page: 1, limit: 50, total: data.length }} onRowClick={setSelected} onRowDoubleClick={setSelected} />
+      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={setSelected} />
 
-      <ImportOrderForm open={formOpen} onClose={() => { setFormOpen(false); fetchData() }} onSave={(d) => api.post('/import-orders', { supplier_id: d.supplier_id, note: d.note, items: d.items })} />
+      <ImportOrderForm open={formOpen} onClose={() => { setFormOpen(false); refetch() }} />
       <WinMessageBox type="question" title="Xác nhận" message={confirmAction === 'approve' ? `Duyệt phiếu ${selected?.code}?` : `Từ chối phiếu ${selected?.code}?`} open={!!confirmAction} buttons="yes_no" onResult={(r) => { if (r === 'yes' && confirmAction) handleAction(confirmAction); setConfirmAction(null) }} />
     </div>
   )
