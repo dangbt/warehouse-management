@@ -8,20 +8,20 @@ import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
 const menuTree: TreeNode[] = [
-  { id: 'warehouse', label: 'Kho', icon: '📦', children: [
-    { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients' },
-    { id: 'imports', label: 'Nhập kho', route: '/import-orders' },
-    { id: 'exports', label: 'Xuất kho', route: '/stock-exports' },
-    { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers' },
+  { id: 'warehouse', label: 'Kho', icon: '📦', permission: 'ingredients:read', children: [
+    { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
+    { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
+    { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
+    { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
   ]},
-  { id: 'kitchen', label: 'Bếp', icon: '🍳', children: [
-    { id: 'recipes', label: 'Công thức', route: '/recipes' },
+  { id: 'kitchen', label: 'Bếp', icon: '🍳', permission: 'recipes:read', children: [
+    { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
   ]},
-  { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports' },
+  { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
   { id: 'admin', label: 'Quản trị', icon: '⚙️', permission: 'users:read', children: [
-    { id: 'users', label: 'Users', route: '/users' },
-    { id: 'roles', label: 'Roles & Permissions', route: '/roles' },
-    { id: 'audit', label: 'Audit Logs', route: '/audit-logs' },
+    { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
+    { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
+    { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
   ]},
 ]
 
@@ -30,8 +30,10 @@ export function AppLayout() {
   const location = useRouterState({ select: (s) => s.location })
   const { user, logout } = useAuthStore()
   const { sidebarExpanded, toggleSidebar } = useUIStore()
+  const hasPermission = useAuthStore((s) => s.hasPermission)
 
-  const activeNode = findActive(menuTree, location.pathname)
+  const filteredTree = filterTree(menuTree, hasPermission)
+  const activeNode = findActive(filteredTree, location.pathname)
 
   function findActive(nodes: TreeNode[], path: string): string | undefined {
     for (const n of nodes) {
@@ -41,6 +43,16 @@ export function AppLayout() {
         if (found) return found
       }
     }
+  }
+
+  function filterTree(nodes: TreeNode[], check: (p: string) => boolean): TreeNode[] {
+    return nodes.reduce<TreeNode[]>((acc, node) => {
+      if (node.permission && !check(node.permission)) return acc
+      const children = node.children ? filterTree(node.children, check) : undefined
+      if (node.children && (!children || children.length === 0)) return acc
+      acc.push({ ...node, children })
+      return acc
+    }, [])
   }
 
   return (
@@ -56,10 +68,10 @@ export function AppLayout() {
 
       {/* Menu Bar */}
       <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0">
-        <MenuDrop label="Hệ thống" items={[{ label: '🏠 Dashboard', route: '/dashboard' }, { label: '👥 Users', route: '/users' }, { label: '📋 Audit Logs', route: '/audit-logs' }]} onNav={(r) => navigate({ to: r })} />
-        <MenuDrop label="Kho" items={[{ label: '📦 Nguyên liệu', route: '/ingredients' }, { label: '📥 Nhập kho', route: '/import-orders' }, { label: '📤 Xuất kho', route: '/stock-exports' }, { label: '🏢 Nhà cung cấp', route: '/suppliers' }]} onNav={(r) => navigate({ to: r })} />
-        <MenuDrop label="Công thức" items={[{ label: '🍳 Công thức', route: '/recipes' }]} onNav={(r) => navigate({ to: r })} />
-        <MenuDrop label="Báo cáo" items={[{ label: '📊 Báo cáo', route: '/reports' }]} onNav={(r) => navigate({ to: r })} />
+        <MenuDrop label="Hệ thống" items={[{ label: '🏠 Dashboard', route: '/dashboard' }, ...(hasPermission('users:read') ? [{ label: '👥 Users', route: '/users' }, { label: '📋 Audit Logs', route: '/audit-logs' }] : [])]} onNav={(r) => navigate({ to: r })} />
+        {hasPermission('ingredients:read') && <MenuDrop label="Kho" items={[{ label: '📦 Nguyên liệu', route: '/ingredients' }, ...(hasPermission('import_orders:read') ? [{ label: '📥 Nhập kho', route: '/import-orders' }] : []), ...(hasPermission('stock_exports:read') ? [{ label: '📤 Xuất kho', route: '/stock-exports' }] : []), ...(hasPermission('suppliers:read') ? [{ label: '🏢 Nhà cung cấp', route: '/suppliers' }] : [])]} onNav={(r) => navigate({ to: r })} />}
+        {hasPermission('recipes:read') && <MenuDrop label="Công thức" items={[{ label: '🍳 Công thức', route: '/recipes' }]} onNav={(r) => navigate({ to: r })} />}
+        {hasPermission('reports:read') && <MenuDrop label="Báo cáo" items={[{ label: '📊 Báo cáo', route: '/reports' }]} onNav={(r) => navigate({ to: r })} />}
         <div className="flex-1" />
         <div className="flex items-center gap-2 pr-2">
           <Bell size={14} className="cursor-pointer" />
@@ -84,7 +96,7 @@ export function AppLayout() {
         {sidebarExpanded && (
           <div className="w-[200px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0">
             <WinTreeView
-              nodes={menuTree}
+              nodes={filteredTree}
               activeId={activeNode}
               onSelect={(node) => node.route && navigate({ to: node.route })}
             />
