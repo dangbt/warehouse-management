@@ -47,8 +47,8 @@ export function AppLayout() {
     <div className="h-screen flex flex-col">
       {/* Title Bar */}
       <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
-        <span className="mr-2 text-sm">🍜</span>
-        Mâm Vị - Quản Lý Kho Nguyên Liệu
+        <img src="/logo.svg" alt="Mâm Vị" className="h-5 brightness-0 invert mr-2" />
+        Quản Lý Kho Nguyên Liệu
       </div>
 
       {/* Menu Bar */}

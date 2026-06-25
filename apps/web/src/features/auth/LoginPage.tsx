@@ -33,8 +33,8 @@ export function LoginPage() {
     <div className="h-screen flex items-center justify-center bg-win-control">
       <form onSubmit={handleSubmit(onSubmit)} className="w-[360px] bg-white border border-win-grid-border rounded shadow-md">
         <div className="px-4 py-3 border-b border-win-grid-border flex items-center gap-2">
-          <span className="text-lg">🍜</span>
-          <span className="text-sm font-semibold">Mâm Vị - Quản Lý Kho</span>
+          <img src="/logo.svg" alt="Mâm Vị" className="h-6" />
+          <span className="text-sm font-semibold">Quản Lý Kho</span>
         </div>
         <div className="p-5 space-y-3">
           <div>
