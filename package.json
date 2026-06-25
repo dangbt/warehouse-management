@@ -1,7 +1,6 @@
 {
   "name": "warehouse-management",
   "private": true,
-  "packageManager": "npm@10.9.7",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "turbo dev",
