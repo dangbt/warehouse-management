@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate } from '@tanstack/react-router'
-import { Warehouse } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth.store'
 import { api } from '@/services/api'
 
@@ -34,8 +33,8 @@ export function LoginPage() {
     <div className="h-screen flex items-center justify-center bg-win-control">
       <form onSubmit={handleSubmit(onSubmit)} className="w-[360px] bg-white border border-win-grid-border rounded shadow-md">
         <div className="px-4 py-3 border-b border-win-grid-border flex items-center gap-2">
-          <Warehouse size={18} className="text-win-active-title" />
-          <span className="text-sm font-semibold">Warehouse Management System</span>
+          <span className="text-lg">🍜</span>
+          <span className="text-sm font-semibold">Mâm Vị - Quản Lý Kho</span>
         </div>
         <div className="p-5 space-y-3">
           <div>

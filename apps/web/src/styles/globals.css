@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "@wms/ui-winforms/styles";
 
+@theme {
+  /* Mâm Vị brand overrides */
+  --color-win-active-title: #D4451A;
+  --color-win-menu: #FFF9F5;
+  --color-win-menu-hover: #FFF0E8;
+  --color-win-grid-selected: #FFE8DB;
+  --color-win-statusbar: #B8381A;
+  --color-win-input-focus: #D4451A;
+}
+
 * {
   font-family: var(--font-family-win);
 }

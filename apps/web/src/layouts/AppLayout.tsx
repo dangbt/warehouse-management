@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
-import { Warehouse, RefreshCw, Bell, PanelLeftClose, PanelLeft } from 'lucide-react'
+import { RefreshCw, Bell, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { WinTreeView, WinStatusBar } from '@wms/ui-winforms'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
@@ -47,8 +47,8 @@ export function AppLayout() {
     <div className="h-screen flex flex-col">
       {/* Title Bar */}
       <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
-        <Warehouse size={14} className="mr-2" />
-        Warehouse Management System
+        <span className="mr-2 text-sm">🍜</span>
+        Mâm Vị - Quản Lý Kho Nguyên Liệu
       </div>
 
       {/* Menu Bar */}
