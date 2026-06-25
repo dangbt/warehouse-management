@@ -4,7 +4,7 @@ import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './StockExportForm'
 import { api } from '@/services/api'
-import { formatDate } from '@/utils/date'
+import { formatDate } from '@wms/shared'
 
 interface StockExport { id: string; ingredient: { name: string; unit: string }; quantity: string; note: string; createdBy: { fullName: string }; createdAt: string }
 

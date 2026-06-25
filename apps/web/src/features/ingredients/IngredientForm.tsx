@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect, useState } from 'react'
 import { WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
-import { UNIT_OPTIONS } from '@/utils/constants'
+import { UNIT_OPTIONS } from '@wms/shared'
 
 const schema = z.object({
   name: z.string().min(1, 'Bắt buộc'),

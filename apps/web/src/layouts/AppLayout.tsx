@@ -4,7 +4,7 @@ import { Warehouse, RefreshCw, Bell, PanelLeftClose, PanelLeft } from 'lucide-re
 import { WinTreeView, WinStatusBar } from '@wms/ui-winforms'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
-import { now } from '@/utils/date'
+import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
 const menuTree: TreeNode[] = [

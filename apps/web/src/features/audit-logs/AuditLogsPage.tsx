@@ -3,7 +3,7 @@ import { RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { api } from '@/services/api'
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@wms/shared'
 
 interface AuditLog { id: string; user: { fullName: string } | null; action: string; resource: string; resourceId: string; oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null; ipAddress: string; createdAt: string }
 

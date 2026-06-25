@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { api } from '@/services/api'
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@wms/shared'
 
 interface Ingredient { name: string; unit: string; currentStock: string; minStock: string; costPerUnit: string }
 interface Transaction { id: string; ingredient: { name: string; unit: string }; type: string; quantity: string; note: string; createdBy: { fullName: string }; createdAt: string }

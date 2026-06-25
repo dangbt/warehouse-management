@@ -4,7 +4,7 @@ import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './ImportOrderForm'
 import { api } from '@/services/api'
-import { formatDate } from '@/utils/date'
+import { formatDate } from '@wms/shared'
 
 interface ImportOrder { id: string; code: string; supplier: { name: string }; totalAmount: string; status: string; createdAt: string }
 

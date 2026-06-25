@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Package, FileText, AlertTriangle, DollarSign, RefreshCw } from 'lucide-react'
 import { WinGroupBox } from '@wms/ui-winforms'
 import { api } from '@/services/api'
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@wms/shared'
 
 export function DashboardPage() {
   const [stats, setStats] = useState({ total: 0, pending: 0, lowStock: 0, totalValue: 0 })

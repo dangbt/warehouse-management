@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
-import { UNIT_OPTIONS } from '@/utils/constants'
+import { UNIT_OPTIONS } from '@wms/shared'
 
 const ingredientLine = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
