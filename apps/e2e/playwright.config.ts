@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 30000,
   retries: 1,
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:5173',
     headless: true,
   },
   webServer: [
@@ -13,18 +13,18 @@ export default defineConfig({
       command: 'cd ../api && node dist/src/main.js',
       port: 3000,
       reuseExistingServer: true,
-      timeout: 10000,
+      timeout: 15000,
       env: {
         DATABASE_URL: 'postgresql://wms_user:wms_pass123@localhost:5432/warehouse_db',
         JWT_SECRET: 'wms-super-secret-key-2026',
-        CORS_ORIGINS: 'http://localhost:4173,http://localhost:5173',
+        CORS_ORIGINS: 'http://localhost:5173',
       },
     },
     {
-      command: 'cd ../web && npx vite preview --port 4173',
-      port: 4173,
+      command: 'cd ../web && npx vite --port 5173',
+      port: 5173,
       reuseExistingServer: true,
-      timeout: 10000,
+      timeout: 15000,
     },
   ],
 })
