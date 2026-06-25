@@ -45,7 +45,7 @@ export function ImportOrdersPage() {
         <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<Check size={14} />} label="Duyệt" disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('approve')} />
-        <WinToolbar.Button icon={<X size={14} />} label="Từ chối" disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('reject')} />
+        <WinToolbar.Button icon={<X size={14} />} label="Từ chối" danger disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('reject')} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
       </WinToolbar>

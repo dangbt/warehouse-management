@@ -26,3 +26,8 @@ body {
 @media (max-width: 768px) {
   body { font-size: 13px; }
 }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

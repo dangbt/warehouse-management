@@ -41,7 +41,7 @@ export function SuppliersPage() {
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={14} />} label="Thêm" onClick={() => { setFormMode('add'); setSelected(null); setFormOpen(true) }} />
         <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => { setFormMode('edit'); setFormOpen(true) }} />
-        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
       </WinToolbar>

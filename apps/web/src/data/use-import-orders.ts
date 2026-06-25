@@ -2,6 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
 import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
+import { useToastStore } from '@/stores/toast.store'
 
 interface ImportOrder { id: string; code: string; supplier: { name: string }; totalAmount: string; status: string; createdAt: string; items: unknown[] }
 interface ListResponse { data: ImportOrder[]; meta: { page: number; limit: number; total: number } }
@@ -16,7 +17,9 @@ export function useCreateImportOrder() {
     mutationFn: (data: { supplier_id: string; note?: string; items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string }[] }) => api.post('/import-orders', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) => old ? { ...old, data: [newItem, ...old.data] } : old)
+      useToastStore.getState().success('Tạo phiếu nhập thành công')
     },
+    onError: (e: Error) => { useToastStore.getState().error(e.message) },
   })
 }
 
@@ -25,7 +28,9 @@ export function useApproveImportOrder() {
     mutationFn: (id: string) => api.put(`/import-orders/${id}/approve`, {}),
     onSuccess: (_, id) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) => old ? { ...old, data: old.data.map((o) => o.id === id ? { ...o, status: 'COMPLETED' } : o) } : old)
+      useToastStore.getState().success('Đã duyệt phiếu nhập')
     },
+    onError: (e: Error) => { useToastStore.getState().error(e.message) },
   })
 }
 
@@ -34,6 +39,8 @@ export function useRejectImportOrder() {
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => api.put(`/import-orders/${id}/reject`, { reason }),
     onSuccess: (_, { id }) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) => old ? { ...old, data: old.data.map((o) => o.id === id ? { ...o, status: 'REJECTED' } : o) } : old)
+      useToastStore.getState().success('Đã từ chối phiếu nhập')
     },
+    onError: (e: Error) => { useToastStore.getState().error(e.message) },
   })
 }

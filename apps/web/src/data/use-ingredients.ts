@@ -2,6 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
 import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
+import { useToastStore } from '@/stores/toast.store'
 
 interface Ingredient {
   id: string
@@ -34,7 +35,9 @@ export function useCreateIngredient() {
         if (!old) return old
         return { ...old, data: [...old.data, newItem], meta: { ...old.meta, total: old.meta.total + 1 } }
       })
+      useToastStore.getState().success('Thêm nguyên liệu thành công')
     },
+    onError: (e: Error) => { useToastStore.getState().error(e.message) },
   })
 }
 
@@ -46,7 +49,9 @@ export function useUpdateIngredient() {
         if (!old) return old
         return { ...old, data: old.data.map((i) => i.id === updated.id ? updated : i) }
       })
+      useToastStore.getState().success('Cập nhật thành công')
     },
+    onError: (e: Error) => { useToastStore.getState().error(e.message) },
   })
 }
 
@@ -58,6 +63,8 @@ export function useDeleteIngredient() {
         if (!old) return old
         return { ...old, data: old.data.filter((i) => i.id !== id), meta: { ...old.meta, total: old.meta.total - 1 } }
       })
+      useToastStore.getState().success('Đã xoá nguyên liệu')
     },
+    onError: (e: Error) => { useToastStore.getState().error(e.message) },
   })
 }

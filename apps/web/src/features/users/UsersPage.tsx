@@ -42,7 +42,7 @@ export function UsersPage() {
         <WinToolbar.Button icon={<Plus size={14} />} label="Thêm" onClick={() => { setFormMode('add'); setSelected(null); setFormOpen(true) }} />
         <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => { setFormMode('edit'); setFormOpen(true) }} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={selected?.isActive ? <ShieldOff size={14} /> : <ShieldCheck size={14} />} label={selected?.isActive ? 'Khoá' : 'Kích hoạt'} disabled={!selected} onClick={toggleActive} />
+        <WinToolbar.Button icon={selected?.isActive ? <ShieldOff size={14} /> : <ShieldCheck size={14} />} label={selected?.isActive ? 'Khoá' : 'Kích hoạt'} danger={selected?.isActive} disabled={!selected} onClick={toggleActive} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={fetchData} />
       </WinToolbar>

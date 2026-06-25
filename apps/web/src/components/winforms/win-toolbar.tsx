@@ -5,14 +5,15 @@ interface ToolbarButtonProps {
   label?: string
   onClick?: () => void
   disabled?: boolean
+  danger?: boolean
 }
 
-function Button({ icon, label, onClick, disabled }: ToolbarButtonProps) {
+function Button({ icon, label, onClick, disabled, danger }: ToolbarButtonProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center gap-1 px-2 py-1 border border-transparent rounded-sm text-[11px] cursor-pointer hover:bg-win-menu-hover hover:border-win-button-border disabled:opacity-40 disabled:cursor-not-allowed"
+      className={`flex items-center gap-1 px-2 py-1 border border-transparent rounded-sm text-[11px] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${danger ? 'text-win-error hover:bg-red-50 hover:border-win-error/40' : 'hover:bg-win-menu-hover hover:border-win-button-border'}`}
     >
       {icon}
       {label && <span>{label}</span>}
