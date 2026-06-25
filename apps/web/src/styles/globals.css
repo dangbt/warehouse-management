@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "@wms/ui-winforms/styles";
+
+* {
+  font-family: var(--font-family-win);
+}
+
+body {
+  margin: 0;
+  background: var(--color-win-control);
+  font-size: 12px;
+  color: var(--color-win-text);
+  overflow: hidden;
+}

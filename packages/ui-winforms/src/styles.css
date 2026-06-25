@@ -1,0 +1,25 @@
+/* WinForms Theme - Use with Tailwind CSS v4 */
+@theme {
+  --color-win-control: #F0F0F0;
+  --color-win-control-dark: #E1E1E1;
+  --color-win-window: #FFFFFF;
+  --color-win-active-title: #0078D4;
+  --color-win-menu: #F5F5F5;
+  --color-win-menu-hover: #E5F3FF;
+  --color-win-grid-header: #E8E8E8;
+  --color-win-grid-border: #D0D0D0;
+  --color-win-grid-row-alt: #F9F9F9;
+  --color-win-grid-selected: #CCE8FF;
+  --color-win-button: #E1E1E1;
+  --color-win-button-hover: #D4D4D4;
+  --color-win-button-border: #ADADAD;
+  --color-win-text: #1E1E1E;
+  --color-win-text-secondary: #6D6D6D;
+  --color-win-statusbar: #007ACC;
+  --color-win-error: #E81123;
+  --color-win-warning: #FFB900;
+  --color-win-success: #107C10;
+  --color-win-input-border: #7A7A7A;
+  --color-win-input-focus: #0078D4;
+  --font-family-win: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+}

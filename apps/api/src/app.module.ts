@@ -1,0 +1,34 @@
+import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { IngredientsModule } from './modules/ingredients/ingredients.module';
+import { SuppliersModule } from './modules/suppliers/suppliers.module';
+import { ImportOrdersModule } from './modules/import-orders/import-orders.module';
+import { StockExportsModule } from './modules/stock-exports/stock-exports.module';
+import { RecipesModule } from './modules/recipes/recipes.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { AuditInterceptor } from './modules/audit-logs/audit.interceptor';
+import { CommonModule } from './modules/common/common.module';
+import { ReportsModule } from './modules/reports/reports.module';
+
+@Module({
+  imports: [
+    PrismaModule,
+    AuthModule,
+    IngredientsModule,
+    SuppliersModule,
+    ImportOrdersModule,
+    StockExportsModule,
+    RecipesModule,
+    UsersModule,
+    AuditLogsModule,
+    CommonModule,
+    ReportsModule,
+  ],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
+  ],
+})
+export class AppModule {}
