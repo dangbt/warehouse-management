@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { HealthController } from './health.controller';
 import { IngredientsModule } from './modules/ingredients/ingredients.module';
 import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { ImportOrdersModule } from './modules/import-orders/import-orders.module';
@@ -30,5 +31,6 @@ import { ReportsModule } from './modules/reports/reports.module';
   providers: [
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
