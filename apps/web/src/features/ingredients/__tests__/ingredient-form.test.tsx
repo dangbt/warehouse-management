@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { IngredientForm } from '../IngredientForm'
+import { IngredientForm } from '../ingredient-form'
 
 describe('IngredientForm', () => {
   it('renders nothing when closed', () => {

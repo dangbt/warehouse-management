@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { LoginPage } from '../LoginPage'
+import { LoginPage } from '../login-page'
 
 // Mock router
 vi.mock('@tanstack/react-router', () => ({
@@ -25,7 +25,7 @@ describe('LoginPage', () => {
 
   it('renders login form', () => {
     render(<LoginPage />)
-    expect(screen.getByText('Warehouse Management System')).toBeInTheDocument()
+    expect(screen.getByText('Quản Lý Kho')).toBeInTheDocument()
     expect(screen.getByText('Đăng Nhập')).toBeInTheDocument()
   })
 

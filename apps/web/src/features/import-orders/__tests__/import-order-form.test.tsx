@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { ImportOrderForm } from '../ImportOrderForm'
+import { ImportOrderForm } from '../import-order-form'
 
 vi.mock('@/services/api', () => ({
   api: {
