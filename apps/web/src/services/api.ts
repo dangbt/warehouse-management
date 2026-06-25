@@ -12,7 +12,7 @@ async function request(path: string, options: RequestInit = {}) {
       ...options.headers,
     },
   })
-  if (res.status === 401) {
+  if (res.status === 401 && !path.includes('/auth/login')) {
     useAuthStore.getState().logout()
     window.location.href = '/login'
     throw new Error('Unauthorized')
