@@ -12,11 +12,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@wms/ui-winforms": "*",
-    "@wms/shared": "*",
     "@hookform/resolvers": "^5.4.0",
     "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-router": "^1.170.16",
+    "@wms/shared": "*",
+    "@wms/ui-winforms": "*",
     "lucide-react": "^1.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -25,6 +25,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.3.1",
     "@tanstack/router-devtools": "^1.167.0",
     "@tanstack/router-plugin": "^1.168.18",
