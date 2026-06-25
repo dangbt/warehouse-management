@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, NotFoundException, ConflictException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
