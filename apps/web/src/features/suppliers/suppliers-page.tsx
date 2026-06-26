@@ -169,12 +169,20 @@ export function SuppliersPage() {
           <div className="text-[11px]">Nợ hiện tại: <strong className="text-win-error">{Number(selected?.totalDebt ?? 0).toLocaleString()}₫</strong></div>
           <div>
             <label className="text-[11px] block mb-0.5">Số tiền thanh toán</label>
-            <input
-              type="number"
-              value={payAmount}
-              onChange={(e) => setPayAmount(e.target.value)}
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none"
-            />
+            <div className="flex gap-1">
+              <input
+                type="number"
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+                className="flex-1 border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none"
+              />
+              <button
+                onClick={() => setPayAmount(String(Number(selected?.totalDebt ?? 0)))}
+                className="px-2 py-1 text-[10px] bg-win-active-title text-white rounded-sm whitespace-nowrap"
+              >
+                Tất cả
+              </button>
+            </div>
           </div>
           <div>
             <label className="text-[11px] block mb-0.5">Phương thức</label>
