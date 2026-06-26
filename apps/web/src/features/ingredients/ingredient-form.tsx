@@ -49,7 +49,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
 
@@ -90,9 +90,10 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
         <>
           <button
             onClick={handleSubmit(onSubmit)}
-            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+            disabled={isSubmitting}
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer disabled:opacity-50"
           >
-            OK
+            {isSubmitting ? 'Đang lưu...' : 'OK'}
           </button>
           <button
             onClick={onClose}

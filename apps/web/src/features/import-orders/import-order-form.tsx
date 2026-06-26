@@ -34,7 +34,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     handleSubmit,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -86,9 +86,10 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
           <span className="text-xs mr-auto font-semibold">Tổng: {total.toLocaleString()}₫</span>
           <button
             onClick={handleSubmit(onSubmit)}
-            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+            disabled={isSubmitting}
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer disabled:opacity-50"
           >
-            Lưu
+            {isSubmitting ? 'Đang lưu...' : 'Lưu'}
           </button>
           <button
             onClick={onClose}
