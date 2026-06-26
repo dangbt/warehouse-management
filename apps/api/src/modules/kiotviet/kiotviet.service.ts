@@ -10,6 +10,21 @@ interface KiotVietOrderInput {
   items: { productName: string; quantity: number; price: number }[];
 }
 
+interface KiotVietInvoice {
+  id: number;
+  code: string;
+  customerName?: string;
+  total: number;
+  purchaseDate: string;
+  invoiceDetails?: KiotVietInvoiceDetail[];
+}
+
+interface KiotVietInvoiceDetail {
+  productName: string;
+  quantity: number;
+  price: number;
+}
+
 @Injectable()
 export class KiotVietService {
   constructor(private prisma: PrismaService) {}
@@ -44,7 +59,7 @@ export class KiotVietService {
       headers: { Retailer: config.retailer, Authorization: `Bearer ${access_token}` },
     });
     if (!invoiceRes.ok) throw new BadRequestException('Lỗi lấy hóa đơn KiotViet: ' + (await invoiceRes.text()));
-    const { data: invoices } = (await invoiceRes.json()) as { data: any[] };
+    const { data: invoices } = (await invoiceRes.json()) as { data: KiotVietInvoice[] };
 
     // 3. Transform to our format and sync
     const orders: KiotVietOrderInput[] = invoices.map((inv) => ({
@@ -53,7 +68,7 @@ export class KiotVietService {
       customerName: inv.customerName,
       totalAmount: inv.total,
       orderDate: inv.purchaseDate,
-      items: (inv.invoiceDetails || []).map((d: any) => ({
+      items: (inv.invoiceDetails || []).map((d) => ({
         productName: d.productName,
         quantity: d.quantity,
         price: d.price,
@@ -76,7 +91,9 @@ export class KiotVietService {
       const menuItems = await this.prisma.menuItem.findMany();
       const itemsData = order.items.map((item) => {
         const norm = this.normalize(item.productName);
-        const matched = menuItems.find((m) => this.normalize(m.name) === norm) || menuItems.find((m) => this.normalize(m.name).includes(norm) || norm.includes(this.normalize(m.name)));
+        const matched =
+          menuItems.find((m) => this.normalize(m.name) === norm) ||
+          menuItems.find((m) => this.normalize(m.name).includes(norm) || norm.includes(this.normalize(m.name)));
         return { productName: item.productName, menuItemId: matched?.id || null, quantity: item.quantity, price: item.price };
       });
 
@@ -112,7 +129,7 @@ export class KiotVietService {
       if (!item.menuItem?.recipe) continue;
       const recipe = item.menuItem.recipe;
       for (const ri of recipe.ingredients) {
-        const qty = Number(ri.quantity) * item.quantity / recipe.servingSize;
+        const qty = (Number(ri.quantity) * item.quantity) / recipe.servingSize;
         const existing = deductions.find((d) => d.ingredientId === ri.ingredientId);
         if (existing) existing.quantity += qty;
         else deductions.push({ ingredientId: ri.ingredientId, quantity: qty });
