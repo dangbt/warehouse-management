@@ -6,6 +6,14 @@ import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate } from '@wms/shared'
 
+interface ImportOrderItem {
+  id: string
+  ingredient: { name: string; unit: string }
+  quantity: string
+  unitPrice: string
+  totalPrice: string
+}
+
 interface ImportOrder {
   id: string
   code: string
@@ -13,6 +21,8 @@ interface ImportOrder {
   totalAmount: string
   status: string
   createdAt: string
+  items?: ImportOrderItem[]
+  note?: string
 }
 
 const statusColors: Record<string, string> = {
@@ -90,6 +100,35 @@ export function ImportOrdersPage() {
         onRowClick={setSelected}
         onRowDoubleClick={setSelected}
       />
+
+      {selected?.items && selected.items.length > 0 && (
+        <div className="border-t border-win-grid-border bg-win-control p-2 max-h-40 overflow-auto shrink-0">
+          <div className="text-[11px] font-semibold mb-1">📋 Chi tiết phiếu {selected.code}:</div>
+          <table className="w-full text-[11px]">
+            <thead>
+              <tr className="bg-win-grid-header">
+                <th className="text-left p-1">Nguyên liệu</th>
+                <th className="text-center p-1">ĐVT</th>
+                <th className="text-right p-1">SL</th>
+                <th className="text-right p-1">Đơn giá</th>
+                <th className="text-right p-1">Thành tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selected.items.map((item) => (
+                <tr key={item.id} className="border-b border-win-grid-border">
+                  <td className="p-1">{item.ingredient?.name}</td>
+                  <td className="p-1 text-center">{item.ingredient?.unit}</td>
+                  <td className="p-1 text-right">{Number(item.quantity).toLocaleString()}</td>
+                  <td className="p-1 text-right">{Number(item.unitPrice).toLocaleString()}₫</td>
+                  <td className="p-1 text-right">{Number(item.totalPrice).toLocaleString()}₫</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {selected.note && <div className="text-[10px] text-win-text-secondary mt-1">Ghi chú: {selected.note}</div>}
+        </div>
+      )}
 
       <ImportOrderForm
         open={formOpen}
