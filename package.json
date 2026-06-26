@@ -13,6 +13,9 @@
     "lint": "turbo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "version:patch": "cd apps/web && npm version patch --no-git-tag-version && cd ../api && npm version patch --no-git-tag-version",
+    "version:minor": "cd apps/web && npm version minor --no-git-tag-version && cd ../api && npm version minor --no-git-tag-version",
+    "version:major": "cd apps/web && npm version major --no-git-tag-version && cd ../api && npm version major --no-git-tag-version",
     "prepare": "node -e \"if(!process.env.CI)require('child_process').execSync('npx husky',{stdio:'inherit'})\""
   },
   "devDependencies": {
