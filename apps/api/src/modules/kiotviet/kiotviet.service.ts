@@ -14,6 +14,54 @@ interface KiotVietOrderInput {
 export class KiotVietService {
   constructor(private prisma: PrismaService) {}
 
+  private normalize(s: string) {
+    return s
+      .toLowerCase()
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+  }
+
+  /** Sync from KiotViet API directly */
+  async syncFromApi(config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }) {
+    // 1. Get access token
+    const tokenRes = await fetch('https://id.kiotviet.vn/connect/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `scopes=PublicApi.Access&grant_type=client_credentials&client_id=${config.clientId}&client_secret=${config.clientSecret}`,
+    });
+    if (!tokenRes.ok) throw new BadRequestException('Không thể xác thực KiotViet: ' + (await tokenRes.text()));
+    const { access_token } = (await tokenRes.json()) as { access_token: string };
+
+    // 2. Fetch invoices
+    const params = new URLSearchParams({ pageSize: '100', orderBy: 'createdDate', orderDirection: 'DESC' });
+    if (config.fromDate) params.set('fromPurchaseDate', config.fromDate);
+    if (config.toDate) params.set('toPurchaseDate', config.toDate);
+
+    const invoiceRes = await fetch(`https://public.kiotapi.com/invoices?${params}`, {
+      headers: { Retailer: config.retailer, Authorization: `Bearer ${access_token}` },
+    });
+    if (!invoiceRes.ok) throw new BadRequestException('Lỗi lấy hóa đơn KiotViet: ' + (await invoiceRes.text()));
+    const { data: invoices } = (await invoiceRes.json()) as { data: any[] };
+
+    // 3. Transform to our format and sync
+    const orders: KiotVietOrderInput[] = invoices.map((inv) => ({
+      id: String(inv.id),
+      code: inv.code,
+      customerName: inv.customerName,
+      totalAmount: inv.total,
+      orderDate: inv.purchaseDate,
+      items: (inv.invoiceDetails || []).map((d: any) => ({
+        productName: d.productName,
+        quantity: d.quantity,
+        price: d.price,
+      })),
+    }));
+
+    return this.syncOrders(orders);
+  }
   async syncOrders(orders: KiotVietOrderInput[]) {
     const results = { synced: 0, skipped: 0, errors: [] as string[] };
 
@@ -24,19 +72,11 @@ export class KiotVietService {
         continue;
       }
 
-      // Match items to menu items by name (normalize: lowercase, trim, remove diacritics)
+      // Match items to menu items by name
       const menuItems = await this.prisma.menuItem.findMany();
-      const normalize = (s: string) =>
-        s
-          .toLowerCase()
-          .trim()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/đ/g, 'd')
-          .replace(/Đ/g, 'D');
       const itemsData = order.items.map((item) => {
-        const norm = normalize(item.productName);
-        const matched = menuItems.find((m) => normalize(m.name) === norm) || menuItems.find((m) => normalize(m.name).includes(norm) || norm.includes(normalize(m.name)));
+        const norm = this.normalize(item.productName);
+        const matched = menuItems.find((m) => this.normalize(m.name) === norm) || menuItems.find((m) => this.normalize(m.name).includes(norm) || norm.includes(this.normalize(m.name)));
         return { productName: item.productName, menuItemId: matched?.id || null, quantity: item.quantity, price: item.price };
       });
 

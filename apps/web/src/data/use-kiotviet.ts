@@ -45,6 +45,20 @@ export function useSyncKiotViet() {
   })
 }
 
+export function useSyncKiotVietApi() {
+  return useMutation({
+    mutationFn: (config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }) =>
+      api.post('/kiotviet/sync-api', config),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.kiotvietOrders })
+      useToastStore.getState().success('Đồng bộ từ KiotViet API thành công')
+    },
+    onError: (e: Error) => {
+      useToastStore.getState().error(e.message)
+    },
+  })
+}
+
 export function useDeductOrder() {
   return useMutation({
     mutationFn: (id: string) => api.post(`/kiotviet/orders/${id}/deduct`),

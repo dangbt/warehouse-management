@@ -20,6 +20,12 @@ export class KiotVietController {
     return this.svc.syncOrders(body.orders);
   }
 
+  @Post('sync-api')
+  @RequirePermissions('kiotviet:sync')
+  syncFromApi(@Body() body: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }) {
+    return this.svc.syncFromApi(body);
+  }
+
   @Post('orders/:id/deduct')
   @RequirePermissions('kiotviet:deduct')
   deduct(@Param('id') id: string, @Req() req) {
