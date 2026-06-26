@@ -381,6 +381,138 @@ Prefix: tất cả route đều có global prefix `/api/v1` (xem main.ts). Bảo
 
 ---
 
+## Mở Rộng: Bán Thành Phẩm (BTP) & Gom Nhóm Nguyên Liệu — ĐỀ XUẤT (chưa code)
+
+> Giải quyết bài toán **chế biến nội bộ**: nhiều nguyên liệu là _bán thành phẩm_ làm từ nguyên liệu sống.
+> Ví dụ: ba rọi sống → ba rọi chín / ba rọi nướng; thịt bò sống → bò chín; vịt sống → vịt chín…
+> Khi báo cáo tồn chỉ cần xem **tổng theo nhóm** (vd "ba rọi" = sống + chín + nướng).
+> **Thiết kế tổng quát, cấu hình bằng dữ liệu — KHÔNG hardcode từng món.**
+
+### Nguyên tắc: tồn kho 2 lớp
+
+```
+NCC ──nhập──► [NL sống] ──(phiếu chế biến)──► [BTP: chín/nướng] ──(order)──► trừ kho
+```
+
+- Recipe của món trỏ tới **BTP** (vd ba rọi nướng). Order → trừ BTP (`ORDER_DEDUCT`).
+- NL sống **chỉ giảm khi chế biến**, không bị trừ trực tiếp bởi order.
+- Lý do: biết chính xác đang còn bao nhiêu đồ đã sơ chế sẵn; nếu trừ thẳng sống thì BTP không bao giờ giảm (sai).
+
+### Thay đổi schema
+
+#### `ingredient_groups` - Nhóm nguyên liệu (gom tồn)
+
+| Column    | Type           | Mô tả                                                                                    |
+| --------- | -------------- | ---------------------------------------------------------------------------------------- |
+| id        | UUID/PK        |                                                                                          |
+| name      | varchar/UK     | Tên nhóm (vd "Ba rọi", "Thịt bò", "Vịt")                                                 |
+| base_unit | varchar        | **Đơn vị gốc của nhóm để cộng tồn**, quy ước theo NL gốc (vd "kg" = kg sống tương đương) |
+| min_stock | decimal(10,3)? | Ngưỡng cảnh báo cấp nhóm theo base_unit (tuỳ chọn)                                       |
+| note      | text?          |                                                                                          |
+
+> Member trong nhóm **không cần cùng đơn vị tồn**: mỗi NL khai `base_factor` để quy về `base_unit` của nhóm (xem UoM bên dưới).
+
+#### `ingredients` - thêm 4 cột
+
+| Column               | Type                     | Mô tả                                                                                                                                                                         |
+| -------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| group_id             | FK? → ingredient_groups  | Nhóm để gom tồn (vd cả 3 ba rọi cùng group)                                                                                                                                   |
+| source_ingredient_id | FK? → ingredients (self) | NL nguồn nếu đây là BTP (vd ba rọi nướng ← ba rọi sống). NULL = NL mua ngoài                                                                                                  |
+| yield_ratio          | decimal(6,4)?            | Định mức quy đổi mặc định = output/source (vd 0.7 = 1kg sống ra 0.7kg nướng)                                                                                                  |
+| base_factor          | decimal(12,6)?           | Quy đổi **1 đơn vị tồn của NL → base_unit của nhóm** (theo NL gốc tương đương). VD ba rọi chín: 1 phần = 0.22 kg **sống tương đương** ⇒ base_factor = 0.22. NL sống (kg): = 1 |
+
+#### `ingredient_units` - Đơn vị tính phụ / đóng gói (UoM)
+
+> Cho phép nhập/xuất theo **đơn vị đóng gói** khác đơn vị tồn. VD: tồn theo "chai", nhập theo "thùng".
+
+| Column         | Type             | Mô tả                                                          |
+| -------------- | ---------------- | -------------------------------------------------------------- |
+| id             | UUID/PK          |                                                                |
+| ingredient_id  | FK → ingredients |                                                                |
+| unit_name      | varchar          | Tên ĐVT phụ (vd "thùng", "lốc")                                |
+| factor         | decimal(12,4)    | 1 [unit_name] = factor [đơn vị tồn]. VD 1 thùng = 24 chai ⇒ 24 |
+| is_default_buy | boolean          | ĐVT mặc định khi nhập (tuỳ chọn)                               |
+
+- Đơn vị tồn gốc của NL vẫn là `ingredients.unit` (vd "chai", "phần", "kg").
+- Khi nhập theo "thùng", user chọn ĐVT = thùng + nhập số lượng; **factor có thể cho sửa ngay tại phiếu nhập** (vì thùng 12/24 chai khác nhau) → số tồn cộng vào = quantity × factor (ra "chai").
+
+#### `processing_orders` - Phiếu chế biến
+
+| Column               | Type             | Mô tả                                            |
+| -------------------- | ---------------- | ------------------------------------------------ |
+| id                   | UUID/PK          |                                                  |
+| code                 | varchar/UK       | Mã phiếu (CB-YYYYMMDD-XXX)                       |
+| source_ingredient_id | FK → ingredients | NL sống dùng                                     |
+| source_qty           | decimal(10,3)    | Lượng sống tiêu hao                              |
+| output_ingredient_id | FK → ingredients | BTP tạo ra                                       |
+| expected_qty         | decimal(10,3)    | Lượng dự kiến = source_qty × yield_ratio (gợi ý) |
+| output_qty           | decimal(10,3)    | **Lượng thực thu** (người làm nhập, có hao hụt)  |
+| status               | string           | DRAFT / COMPLETED                                |
+| note                 | text?            |                                                  |
+| created_by           | FK → users       |                                                  |
+| completed_at         | timestamp?       |                                                  |
+| created_at           | timestamp        |                                                  |
+
+#### `stock_transactions.type` - thêm 2 giá trị
+
+`PROCESS_OUT` (trừ NL sống khi chế biến), `PROCESS_IN` (cộng BTP).
+
+### Luồng chế biến (khi complete phiếu)
+
+```
+1. Trừ source: current_stock(source) -= source_qty   → ghi PROCESS_OUT
+2. Cộng output: current_stock(output) += output_qty  → ghi PROCESS_IN
+3. Chuyển giá vốn: cost_per_unit(output) = (source_qty × cost_per_unit(source)) / output_qty
+   → hao hụt tự đẩy giá vốn/đơn vị BTP lên (đúng kế toán)
+4. hao_hut = source_qty − (output_qty / yield_ratio)   # thông tin, để báo cáo
+5. Ghi audit log
+```
+
+### Báo cáo tồn theo nhóm (quy đổi về base_unit)
+
+> ⚠️ **Bắt buộc:** báo cáo hàng tồn phải **tự động quy đổi ĐVT phần → kg** (theo `base_factor`) — không hiển thị tồn thô theo "phần". VD ba rọi chín 10 phần → báo cáo hiện **2.2 kg**.
+
+- `stock-summary` bổ sung rollup: mỗi nhóm hiện **tổng tồn theo base_unit** = `Σ (member.current_stock × member.base_factor)` + breakdown từng trạng thái (kèm đơn vị tồn gốc + giá trị đã quy đổi).
+- Cảnh báo tồn thấp: theo từng NL như hiện tại, **+ tuỳ chọn** theo `ingredient_groups.min_stock` (so với tổng đã quy đổi).
+- Báo cáo mới (tuỳ chọn): `processing-loss` — hao hụt chế biến theo NL / theo kỳ.
+
+**Ví dụ nhóm "Ba rọi" (base_unit = kg):**
+
+| NL            | Đơn vị tồn | current_stock | base_factor | Quy ra kg   |
+| ------------- | ---------- | ------------- | ----------- | ----------- |
+| Ba rọi sống   | kg         | 8             | 1           | 8.0         |
+| Ba rọi chín   | phần       | 10            | 0.22        | 2.2         |
+| Ba rọi nướng  | phần       | 6             | 0.25        | 1.5         |
+| **Tổng nhóm** |            |               |             | **11.7 kg** |
+
+### Endpoint & quyền (dự kiến)
+
+- `GET/POST /ingredient-groups`, `PUT /ingredient-groups/:id` — quyền `ingredients:*` hoặc resource mới `ingredient_groups`.
+- `GET /processing`, `POST /processing`, `POST /processing/:id/complete` — resource mới **`processing`** (read / create / complete).
+- Báo cáo: `GET /reports/stock-summary` (thêm nhóm), `GET /reports/processing-loss`.
+
+### UI (dự kiến)
+
+- Form nguyên liệu: thêm chọn **Nhóm** + **đơn vị tồn**; nếu là BTP chọn **NL nguồn** + **yield_ratio**; khai **base_factor** (quy về base_unit của nhóm); quản lý **ĐVT phụ** (thùng/lốc + factor).
+- Form phiếu nhập: cho chọn ĐVT nhập (chai/thùng…), nhập số lượng + factor (nếu thùng) → hiển thị số tồn quy đổi.
+- Màn **Chế biến** (`/processing`): tạo phiếu (chọn nguồn + lượng dùng → gợi ý lượng thu → sửa thực thu) → complete.
+- Báo cáo tồn: hàng nhóm hiện **tổng theo base_unit**, bung ra xem từng NL + đơn vị tồn gốc.
+
+### Ràng buộc & lưu ý
+
+- Gom tồn dùng `base_factor` quy về `base_unit` của nhóm → member **không cần cùng đơn vị**.
+- ĐVT 2 tầng: (1) **đóng gói↔tồn** qua `ingredient_units` (thùng→chai) khi nhập/xuất; (2) **tồn↔nhóm** qua `base_factor` khi gom báo cáo.
+- BTP có thể nhiều cấp (sống → luộc → chiên), `source_ingredient_id` cho phép chuỗi; nên giới hạn độ sâu để dễ kiểm soát.
+- `recipe_ingredients` không đổi cấu trúc — chỉ cần trỏ tới BTP thay vì NL sống.
+
+**Lỗ hổng cần chốt trước khi code (chưa giải quyết):**
+
+- **HSD cho BTP:** khi `PROCESS_IN` có tạo `ingredient_batch` cho BTP không (đồ nướng/luộc chỉ để được vài ngày)? Hiện batch chỉ sinh từ phiếu nhập.
+- **1 mẻ → nhiều BTP:** `processing_orders` hiện 1 source → 1 output. Nếu 1 mẻ luộc ra cả "chín" + "nước luộc" thì cần bảng con `processing_outputs`.
+- **Truy vết:** `stock_transactions.reference_id` của PROCESS_OUT/PROCESS_IN nên trỏ về `processing_orders.code`.
+
+---
+
 ## Tech Stack (thực tế)
 
 | Layer      | Choice                                                        |

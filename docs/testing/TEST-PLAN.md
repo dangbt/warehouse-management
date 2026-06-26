@@ -121,3 +121,57 @@
 | Token Tampering | Sửa JWT payload → reject                            |
 | Rate Limiting   | Verify khoá sau 5 lần sai                           |
 | IDOR            | User A không xem được data của User B (nếu áp dụng) |
+
+---
+
+## 5. (ĐỀ XUẤT — chưa code) Test Cases: BTP, Nhóm & Quy đổi đơn vị
+
+> Cho tính năng đề xuất ở `docs/PLAN.md` (Bán thành phẩm + gom nhóm + UoM). Dùng fixture dưới đây.
+
+### 5.0 Dữ liệu mẫu (fixture)
+
+| Thực thể               | Cấu hình                                                                                     |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| Nhóm "Ba rọi"          | base_unit = kg, min_stock = 5                                                                |
+| Ba rọi sống            | unit = kg, cost_per_unit = 120.000, current_stock = 8, base_factor = 1, source = NULL        |
+| Ba rọi chín            | unit = phần, source = ba rọi sống, yield_ratio = 4 (phần/kg), base_factor = 0.22, stock = 10 |
+| Ba rọi nướng           | unit = phần, source = ba rọi sống, base_factor = 0.25, stock = 6                             |
+| Nước ngọt              | unit = chai, ĐVT phụ "thùng" factor = 24, stock = 0                                          |
+| Món "Cơm ba rọi nướng" | recipe: 2 phần ba rọi nướng / order                                                          |
+
+### 5.1 Chế biến (Processing / BTP)
+
+| ID        | Test Case                                              | Expected                                                                   |
+| --------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| TC-PRO-01 | Tạo phiếu chế biến                                     | status = DRAFT; gợi ý expected_qty = source_qty × yield_ratio              |
+| TC-PRO-02 | Complete: dùng 1kg sống → thu 4 phần chín (đúng yield) | sống 8→7; chín 10→14; hao_hut = 0                                          |
+| TC-PRO-03 | Complete sinh đúng giao dịch                           | có 1 PROCESS_OUT (sống −1) + 1 PROCESS_IN (chín +4)                        |
+| TC-PRO-04 | Chuyển giá vốn BTP                                     | cost(chín) = (1 × 120.000) / 4 = 30.000 /phần                              |
+| TC-PRO-05 | Có hao hụt: dùng 1kg sống → chỉ thu 3 phần             | chín +3; cost(chín) = 120.000/3 = 40.000; hao_hut = 1 − 3/4 = 0.25 kg sống |
+| TC-PRO-06 | Complete khi sống không đủ tồn                         | 400, "Không đủ tồn nguyên liệu nguồn"; stock không đổi                     |
+| TC-PRO-07 | reference_id của transaction                           | PROCESS_OUT/IN trỏ về mã phiếu chế biến (CB-...)                           |
+| TC-PRO-08 | Tồn 2 lớp: order món "Cơm ba rọi nướng" ×3             | ba rọi nướng 6→0; **ba rọi sống KHÔNG đổi** (8)                            |
+| TC-PRO-09 | Order vượt tồn BTP (nướng còn 6, order 4 phần ×2=8)    | tuỳ config: block 400 hoặc cho âm + cảnh báo (đồng bộ với order hiện tại)  |
+| TC-PRO-10 | Complete phiếu đã COMPLETED                            | 400, chỉ complete được phiếu DRAFT                                         |
+
+### 5.2 Gom nhóm & báo cáo tồn theo nhóm
+
+| ID        | Test Case                          | Expected                                                                  |
+| --------- | ---------------------------------- | ------------------------------------------------------------------------- |
+| TC-GRP-01 | stock-summary gom nhóm "Ba rọi"    | total = 8×1 + 10×0.22 + 6×0.25 = **11.7 kg**                              |
+| TC-GRP-02 | Breakdown trong nhóm               | trả 3 NL kèm đơn vị tồn gốc (kg/phần) + quy đổi từng dòng (8 / 2.2 / 1.5) |
+| TC-GRP-03 | NL không thuộc nhóm (vd Nước ngọt) | hiển thị riêng, không bị gộp vào nhóm nào                                 |
+| TC-GRP-04 | Cảnh báo tồn thấp cấp nhóm         | sau khi chế biến/bán còn 4.5 kg < min_stock 5 → nhóm "Ba rọi" báo thấp    |
+| TC-GRP-05 | base_factor mặc định = 1           | NL gốc (sống) quy đổi 1:1                                                 |
+| TC-GRP-06 | Member khác đơn vị vẫn cộng được   | kg + phần cộng ra cùng base_unit kg (không lỗi đơn vị)                    |
+
+### 5.3 Quy đổi đơn vị (UoM)
+
+| ID        | Test Case                                     | Expected                                                  |
+| --------- | --------------------------------------------- | --------------------------------------------------------- |
+| TC-UOM-01 | Nhập 5 thùng nước ngọt (factor 24)            | tồn += 5 × 24 = 120 chai                                  |
+| TC-UOM-02 | Sửa factor tại phiếu nhập (thùng 12)          | tồn += 5 × 12 = 60 chai                                   |
+| TC-UOM-03 | Nhập theo đơn vị tồn gốc (10 chai)            | tồn += 10 chai (không nhân factor)                        |
+| TC-UOM-04 | Quy đổi phần → base_unit trong báo cáo        | 10 phần chín × 0.22 = 2.2 kg                              |
+| TC-UOM-05 | Giá trị tồn (totalValue) sau quy đổi đóng gói | đơn giá tính theo đơn vị tồn gốc (chai), không phải thùng |
+| TC-UOM-06 | factor ≤ 0 hoặc base_factor ≤ 0               | 400, validation từ chối                                   |

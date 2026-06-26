@@ -303,3 +303,68 @@ erDiagram
 | kiotviet_orders    | kiotviet_order_items  | 1:N | 1 order có nhiều dòng             |
 | stocktake_sessions | stocktake_items       | 1:N | 1 phiên kiểm kê có nhiều dòng     |
 | purchase_returns   | purchase_return_items | 1:N | 1 phiếu trả có nhiều dòng         |
+
+---
+
+## ĐỀ XUẤT: Bán thành phẩm (BTP) & Gom nhóm nguyên liệu (chưa code)
+
+> Mô hình tổng quát cho chế biến nội bộ (NL sống → BTP chín/nướng) + gom tồn theo nhóm.
+> Áp cho mọi cặp sống→chín (ba rọi, thịt bò, vịt…), cấu hình bằng dữ liệu. Chi tiết: `docs/PLAN.md`.
+
+```mermaid
+erDiagram
+    ingredient_groups ||--o{ ingredients : "groups"
+    ingredients ||--o{ ingredients : "source_of (self)"
+    ingredients ||--o{ ingredient_units : "has_uom"
+    ingredients ||--o{ processing_orders : "source"
+    ingredients ||--o{ processing_orders : "output"
+
+    ingredient_groups {
+        uuid id PK
+        varchar name UK
+        varchar base_unit
+        decimal min_stock
+        text note
+    }
+
+    ingredients {
+        uuid group_id FK
+        uuid source_ingredient_id FK
+        decimal yield_ratio
+        decimal base_factor
+    }
+
+    ingredient_units {
+        uuid id PK
+        uuid ingredient_id FK
+        varchar unit_name
+        decimal factor
+        boolean is_default_buy
+    }
+
+    processing_orders {
+        uuid id PK
+        varchar code UK
+        uuid source_ingredient_id FK
+        decimal source_qty
+        uuid output_ingredient_id FK
+        decimal expected_qty
+        decimal output_qty
+        varchar status
+        text note
+        uuid created_by FK
+        timestamp completed_at
+        timestamp created_at
+    }
+```
+
+| From              | To                | Rel | Mô tả                                    |
+| ----------------- | ----------------- | --- | ---------------------------------------- |
+| ingredient_groups | ingredients       | 1:N | 1 nhóm gom nhiều NL (gom tồn)            |
+| ingredients       | ingredients       | 1:N | NL nguồn → các BTP (self, source_of)     |
+| ingredients       | ingredient_units  | 1:N | 1 NL có nhiều ĐVT phụ (thùng/lốc…)       |
+| ingredients       | processing_orders | 1:N | NL sống dùng / BTP tạo ra trong phiếu CB |
+
+`stock_transactions.type` thêm: `PROCESS_OUT`, `PROCESS_IN`.
+
+Quy đổi 2 tầng: **đóng gói↔tồn** qua `ingredient_units.factor` (vd 1 thùng = 24 chai); **tồn↔nhóm** qua `ingredients.base_factor` → `ingredient_groups.base_unit` (vd 1 phần ba rọi chín = 0.22 kg).
