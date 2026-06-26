@@ -13,7 +13,7 @@
     "lint": "turbo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "node -e \"if(!process.env.CI)require('child_process').execSync('npx husky',{stdio:'inherit'})\""
   },
   "devDependencies": {
     "husky": "9.1.7",
