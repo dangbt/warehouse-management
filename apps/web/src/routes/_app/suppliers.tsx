@@ -1,3 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SuppliersPage } from '@/features/suppliers/suppliers-page'
-export const Route = createFileRoute('/_app/suppliers')({ component: SuppliersPage })
+import { RequirePermission } from '@/components/require-permission'
+export const Route = createFileRoute('/_app/suppliers')({ component: () => <RequirePermission permission="suppliers:read"><SuppliersPage /></RequirePermission> })
