@@ -18,6 +18,8 @@ import { BatchesModule } from './modules/batches/batches.module';
 import { StocktakeModule } from './modules/stocktake/stocktake.module';
 import { PurchaseReturnsModule } from './modules/purchase-returns/purchase-returns.module';
 import { SupplierPaymentsModule } from './modules/supplier-payments/supplier-payments.module';
+import { IngredientGroupsModule } from './modules/ingredient-groups/ingredient-groups.module';
+import { ProcessingModule } from './modules/processing/processing.module';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { SupplierPaymentsModule } from './modules/supplier-payments/supplier-pay
     StocktakeModule,
     PurchaseReturnsModule,
     SupplierPaymentsModule,
+    IngredientGroupsModule,
+    ProcessingModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],

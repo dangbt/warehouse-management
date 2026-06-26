@@ -33,16 +33,33 @@ export class ImportOrdersService {
         quantity: number;
         unit_price: number;
         expiry_date?: string;
+        // Quy đổi ĐVT đóng gói → đơn vị tồn. VD nhập 5 thùng, mỗi thùng 24 chai ⇒ factor = 24.
+        // Bỏ trống ⇒ factor = 1 (nhập theo đúng đơn vị tồn). unit_price tính theo đơn vị tồn.
+        unit?: string;
+        factor?: number;
       }[];
     },
   ) {
     if (!body.supplier_id || !body.items?.length) throw new BadRequestException('Thiếu nhà cung cấp hoặc danh sách hàng');
     for (const item of body.items) {
       if (!item.ingredient_id || item.quantity <= 0 || item.unit_price < 0) throw new BadRequestException('Dữ liệu item không hợp lệ');
+      if (item.factor != null && item.factor <= 0) throw new BadRequestException('Hệ số quy đổi đơn vị phải > 0');
     }
 
+    // Quy đổi về đơn vị tồn: baseQty = quantity × factor
+    const lines = body.items.map((i) => {
+      const baseQty = i.quantity * (i.factor ?? 1);
+      return {
+        ingredientId: i.ingredient_id,
+        quantity: baseQty,
+        unitPrice: i.unit_price,
+        totalPrice: baseQty * i.unit_price,
+        expiryDate: i.expiry_date ? new Date(i.expiry_date) : null,
+      };
+    });
+
     const code = `PN-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-4)}`;
-    const totalAmount = body.items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    const totalAmount = lines.reduce((s, l) => s + l.totalPrice, 0);
 
     return this.prisma.importOrder.create({
       data: {
@@ -52,15 +69,7 @@ export class ImportOrdersService {
         paid: body.paid ?? false,
         note: body.note,
         createdById: userId,
-        items: {
-          create: body.items.map((i) => ({
-            ingredientId: i.ingredient_id,
-            quantity: i.quantity,
-            unitPrice: i.unit_price,
-            totalPrice: i.quantity * i.unit_price,
-            expiryDate: i.expiry_date ? new Date(i.expiry_date) : null,
-          })),
-        },
+        items: { create: lines },
       },
       include: { items: true },
     });
