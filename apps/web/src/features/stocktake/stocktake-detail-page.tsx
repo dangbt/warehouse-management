@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Save, CheckCircle } from 'lucide-react'
-import { useParams } from '@tanstack/react-router'
+import { Save, CheckCircle, ArrowLeft } from 'lucide-react'
+import { useParams, useNavigate } from '@tanstack/react-router'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStocktakeDetail, useUpdateStocktakeItems, useCompleteStocktake } from '@/data'
 import type { StocktakeItem } from '@/data/use-stocktake'
@@ -17,6 +17,7 @@ interface ItemRow {
 
 export function StocktakeDetailPage() {
   const { id } = useParams({ from: '/_app/stocktake_/$id' })
+  const navigate = useNavigate()
   const { data: detail, isLoading } = useStocktakeDetail(id)
   const updateMutation = useUpdateStocktakeItems()
   const completeMutation = useCompleteStocktake()
@@ -73,6 +74,12 @@ export function StocktakeDetailPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
+        <WinToolbar.Button
+          icon={<ArrowLeft size={14} />}
+          label="Quay lại"
+          onClick={() => navigate({ to: '/stocktake' })}
+        />
+        <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Save size={14} />}
           label="Lưu"
