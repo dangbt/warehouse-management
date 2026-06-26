@@ -24,10 +24,19 @@ export class KiotVietService {
         continue;
       }
 
-      // Match items to menu items by name
+      // Match items to menu items by name (normalize: lowercase, trim, remove diacritics)
       const menuItems = await this.prisma.menuItem.findMany();
+      const normalize = (s: string) =>
+        s
+          .toLowerCase()
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/đ/g, 'd')
+          .replace(/Đ/g, 'D');
       const itemsData = order.items.map((item) => {
-        const matched = menuItems.find((m) => m.name.toLowerCase() === item.productName.toLowerCase());
+        const norm = normalize(item.productName);
+        const matched = menuItems.find((m) => normalize(m.name) === norm) || menuItems.find((m) => normalize(m.name).includes(norm) || norm.includes(normalize(m.name)));
         return { productName: item.productName, menuItemId: matched?.id || null, quantity: item.quantity, price: item.price };
       });
 
