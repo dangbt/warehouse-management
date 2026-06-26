@@ -5,13 +5,14 @@ import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useIngredientUsage } from '@/data'
 import type { IngredientUsageItem } from '@/data/use-ingredient-usage'
+import { formatNumber } from '@wms/shared'
 
 const columns: Column<IngredientUsageItem>[] = [
   { key: 'name', header: 'Nguyên liệu', width: 160 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
-  { key: 'imported', header: 'Nhập', width: 90, align: 'right', render: (r) => <span className="text-green-700">{(r.imported ?? 0).toLocaleString()}</span> },
-  { key: 'exported', header: 'Xuất', width: 90, align: 'right', render: (r) => <span className="text-red-700">{(r.exported ?? 0).toLocaleString()}</span> },
-  { key: 'currentStock', header: 'Tồn kho', width: 90, align: 'right', render: (r) => (r.currentStock ?? 0).toLocaleString() },
+  { key: 'imported', header: 'Nhập', width: 90, align: 'right', render: (r) => <span className="text-green-700">{formatNumber(r.imported)}</span> },
+  { key: 'exported', header: 'Xuất', width: 90, align: 'right', render: (r) => <span className="text-red-700">{formatNumber(r.exported)}</span> },
+  { key: 'currentStock', header: 'Tồn kho', width: 90, align: 'right', render: (r) => formatNumber(r.currentStock) },
 ]
 
 function getWeekRange(offset: number) {

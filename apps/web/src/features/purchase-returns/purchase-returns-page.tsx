@@ -3,13 +3,13 @@ import { Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { usePurchaseReturns, useCreatePurchaseReturn, useSuppliers, useIngredients } from '@/data'
-import { formatDateTime } from '@wms/shared'
+import { formatDateTime, formatCurrency } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
 
 const columns: Column<PurchaseReturn>[] = [
   { key: 'code', header: 'Mã phiếu', width: 120 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier.name },
-  { key: 'totalAmount', header: 'Tổng tiền', width: 120, align: 'right', render: (r) => `${Number(r.totalAmount).toLocaleString()}₫` },
+  { key: 'totalAmount', header: 'Tổng tiền', width: 120, align: 'right', render: (r) => formatCurrency(r.totalAmount) },
   { key: 'reason', header: 'Lý do', width: 200 },
   { key: 'createdAt', header: 'Ngày tạo', width: 150, render: (r) => formatDateTime(r.createdAt) },
 ]

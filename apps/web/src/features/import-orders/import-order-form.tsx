@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
+import { formatCurrency } from '@wms/shared'
 
 const itemSchema = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
@@ -84,7 +85,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       width={680}
       footer={
         <>
-          <span className="text-xs mr-auto font-semibold">Tổng: {total.toLocaleString()}₫</span>
+          <span className="text-xs mr-auto font-semibold">Tổng: {formatCurrency(total)}</span>
           <button
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}

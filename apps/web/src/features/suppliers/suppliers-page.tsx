@@ -6,7 +6,7 @@ import type { Supplier } from '@/types'
 import { SupplierForm } from './supplier-form'
 import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '@/data'
 import { useSupplierPayments, useCreateSupplierPayment } from '@/data'
-import { formatDateTime } from '@wms/shared'
+import { formatDateTime, formatCurrency } from '@wms/shared'
 
 interface SupplierWithDebt extends Supplier {
   totalDebt?: string
@@ -18,7 +18,7 @@ const columns: Column<SupplierWithDebt>[] = [
   { key: 'address', header: 'Địa chỉ', width: 200 },
   { key: 'totalDebt', header: 'Nợ', width: 120, align: 'right', render: (r) => {
     const debt = Number(r.totalDebt ?? 0)
-    return debt > 0 ? <span className="text-win-error font-bold">{debt.toLocaleString()}₫</span> : '0₫'
+    return debt > 0 ? <span className="text-win-error font-bold">{formatCurrency(debt)}</span> : '0₫'
   }},
   { key: 'note', header: 'Ghi chú', width: 150 },
 ]
@@ -129,7 +129,7 @@ export function SuppliersPage() {
                 {payments.map((p) => (
                   <tr key={p.id} className="border-b border-win-grid-border">
                     <td className="p-1">{formatDateTime(p.createdAt)}</td>
-                    <td className="p-1 text-right text-win-success font-bold">{Number(p.amount).toLocaleString()}₫</td>
+                    <td className="p-1 text-right text-win-success font-bold">{formatCurrency(p.amount)}</td>
                     <td className="p-1 text-center">{p.method}</td>
                     <td className="p-1">{p.createdBy.fullName}</td>
                     <td className="p-1">{p.note ?? '-'}</td>
@@ -166,7 +166,7 @@ export function SuppliersPage() {
       <WinDialog open={paymentOpen} onClose={() => setPaymentOpen(false)} title="Thanh toán cho NCC" width={400}>
         <div className="space-y-3 p-3">
           <div className="text-[11px]">NCC: <strong>{selected?.name}</strong></div>
-          <div className="text-[11px]">Nợ hiện tại: <strong className="text-win-error">{Number(selected?.totalDebt ?? 0).toLocaleString()}₫</strong></div>
+          <div className="text-[11px]">Nợ hiện tại: <strong className="text-win-error">{formatCurrency(selected?.totalDebt)}</strong></div>
           <div>
             <label className="text-[11px] block mb-0.5">Số tiền thanh toán</label>
             <div className="flex gap-1">

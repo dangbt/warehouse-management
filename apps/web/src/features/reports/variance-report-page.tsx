@@ -4,16 +4,17 @@ import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useConsumptionVariance } from '@/data'
 import type { VarianceItem } from '@/data/use-variance'
+import { formatNumber } from '@wms/shared'
 
 const columns: Column<VarianceItem>[] = [
   { key: 'name', header: 'Nguyên liệu', width: 160 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
-  { key: 'theoreticalUsage', header: 'Lý thuyết', width: 100, align: 'right', render: (r) => (r.theoreticalUsage ?? 0).toLocaleString() },
-  { key: 'actualUsage', header: 'Thực tế', width: 100, align: 'right', render: (r) => (r.actualUsage ?? 0).toLocaleString() },
+  { key: 'theoreticalUsage', header: 'Lý thuyết', width: 100, align: 'right', render: (r) => formatNumber(r.theoreticalUsage) },
+  { key: 'actualUsage', header: 'Thực tế', width: 100, align: 'right', render: (r) => formatNumber(r.actualUsage) },
   { key: 'variance', header: 'Chênh lệch', width: 100, align: 'right', render: (r) => {
     const v = r.variance ?? 0
     const cls = v > 0 ? 'text-win-error' : v < 0 ? 'text-green-700' : ''
-    return <span className={cls}>{v > 0 ? `+${v.toLocaleString()}` : v.toLocaleString()}</span>
+    return <span className={cls}>{v > 0 ? `+${formatNumber(v)}` : formatNumber(v)}</span>
   }},
   { key: 'variancePercent', header: '% Lệch', width: 80, align: 'right', render: (r) => {
     const p = r.variancePercent ?? 0

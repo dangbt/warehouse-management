@@ -4,7 +4,7 @@ import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
-import { formatDate } from '@wms/shared'
+import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
 
 interface ImportOrderItem {
   id: string
@@ -39,7 +39,7 @@ const columns: Column<ImportOrder>[] = [
     header: 'Tổng tiền',
     width: 120,
     align: 'right',
-    render: (r) => `${Number(r.totalAmount).toLocaleString()}₫`,
+    render: (r) => formatCurrency(r.totalAmount),
   },
   {
     key: 'status',
@@ -132,9 +132,9 @@ export function ImportOrdersPage() {
                 <tr key={item.id} className="border-b border-win-grid-border">
                   <td className="p-1">{item.ingredient?.name}</td>
                   <td className="p-1 text-center">{item.ingredient?.unit}</td>
-                  <td className="p-1 text-right">{Number(item.quantity).toLocaleString()}</td>
-                  <td className="p-1 text-right">{Number(item.unitPrice).toLocaleString()}₫</td>
-                  <td className="p-1 text-right">{Number(item.totalPrice).toLocaleString()}₫</td>
+                  <td className="p-1 text-right">{formatNumber(item.quantity)}</td>
+                  <td className="p-1 text-right">{formatCurrency(item.unitPrice)}</td>
+                  <td className="p-1 text-right">{formatCurrency(item.totalPrice)}</td>
                 </tr>
               ))}
             </tbody>

@@ -5,7 +5,7 @@ import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
 import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient, useIngredientBatches } from '@/data'
 import type { Batch } from '@/data/use-batches'
-import { formatDate } from '@wms/shared'
+import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
 
 interface IngredientRow {
   id: string
@@ -37,7 +37,7 @@ const columns: Column<IngredientRow>[] = [
     header: 'Giá/ĐV',
     width: 100,
     align: 'right',
-    render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫`,
+    render: (r) => formatCurrency(r.costPerUnit),
   },
   { key: 'category', header: 'Phân loại', width: 80, align: 'center' },
 ]
@@ -179,7 +179,7 @@ function isExpiringSoon(expiryDate: string | null): boolean {
 
 const batchColumns: Column<Batch>[] = [
   { key: 'batchCode', header: 'Mã lô', width: 120 },
-  { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫` },
+  { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => formatCurrency(r.costPerUnit) },
   { key: 'quantity', header: 'Số lượng', width: 80, align: 'right' },
   { key: 'expiryDate', header: 'HSD', width: 100, render: (r) => r.expiryDate ? <span className={isExpiringSoon(r.expiryDate) ? 'text-win-error font-bold' : ''}>{formatDate(r.expiryDate)}{isExpiringSoon(r.expiryDate) ? ' ⚠️' : ''}</span> : '-' },
   {

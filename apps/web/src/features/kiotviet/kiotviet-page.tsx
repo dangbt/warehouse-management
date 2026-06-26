@@ -3,13 +3,13 @@ import { RefreshCw, Upload, MinusCircle } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useKiotVietOrders, useSyncKiotViet, useDeductOrder } from '@/data'
-import { formatDate } from '@wms/shared'
+import { formatDate, formatCurrency } from '@wms/shared'
 import type { KiotVietOrder } from '@/data/use-kiotviet'
 
 const columns: Column<KiotVietOrder>[] = [
   { key: 'code', header: 'Mã đơn', width: 120 },
   { key: 'customerName', header: 'Khách hàng', width: 160 },
-  { key: 'totalAmount', header: 'Tổng tiền', width: 100, align: 'right', render: (r) => Number(r.totalAmount ?? 0).toLocaleString() },
+  { key: 'totalAmount', header: 'Tổng tiền', width: 100, align: 'right', render: (r) => formatCurrency(r.totalAmount) },
   { key: 'items', header: 'SP', width: 50, align: 'center', render: (r) => String(r.items?.length ?? 0) },
   { key: 'orderDate', header: 'Ngày đặt', width: 100, align: 'center', render: (r) => formatDate(r.orderDate) },
   {
