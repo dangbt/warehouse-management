@@ -16,7 +16,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const { login } = useAuthStore()
   const navigate = useNavigate()
@@ -76,9 +76,10 @@ export function LoginPage() {
           <button
             data-testid="login-submit"
             type="submit"
-            className="w-full py-1.5 bg-win-active-title text-white text-xs border border-win-active-title rounded-sm cursor-pointer hover:opacity-90"
+            disabled={isSubmitting}
+            className="w-full py-1.5 bg-win-active-title text-white text-xs border border-win-active-title rounded-sm cursor-pointer hover:opacity-90 disabled:opacity-50"
           >
-            Đăng Nhập
+            {isSubmitting ? 'Đang đăng nhập...' : 'Đăng Nhập'}
           </button>
         </div>
       </form>
