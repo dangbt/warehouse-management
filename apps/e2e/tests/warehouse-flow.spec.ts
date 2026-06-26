@@ -304,9 +304,20 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
 
     test('Delete ingredient', async ({ page }) => {
       await page.locator('[data-testid="sidebar-ingredients"]').click()
+      // Create a fresh ingredient to delete
+      await page.locator('[data-testid="toolbar-Thêm"]').click()
+      const dialog = page.locator('[data-testid="dialog"]')
+      await dialog.locator('[data-testid="input-Tên"]').fill('E2E DELETE NL')
+      await dialog.locator('[data-testid="select-Đơn vị"]').selectOption('kg')
+      await dialog.locator('[data-testid="select-Phân loại"]').selectOption('Rau')
+      await dialog.locator('[data-testid="input-Giá/đơn vị"]').fill('1000')
+      await dialog.locator('[data-testid="input-Tồn kho min"]').fill('1')
+      await dialog.getByRole('button', { name: 'OK' }).click()
+      await expect(page.getByText('Thêm nguyên liệu thành công')).toBeVisible({ timeout: 15000 })
+
+      // Now delete it
       await page.waitForTimeout(500)
-      // Click the E2E-created ingredient (contains "E2E Test NL")
-      await page.locator('[data-testid^="grid-row-"]', { hasText: 'E2E Test NL' }).first().click()
+      await page.locator('[data-testid^="grid-row-"]', { hasText: 'E2E DELETE NL' }).first().click()
       await page.locator('[data-testid="toolbar-Xoá"]').click()
       await page.getByRole('button', { name: 'Yes' }).click()
       await expect(page.getByText('Đã xoá nguyên liệu')).toBeVisible({ timeout: 15000 })
