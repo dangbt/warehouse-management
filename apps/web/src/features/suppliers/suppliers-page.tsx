@@ -174,7 +174,7 @@ export function SuppliersPage() {
                 type="number"
                 value={payAmount}
                 onChange={(e) => setPayAmount(e.target.value)}
-                className="flex-1 border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none"
+                className="flex-1 border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
               />
               <button
                 onClick={() => setPayAmount(String(Number(selected?.totalDebt ?? 0)))}
@@ -189,7 +189,7 @@ export function SuppliersPage() {
             <select
               value={payMethod}
               onChange={(e) => setPayMethod(e.target.value as 'CASH' | 'TRANSFER')}
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none"
+              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
             >
               <option value="CASH">Tiền mặt</option>
               <option value="TRANSFER">Chuyển khoản</option>
@@ -201,7 +201,8 @@ export function SuppliersPage() {
               type="text"
               value={payNote}
               onChange={(e) => setPayNote(e.target.value)}
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none"
+              placeholder="Ghi chú thanh toán"
+              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
             />
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-win-grid-border">

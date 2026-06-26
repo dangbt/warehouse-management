@@ -38,8 +38,14 @@ export function useCreatePurchaseReturn() {
     mutationFn: (data: {
       supplierId: string
       reason: string
+      note?: string
       items: { ingredientId: string; quantity: number; unitPrice: number }[]
-    }) => api.post('/purchase-returns', data),
+    }) => api.post('/purchase-returns', {
+      supplier_id: data.supplierId,
+      reason: data.reason,
+      note: data.note,
+      items: data.items.map((i) => ({ ingredient_id: i.ingredientId, quantity: i.quantity, unit_price: i.unitPrice })),
+    }),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.purchaseReturns }, (old) =>
         old ? { ...old, data: [newItem, ...old.data] } : old,

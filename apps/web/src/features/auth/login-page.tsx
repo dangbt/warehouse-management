@@ -50,7 +50,8 @@ export function LoginPage() {
             <input
               data-testid="login-email"
               {...register('email')}
-              className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus"
+              placeholder="Nhập email"
+              className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus bg-white"
             />
             {errors.email && <p className="text-[10px] text-win-error mt-0.5">{errors.email.message}</p>}
           </div>
@@ -60,7 +61,8 @@ export function LoginPage() {
               data-testid="login-password"
               type="password"
               {...register('password')}
-              className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus"
+              placeholder="Nhập mật khẩu"
+              className="w-full border border-win-input-border px-2 py-1 text-xs rounded-sm outline-none focus:border-win-input-focus bg-white"
             />
             {errors.password && <p className="text-[10px] text-win-error mt-0.5">{errors.password.message}</p>}
           </div>

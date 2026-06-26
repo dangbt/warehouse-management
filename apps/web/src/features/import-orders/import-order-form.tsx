@@ -160,14 +160,14 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     type="number"
                     step="0.01"
                     {...register(`items.${i}.quantity`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
                   <input
                     type="number"
                     {...register(`items.${i}.unit_price`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5 text-right pr-2">
@@ -177,7 +177,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                   <input
                     type="date"
                     {...register(`items.${i}.expiry_date`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
                   />
                 </td>
                 <td className="p-0.5 text-center">

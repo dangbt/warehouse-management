@@ -177,7 +177,7 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
                     type="number"
                     step="0.001"
                     {...register(`ingredients.${i}.quantity`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">

@@ -114,12 +114,12 @@ export function IngredientsPage() {
           placeholder="Tìm kiếm..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-          className="border border-win-input-border rounded-sm px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus"
+          className="border border-win-input-border rounded-sm px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus bg-white"
         />
         <select
           value={category}
           onChange={(e) => { setCategory(e.target.value); setPage(1) }}
-          className="border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none"
+          className="border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none bg-white"
         >
           <option value="">Tất cả loại</option>
           <option value="Thịt">Thịt</option>
