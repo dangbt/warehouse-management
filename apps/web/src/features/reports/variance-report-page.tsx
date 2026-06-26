@@ -72,7 +72,6 @@ export function VarianceReportPage() {
         columns={columns}
         data={data ?? []}
         loading={isLoading}
-        getRowClass={(r) => (Math.abs(r.variancePercent ?? 0) > 10 ? '!text-win-error' : '')}
         storageKey="variance-report"
       />
     </div>
