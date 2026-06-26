@@ -35,15 +35,67 @@ export function SuppliersPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Thêm" onClick={() => { setFormMode('add'); setSelected(null); setFormOpen(true) }} />
-        <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => { setFormMode('edit'); setFormOpen(true) }} />
-        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button
+          icon={<Plus size={14} />}
+          label="Thêm"
+          onClick={() => {
+            setFormMode('add')
+            setSelected(null)
+            setFormOpen(true)
+          }}
+        />
+        <WinToolbar.Button
+          icon={<Pencil size={14} />}
+          label="Sửa"
+          disabled={!selected}
+          onClick={() => {
+            setFormMode('edit')
+            setFormOpen(true)
+          }}
+        />
+        <WinToolbar.Button
+          icon={<Trash2 size={14} />}
+          label="Xoá"
+          danger
+          disabled={!selected}
+          onClick={() => setConfirmDelete(true)}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 50, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={(r) => { setSelected(r); setFormMode('edit'); setFormOpen(true) }} />
-      <SupplierForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} onSave={handleSave} />
-      <WinMessageBox type="question" title="Xác nhận" message={`Xoá NCC "${selected?.name}"?`} open={confirmDelete} buttons="yes_no" onResult={(r) => { setConfirmDelete(false); if (r === 'yes' && selected) { deleteMutation.mutate(selected.id); setSelected(null) } }} />
+      <WinDataGrid
+        columns={columns}
+        data={res?.data ?? []}
+        loading={isLoading}
+        pagination={{ page: 1, limit: 50, total: res?.meta.total ?? 0 }}
+        onRowClick={setSelected}
+        onRowDoubleClick={(r) => {
+          setSelected(r)
+          setFormMode('edit')
+          setFormOpen(true)
+        }}
+      />
+      <SupplierForm
+        open={formOpen}
+        mode={formMode}
+        data={selected}
+        onClose={() => setFormOpen(false)}
+        onSave={handleSave}
+      />
+      <WinMessageBox
+        type="question"
+        title="Xác nhận"
+        message={`Xoá NCC "${selected?.name}"?`}
+        open={confirmDelete}
+        buttons="yes_no"
+        onResult={(r) => {
+          setConfirmDelete(false)
+          if (r === 'yes' && selected) {
+            deleteMutation.mutate(selected.id)
+            setSelected(null)
+          }
+        }}
+      />
     </div>
   )
 }

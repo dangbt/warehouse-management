@@ -3,7 +3,13 @@ import { api } from '@/services/api'
 import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
 
-interface Role { id: string; name: string; code: string; description?: string; permissions: { id: string; resource: string; action: string }[] }
+interface Role {
+  id: string
+  name: string
+  code: string
+  description?: string
+  permissions: { id: string; resource: string; action: string }[]
+}
 
 export function useRoles() {
   return useQuery<Role[]>({ queryKey: QUERY_KEYS.rolesList(), queryFn: () => api.get('/roles') })
@@ -13,16 +19,21 @@ export function useCreateRole() {
   return useMutation({
     mutationFn: (data: { name: string; code: string; description?: string }) => api.post('/roles', data),
     onSuccess: (newItem) => {
-      queryClient.setQueriesData<Role[]>({ queryKey: QUERY_KEYS.roles }, (old) => old ? [...old, { ...newItem, permissions: [] }] : old)
+      queryClient.setQueriesData<Role[]>({ queryKey: QUERY_KEYS.roles }, (old) =>
+        old ? [...old, { ...newItem, permissions: [] }] : old,
+      )
     },
   })
 }
 
 export function useUpdateRolePermissions() {
   return useMutation({
-    mutationFn: ({ id, permissions }: { id: string; permissions: { resource: string; action: string }[] }) => api.put(`/roles/${id}/permissions`, { permissions }),
+    mutationFn: ({ id, permissions }: { id: string; permissions: { resource: string; action: string }[] }) =>
+      api.put(`/roles/${id}/permissions`, { permissions }),
     onSuccess: (updated) => {
-      queryClient.setQueriesData<Role[]>({ queryKey: QUERY_KEYS.roles }, (old) => old ? old.map((r) => r.id === updated.id ? updated : r) : old)
+      queryClient.setQueriesData<Role[]>({ queryKey: QUERY_KEYS.roles }, (old) =>
+        old ? old.map((r) => (r.id === updated.id ? updated : r)) : old,
+      )
     },
   })
 }

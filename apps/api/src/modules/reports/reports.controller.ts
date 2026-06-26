@@ -9,7 +9,9 @@ export class ReportsController {
 
   @Get('stock-summary')
   async stockSummary() {
-    const ingredients = await this.prisma.ingredient.findMany({ orderBy: { name: 'asc' } });
+    const ingredients = await this.prisma.ingredient.findMany({
+      orderBy: { name: 'asc' },
+    });
     const total = ingredients.length;
     const totalValue = ingredients.reduce((s, i) => s + Number(i.currentStock) * Number(i.costPerUnit), 0);
     const lowStock = ingredients.filter((i) => Number(i.currentStock) <= Number(i.minStock));

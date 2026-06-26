@@ -7,6 +7,7 @@
 ## 1. Design Philosophy
 
 Giao diện mô phỏng style C# Windows Forms / Desktop Application:
+
 - **MDI-like layout** (Multiple Document Interface) - 1 cửa sổ chính, nội dung thay đổi bên trong
 - **Menu bar** phía trên (File, Edit, View, Tools, Help style)
 - **Toolbar** với icon buttons cho thao tác nhanh
@@ -46,29 +47,30 @@ Giao diện mô phỏng style C# Windows Forms / Desktop Application:
 ```
 
 ### 2.2 Typography
+
 - **Font:** Segoe UI (hệ thống Windows) hoặc fallback Inter
 - **Size:** 12px body, 11px small/grid, 14px headings
 - **Weight:** Regular 400, Semibold 600 cho headings
 
 ### 2.3 UI Controls Style
 
-| WinForms Control | Web Equivalent | Đặc điểm |
-|-----------------|----------------|-----------|
-| MenuStrip | Top menu bar | Flat, hover highlight, dropdown |
-| ToolStrip | Toolbar | Icon buttons 24x24, separator, tooltip |
-| TreeView | Sidebar nav | Indent, expand/collapse, icons |
-| DataGridView | Data table | Header sort, resize columns, alternating rows |
-| TabControl | Tabs | Top-aligned tabs |
-| StatusStrip | Status bar | Fixed bottom, info panels |
-| GroupBox | Card/Section | Border + title |
-| TextBox | Input | 1px border, focus highlight |
-| ComboBox | Select/Dropdown | Arrow indicator |
-| Button | Button | Raised, 3D border effect |
-| DateTimePicker | Date picker | Calendar popup |
-| NumericUpDown | Number input | Up/down arrows |
-| ProgressBar | Progress bar | Animated fill |
-| MessageBox | Modal dialog | Icon + buttons (OK, Cancel, Yes, No) |
-| ToolTip | Tooltip | Yellow background (classic) |
+| WinForms Control | Web Equivalent  | Đặc điểm                                      |
+| ---------------- | --------------- | --------------------------------------------- |
+| MenuStrip        | Top menu bar    | Flat, hover highlight, dropdown               |
+| ToolStrip        | Toolbar         | Icon buttons 24x24, separator, tooltip        |
+| TreeView         | Sidebar nav     | Indent, expand/collapse, icons                |
+| DataGridView     | Data table      | Header sort, resize columns, alternating rows |
+| TabControl       | Tabs            | Top-aligned tabs                              |
+| StatusStrip      | Status bar      | Fixed bottom, info panels                     |
+| GroupBox         | Card/Section    | Border + title                                |
+| TextBox          | Input           | 1px border, focus highlight                   |
+| ComboBox         | Select/Dropdown | Arrow indicator                               |
+| Button           | Button          | Raised, 3D border effect                      |
+| DateTimePicker   | Date picker     | Calendar popup                                |
+| NumericUpDown    | Number input    | Up/down arrows                                |
+| ProgressBar      | Progress bar    | Animated fill                                 |
+| MessageBox       | Modal dialog    | Icon + buttons (OK, Cancel, Yes, No)          |
+| ToolTip          | Tooltip         | Yellow background (classic)                   |
 
 ---
 
@@ -161,30 +163,32 @@ Giao diện mô phỏng style C# Windows Forms / Desktop Application:
 
 ### React + ProUI → WinForms Style
 
-| Cần build | ProUI Component | Custom Style |
-|-----------|----------------|--------------|
-| Title Bar | Custom header | Fixed top, brand color |
-| Menu Bar | Custom nav | Dropdown menus, hover state |
-| Toolbar | ProUI Button group | Icon buttons, separators |
-| Sidebar | Custom TreeView | Expand/collapse, icons, indent |
-| DataGrid | ProTable | WinForms grid style, header, alt rows |
-| Tabs | ProUI Tabs | Top-aligned, flat style |
-| Form Dialog | ProUI Modal + ProForm | GroupBox style, OK/Cancel |
-| StatusBar | Custom footer | Fixed bottom, sections |
-| MessageBox | ProUI Modal | Icon + buttons pattern |
-| Context Menu | Custom dropdown | Right-click menu |
+| Cần build    | ProUI Component       | Custom Style                          |
+| ------------ | --------------------- | ------------------------------------- |
+| Title Bar    | Custom header         | Fixed top, brand color                |
+| Menu Bar     | Custom nav            | Dropdown menus, hover state           |
+| Toolbar      | ProUI Button group    | Icon buttons, separators              |
+| Sidebar      | Custom TreeView       | Expand/collapse, icons, indent        |
+| DataGrid     | ProTable              | WinForms grid style, header, alt rows |
+| Tabs         | ProUI Tabs            | Top-aligned, flat style               |
+| Form Dialog  | ProUI Modal + ProForm | GroupBox style, OK/Cancel             |
+| StatusBar    | Custom footer         | Fixed bottom, sections                |
+| MessageBox   | ProUI Modal           | Icon + buttons pattern                |
+| Context Menu | Custom dropdown       | Right-click menu                      |
 
 ---
 
 ## 5. Interaction Patterns (Giống WinForms)
 
 ### 5.1 Navigation
+
 - **Sidebar TreeView** click → load content vào main area
 - **Double-click** row trong grid → mở form edit (dialog)
 - **Right-click** row → context menu (Edit, Delete, View History...)
 - **Keyboard shortcuts:** Ctrl+N (New), Ctrl+S (Save), Del (Delete), F5 (Refresh)
 
 ### 5.2 Data Grid Behaviors
+
 - Click header → sort (▲/▼ indicator)
 - Drag column border → resize
 - Double-click cell → inline edit (nếu có quyền)
@@ -195,14 +199,16 @@ Giao diện mô phỏng style C# Windows Forms / Desktop Application:
 - Right-click → context menu
 
 ### 5.3 Form Behaviors
+
 - Tab order giữa các fields
 - Enter → submit (OK button)
 - Escape → close (Cancel)
-- Required fields có * đỏ
+- Required fields có \* đỏ
 - Validation message hiện ngay dưới field
 - Confirm dialog trước khi delete ("Bạn có chắc chắn muốn xoá?")
 
 ### 5.4 Status Bar
+
 - Luôn hiển thị ở dưới cùng
 - Sections: Status | User info | Role | DateTime
 - Khi loading: hiển thị progress hoặc spinner text
@@ -213,18 +219,19 @@ Giao diện mô phỏng style C# Windows Forms / Desktop Application:
 
 Vì style desktop app, responsive sẽ khác web thông thường:
 
-| Breakpoint | Behavior |
-|------------|----------|
-| >= 1280px (Desktop) | Full layout như wireframe |
-| 1024-1279px | Sidebar collapsed (chỉ icons), expandable |
-| 768-1023px (Tablet) | Sidebar hidden, hamburger menu |
-| < 768px | Không hỗ trợ (hiện thông báo "Vui lòng dùng máy tính") |
+| Breakpoint          | Behavior                                               |
+| ------------------- | ------------------------------------------------------ |
+| >= 1280px (Desktop) | Full layout như wireframe                              |
+| 1024-1279px         | Sidebar collapsed (chỉ icons), expandable              |
+| 768-1023px (Tablet) | Sidebar hidden, hamburger menu                         |
+| < 768px             | Không hỗ trợ (hiện thông báo "Vui lòng dùng máy tính") |
 
 ---
 
 ## 7. Screens Chi Tiết
 
 ### 7.1 Login Screen
+
 ```
 ┌──────────────────────────────────────┐
 │                                      │
@@ -248,12 +255,14 @@ Vì style desktop app, responsive sẽ khác web thông thường:
 ```
 
 ### 7.2 Dashboard
+
 - Giống "Properties Window" style: các panel thông tin
 - Summary cards (tổng NL, phiếu chờ duyệt, cảnh báo)
 - Recent activity log (giống Output window)
 - Quick actions toolbar
 
 ### 7.3 Audit Logs Screen
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ [Filter: User ▾] [Action ▾] [Từ ngày|___] [Đến|___] [🔍]  │

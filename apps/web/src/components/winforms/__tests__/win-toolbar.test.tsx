@@ -8,7 +8,7 @@ describe('WinToolbar', () => {
       <WinToolbar>
         <WinToolbar.Button label="Thêm" />
         <WinToolbar.Button label="Sửa" />
-      </WinToolbar>
+      </WinToolbar>,
     )
     expect(screen.getByText('Thêm')).toBeInTheDocument()
     expect(screen.getByText('Sửa')).toBeInTheDocument()
@@ -16,20 +16,32 @@ describe('WinToolbar', () => {
 
   it('calls onClick when button clicked', () => {
     const fn = vi.fn()
-    render(<WinToolbar><WinToolbar.Button label="Add" onClick={fn} /></WinToolbar>)
+    render(
+      <WinToolbar>
+        <WinToolbar.Button label="Add" onClick={fn} />
+      </WinToolbar>,
+    )
     fireEvent.click(screen.getByText('Add'))
     expect(fn).toHaveBeenCalledOnce()
   })
 
   it('disables button when disabled prop is true', () => {
     const fn = vi.fn()
-    render(<WinToolbar><WinToolbar.Button label="Del" disabled onClick={fn} /></WinToolbar>)
+    render(
+      <WinToolbar>
+        <WinToolbar.Button label="Del" disabled onClick={fn} />
+      </WinToolbar>,
+    )
     fireEvent.click(screen.getByText('Del'))
     expect(fn).not.toHaveBeenCalled()
   })
 
   it('renders separator', () => {
-    const { container } = render(<WinToolbar><WinToolbar.Separator /></WinToolbar>)
+    const { container } = render(
+      <WinToolbar>
+        <WinToolbar.Separator />
+      </WinToolbar>,
+    )
     expect(container.querySelector('.w-px')).toBeInTheDocument()
   })
 })

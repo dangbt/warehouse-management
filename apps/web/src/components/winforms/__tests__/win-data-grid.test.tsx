@@ -3,7 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { WinDataGrid } from '../win-data-grid'
 import type { Column } from '../win-data-grid'
 
-interface Item { id: string; name: string; qty: number }
+interface Item {
+  id: string
+  name: string
+  qty: number
+}
 
 const columns: Column<Item>[] = [
   { key: 'name', header: 'Tên' },
@@ -71,7 +75,9 @@ describe('WinDataGrid', () => {
 
   it('calls onPageChange when next page clicked', () => {
     const fn = vi.fn()
-    render(<WinDataGrid columns={columns} data={data} pagination={{ page: 1, limit: 20, total: 45 }} onPageChange={fn} />)
+    render(
+      <WinDataGrid columns={columns} data={data} pagination={{ page: 1, limit: 20, total: 45 }} onPageChange={fn} />,
+    )
     const buttons = screen.getAllByRole('button')
     const nextBtn = buttons[buttons.length - 1]
     fireEvent.click(nextBtn)
@@ -85,7 +91,7 @@ describe('WinDataGrid', () => {
   })
 
   it('applies getRowClass to rows', () => {
-    render(<WinDataGrid columns={columns} data={data} getRowClass={(r) => r.qty < 5 ? 'low-stock' : ''} />)
+    render(<WinDataGrid columns={columns} data={data} getRowClass={(r) => (r.qty < 5 ? 'low-stock' : '')} />)
     const row = screen.getByText('Rau muống').closest('tr')!
     expect(row.className).toContain('low-stock')
   })

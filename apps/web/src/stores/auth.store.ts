@@ -26,6 +26,6 @@ export const useAuthStore = create<AuthState>()(
         return user.permissions.includes(permission)
       },
     }),
-    { name: 'wms-auth' }
-  )
+    { name: 'wms-auth' },
+  ),
 )

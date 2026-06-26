@@ -9,45 +9,45 @@
 ```css
 @theme {
   /* WinForms System Colors */
-  --color-win-control: #F0F0F0;
-  --color-win-control-dark: #E1E1E1;
-  --color-win-window: #FFFFFF;
-  --color-win-active-title: #0078D4;
-  --color-win-inactive-title: #A0A0A0;
-  --color-win-menu: #F5F5F5;
-  --color-win-menu-hover: #E5F3FF;
-  --color-win-menu-active: #CCE8FF;
+  --color-win-control: #f0f0f0;
+  --color-win-control-dark: #e1e1e1;
+  --color-win-window: #ffffff;
+  --color-win-active-title: #0078d4;
+  --color-win-inactive-title: #a0a0a0;
+  --color-win-menu: #f5f5f5;
+  --color-win-menu-hover: #e5f3ff;
+  --color-win-menu-active: #cce8ff;
 
   /* Grid Colors */
-  --color-win-grid-header: #E8E8E8;
-  --color-win-grid-border: #D0D0D0;
-  --color-win-grid-row-alt: #F9F9F9;
-  --color-win-grid-selected: #CCE8FF;
-  --color-win-grid-selected-focus: #0078D4;
+  --color-win-grid-header: #e8e8e8;
+  --color-win-grid-border: #d0d0d0;
+  --color-win-grid-row-alt: #f9f9f9;
+  --color-win-grid-selected: #cce8ff;
+  --color-win-grid-selected-focus: #0078d4;
 
   /* Button */
-  --color-win-button: #E1E1E1;
-  --color-win-button-hover: #D4D4D4;
-  --color-win-button-active: #C8C8C8;
-  --color-win-button-border: #ADADAD;
+  --color-win-button: #e1e1e1;
+  --color-win-button-hover: #d4d4d4;
+  --color-win-button-active: #c8c8c8;
+  --color-win-button-border: #adadad;
 
   /* Text */
-  --color-win-text: #1E1E1E;
-  --color-win-text-secondary: #6D6D6D;
-  --color-win-text-disabled: #A0A0A0;
+  --color-win-text: #1e1e1e;
+  --color-win-text-secondary: #6d6d6d;
+  --color-win-text-disabled: #a0a0a0;
 
   /* Status */
-  --color-win-statusbar: #007ACC;
-  --color-win-error: #E81123;
-  --color-win-warning: #FFB900;
-  --color-win-success: #107C10;
-  --color-win-info: #0078D4;
-  --color-win-link: #0066CC;
+  --color-win-statusbar: #007acc;
+  --color-win-error: #e81123;
+  --color-win-warning: #ffb900;
+  --color-win-success: #107c10;
+  --color-win-info: #0078d4;
+  --color-win-link: #0066cc;
 
   /* Input */
-  --color-win-input-border: #7A7A7A;
-  --color-win-input-focus: #0078D4;
-  --color-win-input-bg: #FFFFFF;
+  --color-win-input-border: #7a7a7a;
+  --color-win-input-focus: #0078d4;
+  --color-win-input-bg: #ffffff;
 
   /* Spacing */
   --spacing-win-xs: 2px;
@@ -78,6 +78,7 @@
 ## 2. Base Component Styles
 
 ### Title Bar
+
 ```css
 .win-titlebar {
   height: var(--size-titlebar);
@@ -92,6 +93,7 @@
 ```
 
 ### Menu Bar
+
 ```css
 .win-menubar {
   height: var(--size-menubar);
@@ -115,6 +117,7 @@
 ```
 
 ### Toolbar
+
 ```css
 .win-toolbar {
   height: var(--size-toolbar);
@@ -156,6 +159,7 @@
 ```
 
 ### DataGrid
+
 ```css
 .win-grid {
   border: 1px solid var(--color-win-grid-border);
@@ -183,7 +187,7 @@
 }
 
 .win-grid-row {
-  border-bottom: 1px solid #EBEBEB;
+  border-bottom: 1px solid #ebebeb;
 }
 
 .win-grid-row:nth-child(even) {
@@ -200,11 +204,12 @@
 
 .win-grid-row td {
   padding: 4px 8px;
-  border-right: 1px solid #F0F0F0;
+  border-right: 1px solid #f0f0f0;
 }
 ```
 
 ### GroupBox
+
 ```css
 .win-groupbox {
   border: 1px solid var(--color-win-grid-border);
@@ -227,6 +232,7 @@
 ```
 
 ### Status Bar
+
 ```css
 .win-statusbar {
   height: var(--size-statusbar);
@@ -241,12 +247,13 @@
 
 .win-statusbar-section {
   padding: 0 12px;
-  border-right: 1px solid rgba(255,255,255,0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
   white-space: nowrap;
 }
 ```
 
 ### Button (WinForms Style)
+
 ```css
 .win-btn {
   padding: 4px 16px;
@@ -275,6 +282,7 @@
 ```
 
 ### Input
+
 ```css
 .win-input {
   border: 1px solid var(--color-win-input-border);
@@ -292,6 +300,7 @@
 ```
 
 ### TreeView (Sidebar)
+
 ```css
 .win-tree {
   font-size: var(--font-size-sm);
@@ -318,6 +327,7 @@
 ```
 
 ### Dialog
+
 ```css
 .win-dialog-overlay {
   background: rgba(0, 0, 0, 0.4);
@@ -326,7 +336,7 @@
 .win-dialog {
   background: var(--color-win-control);
   border: 1px solid var(--color-win-grid-border);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
 
@@ -361,6 +371,7 @@
 ## 3. Special States
 
 ### Low Stock Warning (Row)
+
 ```css
 .win-grid-row.low-stock {
   color: var(--color-win-error);
@@ -372,6 +383,7 @@
 ```
 
 ### Status Badges
+
 ```css
 .win-badge {
   padding: 2px 8px;
@@ -380,8 +392,20 @@
   font-weight: 600;
   text-transform: uppercase;
 }
-.win-badge-pending { background: #FFF3CD; color: #856404; }
-.win-badge-completed { background: #D4EDDA; color: #155724; }
-.win-badge-rejected { background: #F8D7DA; color: #721C24; }
-.win-badge-cancelled { background: #E2E3E5; color: #383D41; }
+.win-badge-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.win-badge-completed {
+  background: #d4edda;
+  color: #155724;
+}
+.win-badge-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+.win-badge-cancelled {
+  background: #e2e3e5;
+  color: #383d41;
+}
 ```

@@ -8,21 +8,37 @@ import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
 const menuTree: TreeNode[] = [
-  { id: 'warehouse', label: 'Kho', icon: '📦', permission: 'ingredients:read', children: [
-    { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
-    { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
-    { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
-    { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
-  ]},
-  { id: 'kitchen', label: 'Bếp', icon: '🍳', permission: 'recipes:read', children: [
-    { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
-  ]},
+  {
+    id: 'warehouse',
+    label: 'Kho',
+    icon: '📦',
+    permission: 'ingredients:read',
+    children: [
+      { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
+      { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
+      { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
+      { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
+    ],
+  },
+  {
+    id: 'kitchen',
+    label: 'Bếp',
+    icon: '🍳',
+    permission: 'recipes:read',
+    children: [{ id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' }],
+  },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
-  { id: 'admin', label: 'Quản trị', icon: '⚙️', permission: 'users:read', children: [
-    { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
-    { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
-    { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
-  ]},
+  {
+    id: 'admin',
+    label: 'Quản trị',
+    icon: '⚙️',
+    permission: 'users:read',
+    children: [
+      { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
+      { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
+      { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
+    ],
+  },
 ]
 
 export function AppLayout() {
@@ -60,8 +76,10 @@ export function AppLayout() {
       {/* Title Bar */}
       <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2 shrink-0">
-          <circle cx="16" cy="16" r="14" fill="white"/>
-          <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">MV</text>
+          <circle cx="16" cy="16" r="14" fill="white" />
+          <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">
+            MV
+          </text>
         </svg>
         <span className="hidden sm:inline">Mâm Vị - Quản Lý Kho Nguyên Liệu</span>
         <span className="sm:hidden">Mâm Vị</span>
@@ -69,15 +87,58 @@ export function AppLayout() {
 
       {/* Menu Bar */}
       <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 overflow-x-auto">
-        <MenuDrop label="Hệ thống" items={[{ label: '🏠 Dashboard', route: '/dashboard' }, ...(hasPermission('users:read') ? [{ label: '👥 Users', route: '/users' }, { label: '📋 Audit Logs', route: '/audit-logs' }] : [])]} onNav={(r) => navigate({ to: r })} />
-        {hasPermission('ingredients:read') && <MenuDrop label="Kho" items={[{ label: '📦 Nguyên liệu', route: '/ingredients' }, ...(hasPermission('import_orders:read') ? [{ label: '📥 Nhập kho', route: '/import-orders' }] : []), ...(hasPermission('stock_exports:read') ? [{ label: '📤 Xuất kho', route: '/stock-exports' }] : []), ...(hasPermission('suppliers:read') ? [{ label: '🏢 Nhà cung cấp', route: '/suppliers' }] : [])]} onNav={(r) => navigate({ to: r })} />}
-        {hasPermission('recipes:read') && <MenuDrop label="Công thức" items={[{ label: '🍳 Công thức', route: '/recipes' }]} onNav={(r) => navigate({ to: r })} />}
-        {hasPermission('reports:read') && <MenuDrop label="Báo cáo" items={[{ label: '📊 Báo cáo', route: '/reports' }]} onNav={(r) => navigate({ to: r })} />}
+        <MenuDrop
+          label="Hệ thống"
+          items={[
+            { label: '🏠 Dashboard', route: '/dashboard' },
+            ...(hasPermission('users:read')
+              ? [
+                  { label: '👥 Users', route: '/users' },
+                  { label: '📋 Audit Logs', route: '/audit-logs' },
+                ]
+              : []),
+          ]}
+          onNav={(r) => navigate({ to: r })}
+        />
+        {hasPermission('ingredients:read') && (
+          <MenuDrop
+            label="Kho"
+            items={[
+              { label: '📦 Nguyên liệu', route: '/ingredients' },
+              ...(hasPermission('import_orders:read') ? [{ label: '📥 Nhập kho', route: '/import-orders' }] : []),
+              ...(hasPermission('stock_exports:read') ? [{ label: '📤 Xuất kho', route: '/stock-exports' }] : []),
+              ...(hasPermission('suppliers:read') ? [{ label: '🏢 Nhà cung cấp', route: '/suppliers' }] : []),
+            ]}
+            onNav={(r) => navigate({ to: r })}
+          />
+        )}
+        {hasPermission('recipes:read') && (
+          <MenuDrop
+            label="Công thức"
+            items={[{ label: '🍳 Công thức', route: '/recipes' }]}
+            onNav={(r) => navigate({ to: r })}
+          />
+        )}
+        {hasPermission('reports:read') && (
+          <MenuDrop
+            label="Báo cáo"
+            items={[{ label: '📊 Báo cáo', route: '/reports' }]}
+            onNav={(r) => navigate({ to: r })}
+          />
+        )}
         <div className="flex-1" />
         <div className="flex items-center gap-2 pr-2 shrink-0">
           <Bell size={14} className="cursor-pointer" />
           <span className="text-[11px] hidden md:inline">👤 {user?.full_name ?? 'Guest'}</span>
-          <button onClick={() => { logout(); navigate({ to: '/login' }) }} className="text-[11px] text-win-error hover:underline cursor-pointer">Đăng xuất</button>
+          <button
+            onClick={() => {
+              logout()
+              navigate({ to: '/login' })
+            }}
+            className="text-[11px] text-win-error hover:underline cursor-pointer"
+          >
+            Đăng xuất
+          </button>
         </div>
       </div>
 
@@ -87,8 +148,15 @@ export function AppLayout() {
           {sidebarExpanded ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
         </button>
         <div className="w-px h-5 bg-win-grid-border mx-1" />
-        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-[11px] hover:bg-win-menu-hover rounded-sm">🏠 Dashboard</button>
-        <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover rounded"><RefreshCw size={14} /></button>
+        <button
+          onClick={() => navigate({ to: '/dashboard' })}
+          className="px-2 py-1 text-[11px] hover:bg-win-menu-hover rounded-sm"
+        >
+          🏠 Dashboard
+        </button>
+        <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover rounded">
+          <RefreshCw size={14} />
+        </button>
       </div>
 
       {/* Main Content */}
@@ -101,7 +169,10 @@ export function AppLayout() {
               <WinTreeView
                 nodes={filteredTree}
                 activeId={activeNode}
-                onSelect={(node) => { node.route && navigate({ to: node.route }); if (window.innerWidth < 768) toggleSidebar() }}
+                onSelect={(node) => {
+                  node.route && navigate({ to: node.route })
+                  if (window.innerWidth < 768) toggleSidebar()
+                }}
               />
             </div>
           </>
@@ -124,24 +195,47 @@ export function AppLayout() {
   )
 }
 
-
-function MenuDrop({ label, items, onNav }: { label: string; items: { label: string; route: string }[]; onNav: (route: string) => void }) {
+function MenuDrop({
+  label,
+  items,
+  onNav,
+}: {
+  label: string
+  items: { label: string; route: string }[]
+  onNav: (route: string) => void
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
   return (
     <div className="relative" ref={ref}>
-      <span onClick={() => setOpen(!open)} className={`px-2.5 py-0.5 rounded-sm cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}>{label}</span>
+      <span
+        onClick={() => setOpen(!open)}
+        className={`px-2.5 py-0.5 rounded-sm cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
+      >
+        {label}
+      </span>
       {open && (
         <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md rounded-sm z-50 min-w-[160px] py-0.5">
           {items.map((item) => (
-            <div key={item.route} onClick={() => { onNav(item.route); setOpen(false) }} className="px-3 py-1 text-[11px] hover:bg-win-menu-hover cursor-pointer">{item.label}</div>
+            <div
+              key={item.route}
+              onClick={() => {
+                onNav(item.route)
+                setOpen(false)
+              }}
+              className="px-3 py-1 text-[11px] hover:bg-win-menu-hover cursor-pointer"
+            >
+              {item.label}
+            </div>
           ))}
         </div>
       )}

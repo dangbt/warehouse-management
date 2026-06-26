@@ -21,7 +21,14 @@ interface Props<T> {
 }
 
 export function WinDataGrid<T extends { id?: string }>({
-  columns, data, loading, pagination, onPageChange, onRowClick, onRowDoubleClick, getRowClass,
+  columns,
+  data,
+  loading,
+  pagination,
+  onPageChange,
+  onRowClick,
+  onRowDoubleClick,
+  getRowClass,
 }: Props<T>) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
@@ -46,9 +53,17 @@ export function WinDataGrid<T extends { id?: string }>({
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={columns.length} className="text-center py-8 text-win-text-secondary">Đang tải...</td></tr>
+              <tr>
+                <td colSpan={columns.length} className="text-center py-8 text-win-text-secondary">
+                  Đang tải...
+                </td>
+              </tr>
             ) : data.length === 0 ? (
-              <tr><td colSpan={columns.length} className="text-center py-8 text-win-text-secondary">Không có dữ liệu</td></tr>
+              <tr>
+                <td colSpan={columns.length} className="text-center py-8 text-win-text-secondary">
+                  Không có dữ liệu
+                </td>
+              </tr>
             ) : (
               data.map((row, i) => (
                 <tr
@@ -58,11 +73,17 @@ export function WinDataGrid<T extends { id?: string }>({
                     ${i % 2 === 1 ? 'bg-win-grid-row-alt' : 'bg-white'}
                     ${selectedId === row.id ? '!bg-win-grid-selected' : 'hover:bg-win-menu-hover'}
                     ${getRowClass?.(row) ?? ''}`}
-                  onClick={() => { setSelectedId(row.id ?? null); onRowClick?.(row) }}
+                  onClick={() => {
+                    setSelectedId(row.id ?? null)
+                    onRowClick?.(row)
+                  }}
                   onDoubleClick={() => onRowDoubleClick?.(row)}
                 >
                   {columns.map((col) => (
-                    <td key={String(col.key)} className={`px-2 py-1 border-r border-[#F0F0F0] ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : ''}`}>
+                    <td
+                      key={String(col.key)}
+                      className={`px-2 py-1 border-r border-[#F0F0F0] ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : ''}`}
+                    >
                       {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key as string] ?? '')}
                     </td>
                   ))}
@@ -74,11 +95,28 @@ export function WinDataGrid<T extends { id?: string }>({
       </div>
       {pagination && (
         <div className="h-7 border-t border-win-grid-border bg-win-menu flex items-center justify-between px-2 text-[11px] shrink-0">
-          <span>Hiển thị {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total}</span>
+          <span>
+            Hiển thị {(pagination.page - 1) * pagination.limit + 1}-
+            {Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total}
+          </span>
           <div className="flex items-center gap-1">
-            <button onClick={() => onPageChange?.(pagination.page - 1)} disabled={pagination.page <= 1} className="p-0.5 disabled:opacity-30"><ChevronLeft size={14} /></button>
-            <span>Trang {pagination.page}/{totalPages}</span>
-            <button onClick={() => onPageChange?.(pagination.page + 1)} disabled={pagination.page >= totalPages} className="p-0.5 disabled:opacity-30"><ChevronRight size={14} /></button>
+            <button
+              onClick={() => onPageChange?.(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              className="p-0.5 disabled:opacity-30"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <span>
+              Trang {pagination.page}/{totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange?.(pagination.page + 1)}
+              disabled={pagination.page >= totalPages}
+              className="p-0.5 disabled:opacity-30"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
         </div>
       )}

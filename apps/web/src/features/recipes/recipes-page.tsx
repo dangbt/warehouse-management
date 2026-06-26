@@ -5,7 +5,14 @@ import type { Column } from '@wms/ui-winforms'
 import { RecipeForm } from './recipe-form'
 import { useRecipes } from '@/data'
 
-interface RecipeRow { id: string; name: string; menuItem: { name: string }; ingredients: { ingredientId: string; quantity: string; unit: string }[]; servingSize: number; menuItemId: string }
+interface RecipeRow {
+  id: string
+  name: string
+  menuItem: { name: string }
+  ingredients: { ingredientId: string; quantity: string; unit: string }[]
+  servingSize: number
+  menuItemId: string
+}
 
 const columns: Column<RecipeRow>[] = [
   { key: 'menuItem', header: 'Món ăn', width: 180, render: (r) => r.menuItem?.name },
@@ -21,18 +28,47 @@ export function RecipesPage() {
 
   const { data: res, isLoading, refetch } = useRecipes()
 
-  const openEdit = (row: RecipeRow) => { setEditData(row); setFormOpen(true) }
+  const openEdit = (row: RecipeRow) => {
+    setEditData(row)
+    setFormOpen(true)
+  }
 
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo CT" onClick={() => { setEditData(null); setFormOpen(true) }} />
-        <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => selected && openEdit(selected)} />
+        <WinToolbar.Button
+          icon={<Plus size={14} />}
+          label="Tạo CT"
+          onClick={() => {
+            setEditData(null)
+            setFormOpen(true)
+          }}
+        />
+        <WinToolbar.Button
+          icon={<Pencil size={14} />}
+          label="Sửa"
+          disabled={!selected}
+          onClick={() => selected && openEdit(selected)}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={openEdit} />
-      <RecipeForm open={formOpen} editData={editData} onClose={() => { setFormOpen(false); refetch() }} />
+      <WinDataGrid
+        columns={columns}
+        data={res?.data ?? []}
+        loading={isLoading}
+        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        onRowClick={setSelected}
+        onRowDoubleClick={openEdit}
+      />
+      <RecipeForm
+        open={formOpen}
+        editData={editData}
+        onClose={() => {
+          setFormOpen(false)
+          refetch()
+        }}
+      />
     </div>
   )
 }

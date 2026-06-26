@@ -16,7 +16,14 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface UserData { id: string; fullName: string; email: string; phone?: string; departmentId?: string; userRoles?: { role: { id: string; name: string } }[] }
+interface UserData {
+  id: string
+  fullName: string
+  email: string
+  phone?: string
+  departmentId?: string
+  userRoles?: { role: { id: string; name: string } }[]
+}
 
 interface Props {
   open: boolean
@@ -27,7 +34,12 @@ interface Props {
 }
 
 export function UserForm({ open, mode, data, onClose, onSave }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) })
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [departments, setDepartments] = useState<{ value: string; label: string }[]>([])
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([])
   const [submitError, setSubmitError] = useState('')
@@ -35,7 +47,18 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
   useEffect(() => {
     if (open) {
       setSubmitError('')
-      reset(mode === 'edit' && data ? { full_name: data.fullName, email: data.email, phone: data.phone ?? '', department_id: data.departmentId ?? '', role_id: data.userRoles?.[0]?.role?.id ?? '', password: '' } : { full_name: '', email: '', phone: '', department_id: '', role_id: '', password: '' })
+      reset(
+        mode === 'edit' && data
+          ? {
+              full_name: data.fullName,
+              email: data.email,
+              phone: data.phone ?? '',
+              department_id: data.departmentId ?? '',
+              role_id: data.userRoles?.[0]?.role?.id ?? '',
+              password: '',
+            }
+          : { full_name: '', email: '', phone: '', department_id: '', role_id: '', password: '' },
+      )
       Promise.all([api.get('/departments'), api.get('/roles')]).then(([d, r]) => {
         setDepartments((d as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
         setRoles((r as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
@@ -54,11 +77,25 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
   }
 
   return (
-    <WinDialog title={mode === 'add' ? '🆕 Thêm User' : '✏️ Sửa User'} open={open} onClose={onClose} width={440}
+    <WinDialog
+      title={mode === 'add' ? '🆕 Thêm User' : '✏️ Sửa User'}
+      open={open}
+      onClose={onClose}
+      width={440}
       footer={
         <>
-          <button onClick={handleSubmit(onSubmit)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer">OK</button>
-          <button onClick={onClose} className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover">Cancel</button>
+          <button
+            onClick={handleSubmit(onSubmit)}
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+          >
+            OK
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+          >
+            Cancel
+          </button>
         </>
       }
     >
@@ -67,9 +104,16 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
           <WinInput label="Họ tên" {...register('full_name')} error={errors.full_name?.message} />
           <WinInput label="Email" type="email" {...register('email')} error={errors.email?.message} />
           <WinInput label="Điện thoại" {...register('phone')} />
-          <WinSelect label="Bộ phận" {...register('department_id')} options={departments} error={errors.department_id?.message} />
+          <WinSelect
+            label="Bộ phận"
+            {...register('department_id')}
+            options={departments}
+            error={errors.department_id?.message}
+          />
           <WinSelect label="Role" {...register('role_id')} options={roles} error={errors.role_id?.message} />
-          {mode === 'add' && <WinInput label="Mật khẩu" type="password" {...register('password')} placeholder="Mặc định: 123456" />}
+          {mode === 'add' && (
+            <WinInput label="Mật khẩu" type="password" {...register('password')} placeholder="Mặc định: 123456" />
+          )}
           {submitError && <p className="text-[11px] text-win-error font-semibold mt-2">⚠️ {submitError}</p>}
         </div>
       </WinGroupBox>

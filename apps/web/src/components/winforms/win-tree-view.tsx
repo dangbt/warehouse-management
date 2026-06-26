@@ -18,7 +18,17 @@ export function WinTreeView({ nodes, activeId, onSelect }: Props) {
   )
 }
 
-function TreeItem({ node, depth, activeId, onSelect }: { node: TreeNode; depth: number; activeId?: string; onSelect: (n: TreeNode) => void }) {
+function TreeItem({
+  node,
+  depth,
+  activeId,
+  onSelect,
+}: {
+  node: TreeNode
+  depth: number
+  activeId?: string
+  onSelect: (n: TreeNode) => void
+}) {
   const [expanded, setExpanded] = useState(true)
   const hasChildren = node.children && node.children.length > 0
 
@@ -33,13 +43,15 @@ function TreeItem({ node, depth, activeId, onSelect }: { node: TreeNode; depth: 
           if (node.route) onSelect(node)
         }}
       >
-        {hasChildren ? (expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />) : <span className="w-3" />}
+        {hasChildren ? expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} /> : <span className="w-3" />}
         {node.icon && <span>{node.icon}</span>}
         <span>{node.label}</span>
       </div>
-      {hasChildren && expanded && node.children!.map((child) => (
-        <TreeItem key={child.id} node={child} depth={depth + 1} activeId={activeId} onSelect={onSelect} />
-      ))}
+      {hasChildren &&
+        expanded &&
+        node.children!.map((child) => (
+          <TreeItem key={child.id} node={child} depth={depth + 1} activeId={activeId} onSelect={onSelect} />
+        ))}
     </>
   )
 }

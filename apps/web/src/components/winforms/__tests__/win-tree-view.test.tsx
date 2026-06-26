@@ -4,10 +4,15 @@ import { WinTreeView } from '../win-tree-view'
 import type { TreeNode } from '@/types'
 
 const nodes: TreeNode[] = [
-  { id: 'warehouse', label: 'Kho', icon: '📦', children: [
-    { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients' },
-    { id: 'imports', label: 'Nhập kho', route: '/import-orders' },
-  ]},
+  {
+    id: 'warehouse',
+    label: 'Kho',
+    icon: '📦',
+    children: [
+      { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients' },
+      { id: 'imports', label: 'Nhập kho', route: '/import-orders' },
+    ],
+  },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports' },
 ]
 

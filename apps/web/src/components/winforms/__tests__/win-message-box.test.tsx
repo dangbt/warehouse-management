@@ -9,7 +9,9 @@ describe('WinMessageBox', () => {
   })
 
   it('shows title and message', () => {
-    render(<WinMessageBox type="info" title="Thông báo" message="Thao tác thành công" open={true} onResult={() => {}} />)
+    render(
+      <WinMessageBox type="info" title="Thông báo" message="Thao tác thành công" open={true} onResult={() => {}} />,
+    )
     expect(screen.getByText('Thông báo')).toBeInTheDocument()
     expect(screen.getByText('Thao tác thành công')).toBeInTheDocument()
   })

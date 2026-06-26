@@ -7,6 +7,7 @@
 ## Authentication
 
 ### POST /auth/login
+
 ```json
 // Request
 { "email": "user@restaurant.com", "password": "secret123" }
@@ -34,6 +35,7 @@
 ```
 
 ### POST /auth/refresh
+
 ```json
 // Request
 { "refresh_token": "eyJ..." }
@@ -42,6 +44,7 @@
 ```
 
 ### PUT /auth/change-password
+
 ```json
 // Request (Authorization: Bearer <token>)
 { "old_password": "old123", "new_password": "new123" }
@@ -52,11 +55,14 @@
 ## Users
 
 ### GET /users
+
 - **Permission:** `users:read`
 - **Query:** `?page=1&limit=20&department_id=uuid&role_id=uuid&is_active=true&search=keyword`
 
 ### POST /users
+
 - **Permission:** `users:create`
+
 ```json
 {
   "email": "new@restaurant.com",
@@ -69,13 +75,17 @@
 ```
 
 ### PUT /users/:id
+
 - **Permission:** `users:update`
 
 ### PUT /users/:id/toggle-active
+
 - **Permission:** `users:update`
 
 ### PUT /users/:id/roles
+
 - **Permission:** `users:update`
+
 ```json
 { "role_ids": ["uuid1", "uuid2"] }
 ```
@@ -85,7 +95,9 @@
 ## Departments
 
 ### GET /departments
+
 ### POST /departments
+
 ```json
 { "name": "Kho", "code": "WAREHOUSE", "description": "Bộ phận kho" }
 ```
@@ -95,12 +107,15 @@
 ## Roles & Permissions
 
 ### GET /roles
+
 ### POST /roles
+
 ```json
 { "name": "Warehouse Staff", "code": "warehouse_staff", "description": "Nhân viên kho" }
 ```
 
 ### PUT /roles/:id/permissions
+
 ```json
 {
   "permissions": [
@@ -118,9 +133,11 @@
 ## Ingredients
 
 ### GET /ingredients
+
 - **Permission:** `ingredients:read`
 - **Query:** `?page=1&limit=20&category=Thịt&low_stock=true&search=keyword`
 - **Response:**
+
 ```json
 {
   "success": true,
@@ -141,7 +158,9 @@
 ```
 
 ### POST /ingredients
+
 - **Permission:** `ingredients:create`
+
 ```json
 {
   "name": "Thịt bò Úc",
@@ -153,6 +172,7 @@
 ```
 
 ### GET /ingredients/:id/history
+
 - **Query:** `?page=1&limit=50&type=IMPORT&from=2026-06-01&to=2026-06-25`
 
 ---
@@ -160,9 +180,11 @@
 ## Suppliers
 
 ### GET /suppliers
+
 - **Query:** `?search=keyword&page=1&limit=20`
 
 ### POST /suppliers
+
 ```json
 { "name": "Cty TNHH ABC", "phone": "0281234567", "address": "123 Đường XYZ", "note": "" }
 ```
@@ -172,10 +194,13 @@
 ## Import Orders
 
 ### GET /import-orders
+
 - **Query:** `?status=PENDING&supplier_id=uuid&from=2026-06-01&to=2026-06-25&page=1&limit=20`
 
 ### POST /import-orders
+
 - **Permission:** `import_orders:create`
+
 ```json
 {
   "supplier_id": "uuid",
@@ -188,19 +213,25 @@
 ```
 
 ### PUT /import-orders/:id/approve
+
 - **Permission:** `import_orders:approve`
+
 ```json
 { "note": "Đã kiểm tra đầy đủ" }
 ```
 
 ### PUT /import-orders/:id/reject
+
 - **Permission:** `import_orders:approve`
+
 ```json
 { "reason": "Giá cao hơn báo giá" }
 ```
 
 ### PUT /import-orders/:id/cancel
+
 - **Permission:** `import_orders:approve`
+
 ```json
 { "reason": "NCC giao sai hàng" }
 ```
@@ -210,14 +241,15 @@
 ## Stock Exports
 
 ### POST /stock-exports
+
 - **Permission:** `stock_exports:create`
+
 ```json
 {
-  "items": [
-    { "ingredient_id": "uuid", "quantity": 2, "reason": "DAMAGED", "note": "Hỏng do tủ lạnh hư" }
-  ]
+  "items": [{ "ingredient_id": "uuid", "quantity": 2, "reason": "DAMAGED", "note": "Hỏng do tủ lạnh hư" }]
 }
 ```
+
 - **Reason enum:** `DAMAGED | EXPIRED | RETURN | INTERNAL_USE | OTHER`
 
 ---
@@ -225,10 +257,13 @@
 ## Recipes
 
 ### GET /recipes
+
 - **Query:** `?menu_item_id=uuid&search=keyword`
 
 ### POST /recipes
+
 - **Permission:** `recipes:create`
+
 ```json
 {
   "menu_item_id": "uuid",
@@ -243,6 +278,7 @@
 ```
 
 ### GET /recipes/:id
+
 - Response bao gồm chi tiết ingredients
 
 ---
@@ -250,9 +286,11 @@
 ## Audit Logs
 
 ### GET /audit-logs
+
 - **Permission:** `audit_logs:read`
 - **Query:** `?user_id=uuid&action=IMPORT_ORDER_APPROVE&resource=import_orders&from=2026-06-01&to=2026-06-25&page=1&limit=50`
 - **Response:**
+
 ```json
 {
   "data": [
@@ -272,9 +310,11 @@
 ```
 
 ### GET /audit-logs/resource/:resource/:id
+
 - Lịch sử thay đổi của 1 bản ghi cụ thể
 
 ### GET /audit-logs/user/:userId
+
 - Mọi hoạt động của 1 user
 
 ---
@@ -282,16 +322,20 @@
 ## Reports
 
 ### GET /reports/stock-summary
+
 - **Query:** `?category=Thịt`
 - **Response:** Tổng hợp tồn kho + giá trị
 
 ### GET /reports/stock-movement
+
 - **Query:** `?ingredient_id=uuid&from=2026-06-01&to=2026-06-25&group_by=day`
 
 ### GET /reports/low-stock
+
 - Danh sách nguyên liệu dưới mức min_stock
 
 ### GET /reports/cost-analysis
+
 - **Query:** `?from=2026-06-01&to=2026-06-30`
 - Chi phí theo thời gian, food cost per dish
 
@@ -300,6 +344,7 @@
 ## Webhook (nhận từ Order System)
 
 ### POST /webhooks/order-confirmed
+
 ```json
 {
   "order_id": "uuid",
@@ -312,6 +357,7 @@
 ```
 
 ### POST /webhooks/order-cancelled
+
 ```json
 {
   "order_id": "uuid",

@@ -23,7 +23,10 @@ export class AuthService {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
 
-    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
 
     const roles = user.userRoles.map((ur) => ur.role.code);
     const permissions = user.userRoles.flatMap((ur) => ur.role.permissions.map((p) => `${p.resource}:${p.action}`));

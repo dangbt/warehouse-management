@@ -1,25 +1,25 @@
 /* WinForms Theme - Use with Tailwind CSS v4 */
 @theme {
-  --color-win-control: #F0F0F0;
-  --color-win-control-dark: #E1E1E1;
-  --color-win-window: #FFFFFF;
-  --color-win-active-title: #0078D4;
-  --color-win-menu: #F5F5F5;
-  --color-win-menu-hover: #E5F3FF;
-  --color-win-grid-header: #E8E8E8;
-  --color-win-grid-border: #D0D0D0;
-  --color-win-grid-row-alt: #F9F9F9;
-  --color-win-grid-selected: #CCE8FF;
-  --color-win-button: #E1E1E1;
-  --color-win-button-hover: #D4D4D4;
-  --color-win-button-border: #ADADAD;
-  --color-win-text: #1E1E1E;
-  --color-win-text-secondary: #6D6D6D;
-  --color-win-statusbar: #007ACC;
-  --color-win-error: #E81123;
-  --color-win-warning: #FFB900;
-  --color-win-success: #107C10;
-  --color-win-input-border: #7A7A7A;
-  --color-win-input-focus: #0078D4;
+  --color-win-control: #f0f0f0;
+  --color-win-control-dark: #e1e1e1;
+  --color-win-window: #ffffff;
+  --color-win-active-title: #0078d4;
+  --color-win-menu: #f5f5f5;
+  --color-win-menu-hover: #e5f3ff;
+  --color-win-grid-header: #e8e8e8;
+  --color-win-grid-border: #d0d0d0;
+  --color-win-grid-row-alt: #f9f9f9;
+  --color-win-grid-selected: #cce8ff;
+  --color-win-button: #e1e1e1;
+  --color-win-button-hover: #d4d4d4;
+  --color-win-button-border: #adadad;
+  --color-win-text: #1e1e1e;
+  --color-win-text-secondary: #6d6d6d;
+  --color-win-statusbar: #007acc;
+  --color-win-error: #e81123;
+  --color-win-warning: #ffb900;
+  --color-win-success: #107c10;
+  --color-win-input-border: #7a7a7a;
+  --color-win-input-focus: #0078d4;
   --font-family-win: 'Segoe UI', 'Inter', -apple-system, sans-serif;
 }

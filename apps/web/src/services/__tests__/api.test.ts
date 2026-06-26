@@ -11,7 +11,9 @@ vi.mock('@/stores/auth.store', () => ({
 }))
 
 describe('api service', () => {
-  beforeEach(() => { mockFetch.mockReset() })
+  beforeEach(() => {
+    mockFetch.mockReset()
+  })
 
   it('GET adds auth header', async () => {
     mockFetch.mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ data: [] }) })
@@ -20,7 +22,7 @@ describe('api service', () => {
       expect.stringContaining('/ingredients'),
       expect.objectContaining({
         headers: expect.objectContaining({ Authorization: 'Bearer test-token' }),
-      })
+      }),
     )
   })
 
@@ -32,7 +34,7 @@ describe('api service', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ name: 'Test' }),
-      })
+      }),
     )
   })
 
@@ -41,7 +43,7 @@ describe('api service', () => {
     await api.put('/ingredients/1', { name: 'Updated' })
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/ingredients/1'),
-      expect.objectContaining({ method: 'PUT' })
+      expect.objectContaining({ method: 'PUT' }),
     )
   })
 
@@ -50,7 +52,7 @@ describe('api service', () => {
     await api.delete('/ingredients/1')
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/ingredients/1'),
-      expect.objectContaining({ method: 'DELETE' })
+      expect.objectContaining({ method: 'DELETE' }),
     )
   })
 

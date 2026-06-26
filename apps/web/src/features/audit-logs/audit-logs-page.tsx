@@ -5,7 +5,17 @@ import type { Column } from '@wms/ui-winforms'
 import { useAuditLogs } from '@/data'
 import { formatDateTime } from '@wms/shared'
 
-interface AuditLog { id: string; user: { fullName: string } | null; action: string; resource: string; resourceId: string; oldValues: unknown; newValues: unknown; ipAddress: string; createdAt: string }
+interface AuditLog {
+  id: string
+  user: { fullName: string } | null
+  action: string
+  resource: string
+  resourceId: string
+  oldValues: unknown
+  newValues: unknown
+  ipAddress: string
+  createdAt: string
+}
 
 const columns: Column<AuditLog>[] = [
   { key: 'createdAt', header: 'Thời gian', width: 150, render: (r) => formatDateTime(r.createdAt) },
@@ -26,13 +36,27 @@ export function AuditLogsPage() {
       </WinToolbar>
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
-          <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} onRowDoubleClick={setDetail} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} />
+          <WinDataGrid
+            columns={columns}
+            data={res?.data ?? []}
+            loading={isLoading}
+            onRowDoubleClick={setDetail}
+            pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+          />
         </div>
         {detail && (
           <div className="h-32 border-t border-win-grid-border bg-win-control p-2 overflow-auto text-[11px] shrink-0">
             <div className="font-semibold mb-1">Chi tiết: {detail.action}</div>
-            {detail.oldValues && <div><span className="text-win-text-secondary">Old:</span> {JSON.stringify(detail.oldValues)}</div>}
-            {detail.newValues && <div><span className="text-win-text-secondary">New:</span> {JSON.stringify(detail.newValues)}</div>}
+            {detail.oldValues && (
+              <div>
+                <span className="text-win-text-secondary">Old:</span> {JSON.stringify(detail.oldValues)}
+              </div>
+            )}
+            {detail.newValues && (
+              <div>
+                <span className="text-win-text-secondary">New:</span> {JSON.stringify(detail.newValues)}
+              </div>
+            )}
             <div className="text-win-text-secondary mt-1">IP: {detail.ipAddress}</div>
           </div>
         )}

@@ -11,7 +11,9 @@ vi.mock('@/services/api', () => ({
 describe('StockExportForm', () => {
   const defaultProps = { open: true, onClose: vi.fn(), onSave: vi.fn() }
 
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('renders dialog with title when open', () => {
     render(<StockExportForm {...defaultProps} />)
@@ -53,7 +55,9 @@ describe('StockExportForm', () => {
     const onClose = vi.fn()
     render(<StockExportForm open={true} onClose={onClose} onSave={onSave} />)
 
-    await waitFor(() => { expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument() })
+    await waitFor(() => {
+      expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument()
+    })
 
     const selects = screen.getAllByRole('combobox')
     fireEvent.change(selects[0], { target: { value: '1' } })
@@ -61,15 +65,21 @@ describe('StockExportForm', () => {
     fireEvent.change(selects[1], { target: { value: 'DAMAGED' } })
 
     fireEvent.click(screen.getByText('Xuất'))
-    await waitFor(() => { expect(onSave).toHaveBeenCalled() })
-    await waitFor(() => { expect(onClose).toHaveBeenCalled() })
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled()
+    })
   })
 
   it('shows error message when onSave throws', async () => {
     const onSave = vi.fn().mockRejectedValue(new Error('Không đủ tồn kho'))
     render(<StockExportForm open={true} onClose={vi.fn()} onSave={onSave} />)
 
-    await waitFor(() => { expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument() })
+    await waitFor(() => {
+      expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument()
+    })
 
     const selects = screen.getAllByRole('combobox')
     fireEvent.change(selects[0], { target: { value: '1' } })

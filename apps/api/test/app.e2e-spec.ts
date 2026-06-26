@@ -3,20 +3,24 @@ import { INestApplication } from '@nestjs/common';
 import * as supertest from 'supertest';
 import { AppModule } from '../src/app.module';
 
-const request = (app: any) => supertest.default ? supertest.default(app) : supertest(app);
+const request = (app: any) => (supertest.default ? supertest.default(app) : supertest(app));
 
 describe('Warehouse Management E2E', () => {
   let app: INestApplication;
   let token: string;
 
   beforeAll(async () => {
-    const moduleFixture = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const moduleFixture = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
     await app.init();
   });
 
-  afterAll(async () => { await app.close(); });
+  afterAll(async () => {
+    await app.close();
+  });
 
   // ===== AUTH =====
   describe('Auth', () => {
@@ -32,17 +36,11 @@ describe('Warehouse Management E2E', () => {
     });
 
     it('POST /auth/login - wrong password', async () => {
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({ email: 'admin@wms.vn', password: 'wrong' })
-        .expect(401);
+      await request(app.getHttpServer()).post('/api/v1/auth/login').send({ email: 'admin@wms.vn', password: 'wrong' }).expect(401);
     });
 
     it('POST /auth/login - unknown email', async () => {
-      await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({ email: 'nobody@wms.vn', password: '123456' })
-        .expect(401);
+      await request(app.getHttpServer()).post('/api/v1/auth/login').send({ email: 'nobody@wms.vn', password: '123456' }).expect(401);
     });
   });
 
@@ -55,10 +53,7 @@ describe('Warehouse Management E2E', () => {
     });
 
     it('GET /ingredients - list all', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/ingredients')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/ingredients').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data).toBeInstanceOf(Array);
       expect(res.body.meta.total).toBeGreaterThan(0);
     });
@@ -67,7 +62,13 @@ describe('Warehouse Management E2E', () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/ingredients')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Test NL E2E', unit: 'kg', category: 'Test', cost_per_unit: 10000, min_stock: 2 })
+        .send({
+          name: 'Test NL E2E',
+          unit: 'kg',
+          category: 'Test',
+          cost_per_unit: 10000,
+          min_stock: 2,
+        })
         .expect(201);
       expect(res.body.name).toBe('Test NL E2E');
       ingredientId = res.body.id;
@@ -77,7 +78,13 @@ describe('Warehouse Management E2E', () => {
       await request(app.getHttpServer())
         .post('/api/v1/ingredients')
         .set('Authorization', `Bearer ${token}`)
-        .send({ name: 'Test NL E2E', unit: 'kg', category: 'Test', cost_per_unit: 10000, min_stock: 2 })
+        .send({
+          name: 'Test NL E2E',
+          unit: 'kg',
+          category: 'Test',
+          cost_per_unit: 10000,
+          min_stock: 2,
+        })
         .expect(409);
     });
 
@@ -91,10 +98,7 @@ describe('Warehouse Management E2E', () => {
     });
 
     it('DELETE /ingredients/:id - delete', async () => {
-      await request(app.getHttpServer())
-        .delete(`/api/v1/ingredients/${ingredientId}`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      await request(app.getHttpServer()).delete(`/api/v1/ingredients/${ingredientId}`).set('Authorization', `Bearer ${token}`).expect(200);
     });
   });
 
@@ -103,10 +107,7 @@ describe('Warehouse Management E2E', () => {
     let supplierId: string;
 
     it('GET /suppliers - list', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/suppliers')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/suppliers').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
@@ -129,10 +130,7 @@ describe('Warehouse Management E2E', () => {
     });
 
     it('DELETE /suppliers/:id - delete', async () => {
-      await request(app.getHttpServer())
-        .delete(`/api/v1/suppliers/${supplierId}`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      await request(app.getHttpServer()).delete(`/api/v1/suppliers/${supplierId}`).set('Authorization', `Bearer ${token}`).expect(200);
     });
   });
 
@@ -153,7 +151,11 @@ describe('Warehouse Management E2E', () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/import-orders')
         .set('Authorization', `Bearer ${token}`)
-        .send({ supplier_id: supplierId, note: 'Test', items: [{ ingredient_id: ingredientId, quantity: 5, unit_price: 100000 }] })
+        .send({
+          supplier_id: supplierId,
+          note: 'Test',
+          items: [{ ingredient_id: ingredientId, quantity: 5, unit_price: 100000 }],
+        })
         .expect(201);
       expect(res.body.code).toMatch(/^PN-/);
       expect(res.body.status).toBe('PENDING');
@@ -161,10 +163,7 @@ describe('Warehouse Management E2E', () => {
     });
 
     it('GET /import-orders - list', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/import-orders')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/import-orders').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
@@ -197,7 +196,12 @@ describe('Warehouse Management E2E', () => {
       await request(app.getHttpServer())
         .post('/api/v1/stock-exports')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ingredient_id: ingredientId, quantity: 1, reason: 'DAMAGED', note: 'Test' })
+        .send({
+          ingredient_id: ingredientId,
+          quantity: 1,
+          reason: 'DAMAGED',
+          note: 'Test',
+        })
         .expect(201);
     });
 
@@ -205,15 +209,16 @@ describe('Warehouse Management E2E', () => {
       await request(app.getHttpServer())
         .post('/api/v1/stock-exports')
         .set('Authorization', `Bearer ${token}`)
-        .send({ ingredient_id: ingredientId, quantity: 99999, reason: 'DAMAGED' })
+        .send({
+          ingredient_id: ingredientId,
+          quantity: 99999,
+          reason: 'DAMAGED',
+        })
         .expect(400);
     });
 
     it('GET /stock-exports - list', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/stock-exports')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/stock-exports').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
   });
@@ -221,10 +226,7 @@ describe('Warehouse Management E2E', () => {
   // ===== RECIPES =====
   describe('Recipes', () => {
     it('GET /recipes - list', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/recipes')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/recipes').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data.length).toBeGreaterThan(0);
       expect(res.body.data[0].ingredients).toBeInstanceOf(Array);
     });
@@ -233,10 +235,7 @@ describe('Warehouse Management E2E', () => {
   // ===== USERS =====
   describe('Users', () => {
     it('GET /users - list', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/users')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/users').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data.length).toBeGreaterThanOrEqual(3);
       // Should not expose passwordHash
       expect(res.body.data[0].passwordHash).toBeUndefined();
@@ -245,20 +244,14 @@ describe('Warehouse Management E2E', () => {
     it('PUT /users/:id/toggle-active', async () => {
       const users = await request(app.getHttpServer()).get('/api/v1/users').set('Authorization', `Bearer ${token}`);
       const user = users.body.data.find((u: any) => u.email === 'bep@wms.vn');
-      await request(app.getHttpServer())
-        .put(`/api/v1/users/${user.id}/toggle-active`)
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      await request(app.getHttpServer()).put(`/api/v1/users/${user.id}/toggle-active`).set('Authorization', `Bearer ${token}`).expect(200);
     });
   });
 
   // ===== AUDIT LOGS =====
   describe('Audit Logs', () => {
     it('GET /audit-logs - list (empty for now, no interceptor)', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/v1/audit-logs')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
+      const res = await request(app.getHttpServer()).get('/api/v1/audit-logs').set('Authorization', `Bearer ${token}`).expect(200);
       expect(res.body.data).toBeInstanceOf(Array);
     });
   });
@@ -268,23 +261,16 @@ describe('Warehouse Management E2E', () => {
     let warehouseToken: string;
 
     beforeAll(async () => {
-      const res = await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({ email: 'kho@wms.vn', password: '123456' });
+      const res = await request(app.getHttpServer()).post('/api/v1/auth/login').send({ email: 'kho@wms.vn', password: '123456' });
       warehouseToken = res.body.access_token;
     });
 
     it('Warehouse staff can access ingredients', async () => {
-      await request(app.getHttpServer())
-        .get('/api/v1/ingredients')
-        .set('Authorization', `Bearer ${warehouseToken}`)
-        .expect(200);
+      await request(app.getHttpServer()).get('/api/v1/ingredients').set('Authorization', `Bearer ${warehouseToken}`).expect(200);
     });
 
     it('Kitchen staff can login', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/api/v1/auth/login')
-        .send({ email: 'bep@wms.vn', password: '123456' });
+      const res = await request(app.getHttpServer()).post('/api/v1/auth/login').send({ email: 'bep@wms.vn', password: '123456' });
       // May be inactive from toggle test, but login check is valid
       expect(res.status).toBeOneOf([201, 401]);
     });
@@ -295,7 +281,10 @@ describe('Warehouse Management E2E', () => {
 expect.extend({
   toBeOneOf(received, expected) {
     const pass = expected.includes(received);
-    return { pass, message: () => `expected ${received} to be one of ${expected}` };
+    return {
+      pass,
+      message: () => `expected ${received} to be one of ${expected}`,
+    };
   },
 });
 

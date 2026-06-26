@@ -25,7 +25,16 @@ const categories = [
 
 const units = UNIT_OPTIONS
 
-interface IngredientData { id: string; name: string; unit: string; category: string; costPerUnit?: string; cost_per_unit?: number; minStock?: string; min_stock?: number }
+interface IngredientData {
+  id: string
+  name: string
+  unit: string
+  category: string
+  costPerUnit?: string
+  cost_per_unit?: number
+  minStock?: string
+  min_stock?: number
+}
 
 interface Props {
   open: boolean
@@ -36,13 +45,28 @@ interface Props {
 }
 
 export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) })
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     if (open) {
       setSubmitError('')
-      reset(mode === 'edit' && data ? { name: data.name, unit: data.unit, category: data.category, cost_per_unit: Number(data.costPerUnit ?? data.cost_per_unit), min_stock: Number(data.minStock ?? data.min_stock) } : { name: '', unit: '', category: '', cost_per_unit: 0, min_stock: 0 })
+      reset(
+        mode === 'edit' && data
+          ? {
+              name: data.name,
+              unit: data.unit,
+              category: data.category,
+              cost_per_unit: Number(data.costPerUnit ?? data.cost_per_unit),
+              min_stock: Number(data.minStock ?? data.min_stock),
+            }
+          : { name: '', unit: '', category: '', cost_per_unit: 0, min_stock: 0 },
+      )
     }
   }, [open, mode, data, reset])
 
@@ -64,8 +88,18 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
       width={420}
       footer={
         <>
-          <button onClick={handleSubmit(onSubmit)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer">OK</button>
-          <button onClick={onClose} className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover">Cancel</button>
+          <button
+            onClick={handleSubmit(onSubmit)}
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+          >
+            OK
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+          >
+            Cancel
+          </button>
         </>
       }
     >
@@ -73,8 +107,18 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
         <div className="space-y-2.5">
           <WinInput label="Tên" {...register('name')} error={errors.name?.message} />
           <WinSelect label="Đơn vị" {...register('unit')} options={units} error={errors.unit?.message} />
-          <WinSelect label="Phân loại" {...register('category')} options={categories} error={errors.category?.message} />
-          <WinInput label="Giá/đơn vị" type="number" {...register('cost_per_unit')} error={errors.cost_per_unit?.message} />
+          <WinSelect
+            label="Phân loại"
+            {...register('category')}
+            options={categories}
+            error={errors.category?.message}
+          />
+          <WinInput
+            label="Giá/đơn vị"
+            type="number"
+            {...register('cost_per_unit')}
+            error={errors.cost_per_unit?.message}
+          />
           <WinInput label="Tồn kho min" type="number" {...register('min_stock')} error={errors.min_stock?.message} />
           {submitError && <p className="text-[11px] text-win-error font-semibold">⚠️ {submitError}</p>}
         </div>

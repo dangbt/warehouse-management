@@ -1,14 +1,14 @@
-@import "tailwindcss";
-@import "@wms/ui-winforms/styles";
+@import 'tailwindcss';
+@import '@wms/ui-winforms/styles';
 
 @theme {
   /* Mâm Vị brand overrides */
-  --color-win-active-title: #D4451A;
-  --color-win-menu: #FFF9F5;
-  --color-win-menu-hover: #FFF0E8;
-  --color-win-grid-selected: #FFE8DB;
-  --color-win-statusbar: #B8381A;
-  --color-win-input-focus: #D4451A;
+  --color-win-active-title: #d4451a;
+  --color-win-menu: #fff9f5;
+  --color-win-menu-hover: #fff0e8;
+  --color-win-grid-selected: #ffe8db;
+  --color-win-statusbar: #b8381a;
+  --color-win-input-focus: #d4451a;
 }
 
 * {
@@ -24,10 +24,18 @@ body {
 }
 
 @media (max-width: 768px) {
-  body { font-size: 13px; }
+  body {
+    font-size: 13px;
+  }
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }

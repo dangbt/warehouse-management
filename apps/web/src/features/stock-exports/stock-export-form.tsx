@@ -29,7 +29,12 @@ interface Props {
 }
 
 export function StockExportForm({ open, onClose, onSave }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) })
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
   const [submitError, setSubmitError] = useState('')
 
@@ -38,7 +43,12 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
       reset()
       setSubmitError('')
       api.get('/ingredients?limit=100').then((res) => {
-        setIngredients((res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({ value: i.id, label: `${i.name} (tồn: ${i.currentStock} ${i.unit})` })))
+        setIngredients(
+          (res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({
+            value: i.id,
+            label: `${i.name} (tồn: ${i.currentStock} ${i.unit})`,
+          })),
+        )
       })
     }
   }, [open, reset])
@@ -62,15 +72,36 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
       width={420}
       footer={
         <>
-          <button onClick={handleSubmit(onSubmit)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer">Xuất</button>
-          <button onClick={onClose} className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover">Huỷ</button>
+          <button
+            onClick={handleSubmit(onSubmit)}
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+          >
+            Xuất
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+          >
+            Huỷ
+          </button>
         </>
       }
     >
       <WinGroupBox title="Thông tin xuất kho">
         <div className="space-y-2.5">
-          <WinSelect label="Nguyên liệu" {...register('ingredient_id')} options={ingredients} error={errors.ingredient_id?.message} />
-          <WinInput label="Số lượng" type="number" step="0.01" {...register('quantity')} error={errors.quantity?.message} />
+          <WinSelect
+            label="Nguyên liệu"
+            {...register('ingredient_id')}
+            options={ingredients}
+            error={errors.ingredient_id?.message}
+          />
+          <WinInput
+            label="Số lượng"
+            type="number"
+            step="0.01"
+            {...register('quantity')}
+            error={errors.quantity?.message}
+          />
           <WinSelect label="Lý do" {...register('reason')} options={reasons} error={errors.reason?.message} />
           <WinInput label="Ghi chú" {...register('note')} />
           {submitError && <p className="text-[11px] text-win-error font-semibold">⚠️ {submitError}</p>}

@@ -39,7 +39,14 @@ describe('authStore', () => {
   })
 
   it('hasPermission checks permissions array for non-admin', () => {
-    const user = { id: '1', email: 'a@b.com', full_name: 'Test', roles: ['warehouse_staff'], permissions: ['ingredients:read', 'ingredients:create'], is_active: true }
+    const user = {
+      id: '1',
+      email: 'a@b.com',
+      full_name: 'Test',
+      roles: ['warehouse_staff'],
+      permissions: ['ingredients:read', 'ingredients:create'],
+      is_active: true,
+    }
     useAuthStore.getState().login(user, 'tok')
     expect(useAuthStore.getState().hasPermission('ingredients:read')).toBe(true)
     expect(useAuthStore.getState().hasPermission('users:create')).toBe(false)

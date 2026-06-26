@@ -9,7 +9,10 @@ export function AppNotFound() {
         <FileQuestion size={48} className="mx-auto text-win-text-secondary mb-3" />
         <h2 className="text-lg font-bold text-win-text mb-1">404 - Không tìm thấy</h2>
         <p className="text-xs text-win-text-secondary mb-3">Trang này không tồn tại trong hệ thống</p>
-        <button onClick={() => navigate({ to: '/dashboard' })} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm cursor-pointer">
+        <button
+          onClick={() => navigate({ to: '/dashboard' })}
+          className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm cursor-pointer"
+        >
           Về Dashboard
         </button>
       </div>

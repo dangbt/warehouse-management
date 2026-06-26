@@ -28,9 +28,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     CommonModule,
     ReportsModule,
   ],
-  providers: [
-    { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
-  ],
+  providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],
 })
 export class AppModule {}

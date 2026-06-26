@@ -5,14 +5,38 @@ import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
 import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from '@/data'
 
-interface IngredientRow { id: string; name: string; unit: string; currentStock: string; minStock: string; costPerUnit: string; category: string }
+interface IngredientRow {
+  id: string
+  name: string
+  unit: string
+  currentStock: string
+  minStock: string
+  costPerUnit: string
+  category: string
+}
 
 const columns: Column<IngredientRow>[] = [
   { key: 'name', header: 'Tên nguyên liệu', width: 180 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
-  { key: 'currentStock', header: 'Tồn kho', width: 80, align: 'right', render: (r) => <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>{r.currentStock}</span> },
+  {
+    key: 'currentStock',
+    header: 'Tồn kho',
+    width: 80,
+    align: 'right',
+    render: (r) => (
+      <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>
+        {r.currentStock}
+      </span>
+    ),
+  },
   { key: 'minStock', header: 'Min', width: 60, align: 'right' },
-  { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫` },
+  {
+    key: 'costPerUnit',
+    header: 'Giá/ĐV',
+    width: 100,
+    align: 'right',
+    render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫`,
+  },
   { key: 'category', header: 'Phân loại', width: 80, align: 'center' },
 ]
 
@@ -28,7 +52,13 @@ export function IngredientsPage() {
   const updateMutation = useUpdateIngredient()
   const deleteMutation = useDeleteIngredient()
 
-  const handleSave = async (formData: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) => {
+  const handleSave = async (formData: {
+    name: string
+    unit: string
+    category: string
+    cost_per_unit: number
+    min_stock: number
+  }) => {
     if (formMode === 'add') {
       await createMutation.mutateAsync(formData)
     } else if (selected) {
@@ -36,23 +66,79 @@ export function IngredientsPage() {
     }
   }
 
-  const handleDelete = () => { if (selected) { deleteMutation.mutate(selected.id); setSelected(null) } }
+  const handleDelete = () => {
+    if (selected) {
+      deleteMutation.mutate(selected.id)
+      setSelected(null)
+    }
+  }
 
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Thêm" onClick={() => { setFormMode('add'); setSelected(null); setFormOpen(true) }} />
-        <WinToolbar.Button icon={<Pencil size={14} />} label="Sửa" disabled={!selected} onClick={() => { setFormMode('edit'); setFormOpen(true) }} />
-        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button
+          icon={<Plus size={14} />}
+          label="Thêm"
+          onClick={() => {
+            setFormMode('add')
+            setSelected(null)
+            setFormOpen(true)
+          }}
+        />
+        <WinToolbar.Button
+          icon={<Pencil size={14} />}
+          label="Sửa"
+          disabled={!selected}
+          onClick={() => {
+            setFormMode('edit')
+            setFormOpen(true)
+          }}
+        />
+        <WinToolbar.Button
+          icon={<Trash2 size={14} />}
+          label="Xoá"
+          danger
+          disabled={!selected}
+          onClick={() => setConfirmDelete(true)}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={14} />} label="Export" />
       </WinToolbar>
 
-      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }} onPageChange={setPage} onRowClick={setSelected} onRowDoubleClick={(row) => { setSelected(row); setFormMode('edit'); setFormOpen(true) }} getRowClass={(r) => Number(r.currentStock) <= Number(r.minStock) ? '!text-win-error' : ''} />
+      <WinDataGrid
+        columns={columns}
+        data={res?.data ?? []}
+        loading={isLoading}
+        pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
+        onPageChange={setPage}
+        onRowClick={setSelected}
+        onRowDoubleClick={(row) => {
+          setSelected(row)
+          setFormMode('edit')
+          setFormOpen(true)
+        }}
+        getRowClass={(r) => (Number(r.currentStock) <= Number(r.minStock) ? '!text-win-error' : '')}
+      />
 
-      <IngredientForm open={formOpen} mode={formMode} data={selected as any} onClose={() => setFormOpen(false)} onSave={handleSave} />
-      <WinMessageBox type="question" title="Xác nhận" message={`Xoá "${selected?.name}"?`} open={confirmDelete} buttons="yes_no" onResult={(r) => { setConfirmDelete(false); if (r === 'yes') handleDelete() }} />
+      <IngredientForm
+        open={formOpen}
+        mode={formMode}
+        data={selected as any}
+        onClose={() => setFormOpen(false)}
+        onSave={handleSave}
+      />
+      <WinMessageBox
+        type="question"
+        title="Xác nhận"
+        message={`Xoá "${selected?.name}"?`}
+        open={confirmDelete}
+        buttons="yes_no"
+        onResult={(r) => {
+          setConfirmDelete(false)
+          if (r === 'yes') handleDelete()
+        }}
+      />
     </div>
   )
 }

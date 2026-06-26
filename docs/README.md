@@ -3,6 +3,7 @@
 Hệ thống quản lý xuất nhập kho nguyên liệu cho nhà hàng.
 
 ## Tính năng chính
+
 - Quản lý nguyên liệu, nhà cung cấp
 - Nhập/xuất kho với workflow phê duyệt
 - Công thức món ăn → tự động trừ kho khi có order
@@ -35,9 +36,11 @@ docs/
 ```
 
 ## Tech Stack
+
 - **Backend:** NestJS + TypeScript + Prisma + PostgreSQL
 - **Frontend:** React + @dangbt/pro-ui + Tailwind CSS v4
 - **Infra:** Redis, Bull Queue, Docker
 
 ## Getting Started
+
 > Coming soon - sau khi implement Phase 0

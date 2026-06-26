@@ -101,14 +101,14 @@ frontend/
 ```tsx
 // Cấu trúc layout chính
 <div className="h-screen flex flex-col">
-  <TitleBar />                    {/* 32px - App title */}
-  <MenuBar />                     {/* 28px - Menu items */}
-  <Toolbar />                     {/* 36px - Action buttons */}
+  <TitleBar /> {/* 32px - App title */}
+  <MenuBar /> {/* 28px - Menu items */}
+  <Toolbar /> {/* 36px - Action buttons */}
   <div className="flex flex-1 overflow-hidden">
-    <Sidebar />                   {/* 220px - TreeView */}
-    <ContentArea />               {/* flex-1 - Tabs + Content */}
+    <Sidebar /> {/* 220px - TreeView */}
+    <ContentArea /> {/* flex-1 - Tabs + Content */}
   </div>
-  <StatusBar />                   {/* 24px - Status info */}
+  <StatusBar /> {/* 24px - Status info */}
 </div>
 ```
 
@@ -116,60 +116,69 @@ frontend/
 
 ```tsx
 interface TreeNode {
-  id: string;
-  label: string;
-  icon: ReactNode;
-  children?: TreeNode[];
-  route?: string;
-  permission?: string;  // Ẩn nếu không có quyền
+  id: string
+  label: string
+  icon: ReactNode
+  children?: TreeNode[]
+  route?: string
+  permission?: string // Ẩn nếu không có quyền
 }
 
 const menuTree: TreeNode[] = [
   {
-    id: 'warehouse', label: '📦 Kho', children: [
+    id: 'warehouse',
+    label: '📦 Kho',
+    children: [
       { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients' },
       { id: 'imports', label: 'Nhập kho', route: '/import-orders' },
       { id: 'exports', label: 'Xuất kho', route: '/stock-exports' },
       { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers' },
-    ]
+    ],
   },
   {
-    id: 'kitchen', label: '🍳 Bếp', children: [
+    id: 'kitchen',
+    label: '🍳 Bếp',
+    children: [
       { id: 'recipes', label: 'Công thức', route: '/recipes' },
       { id: 'menu', label: 'Thực đơn', route: '/menu-items' },
-    ]
+    ],
   },
   {
-    id: 'reports', label: '📊 Báo cáo', route: '/reports'
+    id: 'reports',
+    label: '📊 Báo cáo',
+    route: '/reports',
   },
   {
-    id: 'admin', label: '⚙️ Quản trị', permission: 'users:read', children: [
+    id: 'admin',
+    label: '⚙️ Quản trị',
+    permission: 'users:read',
+    children: [
       { id: 'users', label: '👥 Users', route: '/users' },
       { id: 'roles', label: '🔑 Roles', route: '/roles' },
       { id: 'audit', label: '📋 Audit Logs', route: '/audit-logs' },
-    ]
+    ],
   },
-];
+]
 ```
 
 ### 2.3 WinDataGrid
 
 ```tsx
 interface WinDataGridProps<T> {
-  columns: ColumnDef<T>[];
-  data: T[];
-  loading?: boolean;
-  pagination?: { page: number; limit: number; total: number };
-  onPageChange?: (page: number) => void;
-  onRowClick?: (row: T) => void;
-  onRowDoubleClick?: (row: T) => void;  // Mở form edit
-  onContextMenu?: (row: T, e: MouseEvent) => void;
-  selectedRows?: T[];
-  onSelectionChange?: (rows: T[]) => void;
-  toolbar?: ReactNode;                   // Toolbar phía trên grid
-  alternatingRows?: boolean;             // Default: true
-  sortable?: boolean;
-  resizableColumns?: boolean;
+  columns: ColumnDef<T>[]
+  data: T[]
+  loading?: boolean
+  pagination?: { page: number; limit: number; total: number }
+  onPageChange?: (page: number) => void
+  onRowClick?: (row: T) => void
+  onRowDoubleClick?: (row: T) => void // Mở form edit
+  onContextMenu?: (row: T, e: MouseEvent) => void
+  selectedRows?: T[]
+  onSelectionChange?: (rows: T[]) => void
+  toolbar?: ReactNode // Toolbar phía trên grid
+  alternatingRows?: boolean // Default: true
+  sortable?: boolean
+  resizableColumns?: boolean
 }
 ```
 
@@ -177,13 +186,13 @@ interface WinDataGridProps<T> {
 
 ```tsx
 interface WinDialogProps {
-  title: string;
-  icon?: 'new' | 'edit' | 'info' | 'warning' | 'error';
-  open: boolean;
-  onClose: () => void;
-  width?: number;          // Default: 480
-  footer?: ReactNode;      // OK/Cancel buttons
-  children: ReactNode;
+  title: string
+  icon?: 'new' | 'edit' | 'info' | 'warning' | 'error'
+  open: boolean
+  onClose: () => void
+  width?: number // Default: 480
+  footer?: ReactNode // OK/Cancel buttons
+  children: ReactNode
 }
 ```
 
@@ -191,8 +200,8 @@ interface WinDialogProps {
 
 ```tsx
 interface WinGroupBoxProps {
-  title: string;
-  children: ReactNode;
+  title: string
+  children: ReactNode
 }
 // Render: border + title float trên border (giống GroupBox C#)
 ```
@@ -201,11 +210,11 @@ interface WinGroupBoxProps {
 
 ```tsx
 interface WinMessageBoxProps {
-  type: 'info' | 'warning' | 'error' | 'question';
-  title: string;
-  message: string;
-  buttons: 'ok' | 'ok_cancel' | 'yes_no' | 'yes_no_cancel';
-  onResult: (result: 'ok' | 'cancel' | 'yes' | 'no') => void;
+  type: 'info' | 'warning' | 'error' | 'question'
+  title: string
+  message: string
+  buttons: 'ok' | 'ok_cancel' | 'yes_no' | 'yes_no_cancel'
+  onResult: (result: 'ok' | 'cancel' | 'yes' | 'no') => void
 }
 ```
 
@@ -256,7 +265,7 @@ function IngredientsPage() {
         onSave={handleSave}
       />
     </div>
-  );
+  )
 }
 ```
 
@@ -264,17 +273,17 @@ function IngredientsPage() {
 
 ## 4. Keyboard Shortcuts
 
-| Shortcut | Action | Scope |
-|----------|--------|-------|
-| Ctrl+N | Thêm mới | Grid pages |
-| Ctrl+S | Lưu | Form dialogs |
-| Ctrl+F | Focus search | Global |
-| F5 | Refresh data | Grid pages |
-| Delete | Xoá selected | Grid pages |
-| Enter | Mở edit / Submit | Grid / Form |
-| Escape | Đóng dialog | Form dialogs |
-| Ctrl+E | Export | Grid pages |
-| Alt+← | Navigate back | Global |
+| Shortcut | Action           | Scope        |
+| -------- | ---------------- | ------------ |
+| Ctrl+N   | Thêm mới         | Grid pages   |
+| Ctrl+S   | Lưu              | Form dialogs |
+| Ctrl+F   | Focus search     | Global       |
+| F5       | Refresh data     | Grid pages   |
+| Delete   | Xoá selected     | Grid pages   |
+| Enter    | Mở edit / Submit | Grid / Form  |
+| Escape   | Đóng dialog      | Form dialogs |
+| Ctrl+E   | Export           | Grid pages   |
+| Alt+←    | Navigate back    | Global       |
 
 ---
 
@@ -296,17 +305,21 @@ React Query cho server state (data fetching, caching, sync).
 ```tsx
 const routes = [
   { path: '/login', element: <LoginPage />, public: true },
-  { path: '/', element: <AppLayout />, children: [
-    { path: 'dashboard', element: <DashboardPage /> },
-    { path: 'ingredients', element: <IngredientsPage />, permission: 'ingredients:read' },
-    { path: 'import-orders', element: <ImportOrdersPage />, permission: 'import_orders:read' },
-    { path: 'stock-exports', element: <StockExportsPage />, permission: 'stock_exports:read' },
-    { path: 'suppliers', element: <SuppliersPage />, permission: 'suppliers:read' },
-    { path: 'recipes', element: <RecipesPage />, permission: 'recipes:read' },
-    { path: 'users', element: <UsersPage />, permission: 'users:read' },
-    { path: 'roles', element: <RolesPage />, permission: 'roles:read' },
-    { path: 'audit-logs', element: <AuditLogsPage />, permission: 'audit_logs:read' },
-    { path: 'reports/*', element: <ReportsPage />, permission: 'reports:read' },
-  ]}
-];
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'ingredients', element: <IngredientsPage />, permission: 'ingredients:read' },
+      { path: 'import-orders', element: <ImportOrdersPage />, permission: 'import_orders:read' },
+      { path: 'stock-exports', element: <StockExportsPage />, permission: 'stock_exports:read' },
+      { path: 'suppliers', element: <SuppliersPage />, permission: 'suppliers:read' },
+      { path: 'recipes', element: <RecipesPage />, permission: 'recipes:read' },
+      { path: 'users', element: <UsersPage />, permission: 'users:read' },
+      { path: 'roles', element: <RolesPage />, permission: 'roles:read' },
+      { path: 'audit-logs', element: <AuditLogsPage />, permission: 'audit_logs:read' },
+      { path: 'reports/*', element: <ReportsPage />, permission: 'reports:read' },
+    ],
+  },
+]
 ```

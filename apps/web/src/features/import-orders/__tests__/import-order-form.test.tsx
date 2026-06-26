@@ -15,7 +15,9 @@ vi.mock('@/services/api', () => ({
 describe('ImportOrderForm', () => {
   const defaultProps = { open: true, onClose: vi.fn(), onSave: vi.fn() }
 
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('renders dialog with title when open', () => {
     render(<ImportOrderForm {...defaultProps} />)
@@ -50,7 +52,9 @@ describe('ImportOrderForm', () => {
 
   it('adds new item row when clicking Thêm dòng', async () => {
     render(<ImportOrderForm {...defaultProps} />)
-    await waitFor(() => { expect(screen.getByText('NCC A')).toBeInTheDocument() })
+    await waitFor(() => {
+      expect(screen.getByText('NCC A')).toBeInTheDocument()
+    })
     const rows = screen.getAllByRole('row')
     fireEvent.click(screen.getByText('Thêm dòng'))
     await waitFor(() => {
@@ -63,7 +67,9 @@ describe('ImportOrderForm', () => {
     const onClose = vi.fn()
     render(<ImportOrderForm open={true} onClose={onClose} onSave={onSave} />)
 
-    await waitFor(() => { expect(screen.getByText('NCC A')).toBeInTheDocument() })
+    await waitFor(() => {
+      expect(screen.getByText('NCC A')).toBeInTheDocument()
+    })
 
     // Select supplier
     const selects = screen.getAllByRole('combobox')
@@ -76,15 +82,21 @@ describe('ImportOrderForm', () => {
     fireEvent.change(numbers[1], { target: { value: '100000' } })
 
     fireEvent.click(screen.getByText('Lưu'))
-    await waitFor(() => { expect(onSave).toHaveBeenCalled() })
-    await waitFor(() => { expect(onClose).toHaveBeenCalled() })
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled()
+    })
   })
 
   it('shows error when onSave throws', async () => {
     const onSave = vi.fn().mockRejectedValue(new Error('Lỗi server'))
     render(<ImportOrderForm open={true} onClose={vi.fn()} onSave={onSave} />)
 
-    await waitFor(() => { expect(screen.getByText('NCC A')).toBeInTheDocument() })
+    await waitFor(() => {
+      expect(screen.getByText('NCC A')).toBeInTheDocument()
+    })
 
     const selects = screen.getAllByRole('combobox')
     fireEvent.change(selects[0], { target: { value: 's1' } })

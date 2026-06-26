@@ -9,7 +9,11 @@ describe('WinGroupBox', () => {
   })
 
   it('renders children content', () => {
-    render(<WinGroupBox title="Test"><span>Child</span></WinGroupBox>)
+    render(
+      <WinGroupBox title="Test">
+        <span>Child</span>
+      </WinGroupBox>,
+    )
     expect(screen.getByText('Child')).toBeInTheDocument()
   })
 

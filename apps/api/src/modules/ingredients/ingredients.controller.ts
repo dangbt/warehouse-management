@@ -10,19 +10,47 @@ export class IngredientsController {
 
   @Get()
   @RequirePermissions('ingredients:read')
-  findAll(@Query() query: { page?: string; limit?: string; category?: string; low_stock?: string; search?: string }) {
+  findAll(
+    @Query()
+    query: {
+      page?: string;
+      limit?: string;
+      category?: string;
+      low_stock?: string;
+      search?: string;
+    },
+  ) {
     return this.svc.findAll(query);
   }
 
   @Post()
   @RequirePermissions('ingredients:create')
-  create(@Body() body: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) {
+  create(
+    @Body()
+    body: {
+      name: string;
+      unit: string;
+      category: string;
+      cost_per_unit: number;
+      min_stock: number;
+    },
+  ) {
     return this.svc.create(body);
   }
 
   @Put(':id')
   @RequirePermissions('ingredients:update')
-  update(@Param('id') id: string, @Body() body: { name?: string; unit?: string; category?: string; cost_per_unit?: number; min_stock?: number }) {
+  update(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      name?: string;
+      unit?: string;
+      category?: string;
+      cost_per_unit?: number;
+      min_stock?: number;
+    },
+  ) {
     return this.svc.update(id, body);
   }
 

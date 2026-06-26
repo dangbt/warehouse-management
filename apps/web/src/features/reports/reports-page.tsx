@@ -33,14 +33,27 @@ export function ReportsPage() {
         {summary && summary.lowStock.length > 0 && (
           <WinGroupBox title="⚠️ Cảnh báo tồn kho thấp">
             <table className="w-full text-[11px]">
-              <thead><tr className="bg-win-grid-header"><th className="text-left p-1">Nguyên liệu</th><th className="p-1">Tồn</th><th className="p-1">Min</th><th className="p-1">Thiếu</th></tr></thead>
+              <thead>
+                <tr className="bg-win-grid-header">
+                  <th className="text-left p-1">Nguyên liệu</th>
+                  <th className="p-1">Tồn</th>
+                  <th className="p-1">Min</th>
+                  <th className="p-1">Thiếu</th>
+                </tr>
+              </thead>
               <tbody>
                 {summary.lowStock.map((r) => (
                   <tr key={r.name} className="border-b border-win-grid-border text-win-error">
                     <td className="p-1">{r.name}</td>
-                    <td className="p-1 text-center">{r.currentStock} {r.unit}</td>
-                    <td className="p-1 text-center">{r.minStock} {r.unit}</td>
-                    <td className="p-1 text-center font-bold">{(Number(r.minStock) - Number(r.currentStock)).toFixed(1)} {r.unit}</td>
+                    <td className="p-1 text-center">
+                      {r.currentStock} {r.unit}
+                    </td>
+                    <td className="p-1 text-center">
+                      {r.minStock} {r.unit}
+                    </td>
+                    <td className="p-1 text-center font-bold">
+                      {(Number(r.minStock) - Number(r.currentStock)).toFixed(1)} {r.unit}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -50,7 +63,15 @@ export function ReportsPage() {
 
         <WinGroupBox title="📈 Biến động kho gần đây">
           <table className="w-full text-[11px]">
-            <thead><tr className="bg-win-grid-header"><th className="text-left p-1">Thời gian</th><th className="text-left p-1">NL</th><th className="text-center p-1">Loại</th><th className="text-right p-1">SL</th><th className="text-left p-1">Người</th></tr></thead>
+            <thead>
+              <tr className="bg-win-grid-header">
+                <th className="text-left p-1">Thời gian</th>
+                <th className="text-left p-1">NL</th>
+                <th className="text-center p-1">Loại</th>
+                <th className="text-right p-1">SL</th>
+                <th className="text-left p-1">Người</th>
+              </tr>
+            </thead>
             <tbody>
               {(movements ?? []).map((t: any) => {
                 const typeMap: Record<string, { label: string; color: string }> = {
@@ -64,13 +85,26 @@ export function ReportsPage() {
                   <tr key={t.id} className="border-b border-win-grid-border">
                     <td className="p-1">{formatDateTime(t.createdAt)}</td>
                     <td className="p-1">{t.ingredient.name}</td>
-                    <td className="p-1 text-center"><span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${typeInfo.color}`}>{typeInfo.label}</span></td>
-                    <td className="p-1 text-right font-mono">{Number(t.quantity) > 0 ? '+' : ''}{t.quantity} {t.ingredient.unit}</td>
+                    <td className="p-1 text-center">
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${typeInfo.color}`}>
+                        {typeInfo.label}
+                      </span>
+                    </td>
+                    <td className="p-1 text-right font-mono">
+                      {Number(t.quantity) > 0 ? '+' : ''}
+                      {t.quantity} {t.ingredient.unit}
+                    </td>
                     <td className="p-1">{t.createdBy.fullName}</td>
                   </tr>
                 )
               })}
-              {!movements?.length && <tr><td colSpan={5} className="p-2 text-center text-win-text-secondary">Chưa có biến động</td></tr>}
+              {!movements?.length && (
+                <tr>
+                  <td colSpan={5} className="p-2 text-center text-win-text-secondary">
+                    Chưa có biến động
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </WinGroupBox>

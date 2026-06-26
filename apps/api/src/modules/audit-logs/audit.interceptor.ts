@@ -35,18 +35,20 @@ export class AuditInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap((response) => {
         // Fire and forget — don't block response
-        this.prisma.auditLog.create({
-          data: {
-            userId,
-            action,
-            resource,
-            resourceId: resourceId || response?.id || null,
-            newValues: method === 'DELETE' ? null : (response || null),
-            ipAddress: ip,
-            userAgent,
-            metadata: method !== 'GET' ? req.body : null,
-          },
-        }).catch(() => {}); // Silently fail — audit should not break app
+        this.prisma.auditLog
+          .create({
+            data: {
+              userId,
+              action,
+              resource,
+              resourceId: resourceId || response?.id || null,
+              newValues: method === 'DELETE' ? null : response || null,
+              ipAddress: ip,
+              userAgent,
+              metadata: method !== 'GET' ? req.body : null,
+            },
+          })
+          .catch(() => {}); // Silently fail — audit should not break app
       }),
     );
   }

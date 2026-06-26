@@ -23,13 +23,22 @@ interface Props {
 }
 
 export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) })
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     if (open) {
       setSubmitError('')
-      reset(mode === 'edit' && data ? { name: data.name, phone: data.phone, address: data.address, note: data.note ?? '' } : { name: '', phone: '', address: '', note: '' })
+      reset(
+        mode === 'edit' && data
+          ? { name: data.name, phone: data.phone, address: data.address, note: data.note ?? '' }
+          : { name: '', phone: '', address: '', note: '' },
+      )
     }
   }, [open, mode, data, reset])
 
@@ -51,8 +60,18 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
       width={440}
       footer={
         <>
-          <button onClick={handleSubmit(onSubmit)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer">OK</button>
-          <button onClick={onClose} className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover">Cancel</button>
+          <button
+            onClick={handleSubmit(onSubmit)}
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+          >
+            OK
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+          >
+            Cancel
+          </button>
         </>
       }
     >

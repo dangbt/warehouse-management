@@ -21,7 +21,9 @@ vi.mock('@/stores/auth.store', () => ({
 }))
 
 describe('LoginPage', () => {
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('renders login form', () => {
     render(<LoginPage />)
@@ -50,7 +52,10 @@ describe('LoginPage', () => {
 
   it('calls api.post on valid submit', async () => {
     const { api } = await import('@/services/api')
-    vi.mocked(api.post).mockResolvedValue({ access_token: 'tok', user: { id: '1', email: 'a@b.com', full_name: 'A', roles: ['admin'], permissions: [], is_active: true } })
+    vi.mocked(api.post).mockResolvedValue({
+      access_token: 'tok',
+      user: { id: '1', email: 'a@b.com', full_name: 'A', roles: ['admin'], permissions: [], is_active: true },
+    })
 
     render(<LoginPage />)
     const inputs = screen.getAllByRole('textbox')

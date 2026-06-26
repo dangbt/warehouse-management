@@ -16,7 +16,20 @@ export class ImportOrdersController {
 
   @Post()
   @RequirePermissions('import_orders:create')
-  create(@Req() req, @Body() body: { supplier_id: string; note?: string; items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string }[] }) {
+  create(
+    @Req() req,
+    @Body()
+    body: {
+      supplier_id: string;
+      note?: string;
+      items: {
+        ingredient_id: string;
+        quantity: number;
+        unit_price: number;
+        expiry_date?: string;
+      }[];
+    },
+  ) {
     return this.svc.create(req.user.id, body);
   }
 

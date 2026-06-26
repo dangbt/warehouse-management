@@ -6,15 +6,40 @@ import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate } from '@wms/shared'
 
-interface ImportOrder { id: string; code: string; supplier: { name: string }; totalAmount: string; status: string; createdAt: string }
+interface ImportOrder {
+  id: string
+  code: string
+  supplier: { name: string }
+  totalAmount: string
+  status: string
+  createdAt: string
+}
 
-const statusColors: Record<string, string> = { PENDING: 'bg-yellow-100 text-yellow-800', COMPLETED: 'bg-green-100 text-green-800', REJECTED: 'bg-red-100 text-red-800' }
+const statusColors: Record<string, string> = {
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  COMPLETED: 'bg-green-100 text-green-800',
+  REJECTED: 'bg-red-100 text-red-800',
+}
 
 const columns: Column<ImportOrder>[] = [
   { key: 'code', header: 'Mã phiếu', width: 170 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier?.name },
-  { key: 'totalAmount', header: 'Tổng tiền', width: 120, align: 'right', render: (r) => `${Number(r.totalAmount).toLocaleString()}₫` },
-  { key: 'status', header: 'Trạng thái', width: 100, align: 'center', render: (r) => <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] || ''}`}>{r.status}</span> },
+  {
+    key: 'totalAmount',
+    header: 'Tổng tiền',
+    width: 120,
+    align: 'right',
+    render: (r) => `${Number(r.totalAmount).toLocaleString()}₫`,
+  },
+  {
+    key: 'status',
+    header: 'Trạng thái',
+    width: 100,
+    align: 'center',
+    render: (r) => (
+      <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] || ''}`}>{r.status}</span>
+    ),
+  },
   { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },
 ]
 
@@ -40,16 +65,51 @@ export function ImportOrdersPage() {
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<Check size={14} />} label="Duyệt" disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('approve')} />
-        <WinToolbar.Button icon={<X size={14} />} label="Từ chối" danger disabled={selected?.status !== 'PENDING'} onClick={() => setConfirmAction('reject')} />
+        <WinToolbar.Button
+          icon={<Check size={14} />}
+          label="Duyệt"
+          disabled={selected?.status !== 'PENDING'}
+          onClick={() => setConfirmAction('approve')}
+        />
+        <WinToolbar.Button
+          icon={<X size={14} />}
+          label="Từ chối"
+          danger
+          disabled={selected?.status !== 'PENDING'}
+          onClick={() => setConfirmAction('reject')}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
-      <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={setSelected} />
+      <WinDataGrid
+        columns={columns}
+        data={res?.data ?? []}
+        loading={isLoading}
+        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        onRowClick={setSelected}
+        onRowDoubleClick={setSelected}
+      />
 
-      <ImportOrderForm open={formOpen} onClose={() => { setFormOpen(false); refetch() }} onSave={(data) => createMutation.mutateAsync(data)} />
-      <WinMessageBox type="question" title="Xác nhận" message={confirmAction === 'approve' ? `Duyệt phiếu ${selected?.code}?` : `Từ chối phiếu ${selected?.code}?`} open={!!confirmAction} buttons="yes_no" onResult={(r) => { if (r === 'yes' && confirmAction) handleAction(confirmAction); setConfirmAction(null) }} />
+      <ImportOrderForm
+        open={formOpen}
+        onClose={() => {
+          setFormOpen(false)
+          refetch()
+        }}
+        onSave={(data) => createMutation.mutateAsync(data)}
+      />
+      <WinMessageBox
+        type="question"
+        title="Xác nhận"
+        message={confirmAction === 'approve' ? `Duyệt phiếu ${selected?.code}?` : `Từ chối phiếu ${selected?.code}?`}
+        open={!!confirmAction}
+        buttons="yes_no"
+        onResult={(r) => {
+          if (r === 'yes' && confirmAction) handleAction(confirmAction)
+          setConfirmAction(null)
+        }}
+      />
     </div>
   )
 }

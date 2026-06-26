@@ -2,10 +2,10 @@
 
 ## Hệ Thống Quản Lý Xuất Nhập Kho Nguyên Liệu Nhà Hàng
 
-| Thông tin | Chi tiết |
-|-----------|----------|
-| Phiên bản | 1.0 |
-| Ngày tạo | 2026-06-25 |
+| Thông tin | Chi tiết   |
+| --------- | ---------- |
+| Phiên bản | 1.0        |
+| Ngày tạo  | 2026-06-25 |
 
 ---
 
@@ -41,6 +41,7 @@
 ```
 
 ### 1.2 Lý do chọn Modular Monolith
+
 - Dự án vừa phải, team nhỏ
 - Dễ deploy, debug
 - Vẫn tách module rõ ràng, dễ tách microservice sau nếu cần
@@ -49,25 +50,26 @@
 
 ## 2. Tech Stack Chi Tiết
 
-| Component | Technology | Lý do |
-|-----------|-----------|-------|
-| Backend Framework | NestJS | Modular, TypeScript, DI |
-| Language | TypeScript | Type safety |
-| Database | PostgreSQL | JSONB cho audit, reliable |
-| ORM | Prisma | Type-safe queries, migrations |
-| Cache | Redis | Session, stock cache |
-| Queue | Bull + Redis | Async stock deduct |
-| Auth | JWT (Passport) | Stateless, scalable |
-| Frontend | React + Vite | Fast, modern |
-| UI Library | @dangbt/pro-ui | Consistent UI |
-| CSS | Tailwind CSS v4 | Utility-first |
-| API Docs | Swagger/OpenAPI | Auto-generated |
+| Component         | Technology      | Lý do                         |
+| ----------------- | --------------- | ----------------------------- |
+| Backend Framework | NestJS          | Modular, TypeScript, DI       |
+| Language          | TypeScript      | Type safety                   |
+| Database          | PostgreSQL      | JSONB cho audit, reliable     |
+| ORM               | Prisma          | Type-safe queries, migrations |
+| Cache             | Redis           | Session, stock cache          |
+| Queue             | Bull + Redis    | Async stock deduct            |
+| Auth              | JWT (Passport)  | Stateless, scalable           |
+| Frontend          | React + Vite    | Fast, modern                  |
+| UI Library        | @dangbt/pro-ui  | Consistent UI                 |
+| CSS               | Tailwind CSS v4 | Utility-first                 |
+| API Docs          | Swagger/OpenAPI | Auto-generated                |
 
 ---
 
 ## 3. Module Design
 
 ### 3.1 Auth Module
+
 ```
 auth/
 ├── auth.controller.ts      # login, logout, refresh
@@ -86,6 +88,7 @@ auth/
 ```
 
 ### 3.2 Audit Module
+
 ```
 audit/
 ├── audit.controller.ts     # query logs
@@ -95,6 +98,7 @@ audit/
 ```
 
 **Interceptor hoạt động:**
+
 - Chạy trước + sau mỗi request
 - Snapshot data trước khi thay đổi (old_values)
 - Capture response (new_values)
@@ -153,20 +157,21 @@ users ──┬── user_roles ──── roles ──── role_permission
 
 ### 4.2 Indexing Strategy
 
-| Table | Index | Lý do |
-|-------|-------|-------|
-| ingredients | (category, name) | Filter + search |
-| stock_transactions | (ingredient_id, created_at) | History query |
-| stock_transactions | (reference_id, type) | Lookup by order |
-| audit_logs | (user_id, created_at) | User activity |
-| audit_logs | (resource, resource_id) | Resource history |
-| import_orders | (status, created_at) | Pending list |
+| Table              | Index                       | Lý do            |
+| ------------------ | --------------------------- | ---------------- |
+| ingredients        | (category, name)            | Filter + search  |
+| stock_transactions | (ingredient_id, created_at) | History query    |
+| stock_transactions | (reference_id, type)        | Lookup by order  |
+| audit_logs         | (user_id, created_at)       | User activity    |
+| audit_logs         | (resource, resource_id)     | Resource history |
+| import_orders      | (status, created_at)        | Pending list     |
 
 ---
 
 ## 5. API Design Conventions
 
 ### 5.1 URL Pattern
+
 ```
 GET    /api/v1/{resource}          # List (paginated)
 POST   /api/v1/{resource}          # Create
@@ -177,6 +182,7 @@ PUT    /api/v1/{resource}/:id/{action}  # Custom action (approve, cancel)
 ```
 
 ### 5.2 Response Format
+
 ```json
 {
   "success": true,
@@ -190,6 +196,7 @@ PUT    /api/v1/{resource}/:id/{action}  # Custom action (approve, cancel)
 ```
 
 ### 5.3 Error Format
+
 ```json
 {
   "success": false,
@@ -206,6 +213,7 @@ PUT    /api/v1/{resource}/:id/{action}  # Custom action (approve, cancel)
 ## 6. Security Design
 
 ### 6.1 Authentication Flow
+
 ```
 Login → Access Token (15min) + Refresh Token (7 days)
      → Mỗi request gửi Access Token trong Authorization header
@@ -214,6 +222,7 @@ Login → Access Token (15min) + Refresh Token (7 days)
 ```
 
 ### 6.2 Authorization Flow
+
 ```
 Request → JwtAuthGuard (verify token)
        → RolesGuard (check user roles)
@@ -226,25 +235,27 @@ Request → JwtAuthGuard (verify token)
 ## 7. Deployment
 
 ### 7.1 Environments
-| Env | Mô tả |
-|-----|--------|
-| Development | Local, Docker Compose |
-| Staging | Test before production |
-| Production | Live system |
+
+| Env         | Mô tả                  |
+| ----------- | ---------------------- |
+| Development | Local, Docker Compose  |
+| Staging     | Test before production |
+| Production  | Live system            |
 
 ### 7.2 Docker Compose (Development)
+
 ```yaml
 services:
   api:
     build: ./backend
-    ports: ["3000:3000"]
+    ports: ['3000:3000']
   frontend:
     build: ./frontend
-    ports: ["5173:5173"]
+    ports: ['5173:5173']
   postgres:
     image: postgres:16
-    ports: ["5432:5432"]
+    ports: ['5432:5432']
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    ports: ['6379:6379']
 ```

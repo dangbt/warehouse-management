@@ -15,7 +15,10 @@ interface Ingredient {
   createdAt: string
 }
 
-interface ListResponse { data: Ingredient[]; meta: { page: number; limit: number; total: number } }
+interface ListResponse {
+  data: Ingredient[]
+  meta: { page: number; limit: number; total: number }
+}
 
 export function useIngredients(params?: { page?: number; category?: string; search?: string }) {
   const query = new URLSearchParams()
@@ -29,7 +32,8 @@ export function useIngredients(params?: { page?: number; category?: string; sear
 
 export function useCreateIngredient() {
   return useMutation({
-    mutationFn: (data: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) => api.post('/ingredients', data),
+    mutationFn: (data: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) =>
+      api.post('/ingredients', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
         if (!old) return old
@@ -37,21 +41,35 @@ export function useCreateIngredient() {
       })
       useToastStore.getState().success('Thêm nguyên liệu thành công')
     },
-    onError: (e: Error) => { useToastStore.getState().error(e.message) },
+    onError: (e: Error) => {
+      useToastStore.getState().error(e.message)
+    },
   })
 }
 
 export function useUpdateIngredient() {
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; name?: string; unit?: string; category?: string; cost_per_unit?: number; min_stock?: number }) => api.put(`/ingredients/${id}`, data),
+    mutationFn: ({
+      id,
+      ...data
+    }: {
+      id: string
+      name?: string
+      unit?: string
+      category?: string
+      cost_per_unit?: number
+      min_stock?: number
+    }) => api.put(`/ingredients/${id}`, data),
     onSuccess: (updated) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
         if (!old) return old
-        return { ...old, data: old.data.map((i) => i.id === updated.id ? updated : i) }
+        return { ...old, data: old.data.map((i) => (i.id === updated.id ? updated : i)) }
       })
       useToastStore.getState().success('Cập nhật thành công')
     },
-    onError: (e: Error) => { useToastStore.getState().error(e.message) },
+    onError: (e: Error) => {
+      useToastStore.getState().error(e.message)
+    },
   })
 }
 
@@ -65,6 +83,8 @@ export function useDeleteIngredient() {
       })
       useToastStore.getState().success('Đã xoá nguyên liệu')
     },
-    onError: (e: Error) => { useToastStore.getState().error(e.message) },
+    onError: (e: Error) => {
+      useToastStore.getState().error(e.message)
+    },
   })
 }

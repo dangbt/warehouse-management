@@ -184,6 +184,7 @@
 ## 7. Notification System
 
 ### In-App Notifications (như system tray)
+
 ```
 ┌─────────────────────────────────────────────┐
 │ 🔔 Thông báo (3)                        [X] │

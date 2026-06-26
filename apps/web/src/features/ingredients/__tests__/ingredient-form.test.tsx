@@ -14,12 +14,26 @@ describe('IngredientForm', () => {
   })
 
   it('shows edit title in edit mode', () => {
-    render(<IngredientForm open={true} mode="edit" data={{ id: '1', name: 'Test', unit: 'kg', category: 'Thịt', cost_per_unit: 100, min_stock: 5 }} onClose={() => {}} />)
+    render(
+      <IngredientForm
+        open={true}
+        mode="edit"
+        data={{ id: '1', name: 'Test', unit: 'kg', category: 'Thịt', cost_per_unit: 100, min_stock: 5 }}
+        onClose={() => {}}
+      />,
+    )
     expect(screen.getByText('✏️ Sửa Nguyên Liệu')).toBeInTheDocument()
   })
 
   it('pre-fills data in edit mode', () => {
-    render(<IngredientForm open={true} mode="edit" data={{ id: '1', name: 'Thịt bò', unit: 'kg', category: 'Thịt', cost_per_unit: 450000, min_stock: 5 }} onClose={() => {}} />)
+    render(
+      <IngredientForm
+        open={true}
+        mode="edit"
+        data={{ id: '1', name: 'Thịt bò', unit: 'kg', category: 'Thịt', cost_per_unit: 450000, min_stock: 5 }}
+        onClose={() => {}}
+      />,
+    )
     expect(screen.getByDisplayValue('Thịt bò')).toBeInTheDocument()
     expect(screen.getByDisplayValue('kg')).toBeInTheDocument()
   })

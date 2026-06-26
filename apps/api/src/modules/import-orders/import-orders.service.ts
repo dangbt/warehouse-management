@@ -6,16 +6,35 @@ export class ImportOrdersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(q: { page?: string; limit?: string; status?: string }) {
-    const page = +(q.page || 1), limit = +(q.limit || 20);
+    const page = +(q.page || 1),
+      limit = +(q.limit || 20);
     const where: any = q.status ? { status: q.status } : {};
     const [data, total] = await Promise.all([
-      this.prisma.importOrder.findMany({ where, skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' }, include: { supplier: true, items: { include: { ingredient: true } } } }),
+      this.prisma.importOrder.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: { supplier: true, items: { include: { ingredient: true } } },
+      }),
       this.prisma.importOrder.count({ where }),
     ]);
     return { data, meta: { page, limit, total } };
   }
 
-  async create(userId: string, body: { supplier_id: string; note?: string; items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string }[] }) {
+  async create(
+    userId: string,
+    body: {
+      supplier_id: string;
+      note?: string;
+      items: {
+        ingredient_id: string;
+        quantity: number;
+        unit_price: number;
+        expiry_date?: string;
+      }[];
+    },
+  ) {
     if (!body.supplier_id || !body.items?.length) throw new BadRequestException('Thiếu nhà cung cấp hoặc danh sách hàng');
     for (const item of body.items) {
       if (!item.ingredient_id || item.quantity <= 0 || item.unit_price < 0) throw new BadRequestException('Dữ liệu item không hợp lệ');
@@ -47,14 +66,32 @@ export class ImportOrdersService {
 
   async approve(id: string, approvedById: string) {
     return this.prisma.$transaction(async (tx) => {
-      const order = await tx.importOrder.findUnique({ where: { id }, include: { items: true } });
+      const order = await tx.importOrder.findUnique({
+        where: { id },
+        include: { items: true },
+      });
       if (!order || order.status !== 'PENDING') throw new BadRequestException('Chỉ duyệt phiếu PENDING');
 
-      await tx.importOrder.update({ where: { id }, data: { status: 'COMPLETED', approvedById } });
+      await tx.importOrder.update({
+        where: { id },
+        data: { status: 'COMPLETED', approvedById },
+      });
       for (const item of order.items) {
-        await tx.ingredient.update({ where: { id: item.ingredientId }, data: { currentStock: { increment: item.quantity } } });
+        await tx.ingredient.update({
+          where: { id: item.ingredientId },
+          data: { currentStock: { increment: item.quantity } },
+        });
         await tx.stockTransaction.create({
-          data: { ingredientId: item.ingredientId, type: 'IMPORT', quantity: item.quantity, unitPrice: item.unitPrice, totalPrice: item.totalPrice, referenceId: order.id, createdById: approvedById, note: `Nhập kho: ${order.code}` },
+          data: {
+            ingredientId: item.ingredientId,
+            type: 'IMPORT',
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            referenceId: order.id,
+            createdById: approvedById,
+            note: `Nhập kho: ${order.code}`,
+          },
         });
       }
       return { message: 'Đã duyệt phiếu nhập' };
@@ -64,7 +101,10 @@ export class ImportOrdersService {
   async reject(id: string, reason?: string) {
     const order = await this.prisma.importOrder.findUnique({ where: { id } });
     if (!order || order.status !== 'PENDING') throw new BadRequestException('Chỉ từ chối phiếu PENDING');
-    await this.prisma.importOrder.update({ where: { id }, data: { status: 'REJECTED', note: reason || order.note } });
+    await this.prisma.importOrder.update({
+      where: { id },
+      data: { status: 'REJECTED', note: reason || order.note },
+    });
     return { message: 'Đã từ chối phiếu nhập' };
   }
 }
