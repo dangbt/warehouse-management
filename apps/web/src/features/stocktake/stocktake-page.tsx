@@ -6,15 +6,15 @@ import { useStocktakeSessions, useCreateStocktake } from '@/data'
 import { formatDateTime } from '@wms/shared'
 import type { StocktakeSession } from '@/data/use-stocktake'
 
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT: 'Đang kiểm',
-  COMPLETED: 'Hoàn thành',
+const STATUS_LABEL: Record<string, { text: string; color: string }> = {
+  DRAFT: { text: 'Đang kiểm', color: 'bg-yellow-100 text-yellow-800' },
+  COMPLETED: { text: 'Hoàn thành', color: 'bg-green-100 text-green-800' },
 }
 
 const columns: Column<StocktakeSession>[] = [
   { key: 'code', header: 'Mã phiên', width: 140 },
   { key: 'createdAt', header: 'Ngày tạo', width: 150, render: (r) => formatDateTime(r.createdAt) },
-  { key: 'status', header: 'Trạng thái', width: 100, align: 'center', render: (r) => STATUS_LABEL[r.status] ?? r.status },
+  { key: 'status', header: 'Trạng thái', width: 100, align: 'center', render: (r) => { const s = STATUS_LABEL[r.status]; return <span className={`px-2 py-0.5 text-[10px] rounded ${s?.color ?? ''}`}>{s?.text ?? r.status}</span> } },
   { key: '_count', header: 'Số NL', width: 80, align: 'right', render: (r) => String(r._count?.items ?? 0) },
 ]
 
