@@ -4,7 +4,7 @@ import { QUERY_KEYS } from './query-keys'
 
 export interface VarianceItem {
   ingredientId: string
-  ingredientName: string
+  name: string
   unit: string
   theoreticalUsage: number
   actualUsage: number

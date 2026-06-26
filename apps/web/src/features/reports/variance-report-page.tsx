@@ -6,17 +6,19 @@ import { useConsumptionVariance } from '@/data'
 import type { VarianceItem } from '@/data/use-variance'
 
 const columns: Column<VarianceItem>[] = [
-  { key: 'ingredientName', header: 'Nguyên liệu', width: 160 },
+  { key: 'name', header: 'Nguyên liệu', width: 160 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
-  { key: 'theoreticalUsage', header: 'Lý thuyết', width: 100, align: 'right', render: (r) => r.theoreticalUsage.toLocaleString() },
-  { key: 'actualUsage', header: 'Thực tế', width: 100, align: 'right', render: (r) => r.actualUsage.toLocaleString() },
+  { key: 'theoreticalUsage', header: 'Lý thuyết', width: 100, align: 'right', render: (r) => (r.theoreticalUsage ?? 0).toLocaleString() },
+  { key: 'actualUsage', header: 'Thực tế', width: 100, align: 'right', render: (r) => (r.actualUsage ?? 0).toLocaleString() },
   { key: 'variance', header: 'Chênh lệch', width: 100, align: 'right', render: (r) => {
-    const cls = r.variance > 0 ? 'text-win-error' : r.variance < 0 ? 'text-win-success' : ''
-    return <span className={cls}>{r.variance > 0 ? `+${r.variance.toLocaleString()}` : r.variance.toLocaleString()}</span>
+    const v = r.variance ?? 0
+    const cls = v > 0 ? 'text-win-error' : v < 0 ? 'text-green-700' : ''
+    return <span className={cls}>{v > 0 ? `+${v.toLocaleString()}` : v.toLocaleString()}</span>
   }},
   { key: 'variancePercent', header: '% Lệch', width: 80, align: 'right', render: (r) => {
-    const cls = Math.abs(r.variancePercent) > 10 ? 'text-win-error font-bold' : ''
-    return <span className={cls}>{r.variancePercent.toFixed(1)}%</span>
+    const p = r.variancePercent ?? 0
+    const cls = Math.abs(p) > 10 ? 'text-win-error font-bold' : ''
+    return <span className={cls}>{p.toFixed(1)}%</span>
   }},
 ]
 
@@ -69,7 +71,7 @@ export function VarianceReportPage() {
         columns={columns}
         data={data ?? []}
         loading={isLoading}
-        getRowClass={(r) => (Math.abs(r.variancePercent) > 10 ? '!text-win-error' : '')}
+        getRowClass={(r) => (Math.abs(r.variancePercent ?? 0) > 10 ? '!text-win-error' : '')}
         storageKey="variance-report"
       />
     </div>
