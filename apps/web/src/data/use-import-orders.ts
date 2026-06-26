@@ -31,6 +31,7 @@ export function useCreateImportOrder() {
     mutationFn: (data: {
       supplier_id: string
       note?: string
+      paid?: boolean
       items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string }[]
     }) => api.post('/import-orders', data),
     onSuccess: (newItem) => {

@@ -181,8 +181,18 @@ const batchColumns: Column<Batch>[] = [
   { key: 'batchCode', header: 'Mã lô', width: 120 },
   { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫` },
   { key: 'quantity', header: 'Số lượng', width: 80, align: 'right' },
-  { key: 'expiryDate', header: 'HSD', width: 100, render: (r) => r.expiryDate ? formatDate(r.expiryDate) : '-' },
-  { key: 'status', header: 'Trạng thái', width: 80, align: 'center' },
+  { key: 'expiryDate', header: 'HSD', width: 100, render: (r) => r.expiryDate ? <span className={isExpiringSoon(r.expiryDate) ? 'text-win-error font-bold' : ''}>{formatDate(r.expiryDate)}{isExpiringSoon(r.expiryDate) ? ' ⚠️' : ''}</span> : '-' },
+  {
+    key: 'status',
+    header: 'Trạng thái',
+    width: 100,
+    align: 'center',
+    render: (r) => {
+      const colors: Record<string, string> = { ACTIVE: 'bg-green-100 text-green-800', EXPIRED: 'bg-red-100 text-red-800', DEPLETED: 'bg-gray-100 text-gray-600' }
+      const labels: Record<string, string> = { ACTIVE: 'Còn hàng', EXPIRED: 'Hết hạn', DEPLETED: 'Đã hết' }
+      return <span className={`px-2 py-0.5 text-[10px] rounded ${colors[r.status] ?? ''}`}>{labels[r.status] ?? r.status}</span>
+    },
+  },
 ]
 
 function BatchesPanel({ ingredientId }: { ingredientId: string }) {
@@ -195,7 +205,6 @@ function BatchesPanel({ ingredientId }: { ingredientId: string }) {
           columns={batchColumns}
           data={batches ?? []}
           loading={isLoading}
-          getRowClass={(r) => (isExpiringSoon(r.expiryDate) ? '!text-win-error font-bold' : '')}
           storageKey="ingredient-batches"
         />
       </WinGroupBox>

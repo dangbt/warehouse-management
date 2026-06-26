@@ -22,6 +22,7 @@ export class ImportOrdersController {
     body: {
       supplier_id: string;
       note?: string;
+      paid?: boolean;
       items: {
         ingredient_id: string;
         quantity: number;
