@@ -15,8 +15,10 @@ const menuTree: TreeNode[] = [
     permission: 'ingredients:read',
     children: [
       { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
+      { id: 'groups', label: 'Nhóm nguyên liệu', route: '/ingredient-groups', permission: 'ingredients:read' },
       { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
       { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
+      { id: 'processing', label: 'Chế biến', route: '/processing', permission: 'processing:read' },
       { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
       { id: 'stocktake', label: 'Kiểm kê', route: '/stocktake', permission: 'ingredients:read' },
       { id: 'returns', label: 'Trả hàng', route: '/purchase-returns', permission: 'purchase_returns:read' },
@@ -118,18 +120,10 @@ export function AppLayout() {
           />
         )}
         {hasPermission('recipes:read') && (
-          <MenuDrop
-            label="Công thức"
-            items={[{ label: '🍳 Công thức', route: '/recipes' }]}
-            onNav={(r) => navigate({ to: r })}
-          />
+          <MenuDrop label="Công thức" items={[{ label: '🍳 Công thức', route: '/recipes' }]} onNav={(r) => navigate({ to: r })} />
         )}
         {hasPermission('reports:read') && (
-          <MenuDrop
-            label="Báo cáo"
-            items={[{ label: '📊 Báo cáo', route: '/reports' }]}
-            onNav={(r) => navigate({ to: r })}
-          />
+          <MenuDrop label="Báo cáo" items={[{ label: '📊 Báo cáo', route: '/reports' }]} onNav={(r) => navigate({ to: r })} />
         )}
         <div className="flex-1" />
         <div className="flex items-center gap-2 pr-2 shrink-0">
@@ -153,10 +147,7 @@ export function AppLayout() {
           {sidebarExpanded ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
         </button>
         <div className="w-px h-5 bg-win-grid-border mx-1" />
-        <button
-          onClick={() => navigate({ to: '/dashboard' })}
-          className="px-2 py-1 text-[11px] hover:bg-win-menu-hover rounded-sm"
-        >
+        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-[11px] hover:bg-win-menu-hover rounded-sm">
           🏠 Dashboard
         </button>
         <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover rounded">
@@ -201,15 +192,7 @@ export function AppLayout() {
   )
 }
 
-function MenuDrop({
-  label,
-  items,
-  onNav,
-}: {
-  label: string
-  items: { label: string; route: string }[]
-  onNav: (route: string) => void
-}) {
+function MenuDrop({ label, items, onNav }: { label: string; items: { label: string; route: string }[]; onNav: (route: string) => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 

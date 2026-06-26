@@ -31,6 +31,12 @@ const statusColors: Record<string, string> = {
   REJECTED: 'bg-red-100 text-red-800',
 }
 
+const statusLabels: Record<string, string> = {
+  PENDING: 'Chờ duyệt',
+  COMPLETED: 'Đã duyệt',
+  REJECTED: 'Từ chối',
+}
+
 const columns: Column<ImportOrder>[] = [
   { key: 'code', header: 'Mã phiếu', width: 170 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier?.name },
@@ -47,7 +53,7 @@ const columns: Column<ImportOrder>[] = [
     width: 100,
     align: 'center',
     render: (r) => (
-      <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] || ''}`}>{r.status}</span>
+      <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] || ''}`}>{statusLabels[r.status] || r.status}</span>
     ),
   },
   { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },

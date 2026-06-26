@@ -24,3 +24,7 @@ export {
 export { usePurchaseReturns, useCreatePurchaseReturn } from './use-purchase-returns'
 export { useSupplierPayments, useCreateSupplierPayment } from './use-supplier-payments'
 export { useConsumptionVariance } from './use-variance'
+export { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup } from './use-ingredient-groups'
+export type { IngredientGroup } from './use-ingredient-groups'
+export { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from './use-processing'
+export type { ProcessingOrder } from './use-processing'
