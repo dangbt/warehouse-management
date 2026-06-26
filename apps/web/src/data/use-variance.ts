@@ -18,6 +18,9 @@ export function useConsumptionVariance(params?: { from?: string; to?: string }) 
   if (params?.to) query.set('to', params.to)
   return useQuery<VarianceItem[]>({
     queryKey: QUERY_KEYS.reports.consumptionVariance({ from: params?.from, to: params?.to }),
-    queryFn: () => api.get(`/reports/consumption-variance?${query}`),
+    queryFn: async () => {
+      const res: { data: VarianceItem[] } = await api.get(`/reports/consumption-variance?${query}`)
+      return res.data
+    },
   })
 }
