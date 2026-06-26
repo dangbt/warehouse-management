@@ -3,17 +3,17 @@ import { Plus, Pencil, Trash2, RefreshCw, Download } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
-import { useIngredients, useDeleteIngredient } from '@/data'
+import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from '@/data'
 
 interface IngredientRow { id: string; name: string; unit: string; currentStock: string; minStock: string; costPerUnit: string; category: string }
 
 const columns: Column<IngredientRow>[] = [
   { key: 'name', header: 'Tên nguyên liệu', width: 180 },
-  { key: 'unit', header: 'ĐVT', width: 60 },
-  { key: 'currentStock', header: 'Tồn kho', width: 80, render: (r) => <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>{r.currentStock}</span> },
-  { key: 'minStock', header: 'Min', width: 60 },
-  { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫` },
-  { key: 'category', header: 'Phân loại', width: 80 },
+  { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
+  { key: 'currentStock', header: 'Tồn kho', width: 80, align: 'right', render: (r) => <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>{r.currentStock}</span> },
+  { key: 'minStock', header: 'Min', width: 60, align: 'right' },
+  { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫` },
+  { key: 'category', header: 'Phân loại', width: 80, align: 'center' },
 ]
 
 export function IngredientsPage() {
@@ -24,7 +24,17 @@ export function IngredientsPage() {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const { data: res, isLoading, refetch } = useIngredients({ page })
+  const createMutation = useCreateIngredient()
+  const updateMutation = useUpdateIngredient()
   const deleteMutation = useDeleteIngredient()
+
+  const handleSave = async (formData: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) => {
+    if (formMode === 'add') {
+      await createMutation.mutateAsync(formData)
+    } else if (selected) {
+      await updateMutation.mutateAsync({ id: selected.id, ...formData })
+    }
+  }
 
   const handleDelete = () => { if (selected) { deleteMutation.mutate(selected.id); setSelected(null) } }
 
@@ -41,7 +51,7 @@ export function IngredientsPage() {
 
       <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }} onPageChange={setPage} onRowClick={setSelected} onRowDoubleClick={(row) => { setSelected(row); setFormMode('edit'); setFormOpen(true) }} getRowClass={(r) => Number(r.currentStock) <= Number(r.minStock) ? '!text-win-error' : ''} />
 
-      <IngredientForm open={formOpen} mode={formMode} data={selected as any} onClose={() => setFormOpen(false)} />
+      <IngredientForm open={formOpen} mode={formMode} data={selected as any} onClose={() => setFormOpen(false)} onSave={handleSave} />
       <WinMessageBox type="question" title="Xác nhận" message={`Xoá "${selected?.name}"?`} open={confirmDelete} buttons="yes_no" onResult={(r) => { setConfirmDelete(false); if (r === 'yes') handleDelete() }} />
     </div>
   )

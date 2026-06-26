@@ -4,7 +4,7 @@ import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import type { Supplier } from '@/types'
 import { SupplierForm } from './supplier-form'
-import { useSuppliers, useDeleteSupplier } from '@/data'
+import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '@/data'
 
 const columns: Column<Supplier>[] = [
   { key: 'name', header: 'Tên NCC', width: 180 },
@@ -20,7 +20,17 @@ export function SuppliersPage() {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const { data: res, isLoading, refetch } = useSuppliers()
+  const createMutation = useCreateSupplier()
+  const updateMutation = useUpdateSupplier()
   const deleteMutation = useDeleteSupplier()
+
+  const handleSave = async (formData: { name: string; phone: string; address: string; note?: string }) => {
+    if (formMode === 'add') {
+      await createMutation.mutateAsync(formData)
+    } else if (selected) {
+      await updateMutation.mutateAsync({ id: selected.id, ...formData })
+    }
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -32,7 +42,7 @@ export function SuppliersPage() {
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       <WinDataGrid columns={columns} data={res?.data ?? []} loading={isLoading} pagination={{ page: 1, limit: 50, total: res?.meta.total ?? 0 }} onRowClick={setSelected} onRowDoubleClick={(r) => { setSelected(r); setFormMode('edit'); setFormOpen(true) }} />
-      <SupplierForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} />
+      <SupplierForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} onSave={handleSave} />
       <WinMessageBox type="question" title="Xác nhận" message={`Xoá NCC "${selected?.name}"?`} open={confirmDelete} buttons="yes_no" onResult={(r) => { setConfirmDelete(false); if (r === 'yes' && selected) { deleteMutation.mutate(selected.id); setSelected(null) } }} />
     </div>
   )

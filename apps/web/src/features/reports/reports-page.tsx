@@ -50,17 +50,26 @@ export function ReportsPage() {
 
         <WinGroupBox title="📈 Biến động kho gần đây">
           <table className="w-full text-[11px]">
-            <thead><tr className="bg-win-grid-header"><th className="text-left p-1">Thời gian</th><th className="p-1">NL</th><th className="p-1">Loại</th><th className="p-1">SL</th><th className="p-1">Người</th></tr></thead>
+            <thead><tr className="bg-win-grid-header"><th className="text-left p-1">Thời gian</th><th className="text-left p-1">NL</th><th className="text-center p-1">Loại</th><th className="text-right p-1">SL</th><th className="text-left p-1">Người</th></tr></thead>
             <tbody>
-              {(movements ?? []).map((t: any) => (
-                <tr key={t.id} className="border-b border-win-grid-border">
-                  <td className="p-1">{formatDateTime(t.createdAt)}</td>
-                  <td className="p-1">{t.ingredient.name}</td>
-                  <td className="p-1">{t.type === 'IMPORT' ? '📥 Nhập' : '📤 Xuất'}</td>
-                  <td className="p-1 text-right">{Number(t.quantity) > 0 ? '+' : ''}{t.quantity} {t.ingredient.unit}</td>
-                  <td className="p-1">{t.createdBy.fullName}</td>
-                </tr>
-              ))}
+              {(movements ?? []).map((t: any) => {
+                const typeMap: Record<string, { label: string; color: string }> = {
+                  IMPORT: { label: '📥 Nhập', color: 'text-green-700 bg-green-50' },
+                  EXPORT: { label: '📤 Xuất', color: 'text-red-700 bg-red-50' },
+                  ORDER_DEDUCT: { label: '🍳 Trừ kho', color: 'text-orange-700 bg-orange-50' },
+                  ORDER_RESTORE: { label: '↩️ Hoàn', color: 'text-blue-700 bg-blue-50' },
+                }
+                const typeInfo = typeMap[t.type] ?? { label: t.type, color: '' }
+                return (
+                  <tr key={t.id} className="border-b border-win-grid-border">
+                    <td className="p-1">{formatDateTime(t.createdAt)}</td>
+                    <td className="p-1">{t.ingredient.name}</td>
+                    <td className="p-1 text-center"><span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${typeInfo.color}`}>{typeInfo.label}</span></td>
+                    <td className="p-1 text-right font-mono">{Number(t.quantity) > 0 ? '+' : ''}{t.quantity} {t.ingredient.unit}</td>
+                    <td className="p-1">{t.createdBy.fullName}</td>
+                  </tr>
+                )
+              })}
               {!movements?.length && <tr><td colSpan={5} className="p-2 text-center text-win-text-secondary">Chưa có biến động</td></tr>}
             </tbody>
           </table>

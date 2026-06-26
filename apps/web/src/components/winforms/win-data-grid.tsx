@@ -5,6 +5,7 @@ export interface Column<T> {
   key: keyof T | string
   header: string
   width?: number
+  align?: 'left' | 'center' | 'right'
   render?: (row: T) => React.ReactNode
 }
 
@@ -35,7 +36,7 @@ export function WinDataGrid<T extends { id?: string }>({
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
-                  className="px-2 py-1.5 text-left font-semibold border-r border-win-grid-border whitespace-nowrap select-none"
+                  className={`px-2 py-1.5 font-semibold border-r border-win-grid-border whitespace-nowrap select-none ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                   style={col.width ? { width: col.width } : undefined}
                 >
                   {col.header}
@@ -61,7 +62,7 @@ export function WinDataGrid<T extends { id?: string }>({
                   onDoubleClick={() => onRowDoubleClick?.(row)}
                 >
                   {columns.map((col) => (
-                    <td key={String(col.key)} className="px-2 py-1 border-r border-[#F0F0F0]">
+                    <td key={String(col.key)} className={`px-2 py-1 border-r border-[#F0F0F0] ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : ''}`}>
                       {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key as string] ?? '')}
                     </td>
                   ))}
