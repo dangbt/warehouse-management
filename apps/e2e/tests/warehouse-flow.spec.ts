@@ -11,7 +11,6 @@ async function login(page: Page) {
 }
 
 test.describe('Warehouse Mâm Vị - Full Flow', () => {
-
   test.describe('Authentication', () => {
     test('login with wrong password shows error', async ({ page }) => {
       await page.goto('/login')
@@ -210,8 +209,18 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
 
     test('Delete supplier', async ({ page }) => {
       await page.locator('[data-testid="sidebar-suppliers"]').click()
+      // Create a fresh supplier to delete
+      await page.locator('[data-testid="toolbar-Thêm"]').click()
+      const dialog = page.locator('[data-testid="dialog"]')
+      await dialog.locator('[data-testid="input-Tên NCC"]').fill('E2E DELETE NCC')
+      await dialog.locator('[data-testid="input-Điện thoại"]').fill('0900000000')
+      await dialog.locator('[data-testid="input-Địa chỉ"]').fill('Delete test')
+      await dialog.getByRole('button', { name: 'OK' }).click()
+      await expect(page.getByText('Thêm NCC thành công')).toBeVisible({ timeout: 15000 })
+
+      // Now delete it
       await page.waitForTimeout(500)
-      await page.locator('[data-testid^="grid-row-"]', { hasText: 'E2E NCC' }).first().click()
+      await page.locator('[data-testid^="grid-row-"]', { hasText: 'E2E DELETE NCC' }).first().click()
       await page.locator('[data-testid="toolbar-Xoá"]').click()
       await page.getByRole('button', { name: 'Yes' }).click()
       await expect(page.getByText('Đã xoá NCC')).toBeVisible({ timeout: 15000 })

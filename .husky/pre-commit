@@ -1,0 +1,21 @@
+#!/bin/sh
+
+echo "🔍 Running pre-commit checks..."
+
+# Lint
+echo "→ Lint..."
+npx turbo lint || exit 1
+
+# TypeScript type check
+echo "→ Type check..."
+npx turbo build || exit 1
+
+# Unit tests
+echo "→ Unit tests..."
+npx turbo test || exit 1
+
+# E2E tests
+echo "→ E2E tests..."
+cd apps/e2e && npm test || exit 1
+
+echo "✅ All checks passed!"

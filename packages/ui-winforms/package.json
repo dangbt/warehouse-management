@@ -14,14 +14,14 @@
     "lint": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "dependencies": {
-    "lucide-react": "^1.21.0"
+    "lucide-react": "1.21.0"
   },
   "devDependencies": {
-    "@types/react": "^19.2.17",
-    "typescript": "~6.0.2"
+    "@types/react": "19.2.17",
+    "typescript": "6.0.3"
   }
 }
