@@ -27,11 +27,11 @@ const columns: Column<IngredientRow>[] = [
     align: 'right',
     render: (r) => (
       <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>
-        {r.currentStock}
+        {formatNumber(r.currentStock)}
       </span>
     ),
   },
-  { key: 'minStock', header: 'Min', width: 60, align: 'right' },
+  { key: 'minStock', header: 'Min', width: 60, align: 'right', render: (r) => formatNumber(r.minStock) },
   {
     key: 'costPerUnit',
     header: 'Giá/ĐV',
@@ -180,7 +180,7 @@ function isExpiringSoon(expiryDate: string | null): boolean {
 const batchColumns: Column<Batch>[] = [
   { key: 'batchCode', header: 'Mã lô', width: 120 },
   { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => formatCurrency(r.costPerUnit) },
-  { key: 'quantity', header: 'Số lượng', width: 80, align: 'right' },
+  { key: 'quantity', header: 'Số lượng', width: 80, align: 'right', render: (r) => formatNumber(r.quantity) },
   { key: 'expiryDate', header: 'HSD', width: 100, render: (r) => r.expiryDate ? <span className={isExpiringSoon(r.expiryDate) ? 'text-win-error font-bold' : ''}>{formatDate(r.expiryDate)}{isExpiringSoon(r.expiryDate) ? ' ⚠️' : ''}</span> : '-' },
   {
     key: 'status',

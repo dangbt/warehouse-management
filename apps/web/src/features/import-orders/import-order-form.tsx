@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
-import { formatCurrency } from '@wms/shared'
+import { formatCurrency, formatNumber } from '@wms/shared'
 
 const itemSchema = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
@@ -172,7 +172,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                   />
                 </td>
                 <td className="p-0.5 text-right pr-2">
-                  {((items[i]?.quantity || 0) * (items[i]?.unit_price || 0)).toLocaleString()}
+                  {formatNumber((items[i]?.quantity || 0) * (items[i]?.unit_price || 0))}
                 </td>
                 <td className="p-0.5">
                   <input

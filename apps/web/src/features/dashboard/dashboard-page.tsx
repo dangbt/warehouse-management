@@ -1,7 +1,7 @@
 import { Package, FileText, AlertTriangle, DollarSign, RefreshCw } from 'lucide-react'
 import { WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement, useImportOrders, useExpiringBatches } from '@/data'
-import { formatDateTime, formatDate } from '@wms/shared'
+import { formatDateTime, formatDate, formatNumber } from '@wms/shared'
 
 export function DashboardPage() {
   const { data: summary, refetch: refetchSummary } = useStockSummary()
@@ -94,7 +94,7 @@ export function DashboardPage() {
               <div key={t.id} className="flex gap-2 text-[11px]">
                 <span className="text-win-text-secondary w-[110px] shrink-0">{formatDateTime(t.createdAt)}</span>
                 <span>
-                  {t.createdBy.fullName} {t.type === 'IMPORT' ? '📥' : '📤'} {Math.abs(Number(t.quantity))}{' '}
+                  {t.createdBy.fullName} {t.type === 'IMPORT' ? '📥' : '📤'} {formatNumber(Math.abs(Number(t.quantity)))}{' '}
                   {t.ingredient.unit} {t.ingredient.name}
                 </span>
               </div>

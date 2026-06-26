@@ -4,7 +4,7 @@ import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './stock-export-form'
 import { useStockExports, useCreateStockExport } from '@/data'
-import { formatDate } from '@wms/shared'
+import { formatDate, formatNumber } from '@wms/shared'
 
 interface StockExport {
   id: string
@@ -22,7 +22,7 @@ const columns: Column<StockExport>[] = [
     header: 'Số lượng',
     width: 80,
     align: 'right',
-    render: (r) => String(Math.abs(Number(r.quantity))),
+    render: (r) => formatNumber(Math.abs(Number(r.quantity))),
   },
   { key: 'ingredient', header: 'ĐVT', width: 60, align: 'center', render: (r) => r.ingredient?.unit },
   { key: 'note', header: 'Lý do', width: 200, render: (r) => {

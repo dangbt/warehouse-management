@@ -1,7 +1,7 @@
 import { RefreshCw } from 'lucide-react'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement } from '@/data'
-import { formatDateTime, formatCurrency } from '@wms/shared'
+import { formatDateTime, formatCurrency, formatNumber } from '@wms/shared'
 
 export function ReportsPage() {
   const { data: summary, isLoading, refetch } = useStockSummary()
@@ -92,7 +92,7 @@ export function ReportsPage() {
                     </td>
                     <td className="p-1 text-right font-mono">
                       {Number(t.quantity) > 0 ? '+' : ''}
-                      {t.quantity} {t.ingredient.unit}
+                      {formatNumber(t.quantity)} {t.ingredient.unit}
                     </td>
                     <td className="p-1">{t.createdBy.fullName}</td>
                   </tr>
