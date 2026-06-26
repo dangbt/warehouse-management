@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { StockExportsController } from './stock-exports.controller';
+import { CommonModule } from '../common/common.module';
 
-@Module({ controllers: [StockExportsController] })
+@Module({
+  imports: [CommonModule],
+  controllers: [StockExportsController],
+})
 export class StockExportsModule {}

@@ -18,6 +18,8 @@ const menuTree: TreeNode[] = [
       { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
       { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
       { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
+      { id: 'stocktake', label: 'Kiểm kê', route: '/stocktake', permission: 'ingredients:read' },
+      { id: 'returns', label: 'Trả hàng', route: '/purchase-returns', permission: 'purchase_returns:read' },
     ],
   },
   {
@@ -30,6 +32,7 @@ const menuTree: TreeNode[] = [
   { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
   { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
+  { id: 'variance', label: 'Định mức', icon: '⚖️', route: '/consumption-variance', permission: 'reports:read' },
   {
     id: 'admin',
     label: 'Quản trị',

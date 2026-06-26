@@ -76,6 +76,10 @@ export class ImportOrdersService {
         where: { id },
         data: { status: 'COMPLETED', approvedById },
       });
+      await tx.supplier.update({
+        where: { id: order.supplierId },
+        data: { totalDebt: { increment: order.totalAmount } },
+      });
       for (const item of order.items) {
         await tx.ingredient.update({
           where: { id: item.ingredientId },
@@ -91,6 +95,17 @@ export class ImportOrdersService {
             referenceId: order.id,
             createdById: approvedById,
             note: `Nhập kho: ${order.code}`,
+          },
+        });
+        await tx.ingredientBatch.create({
+          data: {
+            ingredientId: item.ingredientId,
+            importOrderItemId: item.id,
+            batchCode: `${order.code}-${item.id.slice(0, 4)}`,
+            quantity: item.quantity,
+            costPerUnit: item.unitPrice,
+            expiryDate: item.expiryDate,
+            receivedDate: new Date(),
           },
         });
       }

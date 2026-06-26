@@ -35,6 +35,9 @@ model User {
   importOrders   ImportOrder[] @relation("CreatedBy")
   approvedOrders ImportOrder[] @relation("ApprovedBy")
   stockTransactions StockTransaction[]
+  stocktakeSessions  StocktakeSession[] @relation("StocktakeCreatedBy")
+  purchaseReturns    PurchaseReturn[] @relation("ReturnCreatedBy")
+  supplierPayments   SupplierPayment[] @relation("PaymentCreatedBy")
 
   @@map("users")
 }
@@ -83,17 +86,23 @@ model Ingredient {
   importOrderItems ImportOrderItem[]
   stockTransactions StockTransaction[]
   recipeIngredients RecipeIngredient[]
+  batches      IngredientBatch[]
+  stocktakeItems StocktakeItem[]
+  purchaseReturnItems PurchaseReturnItem[]
 
   @@map("ingredients")
 }
 
 model Supplier {
-  id       String  @id @default(uuid())
-  name     String
-  phone    String?
-  address  String?
-  note     String?
-  importOrders ImportOrder[]
+  id         String  @id @default(uuid())
+  name       String
+  phone      String?
+  address    String?
+  note       String?
+  totalDebt  Decimal @default(0) @map("total_debt") @db.Decimal(14, 2)
+  importOrders    ImportOrder[]
+  purchaseReturns PurchaseReturn[]
+  payments        SupplierPayment[]
 
   @@map("suppliers")
 }
@@ -126,8 +135,28 @@ model ImportOrderItem {
   unitPrice     Decimal  @map("unit_price") @db.Decimal(12, 2)
   totalPrice    Decimal  @map("total_price") @db.Decimal(14, 2)
   expiryDate    DateTime? @map("expiry_date") @db.Date
+  batch         IngredientBatch?
 
   @@map("import_order_items")
+}
+
+model IngredientBatch {
+  id                String    @id @default(uuid())
+  ingredientId      String    @map("ingredient_id")
+  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
+  importOrderItemId String?   @unique @map("import_order_item_id")
+  importOrderItem   ImportOrderItem? @relation(fields: [importOrderItemId], references: [id])
+  batchCode         String    @map("batch_code")
+  quantity          Decimal   @db.Decimal(10, 3)
+  costPerUnit       Decimal   @map("cost_per_unit") @db.Decimal(12, 2)
+  expiryDate        DateTime? @map("expiry_date") @db.Date
+  receivedDate      DateTime  @map("received_date")
+  status            String    @default("ACTIVE")
+  note              String?
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@index([ingredientId, status])
+  @@map("ingredient_batches")
 }
 
 model StockTransaction {
@@ -231,4 +260,79 @@ model AuditLog {
   @@index([userId, createdAt])
   @@index([resource, resourceId])
   @@map("audit_logs")
+}
+
+
+
+model StocktakeSession {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  status      String    @default("DRAFT")
+  note        String?
+  createdById String    @map("created_by")
+  createdBy   User      @relation("StocktakeCreatedBy", fields: [createdById], references: [id])
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  items       StocktakeItem[]
+
+  @@map("stocktake_sessions")
+}
+
+model StocktakeItem {
+  id           String           @id @default(uuid())
+  sessionId    String           @map("session_id")
+  session      StocktakeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  ingredientId String           @map("ingredient_id")
+  ingredient   Ingredient       @relation(fields: [ingredientId], references: [id])
+  systemQty    Decimal          @map("system_qty") @db.Decimal(10, 3)
+  actualQty    Decimal          @map("actual_qty") @db.Decimal(10, 3)
+  difference   Decimal          @db.Decimal(10, 3)
+  note         String?
+
+  @@map("stocktake_items")
+}
+
+
+
+model PurchaseReturn {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  supplierId  String   @map("supplier_id")
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  totalAmount Decimal  @default(0) @map("total_amount") @db.Decimal(14, 2)
+  reason      String
+  note        String?
+  createdById String   @map("created_by")
+  createdBy   User     @relation("ReturnCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  items       PurchaseReturnItem[]
+
+  @@map("purchase_returns")
+}
+
+model PurchaseReturnItem {
+  id             String         @id @default(uuid())
+  returnId       String         @map("return_id")
+  purchaseReturn PurchaseReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  ingredientId   String         @map("ingredient_id")
+  ingredient     Ingredient     @relation(fields: [ingredientId], references: [id])
+  quantity       Decimal        @db.Decimal(10, 3)
+  unitPrice      Decimal        @map("unit_price") @db.Decimal(12, 2)
+  totalPrice     Decimal        @map("total_price") @db.Decimal(14, 2)
+
+  @@map("purchase_return_items")
+}
+
+model SupplierPayment {
+  id          String   @id @default(uuid())
+  supplierId  String   @map("supplier_id")
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  amount      Decimal  @db.Decimal(14, 2)
+  method      String
+  note        String?
+  createdById String   @map("created_by")
+  createdBy   User     @relation("PaymentCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("supplier_payments")
 }

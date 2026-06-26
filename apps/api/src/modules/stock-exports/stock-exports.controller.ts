@@ -2,11 +2,15 @@ import { Controller, Get, Post, Body, Query, UseGuards, Req, BadRequestException
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
+import { BatchDeductionService } from '../common/batch-deduction.service';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('stock-exports')
 export class StockExportsController {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private batchDeduction: BatchDeductionService,
+  ) {}
 
   @Get()
   @RequirePermissions('stock_exports:read')
@@ -49,19 +53,25 @@ export class StockExportsController {
     if (Number(ingredient.currentStock) < body.quantity) throw new BadRequestException('Không đủ tồn kho');
 
     await this.prisma.$transaction(async (tx) => {
+      const deducted = await this.batchDeduction.deductFromBatches(tx, body.ingredient_id, body.quantity);
+
       await tx.ingredient.update({
         where: { id: body.ingredient_id },
         data: { currentStock: { decrement: body.quantity } },
       });
-      await tx.stockTransaction.create({
-        data: {
-          ingredientId: body.ingredient_id,
-          type: 'EXPORT',
-          quantity: body.quantity,
-          note: `${body.reason}${body.note ? ': ' + body.note : ''}`,
-          createdById: req.user.id,
-        },
-      });
+
+      for (const d of deducted) {
+        await tx.stockTransaction.create({
+          data: {
+            ingredientId: body.ingredient_id,
+            type: 'EXPORT',
+            quantity: d.qty,
+            referenceId: d.batchId,
+            note: `${body.reason}${body.note ? ': ' + body.note : ''}`,
+            createdById: req.user.id,
+          },
+        });
+      }
     });
     return { message: 'Xuất kho thành công' };
   }

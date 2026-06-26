@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { BatchDeductionService } from '../common/batch-deduction.service';
 
 interface KiotVietOrderInput {
   id: string;
@@ -27,7 +28,10 @@ interface KiotVietInvoiceDetail {
 
 @Injectable()
 export class KiotVietService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private batchDeduction: BatchDeductionService,
+  ) {}
 
   private normalize(s: string) {
     return s
@@ -141,17 +145,20 @@ export class KiotVietService {
     // Execute deduction in transaction
     await this.prisma.$transaction(async (tx) => {
       for (const d of deductions) {
+        const batchResults = await this.batchDeduction.deductFromBatches(tx, d.ingredientId, d.quantity);
         await tx.ingredient.update({ where: { id: d.ingredientId }, data: { currentStock: { decrement: d.quantity } } });
-        await tx.stockTransaction.create({
-          data: {
-            ingredientId: d.ingredientId,
-            type: 'ORDER_DEDUCT',
-            quantity: -d.quantity,
-            referenceId: order.id,
-            note: `Trừ kho từ đơn KiotViet ${order.code}`,
-            createdById: userId,
-          },
-        });
+        for (const b of batchResults) {
+          await tx.stockTransaction.create({
+            data: {
+              ingredientId: d.ingredientId,
+              type: 'ORDER_DEDUCT',
+              quantity: -b.qty,
+              referenceId: b.batchId,
+              note: `Trừ kho từ đơn KiotViet ${order.code}`,
+              createdById: userId,
+            },
+          });
+        }
       }
       await tx.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true } });
     });

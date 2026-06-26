@@ -33,8 +33,25 @@ export const QUERY_KEYS = {
   ingredientUsage: ['ingredient-usage'] as const,
   ingredientUsageList: (params?: Record<string, string | undefined>) => ['ingredient-usage', 'list', params] as const,
 
+  batches: ['batches'] as const,
+  batchesList: (ingredientId: string) => ['batches', 'list', ingredientId] as const,
+  expiringBatches: (days: number) => ['batches', 'expiring', days] as const,
+
+  stocktake: ['stocktake'] as const,
+  stocktakeList: () => ['stocktake', 'list'] as const,
+  stocktakeDetail: (id: string) => ['stocktake', 'detail', id] as const,
+
+  purchaseReturns: ['purchase-returns'] as const,
+  purchaseReturnsList: () => ['purchase-returns', 'list'] as const,
+
+  supplierPayments: ['supplier-payments'] as const,
+  supplierPaymentsList: (supplierId: string) => ['supplier-payments', 'list', supplierId] as const,
+
   reports: {
     stockSummary: ['reports', 'stock-summary'] as const,
     stockMovement: ['reports', 'stock-movement'] as const,
+    consumptionVariance: (params?: Record<string, string | undefined>) =>
+      ['reports', 'consumption-variance', params] as const,
+    expiring: (days: number) => ['reports', 'expiring', days] as const,
   },
 } as const

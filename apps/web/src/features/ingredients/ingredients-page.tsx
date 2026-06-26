@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, RefreshCw, Download } from 'lucide-react'
-import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
+import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
-import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from '@/data'
+import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient, useIngredientBatches } from '@/data'
+import type { Batch } from '@/data/use-batches'
+import { formatDate } from '@wms/shared'
 
 interface IngredientRow {
   id: string
@@ -162,6 +164,41 @@ export function IngredientsPage() {
           if (r === 'yes') handleDelete()
         }}
       />
+
+      {selected && <BatchesPanel ingredientId={selected.id} />}
+    </div>
+  )
+}
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+
+function isExpiringSoon(expiryDate: string | null): boolean {
+  if (!expiryDate) return false
+  return new Date(expiryDate).getTime() - Date.now() < SEVEN_DAYS_MS
+}
+
+const batchColumns: Column<Batch>[] = [
+  { key: 'batchCode', header: 'Mã lô', width: 120 },
+  { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => `${Number(r.costPerUnit).toLocaleString()}₫` },
+  { key: 'quantity', header: 'Số lượng', width: 80, align: 'right' },
+  { key: 'expiryDate', header: 'HSD', width: 100, render: (r) => r.expiryDate ? formatDate(r.expiryDate) : '-' },
+  { key: 'status', header: 'Trạng thái', width: 80, align: 'center' },
+]
+
+function BatchesPanel({ ingredientId }: { ingredientId: string }) {
+  const { data: batches, isLoading } = useIngredientBatches(ingredientId)
+
+  return (
+    <div className="border-t border-win-grid-border max-h-[200px] overflow-auto">
+      <WinGroupBox title="📦 Lô hàng">
+        <WinDataGrid
+          columns={batchColumns}
+          data={batches ?? []}
+          loading={isLoading}
+          getRowClass={(r) => (isExpiringSoon(r.expiryDate) ? '!text-win-error font-bold' : '')}
+          storageKey="ingredient-batches"
+        />
+      </WinGroupBox>
     </div>
   )
 }

@@ -14,6 +14,10 @@ import { AuditInterceptor } from './modules/audit-logs/audit.interceptor';
 import { CommonModule } from './modules/common/common.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { KiotVietModule } from './modules/kiotviet/kiotviet.module';
+import { BatchesModule } from './modules/batches/batches.module';
+import { StocktakeModule } from './modules/stocktake/stocktake.module';
+import { PurchaseReturnsModule } from './modules/purchase-returns/purchase-returns.module';
+import { SupplierPaymentsModule } from './modules/supplier-payments/supplier-payments.module';
 
 @Module({
   imports: [
@@ -29,6 +33,10 @@ import { KiotVietModule } from './modules/kiotviet/kiotviet.module';
     CommonModule,
     ReportsModule,
     KiotVietModule,
+    BatchesModule,
+    StocktakeModule,
+    PurchaseReturnsModule,
+    SupplierPaymentsModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],

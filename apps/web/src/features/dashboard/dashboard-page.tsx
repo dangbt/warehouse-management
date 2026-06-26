@@ -1,12 +1,13 @@
 import { Package, FileText, AlertTriangle, DollarSign, RefreshCw } from 'lucide-react'
 import { WinGroupBox } from '@wms/ui-winforms'
-import { useStockSummary, useStockMovement, useImportOrders } from '@/data'
-import { formatDateTime } from '@wms/shared'
+import { useStockSummary, useStockMovement, useImportOrders, useExpiringBatches } from '@/data'
+import { formatDateTime, formatDate } from '@wms/shared'
 
 export function DashboardPage() {
   const { data: summary, refetch: refetchSummary } = useStockSummary()
   const { data: movements } = useStockMovement()
   const { data: pendingOrders } = useImportOrders({ status: 'PENDING' })
+  const { data: expiringBatches } = useExpiringBatches(7)
 
   const cards = [
     { label: 'Nguyên liệu', value: summary?.total ?? 0, icon: <Package size={20} />, color: 'text-win-active-title' },
@@ -100,6 +101,37 @@ export function DashboardPage() {
             ))}
             {!movements?.length && <p className="text-[11px] text-win-text-secondary">Chưa có hoạt động</p>}
           </div>
+        </WinGroupBox>
+      </div>
+
+      <div className="mt-3">
+        <WinGroupBox title="⏰ Lô hàng sắp hết hạn (7 ngày)">
+          {expiringBatches?.length ? (
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr className="bg-win-grid-header">
+                  <th className="text-left p-1">Mã lô</th>
+                  <th className="text-left p-1">Nguyên liệu</th>
+                  <th className="p-1">Số lượng</th>
+                  <th className="p-1">HSD</th>
+                  <th className="p-1">Còn</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expiringBatches.slice(0, 10).map((b) => (
+                  <tr key={b.id} className="border-b border-win-grid-border text-win-error">
+                    <td className="p-1">{b.batchCode}</td>
+                    <td className="p-1">{b.ingredient.name}</td>
+                    <td className="p-1 text-center">{b.quantity} {b.ingredient.unit}</td>
+                    <td className="p-1 text-center">{formatDate(b.expiryDate)}</td>
+                    <td className="p-1 text-center font-bold">{b.daysUntilExpiry} ngày</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-[11px] text-win-success">✓ Không có lô sắp hết hạn</p>
+          )}
         </WinGroupBox>
       </div>
     </div>

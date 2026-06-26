@@ -14,16 +14,20 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSuppliersRouteImport } from './routes/_app/suppliers'
+import { Route as AppStocktakeRouteImport } from './routes/_app/stocktake'
 import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports'
 import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
+import { Route as AppPurchaseReturnsRouteImport } from './routes/_app/purchase-returns'
 import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
 import { Route as AppIngredientsRouteImport } from './routes/_app/ingredients'
 import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient-usage'
 import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
+import { Route as AppStocktakeIdRouteImport } from './routes/_app/stocktake.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -49,6 +53,11 @@ const AppSuppliersRoute = AppSuppliersRouteImport.update({
   path: '/suppliers',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStocktakeRoute = AppStocktakeRouteImport.update({
+  id: '/stocktake',
+  path: '/stocktake',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppStockExportsRoute = AppStockExportsRouteImport.update({
   id: '/stock-exports',
   path: '/stock-exports',
@@ -67,6 +76,11 @@ const AppReportsRoute = AppReportsRouteImport.update({
 const AppRecipesRoute = AppRecipesRouteImport.update({
   id: '/recipes',
   path: '/recipes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPurchaseReturnsRoute = AppPurchaseReturnsRouteImport.update({
+  id: '/purchase-returns',
+  path: '/purchase-returns',
   getParentRoute: () => AppRoute,
 } as any)
 const AppKiotvietRoute = AppKiotvietRouteImport.update({
@@ -94,43 +108,61 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppConsumptionVarianceRoute = AppConsumptionVarianceRouteImport.update({
+  id: '/consumption-variance',
+  path: '/consumption-variance',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
   id: '/audit-logs',
   path: '/audit-logs',
   getParentRoute: () => AppRoute,
+} as any)
+const AppStocktakeIdRoute = AppStocktakeIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppStocktakeRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/audit-logs': typeof AppAuditLogsRoute
+  '/consumption-variance': typeof AppConsumptionVarianceRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
   '/kiotviet': typeof AppKiotvietRoute
+  '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
   '/stock-exports': typeof AppStockExportsRoute
+  '/stocktake': typeof AppStocktakeRouteWithChildren
   '/suppliers': typeof AppSuppliersRoute
   '/users': typeof AppUsersRoute
+  '/stocktake/$id': typeof AppStocktakeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/audit-logs': typeof AppAuditLogsRoute
+  '/consumption-variance': typeof AppConsumptionVarianceRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
   '/kiotviet': typeof AppKiotvietRoute
+  '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
   '/stock-exports': typeof AppStockExportsRoute
+  '/stocktake': typeof AppStocktakeRouteWithChildren
   '/suppliers': typeof AppSuppliersRoute
   '/users': typeof AppUsersRoute
+  '/stocktake/$id': typeof AppStocktakeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,17 +170,21 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/audit-logs': typeof AppAuditLogsRoute
+  '/_app/consumption-variance': typeof AppConsumptionVarianceRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/import-orders': typeof AppImportOrdersRoute
   '/_app/ingredient-usage': typeof AppIngredientUsageRoute
   '/_app/ingredients': typeof AppIngredientsRoute
   '/_app/kiotviet': typeof AppKiotvietRoute
+  '/_app/purchase-returns': typeof AppPurchaseReturnsRoute
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/roles': typeof AppRolesRoute
   '/_app/stock-exports': typeof AppStockExportsRoute
+  '/_app/stocktake': typeof AppStocktakeRouteWithChildren
   '/_app/suppliers': typeof AppSuppliersRoute
   '/_app/users': typeof AppUsersRoute
+  '/_app/stocktake/$id': typeof AppStocktakeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -156,50 +192,62 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/audit-logs'
+    | '/consumption-variance'
     | '/dashboard'
     | '/import-orders'
     | '/ingredient-usage'
     | '/ingredients'
     | '/kiotviet'
+    | '/purchase-returns'
     | '/recipes'
     | '/reports'
     | '/roles'
     | '/stock-exports'
+    | '/stocktake'
     | '/suppliers'
     | '/users'
+    | '/stocktake/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/audit-logs'
+    | '/consumption-variance'
     | '/dashboard'
     | '/import-orders'
     | '/ingredient-usage'
     | '/ingredients'
     | '/kiotviet'
+    | '/purchase-returns'
     | '/recipes'
     | '/reports'
     | '/roles'
     | '/stock-exports'
+    | '/stocktake'
     | '/suppliers'
     | '/users'
+    | '/stocktake/$id'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
     | '/_app/audit-logs'
+    | '/_app/consumption-variance'
     | '/_app/dashboard'
     | '/_app/import-orders'
     | '/_app/ingredient-usage'
     | '/_app/ingredients'
     | '/_app/kiotviet'
+    | '/_app/purchase-returns'
     | '/_app/recipes'
     | '/_app/reports'
     | '/_app/roles'
     | '/_app/stock-exports'
+    | '/_app/stocktake'
     | '/_app/suppliers'
     | '/_app/users'
+    | '/_app/stocktake/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -245,6 +293,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSuppliersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/stocktake': {
+      id: '/_app/stocktake'
+      path: '/stocktake'
+      fullPath: '/stocktake'
+      preLoaderRoute: typeof AppStocktakeRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/stock-exports': {
       id: '/_app/stock-exports'
       path: '/stock-exports'
@@ -271,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/recipes'
       fullPath: '/recipes'
       preLoaderRoute: typeof AppRecipesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/purchase-returns': {
+      id: '/_app/purchase-returns'
+      path: '/purchase-returns'
+      fullPath: '/purchase-returns'
+      preLoaderRoute: typeof AppPurchaseReturnsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/kiotviet': {
@@ -308,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/consumption-variance': {
+      id: '/_app/consumption-variance'
+      path: '/consumption-variance'
+      fullPath: '/consumption-variance'
+      preLoaderRoute: typeof AppConsumptionVarianceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/audit-logs': {
       id: '/_app/audit-logs'
       path: '/audit-logs'
@@ -315,35 +384,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditLogsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/stocktake/$id': {
+      id: '/_app/stocktake/$id'
+      path: '/$id'
+      fullPath: '/stocktake/$id'
+      preLoaderRoute: typeof AppStocktakeIdRouteImport
+      parentRoute: typeof AppStocktakeRoute
+    }
   }
 }
 
+interface AppStocktakeRouteChildren {
+  AppStocktakeIdRoute: typeof AppStocktakeIdRoute
+}
+
+const AppStocktakeRouteChildren: AppStocktakeRouteChildren = {
+  AppStocktakeIdRoute: AppStocktakeIdRoute,
+}
+
+const AppStocktakeRouteWithChildren = AppStocktakeRoute._addFileChildren(
+  AppStocktakeRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAuditLogsRoute: typeof AppAuditLogsRoute
+  AppConsumptionVarianceRoute: typeof AppConsumptionVarianceRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppImportOrdersRoute: typeof AppImportOrdersRoute
   AppIngredientUsageRoute: typeof AppIngredientUsageRoute
   AppIngredientsRoute: typeof AppIngredientsRoute
   AppKiotvietRoute: typeof AppKiotvietRoute
+  AppPurchaseReturnsRoute: typeof AppPurchaseReturnsRoute
   AppRecipesRoute: typeof AppRecipesRoute
   AppReportsRoute: typeof AppReportsRoute
   AppRolesRoute: typeof AppRolesRoute
   AppStockExportsRoute: typeof AppStockExportsRoute
+  AppStocktakeRoute: typeof AppStocktakeRouteWithChildren
   AppSuppliersRoute: typeof AppSuppliersRoute
   AppUsersRoute: typeof AppUsersRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuditLogsRoute: AppAuditLogsRoute,
+  AppConsumptionVarianceRoute: AppConsumptionVarianceRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppImportOrdersRoute: AppImportOrdersRoute,
   AppIngredientUsageRoute: AppIngredientUsageRoute,
   AppIngredientsRoute: AppIngredientsRoute,
   AppKiotvietRoute: AppKiotvietRoute,
+  AppPurchaseReturnsRoute: AppPurchaseReturnsRoute,
   AppRecipesRoute: AppRecipesRoute,
   AppReportsRoute: AppReportsRoute,
   AppRolesRoute: AppRolesRoute,
   AppStockExportsRoute: AppStockExportsRoute,
+  AppStocktakeRoute: AppStocktakeRouteWithChildren,
   AppSuppliersRoute: AppSuppliersRoute,
   AppUsersRoute: AppUsersRoute,
 }
