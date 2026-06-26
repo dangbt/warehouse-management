@@ -27,7 +27,9 @@ const menuTree: TreeNode[] = [
     permission: 'recipes:read',
     children: [{ id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' }],
   },
+  { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
+  { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
   {
     id: 'admin',
     label: 'Quản trị',

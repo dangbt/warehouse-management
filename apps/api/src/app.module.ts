@@ -13,6 +13,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { AuditInterceptor } from './modules/audit-logs/audit.interceptor';
 import { CommonModule } from './modules/common/common.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { KiotVietModule } from './modules/kiotviet/kiotviet.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReportsModule } from './modules/reports/reports.module';
     AuditLogsModule,
     CommonModule,
     ReportsModule,
+    KiotVietModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],

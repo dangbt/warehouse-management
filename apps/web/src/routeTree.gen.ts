@@ -18,7 +18,9 @@ import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports
 import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
+import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
 import { Route as AppIngredientsRouteImport } from './routes/_app/ingredients'
+import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient-usage'
 import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
@@ -67,9 +69,19 @@ const AppRecipesRoute = AppRecipesRouteImport.update({
   path: '/recipes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppKiotvietRoute = AppKiotvietRouteImport.update({
+  id: '/kiotviet',
+  path: '/kiotviet',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppIngredientsRoute = AppIngredientsRouteImport.update({
   id: '/ingredients',
   path: '/ingredients',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIngredientUsageRoute = AppIngredientUsageRouteImport.update({
+  id: '/ingredient-usage',
+  path: '/ingredient-usage',
   getParentRoute: () => AppRoute,
 } as any)
 const AppImportOrdersRoute = AppImportOrdersRouteImport.update({
@@ -94,7 +106,9 @@ export interface FileRoutesByFullPath {
   '/audit-logs': typeof AppAuditLogsRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
+  '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
+  '/kiotviet': typeof AppKiotvietRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
@@ -108,7 +122,9 @@ export interface FileRoutesByTo {
   '/audit-logs': typeof AppAuditLogsRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
+  '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
+  '/kiotviet': typeof AppKiotvietRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
@@ -124,7 +140,9 @@ export interface FileRoutesById {
   '/_app/audit-logs': typeof AppAuditLogsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/import-orders': typeof AppImportOrdersRoute
+  '/_app/ingredient-usage': typeof AppIngredientUsageRoute
   '/_app/ingredients': typeof AppIngredientsRoute
+  '/_app/kiotviet': typeof AppKiotvietRoute
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/roles': typeof AppRolesRoute
@@ -140,7 +158,9 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/dashboard'
     | '/import-orders'
+    | '/ingredient-usage'
     | '/ingredients'
+    | '/kiotviet'
     | '/recipes'
     | '/reports'
     | '/roles'
@@ -154,7 +174,9 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/dashboard'
     | '/import-orders'
+    | '/ingredient-usage'
     | '/ingredients'
+    | '/kiotviet'
     | '/recipes'
     | '/reports'
     | '/roles'
@@ -169,7 +191,9 @@ export interface FileRouteTypes {
     | '/_app/audit-logs'
     | '/_app/dashboard'
     | '/_app/import-orders'
+    | '/_app/ingredient-usage'
     | '/_app/ingredients'
+    | '/_app/kiotviet'
     | '/_app/recipes'
     | '/_app/reports'
     | '/_app/roles'
@@ -249,11 +273,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRecipesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/kiotviet': {
+      id: '/_app/kiotviet'
+      path: '/kiotviet'
+      fullPath: '/kiotviet'
+      preLoaderRoute: typeof AppKiotvietRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ingredients': {
       id: '/_app/ingredients'
       path: '/ingredients'
       fullPath: '/ingredients'
       preLoaderRoute: typeof AppIngredientsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ingredient-usage': {
+      id: '/_app/ingredient-usage'
+      path: '/ingredient-usage'
+      fullPath: '/ingredient-usage'
+      preLoaderRoute: typeof AppIngredientUsageRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/import-orders': {
@@ -284,7 +322,9 @@ interface AppRouteChildren {
   AppAuditLogsRoute: typeof AppAuditLogsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppImportOrdersRoute: typeof AppImportOrdersRoute
+  AppIngredientUsageRoute: typeof AppIngredientUsageRoute
   AppIngredientsRoute: typeof AppIngredientsRoute
+  AppKiotvietRoute: typeof AppKiotvietRoute
   AppRecipesRoute: typeof AppRecipesRoute
   AppReportsRoute: typeof AppReportsRoute
   AppRolesRoute: typeof AppRolesRoute
@@ -297,7 +337,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppAuditLogsRoute: AppAuditLogsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppImportOrdersRoute: AppImportOrdersRoute,
+  AppIngredientUsageRoute: AppIngredientUsageRoute,
   AppIngredientsRoute: AppIngredientsRoute,
+  AppKiotvietRoute: AppKiotvietRoute,
   AppRecipesRoute: AppRecipesRoute,
   AppReportsRoute: AppReportsRoute,
   AppRolesRoute: AppRolesRoute,

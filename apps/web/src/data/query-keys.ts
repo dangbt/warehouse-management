@@ -26,6 +26,13 @@ export const QUERY_KEYS = {
   auditLogs: ['audit-logs'] as const,
   auditLogsList: (params?: Record<string, string>) => ['audit-logs', 'list', params] as const,
 
+  kiotvietOrders: ['kiotviet-orders'] as const,
+  kiotvietOrdersList: (params?: Record<string, string | number | undefined>) =>
+    ['kiotviet-orders', 'list', params] as const,
+
+  ingredientUsage: ['ingredient-usage'] as const,
+  ingredientUsageList: (params?: Record<string, string | undefined>) => ['ingredient-usage', 'list', params] as const,
+
   reports: {
     stockSummary: ['reports', 'stock-summary'] as const,
     stockMovement: ['reports', 'stock-movement'] as const,

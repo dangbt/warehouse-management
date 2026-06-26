@@ -156,6 +156,7 @@ model MenuItem {
   category String
   isActive Boolean @default(true) @map("is_active")
   recipe   Recipe?
+  kiotVietOrderItems KiotVietOrderItem[]
 
   @@map("menu_items")
 }
@@ -182,6 +183,35 @@ model RecipeIngredient {
   note         String?
 
   @@map("recipe_ingredients")
+}
+
+model KiotVietOrder {
+  id            String   @id @default(uuid())
+  kiotVietId    String   @unique @map("kiotviet_id")
+  code          String
+  customerName  String?  @map("customer_name")
+  totalAmount   Decimal  @map("total_amount") @db.Decimal(14, 2)
+  status        String   @default("SYNCED")
+  deducted      Boolean  @default(false)
+  orderDate     DateTime @map("order_date")
+  syncedAt      DateTime @default(now()) @map("synced_at")
+  items         KiotVietOrderItem[]
+
+  @@index([orderDate])
+  @@map("kiotviet_orders")
+}
+
+model KiotVietOrderItem {
+  id          String   @id @default(uuid())
+  orderId     String   @map("order_id")
+  order       KiotVietOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productName String   @map("product_name")
+  menuItemId  String?  @map("menu_item_id")
+  menuItem    MenuItem? @relation(fields: [menuItemId], references: [id])
+  quantity    Int
+  price       Decimal  @db.Decimal(12, 2)
+
+  @@map("kiotviet_order_items")
 }
 
 model AuditLog {
