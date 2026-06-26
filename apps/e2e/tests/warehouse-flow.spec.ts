@@ -329,4 +329,74 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       await expect(page.locator('[data-testid="login-form"]')).toBeVisible()
     })
   })
+
+  test.describe('Warehouse Staff role', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login')
+      await page.locator('[data-testid="login-email"]').fill('kho@wms.vn')
+      await page.locator('[data-testid="login-password"]').fill('123456')
+      await page.locator('[data-testid="login-submit"]').click()
+      await page.waitForURL('**/dashboard')
+    })
+
+    test('Can view ingredients', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-ingredients"]').click()
+      await page.waitForURL('**/ingredients')
+      await expect(page.locator('th', { hasText: 'Tên nguyên liệu' })).toBeVisible()
+    })
+
+    test('Can create ingredient', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-ingredients"]').click()
+      await page.locator('[data-testid="toolbar-Thêm"]').click()
+      await expect(page.locator('[data-testid="dialog"]')).toBeVisible()
+    })
+
+    test('Can view import orders', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-imports"]').click()
+      await page.waitForURL('**/imports')
+      await expect(page.locator('th', { hasText: 'Mã phiếu' })).toBeVisible()
+    })
+
+    test('Can view stock exports', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-exports"]').click()
+      await expect(page.locator('th', { hasText: 'Nguyên liệu' })).toBeVisible()
+    })
+
+    test('Cannot access user management', async ({ page }) => {
+      await page.goto('/users')
+      await expect(page.locator('th', { hasText: 'Email' })).not.toBeVisible({ timeout: 3000 })
+    })
+  })
+
+  test.describe('Kitchen Staff role', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login')
+      await page.locator('[data-testid="login-email"]').fill('bep@wms.vn')
+      await page.locator('[data-testid="login-password"]').fill('123456')
+      await page.locator('[data-testid="login-submit"]').click()
+      await page.waitForURL('**/dashboard')
+    })
+
+    test('Can view ingredients (read only)', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-ingredients"]').click()
+      await page.waitForURL('**/ingredients')
+      await expect(page.locator('th', { hasText: 'Tên nguyên liệu' })).toBeVisible()
+    })
+
+    test('Can view recipes', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-recipes"]').click()
+      await page.waitForURL('**/recipes')
+      await expect(page.locator('th', { hasText: 'Món ăn' })).toBeVisible()
+    })
+
+    test('Cannot access suppliers', async ({ page }) => {
+      await page.goto('/suppliers')
+      await expect(page.locator('th', { hasText: 'Tên NCC' })).not.toBeVisible({ timeout: 3000 })
+    })
+
+    test('Cannot access stock exports', async ({ page }) => {
+      await page.goto('/stock-exports')
+      await expect(page.locator('th', { hasText: 'Nguyên liệu' })).not.toBeVisible({ timeout: 3000 })
+    })
+  })
 })
