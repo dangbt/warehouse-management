@@ -25,7 +25,7 @@ export function StocktakePage() {
 
   const handleCreate = async () => {
     const session = await createMutation.mutateAsync()
-    navigate({ to: '/stocktake_/$id', params: { id: (session as StocktakeSession).id } })
+    navigate({ to: '/stocktake/$id', params: { id: (session as StocktakeSession).id } })
   }
 
   return (
@@ -39,7 +39,7 @@ export function StocktakePage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        onRowClick={(row) => navigate({ to: '/stocktake_/$id', params: { id: row.id } })}
+        onRowClick={(row) => navigate({ to: '/stocktake/$id', params: { id: row.id } })}
         storageKey="stocktake"
       />
     </div>
