@@ -141,6 +141,7 @@ export function IngredientsPage() {
           setFormOpen(true)
         }}
         getRowClass={(r) => (Number(r.currentStock) <= Number(r.minStock) ? '!text-win-error' : '')}
+        storageKey="ingredients"
       />
 
       <IngredientForm

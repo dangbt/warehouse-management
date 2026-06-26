@@ -98,7 +98,7 @@ export function IngredientUsagePage() {
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       {data && data.length > 0 && <BarChart data={data} />}
-      <WinDataGrid columns={columns} data={data ?? []} loading={isLoading} />
+      <WinDataGrid columns={columns} data={data ?? []} loading={isLoading} storageKey="ingredient-usage" />
     </div>
   )
 }

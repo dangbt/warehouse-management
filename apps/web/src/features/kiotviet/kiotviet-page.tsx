@@ -81,6 +81,7 @@ export function KiotVietPage() {
         selectedId={selectedId}
         onRowClick={(row) => setSelectedId(row.id)}
         pagination={{ page: 1, limit: 20, total: res?.meta?.total ?? 0 }}
+        storageKey="kiotviet"
       />
     </div>
   )

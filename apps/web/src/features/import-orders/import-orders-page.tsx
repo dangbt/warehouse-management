@@ -111,6 +111,7 @@ export function ImportOrdersPage() {
         pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
         onRowClick={setSelected}
         onRowDoubleClick={setSelected}
+        storageKey="import-orders"
       />
 
       {selected?.items && selected.items.length > 0 && (

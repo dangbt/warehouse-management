@@ -47,6 +47,7 @@ export function StockExportsPage() {
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        storageKey="stock-exports"
       />
       <StockExportForm
         open={formOpen}
