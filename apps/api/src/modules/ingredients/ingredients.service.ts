@@ -22,7 +22,8 @@ export class IngredientsService {
 
   async findAll(query: { page?: string; limit?: string; category?: string; low_stock?: string; search?: string }) {
     const page = Math.max(1, +(query.page || 1));
-    const limit = Math.min(50, Math.max(1, +(query.limit || 20)));
+    // Cho phép limit lớn để form/dropdown lấy toàn bộ NL (vd chọn nguồn cho BTP)
+    const limit = Math.min(1000, Math.max(1, +(query.limit || 20)));
     const where: Record<string, unknown> = {};
     if (query.category) where.category = query.category;
     if (query.search) where.name = { contains: query.search, mode: 'insensitive' };
