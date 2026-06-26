@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useIngredientUsage } from '@/data'
@@ -37,41 +38,23 @@ function fmtDisplay(d: string) {
   return d.split('-').reverse().join('/')
 }
 
-function BarChart({ data }: { data: IngredientUsageItem[] }) {
-  const top = data.slice(0, 10)
-  const maxVal = Math.max(...top.map((d) => Math.max(d.imported ?? 0, d.exported ?? 0, d.currentStock ?? 0)), 1)
+function UsageChart({ data }: { data: IngredientUsageItem[] }) {
+  const chartData = data.slice(0, 10).map((d) => ({ name: d.name, Nhập: d.imported ?? 0, Xuất: d.exported ?? 0, 'Tồn kho': d.currentStock ?? 0 }))
 
   return (
-    <div className="p-3 border-b border-win-grid-border bg-white overflow-x-auto">
-      <div className="flex items-end gap-3 h-40 min-w-[600px]">
-        {top.map((item) => (
-          <div key={item.id} className="flex flex-col items-center flex-1 min-w-[50px]">
-            <div className="flex items-end gap-0.5 h-28 w-full justify-center">
-              <div
-                className="bg-green-500 w-3 rounded-t-sm"
-                style={{ height: `${((item.imported ?? 0) / maxVal) * 100}%` }}
-                title={`Nhập: ${item.imported ?? 0}`}
-              />
-              <div
-                className="bg-red-500 w-3 rounded-t-sm"
-                style={{ height: `${((item.exported ?? 0) / maxVal) * 100}%` }}
-                title={`Xuất: ${item.exported ?? 0}`}
-              />
-              <div
-                className="bg-blue-500 w-3 rounded-t-sm"
-                style={{ height: `${((item.currentStock ?? 0) / maxVal) * 100}%` }}
-                title={`Tồn: ${item.currentStock ?? 0}`}
-              />
-            </div>
-            <span className="text-[9px] text-center mt-1 leading-tight truncate w-full">{item.name}</span>
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-4 justify-center mt-2 text-[10px]">
-        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded-sm" /> Nhập</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded-sm" /> Xuất</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-sm" /> Tồn kho</span>
-      </div>
+    <div className="border-b border-win-grid-border bg-white p-3 h-[220px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={50} />
+          <YAxis tick={{ fontSize: 10 }} />
+          <Tooltip contentStyle={{ fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <Bar dataKey="Nhập" fill="#22c55e" radius={[2, 2, 0, 0]} />
+          <Bar dataKey="Xuất" fill="#ef4444" radius={[2, 2, 0, 0]} />
+          <Bar dataKey="Tồn kho" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   )
 }
@@ -97,7 +80,7 @@ export function IngredientUsagePage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      {data && data.length > 0 && <BarChart data={data} />}
+      {data && data.length > 0 && <UsageChart data={data} />}
       <WinDataGrid columns={columns} data={data ?? []} loading={isLoading} storageKey="ingredient-usage" />
     </div>
   )
