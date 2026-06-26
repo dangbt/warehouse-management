@@ -243,6 +243,56 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       await expect(page.getByText('Nguyên liệu').first()).toBeVisible()
     })
 
+    test('Navigate to ingredient usage report', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-usage"]').click()
+      await page.waitForURL('**/ingredient-usage')
+      await expect(page.locator('th', { hasText: 'Nguyên liệu' })).toBeVisible()
+    })
+
+    test('Ingredient usage report toggle period', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-usage"]').click()
+      await page.locator('[data-testid="toolbar-Tháng"]').click()
+      await expect(page.locator('[data-testid="toolbar-Tháng"]')).toBeVisible()
+    })
+
+    test('Navigate to variance report', async ({ page }) => {
+      await page.goto('/consumption-variance')
+      await expect(page.locator('th', { hasText: 'Lý thuyết' })).toBeVisible()
+    })
+
+    test('Navigate to stocktake', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-stocktake"]').click()
+      await page.waitForURL('**/stocktake')
+      await expect(page.locator('th', { hasText: 'Mã phiên' })).toBeVisible()
+    })
+
+    test('Create stocktake session', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-stocktake"]').click()
+      await page.locator('[data-testid="toolbar-Tạo phiên"]').click()
+      await expect(page.getByText('Tạo phiên kiểm kê thành công')).toBeVisible({ timeout: 15000 })
+    })
+
+    test('Navigate to purchase returns', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-returns"]').click()
+      await page.waitForURL('**/purchase-returns')
+      await expect(page.locator('th', { hasText: 'Mã phiếu' })).toBeVisible()
+    })
+
+    test('Supplier payment', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-suppliers"]').click()
+      await page.waitForTimeout(500)
+      // Select first supplier
+      await page.locator('[data-testid^="grid-row-"]').first().click()
+      await page.locator('[data-testid="toolbar-Thanh toán"]').click()
+      await expect(page.getByText('Nợ hiện tại')).toBeVisible()
+    })
+
+    test('Navigate to KiotViet', async ({ page }) => {
+      await page.locator('[data-testid="sidebar-kiotviet"]').click()
+      await page.waitForURL('**/kiotviet')
+      await expect(page.locator('th', { hasText: 'Mã đơn' })).toBeVisible()
+    })
+
     test('Delete ingredient in use shows error', async ({ page }) => {
       await page.locator('[data-testid="sidebar-ingredients"]').click()
       await page.waitForTimeout(500)
