@@ -7,7 +7,7 @@ import { formatDateTime } from '@wms/shared'
 import type { StocktakeSession } from '@/data/use-stocktake'
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING: 'Đang kiểm',
+  DRAFT: 'Đang kiểm',
   COMPLETED: 'Hoàn thành',
 }
 
@@ -15,7 +15,7 @@ const columns: Column<StocktakeSession>[] = [
   { key: 'code', header: 'Mã phiên', width: 140 },
   { key: 'createdAt', header: 'Ngày tạo', width: 150, render: (r) => formatDateTime(r.createdAt) },
   { key: 'status', header: 'Trạng thái', width: 100, align: 'center', render: (r) => STATUS_LABEL[r.status] ?? r.status },
-  { key: 'itemCount', header: 'Số NL', width: 80, align: 'right' },
+  { key: '_count', header: 'Số NL', width: 80, align: 'right', render: (r) => String(r._count?.items ?? 0) },
 ]
 
 export function StocktakePage() {

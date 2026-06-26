@@ -16,6 +16,7 @@ const itemSchema = z.object({
 const schema = z.object({
   supplier_id: z.string().min(1, 'Chọn NCC'),
   note: z.string().optional(),
+  paid: z.boolean().default(true),
   items: z.array(itemSchema).min(1, 'Ít nhất 1 dòng'),
 })
 
@@ -53,7 +54,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   useEffect(() => {
     if (open) {
-      reset({ supplier_id: '', note: '', items: [{ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' }] })
+      reset({ supplier_id: '', note: '', paid: true, items: [{ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' }] })
       setSubmitError('')
       Promise.all([api.get('/suppliers?limit=100'), api.get('/ingredients?limit=100')]).then(([s, i]) => {
         setSuppliers((s.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
@@ -109,6 +110,10 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
             error={errors.supplier_id?.message}
           />
           <WinInput label="Ghi chú" {...register('note')} />
+          <label className="flex items-center gap-2 text-[11px] mt-1">
+            <input type="checkbox" {...register('paid')} className="w-3 h-3" />
+            Đã thanh toán cho NCC
+          </label>
         </div>
       </WinGroupBox>
 

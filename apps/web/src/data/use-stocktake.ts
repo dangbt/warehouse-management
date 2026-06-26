@@ -8,7 +8,7 @@ export interface StocktakeSession {
   id: string
   code: string
   status: string
-  itemCount: number
+  _count?: { items: number }
   createdAt: string
   completedAt: string | null
 }

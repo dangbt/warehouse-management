@@ -27,6 +27,7 @@ export class ImportOrdersService {
     body: {
       supplier_id: string;
       note?: string;
+      paid?: boolean;
       items: {
         ingredient_id: string;
         quantity: number;
@@ -48,6 +49,7 @@ export class ImportOrdersService {
         code,
         supplierId: body.supplier_id,
         totalAmount,
+        paid: body.paid ?? true,
         note: body.note,
         createdById: userId,
         items: {
@@ -76,10 +78,12 @@ export class ImportOrdersService {
         where: { id },
         data: { status: 'COMPLETED', approvedById },
       });
-      await tx.supplier.update({
-        where: { id: order.supplierId },
-        data: { totalDebt: { increment: order.totalAmount } },
-      });
+      if (!order.paid) {
+        await tx.supplier.update({
+          where: { id: order.supplierId },
+          data: { totalDebt: { increment: order.totalAmount } },
+        });
+      }
       for (const item of order.items) {
         await tx.ingredient.update({
           where: { id: item.ingredientId },
