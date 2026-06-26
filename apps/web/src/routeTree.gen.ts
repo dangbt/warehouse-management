@@ -27,7 +27,7 @@ import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
-import { Route as AppStocktakeIdRouteImport } from './routes/_app/stocktake.$id'
+import { Route as AppStocktakeIdRouteImport } from './routes/_app/stocktake_.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -119,9 +119,9 @@ const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const AppStocktakeIdRoute = AppStocktakeIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppStocktakeRoute,
+  id: '/stocktake_/$id',
+  path: '/stocktake/$id',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -139,7 +139,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
   '/stock-exports': typeof AppStockExportsRoute
-  '/stocktake': typeof AppStocktakeRouteWithChildren
+  '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
@@ -159,7 +159,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
   '/stock-exports': typeof AppStockExportsRoute
-  '/stocktake': typeof AppStocktakeRouteWithChildren
+  '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
@@ -181,10 +181,10 @@ export interface FileRoutesById {
   '/_app/reports': typeof AppReportsRoute
   '/_app/roles': typeof AppRolesRoute
   '/_app/stock-exports': typeof AppStockExportsRoute
-  '/_app/stocktake': typeof AppStocktakeRouteWithChildren
+  '/_app/stocktake': typeof AppStocktakeRoute
   '/_app/suppliers': typeof AppSuppliersRoute
   '/_app/users': typeof AppUsersRoute
-  '/_app/stocktake/$id': typeof AppStocktakeIdRoute
+  '/_app/stocktake_/$id': typeof AppStocktakeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,7 +247,7 @@ export interface FileRouteTypes {
     | '/_app/stocktake'
     | '/_app/suppliers'
     | '/_app/users'
-    | '/_app/stocktake/$id'
+    | '/_app/stocktake_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -384,27 +384,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditLogsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/stocktake/$id': {
-      id: '/_app/stocktake/$id'
-      path: '/$id'
+    '/_app/stocktake_/$id': {
+      id: '/_app/stocktake_/$id'
+      path: '/stocktake/$id'
       fullPath: '/stocktake/$id'
       preLoaderRoute: typeof AppStocktakeIdRouteImport
-      parentRoute: typeof AppStocktakeRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
-
-interface AppStocktakeRouteChildren {
-  AppStocktakeIdRoute: typeof AppStocktakeIdRoute
-}
-
-const AppStocktakeRouteChildren: AppStocktakeRouteChildren = {
-  AppStocktakeIdRoute: AppStocktakeIdRoute,
-}
-
-const AppStocktakeRouteWithChildren = AppStocktakeRoute._addFileChildren(
-  AppStocktakeRouteChildren,
-)
 
 interface AppRouteChildren {
   AppAuditLogsRoute: typeof AppAuditLogsRoute
@@ -419,9 +407,10 @@ interface AppRouteChildren {
   AppReportsRoute: typeof AppReportsRoute
   AppRolesRoute: typeof AppRolesRoute
   AppStockExportsRoute: typeof AppStockExportsRoute
-  AppStocktakeRoute: typeof AppStocktakeRouteWithChildren
+  AppStocktakeRoute: typeof AppStocktakeRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
   AppUsersRoute: typeof AppUsersRoute
+  AppStocktakeIdRoute: typeof AppStocktakeIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -437,9 +426,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppReportsRoute: AppReportsRoute,
   AppRolesRoute: AppRolesRoute,
   AppStockExportsRoute: AppStockExportsRoute,
-  AppStocktakeRoute: AppStocktakeRouteWithChildren,
+  AppStocktakeRoute: AppStocktakeRoute,
   AppSuppliersRoute: AppSuppliersRoute,
   AppUsersRoute: AppUsersRoute,
+  AppStocktakeIdRoute: AppStocktakeIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

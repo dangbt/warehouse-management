@@ -16,7 +16,7 @@ interface ItemRow {
 }
 
 export function StocktakeDetailPage() {
-  const { id } = useParams({ from: '/_app/stocktake/$id' })
+  const { id } = useParams({ from: '/_app/stocktake_/$id' })
   const { data: detail, isLoading } = useStocktakeDetail(id)
   const updateMutation = useUpdateStocktakeItems()
   const completeMutation = useCompleteStocktake()
