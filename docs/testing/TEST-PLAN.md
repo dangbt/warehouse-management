@@ -2,15 +2,22 @@
 
 ## Hệ Thống Quản Lý Kho Nguyên Liệu Nhà Hàng
 
+> **Cập nhật 2026-06-26.** Một số test case dưới đây ứng với tính năng **chưa triển khai**:
+> TC-AUTH-03 (khoá sau 5 lần sai), TC-AUTH-06/07/08 (token expired / refresh), TC-IMP-05 (cancel phiếu đã approve),
+> TC-RCP-06 (hoàn kho khi huỷ order), TC-RCP-07/08 (block/allow khi thiếu tồn), Rate Limiting (mục 4) — đánh dấu _N/A (chưa làm)_.
+> Trừ kho tự động (TC-RCP-02..05) chạy qua luồng **đồng bộ KiotViet + deduct**.
+> Cần bổ sung test cho module mới: stocktake, purchase-returns + công nợ, supplier-payments, batches/HSD, kiotviet sync/deduct.
+
 ---
 
 ## 1. Phạm Vi Test
 
-| Level            | Công cụ            | Mô tả                       |
-| ---------------- | ------------------ | --------------------------- |
-| Unit Test        | Jest               | Test service logic riêng lẻ |
-| Integration Test | Jest + Supertest   | Test API endpoints + DB     |
-| E2E Test         | Cypress/Playwright | Test UI flows               |
+| Level            | Công cụ                 | Mô tả                                          |
+| ---------------- | ----------------------- | ---------------------------------------------- |
+| Unit Test (api)  | Jest                    | Test service logic riêng lẻ                    |
+| Unit Test (web)  | Vitest                  | Test component/store/service web               |
+| Integration Test | Jest + Supertest        | Test API endpoints + DB                        |
+| E2E Test         | Playwright (`apps/e2e`) | Test UI flows (đã có: warehouse/kitchen roles) |
 
 ---
 

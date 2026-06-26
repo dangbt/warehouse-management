@@ -2,6 +2,14 @@
 
 ## Hệ Thống Quản Lý Xuất Nhập Kho Nguyên Liệu Nhà Hàng
 
+> Cập nhật 2026-06-26 theo code. Lưu ý trạng thái triển khai:
+>
+> - **UC-03c (Huỷ phiếu nhập đã duyệt):** ❌ chưa có (không có endpoint cancel).
+> - **UC-06 (Trừ kho tự động):** ✅ nhưng qua **đồng bộ KiotViet + deduct thủ công**, không phải webhook Order Service.
+> - **UC-07 (Hoàn kho khi huỷ order):** ❌ chưa triển khai.
+> - **UC-09 (Cảnh báo tồn thấp):** 🟡 có report `/reports/expiring` + highlight tồn thấp; chưa có push notification.
+> - UC mới đã code: UC-11 Kiểm kê, UC-12 Trả hàng NCC + công nợ, UC-13 Thanh toán NCC, UC-14 Lô/HSD, UC-15 Đồng bộ KiotViet (xem cuối tài liệu).
+
 ---
 
 ## UC-01: Đăng Nhập
@@ -238,8 +246,70 @@
 - Nhập/xuất trong khoảng thời gian
 - Biểu đồ trend
 
-**UC-10c: Phân tích chi phí**
+**UC-10c: Phân tích chi phí** _(hiện thay bằng:)_
 
-- Food cost per dish
-- Tổng chi phí nguyên liệu theo tháng
-- So sánh giữa các kỳ
+- `GET /reports/ingredient-usage` — tiêu hao nguyên liệu
+- `GET /reports/consumption-variance` — chênh lệch tiêu hao thực tế vs định mức công thức
+
+---
+
+## UC-11: Kiểm Kê (Stocktake)
+
+| Mục   | Chi tiết                 |
+| ----- | ------------------------ |
+| Actor | Warehouse Staff, Manager |
+
+1. Tạo phiên kiểm kê → hệ thống snapshot `system_qty` từ tồn hiện tại của mọi nguyên liệu (status DRAFT)
+2. Nhập `actual_qty` thực đếm cho từng dòng → hệ thống tính `difference`
+3. Complete → `current_stock = actual_qty`, ghi stock_transactions (STOCKTAKE_ADJUST), status COMPLETED
+
+---
+
+## UC-12: Trả Hàng NCC + Công Nợ
+
+| Mục   | Chi tiết           |
+| ----- | ------------------ |
+| Actor | Warehouse, Manager |
+
+1. Tạo phiếu trả: chọn NCC, lý do, các dòng (nguyên liệu, SL, đơn giá)
+2. Hệ thống trừ tồn (type = RETURN) cho từng nguyên liệu
+3. Giảm `supplier.total_debt` theo tổng giá trị trả
+4. Ghi audit log
+
+> Phiếu nhập tạo với `paid = false` sẽ **tăng công nợ NCC** khi được duyệt.
+
+---
+
+## UC-13: Thanh Toán Công Nợ NCC
+
+| Mục   | Chi tiết            |
+| ----- | ------------------- |
+| Actor | Manager, Accountant |
+
+1. Chọn NCC → nhập số tiền + phương thức (CASH / TRANSFER)
+2. Hệ thống giảm `supplier.total_debt`
+3. Ghi audit log
+
+---
+
+## UC-14: Quản Lý Lô + Hạn Sử Dụng
+
+| Mục   | Chi tiết           |
+| ----- | ------------------ |
+| Actor | Warehouse, Manager |
+
+1. Mỗi dòng phiếu nhập được duyệt tạo 1 lô (batch_code, quantity, cost, expiry_date, status ACTIVE)
+2. Xem lô qua `GET /batches`
+3. Cảnh báo lô sắp/đã hết hạn qua `GET /reports/expiring`
+
+---
+
+## UC-15: Đồng Bộ & Trừ Kho Từ KiotViet (POS)
+
+| Mục   | Chi tiết                           |
+| ----- | ---------------------------------- |
+| Actor | Manager/Warehouse (quyền kiotviet) |
+
+1. Đồng bộ order từ KiotViet (`/kiotviet/sync` hoặc `/kiotviet/sync-api`) → lưu `kiotviet_orders` (deducted=false)
+2. Map dòng order → menu_item → recipe
+3. Gọi deduct (`/kiotviet/orders/:id/deduct`) → trừ tồn theo recipe (ORDER_DEDUCT), đánh dấu `deducted=true`

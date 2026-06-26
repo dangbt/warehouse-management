@@ -2,6 +2,9 @@
 
 ## Base URL: `/api/v1`
 
+> Đồng bộ với controllers hiện tại (2026-06-26). Mọi route (trừ `auth/login`, `health`) yêu cầu
+> `Authorization: Bearer <token>` (JwtAuthGuard) và permission tương ứng (PermissionsGuard).
+
 ---
 
 ## Authentication
@@ -10,101 +13,56 @@
 
 ```json
 // Request
-{ "email": "user@restaurant.com", "password": "secret123" }
+{ "email": "admin@wms.vn", "password": "123456" }
 
 // Response 200
 {
-  "success": true,
-  "data": {
-    "access_token": "eyJ...",
-    "refresh_token": "eyJ...",
-    "expires_in": 900,
-    "user": {
-      "id": "uuid",
-      "email": "user@restaurant.com",
-      "full_name": "Nguyen Van A",
-      "department": { "id": "uuid", "name": "Kho", "code": "WAREHOUSE" },
-      "roles": ["warehouse_staff"],
-      "permissions": ["ingredients:read", "ingredients:create", ...]
-    }
+  "access_token": "eyJ...",
+  "user": {
+    "id": "uuid",
+    "email": "admin@wms.vn",
+    "full_name": "Nguyễn Văn A",
+    "department": { "id": "uuid", "name": "Quản lý", "code": "MANAGER" },
+    "roles": ["admin"],
+    "permissions": ["ingredients:read", "ingredients:create", "..."]
   }
 }
-
-// Response 401
-{ "success": false, "error": { "code": "INVALID_CREDENTIALS", "message": "Email hoặc mật khẩu không đúng" } }
 ```
 
-### POST /auth/refresh
+> Chưa implement: `POST /auth/refresh`, `POST /auth/logout`, `PUT /auth/change-password`.
 
-```json
-// Request
-{ "refresh_token": "eyJ..." }
-// Response 200
-{ "success": true, "data": { "access_token": "eyJ...", "expires_in": 900 } }
-```
+### GET /health
 
-### PUT /auth/change-password
-
-```json
-// Request (Authorization: Bearer <token>)
-{ "old_password": "old123", "new_password": "new123" }
-```
+- Healthcheck, không cần auth.
 
 ---
 
 ## Users
 
-### GET /users
+### GET /users — `users:read`
 
-- **Permission:** `users:read`
-- **Query:** `?page=1&limit=20&department_id=uuid&role_id=uuid&is_active=true&search=keyword`
-
-### POST /users
-
-- **Permission:** `users:create`
+### POST /users — tạo user
 
 ```json
 {
-  "email": "new@restaurant.com",
+  "email": "new@wms.vn",
   "password": "default123",
   "full_name": "Tran Van B",
   "phone": "0901234567",
   "department_id": "uuid",
-  "role_ids": ["uuid1", "uuid2"]
+  "role_ids": ["uuid"]
 }
 ```
 
-### PUT /users/:id
+### PUT /users/:id — cập nhật user (gồm role_ids)
 
-- **Permission:** `users:update`
-
-### PUT /users/:id/toggle-active
-
-- **Permission:** `users:update`
-
-### PUT /users/:id/roles
-
-- **Permission:** `users:update`
-
-```json
-{ "role_ids": ["uuid1", "uuid2"] }
-```
+### PUT /users/:id/toggle-active — bật/tắt is_active (soft delete)
 
 ---
 
-## Departments
+## Common: Departments / Roles / Menu
 
 ### GET /departments
-
-### POST /departments
-
-```json
-{ "name": "Kho", "code": "WAREHOUSE", "description": "Bộ phận kho" }
-```
-
----
-
-## Roles & Permissions
 
 ### GET /roles
 
@@ -120,27 +78,21 @@
 {
   "permissions": [
     { "resource": "ingredients", "action": "create" },
-    { "resource": "ingredients", "action": "read" },
-    { "resource": "ingredients", "action": "update" },
-    { "resource": "import_orders", "action": "create" },
-    { "resource": "import_orders", "action": "read" }
+    { "resource": "ingredients", "action": "read" }
   ]
 }
 ```
+
+### GET /menu-items
 
 ---
 
 ## Ingredients
 
-### GET /ingredients
-
-- **Permission:** `ingredients:read`
-- **Query:** `?page=1&limit=20&category=Thịt&low_stock=true&search=keyword`
-- **Response:**
+### GET /ingredients — `ingredients:read`
 
 ```json
 {
-  "success": true,
   "data": [
     {
       "id": "uuid",
@@ -149,61 +101,66 @@
       "min_stock": 5,
       "current_stock": 12.5,
       "cost_per_unit": 450000,
-      "category": "Thịt",
-      "is_low_stock": false
+      "category": "Thịt"
     }
-  ],
-  "meta": { "page": 1, "limit": 20, "total": 45 }
+  ]
 }
 ```
 
-### POST /ingredients
-
-- **Permission:** `ingredients:create`
+### POST /ingredients — `ingredients:create`
 
 ```json
-{
-  "name": "Thịt bò Úc",
-  "unit": "kg",
-  "min_stock": 5,
-  "cost_per_unit": 450000,
-  "category": "Thịt"
-}
+{ "name": "Thịt bò Úc", "unit": "kg", "min_stock": 5, "cost_per_unit": 450000, "category": "Thịt" }
 ```
 
-### GET /ingredients/:id/history
+### PUT /ingredients/:id — `ingredients:update`
 
-- **Query:** `?page=1&limit=50&type=IMPORT&from=2026-06-01&to=2026-06-25`
+### DELETE /ingredients/:id — `ingredients:delete`
+
+> Không có `/ingredients/:id/history` — lịch sử nằm ở stock_transactions / batches.
+
+---
+
+## Batches
+
+### GET /batches — `ingredients:read`
+
+- Danh sách lô nguyên liệu (quantity, cost_per_unit, expiry_date, status ACTIVE/DEPLETED).
+
+### GET /reports/expiring — `ingredients:read`
+
+- Các lô sắp/đã hết hạn.
 
 ---
 
 ## Suppliers
 
-### GET /suppliers
+### GET /suppliers — `suppliers:read`
 
-- **Query:** `?search=keyword&page=1&limit=20`
+- Trả về cả `total_debt` (công nợ).
 
-### POST /suppliers
+### POST /suppliers — `suppliers:create`
 
 ```json
 { "name": "Cty TNHH ABC", "phone": "0281234567", "address": "123 Đường XYZ", "note": "" }
 ```
 
+### PUT /suppliers/:id — `suppliers:update`
+
+### DELETE /suppliers/:id — `suppliers:delete`
+
 ---
 
 ## Import Orders
 
-### GET /import-orders
+### GET /import-orders — `import_orders:read`
 
-- **Query:** `?status=PENDING&supplier_id=uuid&from=2026-06-01&to=2026-06-25&page=1&limit=20`
-
-### POST /import-orders
-
-- **Permission:** `import_orders:create`
+### POST /import-orders — `import_orders:create`
 
 ```json
 {
   "supplier_id": "uuid",
+  "paid": false,
   "note": "Nhập hàng tuần",
   "items": [
     { "ingredient_id": "uuid", "quantity": 10, "unit_price": 450000, "expiry_date": "2026-07-25" },
@@ -212,57 +169,37 @@
 }
 ```
 
-### PUT /import-orders/:id/approve
+### PUT /import-orders/:id/approve — `import_orders:approve`
 
-- **Permission:** `import_orders:approve`
+- status → COMPLETED, tăng tồn kho, ghi `IMPORT`, tạo lô; nếu `paid=false` → cộng công nợ NCC.
 
-```json
-{ "note": "Đã kiểm tra đầy đủ" }
-```
+### PUT /import-orders/:id/reject — `import_orders:approve`
 
-### PUT /import-orders/:id/reject
+- status → REJECTED.
 
-- **Permission:** `import_orders:approve`
-
-```json
-{ "reason": "Giá cao hơn báo giá" }
-```
-
-### PUT /import-orders/:id/cancel
-
-- **Permission:** `import_orders:approve`
-
-```json
-{ "reason": "NCC giao sai hàng" }
-```
+> Không có endpoint cancel.
 
 ---
 
 ## Stock Exports
 
-### POST /stock-exports
+### GET /stock-exports — `stock_exports:read`
 
-- **Permission:** `stock_exports:create`
+### POST /stock-exports — `stock_exports:create`
 
 ```json
-{
-  "items": [{ "ingredient_id": "uuid", "quantity": 2, "reason": "DAMAGED", "note": "Hỏng do tủ lạnh hư" }]
-}
+{ "items": [{ "ingredient_id": "uuid", "quantity": 2, "note": "Hỏng do tủ lạnh hư" }] }
 ```
 
-- **Reason enum:** `DAMAGED | EXPIRED | RETURN | INTERNAL_USE | OTHER`
+- Trừ tồn kho, ghi `EXPORT`.
 
 ---
 
 ## Recipes
 
-### GET /recipes
+### GET /recipes — `recipes:read`
 
-- **Query:** `?menu_item_id=uuid&search=keyword`
-
-### POST /recipes
-
-- **Permission:** `recipes:create`
+### POST /recipes — `recipes:create`
 
 ```json
 {
@@ -270,52 +207,115 @@
   "name": "Phở bò tái",
   "serving_size": 1,
   "ingredients": [
-    { "ingredient_id": "uuid", "quantity": 0.2, "unit": "kg", "note": "Thịt bò tái" },
-    { "ingredient_id": "uuid", "quantity": 0.3, "unit": "kg", "note": "Bánh phở" },
-    { "ingredient_id": "uuid", "quantity": 0.5, "unit": "lít", "note": "Nước dùng" }
+    { "ingredient_id": "uuid", "quantity": 0.15, "unit": "kg", "note": "Thịt bò tái" },
+    { "ingredient_id": "uuid", "quantity": 0.25, "unit": "kg", "note": "Bánh phở" }
   ]
 }
 ```
 
-### GET /recipes/:id
+### PUT /recipes/:id — `recipes:update`
 
-- Response bao gồm chi tiết ingredients
+> Chưa có GET /recipes/:id và DELETE.
+
+---
+
+## KiotViet (POS)
+
+### GET /kiotviet/orders — `kiotviet:read`
+
+### POST /kiotviet/sync — `kiotviet:sync`
+
+- Đồng bộ order thủ công (payload mẫu / dữ liệu test).
+
+### POST /kiotviet/sync-api — `kiotviet:sync`
+
+- Đồng bộ qua API KiotViet.
+
+### POST /kiotviet/orders/:id/deduct — `kiotviet:deduct`
+
+- Với mỗi item → map menu_item → lấy recipe → trừ tồn (`ORDER_DEDUCT`), đánh dấu `deducted=true`.
+
+---
+
+## Stocktake (Kiểm kê)
+
+### GET /stocktake — `stocktake:read`
+
+### POST /stocktake — `stocktake:create`
+
+- Tạo phiên DRAFT, snapshot system_qty từ current_stock của mọi nguyên liệu.
+
+```json
+{ "note": "Kiểm kê cuối tháng" }
+```
+
+### GET /stocktake/:id — `stocktake:read`
+
+### PUT /stocktake/:id/items — `stocktake:create`
+
+```json
+{ "items": [{ "ingredient_id": "uuid", "actual_qty": 11.8, "note": "" }] }
+```
+
+### POST /stocktake/:id/complete — `stocktake:complete`
+
+- current_stock = actual_qty, ghi `STOCKTAKE_ADJUST`, status → COMPLETED.
+
+---
+
+## Purchase Returns (Trả hàng NCC)
+
+### GET /purchase-returns — `purchase_returns:read`
+
+### POST /purchase-returns — `purchase_returns:create`
+
+```json
+{
+  "supplier_id": "uuid",
+  "reason": "Hàng kém chất lượng",
+  "note": "",
+  "items": [{ "ingredient_id": "uuid", "quantity": 2, "unit_price": 450000 }]
+}
+```
+
+- Trừ tồn (`RETURN`), giảm công nợ NCC.
+
+---
+
+## Supplier Payments (Thanh toán NCC)
+
+### GET /supplier-payments — `supplier_payments:read`
+
+### POST /supplier-payments — `supplier_payments:create`
+
+```json
+{ "supplier_id": "uuid", "amount": 5000000, "method": "TRANSFER", "note": "Trả nợ tháng 6" }
+```
+
+- method ∈ `CASH | TRANSFER`; giảm `supplier.total_debt`.
 
 ---
 
 ## Audit Logs
 
-### GET /audit-logs
-
-- **Permission:** `audit_logs:read`
-- **Query:** `?user_id=uuid&action=IMPORT_ORDER_APPROVE&resource=import_orders&from=2026-06-01&to=2026-06-25&page=1&limit=50`
-- **Response:**
+### GET /audit-logs — `audit_logs:read`
 
 ```json
 {
   "data": [
     {
       "id": "uuid",
-      "user": { "id": "uuid", "full_name": "Nguyen Van A" },
+      "user": { "id": "uuid", "full_name": "Nguyễn Văn A" },
       "action": "IMPORT_ORDER_APPROVE",
       "resource": "import_orders",
       "resource_id": "uuid",
       "old_values": { "status": "PENDING" },
-      "new_values": { "status": "COMPLETED", "approved_by": "uuid" },
-      "ip_address": "192.168.1.10",
-      "created_at": "2026-06-25T10:30:00Z"
+      "new_values": { "status": "COMPLETED" },
+      "created_at": "2026-06-26T10:30:00Z"
     }
   ]
 }
 ```
-
-### GET /audit-logs/resource/:resource/:id
-
-- Lịch sử thay đổi của 1 bản ghi cụ thể
-
-### GET /audit-logs/user/:userId
-
-- Mọi hoạt động của 1 user
 
 ---
 
@@ -323,44 +323,18 @@
 
 ### GET /reports/stock-summary
 
-- **Query:** `?category=Thịt`
-- **Response:** Tổng hợp tồn kho + giá trị
+- Tổng hợp tồn kho + giá trị.
 
 ### GET /reports/stock-movement
 
-- **Query:** `?ingredient_id=uuid&from=2026-06-01&to=2026-06-25&group_by=day`
+- Biến động xuất/nhập theo thời gian.
 
-### GET /reports/low-stock
+### GET /reports/ingredient-usage
 
-- Danh sách nguyên liệu dưới mức min_stock
+- Tiêu hao nguyên liệu.
 
-### GET /reports/cost-analysis
+### GET /reports/consumption-variance
 
-- **Query:** `?from=2026-06-01&to=2026-06-30`
-- Chi phí theo thời gian, food cost per dish
+- Chênh lệch giữa tiêu hao thực tế và định mức theo công thức.
 
----
-
-## Webhook (nhận từ Order System)
-
-### POST /webhooks/order-confirmed
-
-```json
-{
-  "order_id": "uuid",
-  "order_code": "ORD-20260625-001",
-  "items": [
-    { "menu_item_id": "uuid", "quantity": 2 },
-    { "menu_item_id": "uuid", "quantity": 1 }
-  ]
-}
-```
-
-### POST /webhooks/order-cancelled
-
-```json
-{
-  "order_id": "uuid",
-  "order_code": "ORD-20260625-001"
-}
-```
+> `/reports/expiring` thuộc nhóm Batches (xem trên).
