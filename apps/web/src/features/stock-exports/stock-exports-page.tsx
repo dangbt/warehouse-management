@@ -25,7 +25,13 @@ const columns: Column<StockExport>[] = [
     render: (r) => String(Math.abs(Number(r.quantity))),
   },
   { key: 'ingredient', header: 'ĐVT', width: 60, align: 'center', render: (r) => r.ingredient?.unit },
-  { key: 'note', header: 'Lý do', width: 200 },
+  { key: 'note', header: 'Lý do', width: 200, render: (r) => {
+    const reasons: Record<string, string> = { DAMAGED: 'Hỏng', EXPIRED: 'Hết hạn', RETURN: 'Trả NCC', INTERNAL_USE: 'Sử dụng nội bộ', OTHER: 'Khác' }
+    const note = r.note ?? ''
+    const parts = note.split(': ')
+    const label = reasons[parts[0]] ?? parts[0]
+    return parts.length > 1 ? `${label}: ${parts.slice(1).join(': ')}` : label
+  }},
   { key: 'createdBy', header: 'Người xuất', width: 120, render: (r) => r.createdBy?.fullName },
   { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },
 ]

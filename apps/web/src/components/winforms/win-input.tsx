@@ -13,7 +13,7 @@ export const WinInput = forwardRef<HTMLInputElement, Props>(({ label, error, ...
         ref={ref}
         data-testid={`input-${label}`}
         {...props}
-        className={`w-full border px-2 py-0.5 text-[11px] rounded-sm outline-none focus:border-win-input-focus ${error ? 'border-win-error' : 'border-win-input-border'}`}
+        className={`w-full border px-2 py-0.5 text-[11px] rounded-sm outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
       />
       {error && <p className="text-[10px] text-win-error mt-0.5">{error}</p>}
     </div>

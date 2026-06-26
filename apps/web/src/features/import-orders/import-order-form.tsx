@@ -16,7 +16,7 @@ const itemSchema = z.object({
 const schema = z.object({
   supplier_id: z.string().min(1, 'Chọn NCC'),
   note: z.string().optional(),
-  paid: z.boolean().default(true),
+  paid: z.boolean().default(false),
   items: z.array(itemSchema).min(1, 'Ít nhất 1 dòng'),
 })
 
@@ -54,7 +54,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   useEffect(() => {
     if (open) {
-      reset({ supplier_id: '', note: '', paid: true, items: [{ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' }] })
+      reset({ supplier_id: '', note: '', paid: false, items: [{ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' }] })
       setSubmitError('')
       Promise.all([api.get('/suppliers?limit=100'), api.get('/ingredients?limit=100')]).then(([s, i]) => {
         setSuppliers((s.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))

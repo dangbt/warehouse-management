@@ -49,7 +49,7 @@ export class ImportOrdersService {
         code,
         supplierId: body.supplier_id,
         totalAmount,
-        paid: body.paid ?? true,
+        paid: body.paid ?? false,
         note: body.note,
         createdById: userId,
         items: {

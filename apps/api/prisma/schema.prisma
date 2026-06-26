@@ -114,7 +114,7 @@ model ImportOrder {
   supplier    Supplier @relation(fields: [supplierId], references: [id])
   totalAmount Decimal  @default(0) @map("total_amount") @db.Decimal(14, 2)
   status      String   @default("PENDING")
-  paid        Boolean  @default(true)
+  paid        Boolean  @default(false)
   note        String?
   createdById String   @map("created_by")
   createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
