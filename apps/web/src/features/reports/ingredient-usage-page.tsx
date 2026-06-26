@@ -11,9 +11,9 @@ const PERIOD_OPTIONS = [
 ] as const
 
 const columns: Column<IngredientUsageItem>[] = [
-  { key: 'ingredientName', header: 'Nguyên liệu', width: 200 },
+  { key: 'name', header: 'Nguyên liệu', width: 200 },
   { key: 'unit', header: 'ĐVT', width: 80, align: 'center' },
-  { key: 'totalUsed', header: 'Tổng sử dụng', width: 120, align: 'right', render: (r) => r.totalUsed.toLocaleString() },
+  { key: 'total', header: 'Tổng sử dụng', width: 120, align: 'right', render: (r) => r.total.toLocaleString() },
 ]
 
 export function IngredientUsagePage() {
