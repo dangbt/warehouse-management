@@ -4,6 +4,10 @@ export default defineConfig({
   testDir: './tests',
   timeout: 30000,
   retries: 1,
+  // Chạy tuần tự 1 worker: tránh nhiều browser context cùng đập vào vite dev lúc
+  // compile lạnh (gây flaky các test đầu, vd login). Compile lạnh chỉ 1 lần.
+  workers: 1,
+  fullyParallel: false,
   // Tắt trace để tránh lỗi ENOENT .stacks khi run bị ngắt (artifact noise, không phải lỗi test)
   use: {
     baseURL: 'http://localhost:5173',
