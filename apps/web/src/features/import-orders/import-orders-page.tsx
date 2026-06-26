@@ -57,8 +57,9 @@ export function ImportOrdersPage() {
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
+  const [statusFilter, setStatusFilter] = useState('')
 
-  const { data: res, isLoading, refetch } = useImportOrders()
+  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
@@ -90,6 +91,17 @@ export function ImportOrdersPage() {
         />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Separator />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none"
+        >
+          <option value="">Tất cả</option>
+          <option value="PENDING">Chờ duyệt</option>
+          <option value="COMPLETED">Đã duyệt</option>
+          <option value="REJECTED">Từ chối</option>
+        </select>
       </WinToolbar>
 
       <WinDataGrid

@@ -42,12 +42,14 @@ const columns: Column<IngredientRow>[] = [
 
 export function IngredientsPage() {
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<IngredientRow | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useIngredients({ page })
+  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined })
   const createMutation = useCreateIngredient()
   const updateMutation = useUpdateIngredient()
   const deleteMutation = useDeleteIngredient()
@@ -104,6 +106,26 @@ export function IngredientsPage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={14} />} label="Export" />
+        <WinToolbar.Separator />
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+          className="border border-win-input-border rounded-sm px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus"
+        />
+        <select
+          value={category}
+          onChange={(e) => { setCategory(e.target.value); setPage(1) }}
+          className="border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none"
+        >
+          <option value="">Tất cả loại</option>
+          <option value="Thịt">Thịt</option>
+          <option value="Rau">Rau</option>
+          <option value="Gia vị">Gia vị</option>
+          <option value="Đồ khô">Đồ khô</option>
+          <option value="Đồ uống">Đồ uống</option>
+        </select>
       </WinToolbar>
 
       <WinDataGrid

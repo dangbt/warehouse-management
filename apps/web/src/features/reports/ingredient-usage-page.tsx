@@ -6,9 +6,11 @@ import { useIngredientUsage } from '@/data'
 import type { IngredientUsageItem } from '@/data/use-ingredient-usage'
 
 const columns: Column<IngredientUsageItem>[] = [
-  { key: 'name', header: 'Nguyên liệu', width: 200 },
-  { key: 'unit', header: 'ĐVT', width: 80, align: 'center' },
-  { key: 'total', header: 'Tổng sử dụng', width: 120, align: 'right', render: (r) => r.total.toLocaleString() },
+  { key: 'name', header: 'Nguyên liệu', width: 160 },
+  { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
+  { key: 'imported', header: 'Nhập', width: 90, align: 'right', render: (r) => <span className="text-green-700">{r.imported.toLocaleString()}</span> },
+  { key: 'exported', header: 'Xuất', width: 90, align: 'right', render: (r) => <span className="text-red-700">{r.exported.toLocaleString()}</span> },
+  { key: 'currentStock', header: 'Tồn kho', width: 90, align: 'right', render: (r) => r.currentStock.toLocaleString() },
 ]
 
 function getWeekRange(offset: number) {
@@ -35,6 +37,45 @@ function fmtDisplay(d: string) {
   return d.split('-').reverse().join('/')
 }
 
+function BarChart({ data }: { data: IngredientUsageItem[] }) {
+  const top = data.slice(0, 10)
+  const maxVal = Math.max(...top.map((d) => Math.max(d.imported, d.exported, d.currentStock)), 1)
+
+  return (
+    <div className="p-3 border-b border-win-grid-border bg-white overflow-x-auto">
+      <div className="flex items-end gap-3 h-40 min-w-[600px]">
+        {top.map((item) => (
+          <div key={item.id} className="flex flex-col items-center flex-1 min-w-[50px]">
+            <div className="flex items-end gap-0.5 h-28 w-full justify-center">
+              <div
+                className="bg-green-500 w-3 rounded-t-sm"
+                style={{ height: `${(item.imported / maxVal) * 100}%` }}
+                title={`Nhập: ${item.imported}`}
+              />
+              <div
+                className="bg-red-500 w-3 rounded-t-sm"
+                style={{ height: `${(item.exported / maxVal) * 100}%` }}
+                title={`Xuất: ${item.exported}`}
+              />
+              <div
+                className="bg-blue-500 w-3 rounded-t-sm"
+                style={{ height: `${(item.currentStock / maxVal) * 100}%` }}
+                title={`Tồn: ${item.currentStock}`}
+              />
+            </div>
+            <span className="text-[9px] text-center mt-1 leading-tight truncate w-full">{item.name}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-4 justify-center mt-2 text-[10px]">
+        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded-sm" /> Nhập</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded-sm" /> Xuất</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-sm" /> Tồn kho</span>
+      </div>
+    </div>
+  )
+}
+
 export function IngredientUsagePage() {
   const [period, setPeriod] = useState<'week' | 'month'>('week')
   const [offset, setOffset] = useState(0)
@@ -56,6 +97,7 @@ export function IngredientUsagePage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
+      {data && data.length > 0 && <BarChart data={data} />}
       <WinDataGrid columns={columns} data={data ?? []} loading={isLoading} />
     </div>
   )

@@ -6,7 +6,9 @@ export interface IngredientUsageItem {
   id: string
   name: string
   unit: string
-  total: number
+  imported: number
+  exported: number
+  currentStock: number
 }
 
 interface UsageResponse {

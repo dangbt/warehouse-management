@@ -40,37 +40,33 @@ export class ReportsController {
     } else if (q.period === 'month') {
       from = new Date(now.getFullYear(), now.getMonth(), 1);
     } else {
-      // default: this week (Monday)
       const day = now.getDay() || 7;
       from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
     }
 
     const transactions = await this.prisma.stockTransaction.findMany({
-      where: {
-        type: { in: ['ORDER_DEDUCT', 'EXPORT'] },
-        createdAt: { gte: from, lte: to },
-      },
-      include: { ingredient: { select: { id: true, name: true, unit: true } } },
+      where: { createdAt: { gte: from, lte: to } },
+      include: { ingredient: { select: { id: true, name: true, unit: true, currentStock: true } } },
     });
 
-    // Aggregate by ingredient
-    const usageMap = new Map<string, { id: string; name: string; unit: string; total: number }>();
+    const map = new Map<string, { id: string; name: string; unit: string; imported: number; exported: number; currentStock: number }>();
     for (const t of transactions) {
       const key = t.ingredientId;
-      const existing = usageMap.get(key);
+      const existing = map.get(key);
       const qty = Math.abs(Number(t.quantity));
-      if (existing) {
-        existing.total += qty;
-      } else {
-        usageMap.set(key, { id: t.ingredient.id, name: t.ingredient.name, unit: t.ingredient.unit, total: qty });
+      if (!existing) {
+        map.set(key, { id: t.ingredient.id, name: t.ingredient.name, unit: t.ingredient.unit, imported: 0, exported: 0, currentStock: Number(t.ingredient.currentStock) });
       }
+      const entry = map.get(key)!;
+      if (t.type === 'IMPORT') entry.imported += qty;
+      else entry.exported += qty;
     }
 
     return {
       period: q.period || 'week',
       from: from.toISOString(),
       to: to.toISOString(),
-      data: Array.from(usageMap.values()).sort((a, b) => b.total - a.total),
+      data: Array.from(map.values()).sort((a, b) => (b.imported + b.exported) - (a.imported + a.exported)),
     };
   }
 }
