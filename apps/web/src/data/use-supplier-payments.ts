@@ -25,7 +25,7 @@ export function useSupplierPayments(supplierId: string | undefined) {
 export function useCreateSupplierPayment() {
   return useMutation({
     mutationFn: (data: { supplierId: string; amount: number; method: 'CASH' | 'TRANSFER'; note?: string }) =>
-      api.post('/supplier-payments', data),
+      api.post('/supplier-payments', { supplier_id: data.supplierId, amount: data.amount, method: data.method, note: data.note }),
     onSuccess: (_newItem, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.supplierPaymentsList(variables.supplierId) })
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.suppliers })
