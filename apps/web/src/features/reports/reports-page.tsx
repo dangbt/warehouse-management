@@ -73,7 +73,7 @@ export function ReportsPage() {
               </tr>
             </thead>
             <tbody>
-              {(movements ?? []).map((t: any) => {
+              {(Array.isArray(movements) ? movements : []).map((t) => {
                 const typeMap: Record<string, { label: string; color: string }> = {
                   IMPORT: { label: '📥 Nhập', color: 'text-green-700 bg-green-50' },
                   EXPORT: { label: '📤 Xuất', color: 'text-red-700 bg-red-50' },
