@@ -9,8 +9,8 @@ import type { KiotVietOrder } from '@/data/use-kiotviet'
 const columns: Column<KiotVietOrder>[] = [
   { key: 'code', header: 'Mã đơn', width: 120 },
   { key: 'customerName', header: 'Khách hàng', width: 160 },
-  { key: 'totalAmount', header: 'Tổng tiền', width: 100, align: 'right', render: (r) => r.totalAmount.toLocaleString() },
-  { key: 'items', header: 'SP', width: 50, align: 'center', render: (r) => String(r.items.length) },
+  { key: 'totalAmount', header: 'Tổng tiền', width: 100, align: 'right', render: (r) => Number(r.totalAmount ?? 0).toLocaleString() },
+  { key: 'items', header: 'SP', width: 50, align: 'center', render: (r) => String(r.items?.length ?? 0) },
   { key: 'orderDate', header: 'Ngày đặt', width: 100, align: 'center', render: (r) => formatDate(r.orderDate) },
   {
     key: 'deducted',

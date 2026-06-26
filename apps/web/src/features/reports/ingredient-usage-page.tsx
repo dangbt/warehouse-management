@@ -8,9 +8,9 @@ import type { IngredientUsageItem } from '@/data/use-ingredient-usage'
 const columns: Column<IngredientUsageItem>[] = [
   { key: 'name', header: 'Nguyên liệu', width: 160 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
-  { key: 'imported', header: 'Nhập', width: 90, align: 'right', render: (r) => <span className="text-green-700">{r.imported.toLocaleString()}</span> },
-  { key: 'exported', header: 'Xuất', width: 90, align: 'right', render: (r) => <span className="text-red-700">{r.exported.toLocaleString()}</span> },
-  { key: 'currentStock', header: 'Tồn kho', width: 90, align: 'right', render: (r) => r.currentStock.toLocaleString() },
+  { key: 'imported', header: 'Nhập', width: 90, align: 'right', render: (r) => <span className="text-green-700">{(r.imported ?? 0).toLocaleString()}</span> },
+  { key: 'exported', header: 'Xuất', width: 90, align: 'right', render: (r) => <span className="text-red-700">{(r.exported ?? 0).toLocaleString()}</span> },
+  { key: 'currentStock', header: 'Tồn kho', width: 90, align: 'right', render: (r) => (r.currentStock ?? 0).toLocaleString() },
 ]
 
 function getWeekRange(offset: number) {
@@ -39,7 +39,7 @@ function fmtDisplay(d: string) {
 
 function BarChart({ data }: { data: IngredientUsageItem[] }) {
   const top = data.slice(0, 10)
-  const maxVal = Math.max(...top.map((d) => Math.max(d.imported, d.exported, d.currentStock)), 1)
+  const maxVal = Math.max(...top.map((d) => Math.max(d.imported ?? 0, d.exported ?? 0, d.currentStock ?? 0)), 1)
 
   return (
     <div className="p-3 border-b border-win-grid-border bg-white overflow-x-auto">
@@ -49,18 +49,18 @@ function BarChart({ data }: { data: IngredientUsageItem[] }) {
             <div className="flex items-end gap-0.5 h-28 w-full justify-center">
               <div
                 className="bg-green-500 w-3 rounded-t-sm"
-                style={{ height: `${(item.imported / maxVal) * 100}%` }}
-                title={`Nhập: ${item.imported}`}
+                style={{ height: `${((item.imported ?? 0) / maxVal) * 100}%` }}
+                title={`Nhập: ${item.imported ?? 0}`}
               />
               <div
                 className="bg-red-500 w-3 rounded-t-sm"
-                style={{ height: `${(item.exported / maxVal) * 100}%` }}
-                title={`Xuất: ${item.exported}`}
+                style={{ height: `${((item.exported ?? 0) / maxVal) * 100}%` }}
+                title={`Xuất: ${item.exported ?? 0}`}
               />
               <div
                 className="bg-blue-500 w-3 rounded-t-sm"
-                style={{ height: `${(item.currentStock / maxVal) * 100}%` }}
-                title={`Tồn: ${item.currentStock}`}
+                style={{ height: `${((item.currentStock ?? 0) / maxVal) * 100}%` }}
+                title={`Tồn: ${item.currentStock ?? 0}`}
               />
             </div>
             <span className="text-[9px] text-center mt-1 leading-tight truncate w-full">{item.name}</span>
