@@ -5,7 +5,14 @@ import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.gua
 import { KiotVietService } from './kiotviet.service';
 
 interface SyncBody {
-  orders: { id: string; code: string; customerName?: string; totalAmount: number; orderDate: string; items: { productName: string; quantity: number; price: number }[] }[];
+  orders: {
+    id: string;
+    code: string;
+    customerName?: string;
+    totalAmount: number;
+    orderDate: string;
+    items: { productName: string; quantity: number; price: number }[];
+  }[];
 }
 
 interface SyncApiBody {

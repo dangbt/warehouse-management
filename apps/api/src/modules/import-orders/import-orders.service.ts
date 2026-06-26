@@ -8,7 +8,7 @@ export class ImportOrdersService {
   async findAll(q: { page?: string; limit?: string; status?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: any = q.status ? { status: q.status } : {};
+    const where: { status?: string } = q.status ? { status: q.status } : {};
     const [data, total] = await Promise.all([
       this.prisma.importOrder.findMany({
         where,

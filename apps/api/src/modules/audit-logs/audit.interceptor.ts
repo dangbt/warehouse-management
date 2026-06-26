@@ -16,7 +16,7 @@ const SKIP_PATHS = ['/api/v1/auth/login', '/api/v1/audit-logs'];
 export class AuditInterceptor implements NestInterceptor {
   constructor(private prisma: PrismaService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = context.switchToHttp().getRequest();
     const method = req.method;
     const path = req.url;

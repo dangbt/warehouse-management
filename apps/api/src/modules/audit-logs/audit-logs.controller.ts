@@ -22,7 +22,7 @@ export class AuditLogsController {
   ) {
     const page = Math.max(1, +(q.page || 1)),
       limit = Math.min(50, Math.max(1, +(q.limit || 20)));
-    const where: any = {};
+    const where: { userId?: string; action?: string; resource?: string } = {};
     if (q.user_id) where.userId = q.user_id;
     if (q.action) where.action = q.action;
     if (q.resource) where.resource = q.resource;
