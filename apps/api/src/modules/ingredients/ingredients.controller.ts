@@ -9,6 +9,7 @@ type ExtraFields = {
   base_factor?: number | null;
   source_ingredient_id?: string | null;
   yield_ratio?: number | null;
+  loss_ratio?: number | null;
   units?: UnitInput[];
 };
 

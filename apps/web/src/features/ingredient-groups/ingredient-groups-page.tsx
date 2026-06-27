@@ -3,9 +3,73 @@ import { useForm } from 'react-hook-form'
 import { Plus, Pencil, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup } from '@/data'
+import { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup, useIngredients } from '@/data'
 import type { IngredientGroup } from '@/data'
 import { formatNumber } from '@wms/shared'
+
+interface GroupMember {
+  id: string
+  name: string
+  unit: string
+  groupId?: string | null
+  baseFactor?: string | null
+  sourceIngredientId?: string | null
+  lossRatio?: string | null
+  currentStock: string
+}
+
+function GroupMembersPanel({ group }: { group: IngredientGroup }) {
+  const { data: res } = useIngredients({ limit: 1000 })
+  const members = ((res?.data ?? []) as unknown as GroupMember[]).filter((i) => i.groupId === group.id)
+  const totalBase = members.reduce((s, m) => s + Number(m.currentStock) * (m.baseFactor != null ? Number(m.baseFactor) : 1), 0)
+
+  return (
+    <div className="border-t border-win-grid-border max-h-[240px] overflow-auto">
+      <WinGroupBox title={`📦 Chi tiết nhóm "${group.name}" — ${members.length} NL · tổng quy đổi ${formatNumber(totalBase)} ${group.baseUnit}`}>
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr className="bg-win-grid-header">
+              <th className="text-left p-1">Nguyên liệu</th>
+              <th className="text-center p-1">ĐVT</th>
+              <th className="text-right p-1">Hệ số về nhóm</th>
+              <th className="text-center p-1">Loại</th>
+              <th className="text-right p-1">Hao hụt</th>
+              <th className="text-right p-1">Tồn (quy đổi)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.map((m) => {
+              const bf = m.baseFactor != null ? Number(m.baseFactor) : 1
+              return (
+                <tr key={m.id} className="border-b border-win-grid-border">
+                  <td className="p-1">{m.name}</td>
+                  <td className="p-1 text-center">{m.unit}</td>
+                  <td className="p-1 text-right">{bf}</td>
+                  <td className="p-1 text-center">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${m.sourceIngredientId ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
+                      {m.sourceIngredientId ? 'BTP' : 'Nguồn/gốc'}
+                    </span>
+                  </td>
+                  <td className="p-1 text-right">{m.lossRatio != null ? `${(Number(m.lossRatio) * 100).toFixed(0)}%` : '-'}</td>
+                  <td className="p-1 text-right">
+                    {formatNumber(Number(m.currentStock) * bf)} {group.baseUnit}
+                  </td>
+                </tr>
+              )
+            })}
+            {!members.length && (
+              <tr>
+                <td colSpan={6} className="p-2 text-center text-win-text-secondary">
+                  Nhóm chưa có nguyên liệu
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </WinGroupBox>
+    </div>
+  )
+}
 
 const columns: Column<IngredientGroup>[] = [
   { key: 'name', header: 'Tên nhóm', width: 200 },
@@ -103,6 +167,8 @@ export function IngredientGroupsPage() {
         }}
         storageKey="ingredient-groups"
       />
+
+      {selected && <GroupMembersPanel group={selected} />}
 
       <WinDialog
         title={mode === 'add' ? '🆕 Thêm Nhóm Nguyên Liệu' : '✏️ Sửa Nhóm'}

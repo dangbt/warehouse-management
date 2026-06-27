@@ -18,6 +18,7 @@ const schema = z.object({
   base_factor: optionalNumber.optional(),
   source_ingredient_id: z.string().optional(),
   yield_ratio: optionalNumber.optional(),
+  loss_ratio: optionalNumber.optional(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -45,6 +46,7 @@ interface IngredientData {
   baseFactor?: string | null
   sourceIngredientId?: string | null
   yieldRatio?: string | null
+  lossRatio?: string | null
 }
 
 interface Props {
@@ -91,6 +93,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               base_factor: data.baseFactor != null ? Number(data.baseFactor) : null,
               source_ingredient_id: data.sourceIngredientId ?? '',
               yield_ratio: data.yieldRatio != null ? Number(data.yieldRatio) : null,
+              loss_ratio: data.lossRatio != null ? Number(data.lossRatio) : null,
             }
           : {
               name: '',
@@ -102,6 +105,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               base_factor: null,
               source_ingredient_id: '',
               yield_ratio: null,
+              loss_ratio: null,
             },
       )
     }
@@ -168,11 +172,18 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
             />
             <WinSelect label="Làm từ (nguồn)" {...register('source_ingredient_id')} options={sourceOptions} />
             <WinInput
-              label="Định mức (yield)"
+              label="Định mức chế biến"
               type="number"
               step="0.0001"
-              placeholder="1kg sống → 4 phần ⇒ 4"
+              placeholder="1 nguồn → mấy thành phẩm (1kg sống → 4 phần ⇒ 4)"
               {...register('yield_ratio')}
+            />
+            <WinInput
+              label="Hao hụt sơ chế"
+              type="number"
+              step="0.0001"
+              placeholder="tỷ lệ hao hụt (0.1 = 10%)"
+              {...register('loss_ratio')}
             />
           </div>
         </WinGroupBox>

@@ -95,6 +95,8 @@ model Ingredient {
   source       Ingredient?  @relation("Derivation", fields: [sourceIngredientId], references: [id])
   derived      Ingredient[] @relation("Derivation")
   yieldRatio   Decimal? @map("yield_ratio") @db.Decimal(10, 4)
+  // Hao hụt sơ chế: tỷ lệ hao hụt khi chế biến (vd 0.1 = 10%)
+  lossRatio    Decimal? @map("loss_ratio") @db.Decimal(5, 4)
 
   importOrderItems ImportOrderItem[]
   stockTransactions StockTransaction[]
