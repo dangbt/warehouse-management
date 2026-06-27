@@ -7,6 +7,8 @@ const ADMIN = { email: 'admin@wms.vn', password: '123456' }
 const RUN = Date.now()
 const SUP = `E2E NCC ${RUN}`
 const ING = `E2E NL ${RUN}`
+const DEL_NCC = `E2E DELETE NCC ${RUN}`
+const DEL_NL = `E2E DELETE NL ${RUN}`
 
 async function login(page: Page) {
   await page.goto('/login')
@@ -169,14 +171,14 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       await page.locator('[data-testid="sidebar-suppliers"]').click()
       await page.locator('[data-testid="toolbar-Thêm"]').click()
       const dialog = page.locator('[data-testid="dialog"]')
-      await dialog.locator('[data-testid="input-Tên NCC"]').fill('E2E DELETE NCC')
+      await dialog.locator('[data-testid="input-Tên NCC"]').fill(DEL_NCC)
       await dialog.locator('[data-testid="input-Điện thoại"]').fill('0900000000')
       await dialog.locator('[data-testid="input-Địa chỉ"]').fill('Delete test')
       await dialog.getByRole('button', { name: 'OK' }).click()
       await expect(page.getByText('Thêm NCC thành công')).toBeVisible({ timeout: 15000 })
 
       await page.waitForTimeout(500)
-      await page.locator('[data-testid^="grid-row-"]', { hasText: 'E2E DELETE NCC' }).first().click()
+      await page.locator('[data-testid^="grid-row-"]', { hasText: DEL_NCC }).first().click()
       await page.locator('[data-testid="toolbar-Xoá"]').click()
       await page.getByRole('button', { name: 'Yes' }).click()
       await expect(page.getByText('Đã xoá NCC')).toBeVisible({ timeout: 15000 })
@@ -186,7 +188,7 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       await page.locator('[data-testid="sidebar-ingredients"]').click()
       await page.locator('[data-testid="toolbar-Thêm"]').click()
       const dialog = page.locator('[data-testid="dialog"]')
-      await dialog.locator('[data-testid="input-Tên"]').fill('E2E DELETE NL')
+      await dialog.locator('[data-testid="input-Tên"]').fill(DEL_NL)
       await dialog.locator('[data-testid="select-Đơn vị"]').selectOption('kg')
       await dialog.locator('[data-testid="select-Phân loại"]').selectOption('Rau')
       await dialog.locator('[data-testid="input-Giá/đơn vị"]').fill('1000')
@@ -195,7 +197,7 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       await expect(page.getByText('Thêm nguyên liệu thành công')).toBeVisible({ timeout: 15000 })
 
       await page.waitForTimeout(500)
-      await page.locator('[data-testid^="grid-row-"]', { hasText: 'E2E DELETE NL' }).first().click()
+      await page.locator('[data-testid^="grid-row-"]', { hasText: DEL_NL }).first().click()
       await page.locator('[data-testid="toolbar-Xoá"]').click()
       await page.getByRole('button', { name: 'Yes' }).click()
       await expect(page.getByText('Đã xoá nguyên liệu')).toBeVisible({ timeout: 15000 })
