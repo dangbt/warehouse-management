@@ -92,8 +92,8 @@ export function AppLayout() {
         <span className="sm:hidden">Mâm Vị</span>
       </div>
 
-      {/* Menu Bar */}
-      <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 overflow-x-auto">
+      {/* Menu Bar (overflow-visible để dropdown không bị clip trên mobile) */}
+      <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 relative z-30 overflow-visible">
         <MenuDrop
           label="Hệ thống"
           items={[
