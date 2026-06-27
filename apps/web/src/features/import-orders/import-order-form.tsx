@@ -61,7 +61,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     if (open) {
       reset({ supplier_id: '', note: '', paid: false, items: [{ ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, expiry_date: '' }] })
       setSubmitError('')
-      Promise.all([api.get('/suppliers?limit=100'), api.get('/ingredients?limit=100')]).then(([s, i]) => {
+      Promise.all([api.get('/suppliers?limit=1000'), api.get('/ingredients?limit=1000')]).then(([s, i]) => {
         setSuppliers((s.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
         setIngredients((i.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
       })
