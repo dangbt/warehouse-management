@@ -40,7 +40,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
-  const { data: ingRes } = useIngredients({ page: 1 })
+  const { data: ingRes } = useIngredients({ limit: 1000 })
   const ingredients = (ingRes?.data ?? []) as unknown as Ing[]
 
   useEffect(() => {

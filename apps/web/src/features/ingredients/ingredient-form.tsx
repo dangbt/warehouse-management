@@ -65,7 +65,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
   const [submitError, setSubmitError] = useState('')
 
   const { data: groups } = useIngredientGroups()
-  const { data: ingRes } = useIngredients({ page: 1 })
+  const { data: ingRes } = useIngredients({ limit: 1000 })
 
   const groupOptions = [
     { value: '', label: '— Không thuộc nhóm —' },
