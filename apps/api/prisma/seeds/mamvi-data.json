@@ -1,0 +1,3338 @@
+{
+ "groups": [
+  {
+   "name": "Ba rọi",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Bò tơ",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Bắp bò",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Bồ câu",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cá hồi",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cá hú",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cá lăng",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cá lóc",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cá thu",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cá trắm",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Cua biển",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Nạm bò",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Sụn gà",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Tai heo",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Thịt xay",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Tôm",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Vịt",
+   "base_unit": "kg"
+  },
+  {
+   "name": "Giò",
+   "base_unit": "kg"
+  }
+ ],
+ "ingredients": [
+  {
+   "name": "Ba rọi sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Ba rọi",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ba rọi cháy cạnh",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.22,
+   "group": "Ba rọi",
+   "source": "Ba rọi sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Ba rọi chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Ba rọi",
+   "source": "Ba rọi sống",
+   "loss_ratio": 0.1
+  },
+  {
+   "name": "Ba rọi kho tiêu",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Ba rọi",
+   "source": "Ba rọi sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Ba rọi mắm ruốc",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Ba rọi",
+   "source": "Ba rọi sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Bò tơ chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bò tơ",
+   "source": "Bò tơ sống",
+   "loss_ratio": 0.4
+  },
+  {
+   "name": "Bò tơ sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bò tơ",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bê tái chanh (đùi bê)",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bê chao tỏi (đùi bê)",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đùi bê",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh lọc",
+   "unit": "Cái",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh nậm",
+   "unit": "Cái",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bào ngư",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bắp bò chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bắp bò",
+   "source": "Bắp bò sống",
+   "loss_ratio": 0.4
+  },
+  {
+   "name": "Bắp bắp ngâm giấm",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bắp bò sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bắp bò",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bò tái",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bò viên",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bò xay",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bồ câu bánh đa",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.13,
+   "group": "Bồ câu",
+   "source": "Bồ câu sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Bồ câu quay",
+   "unit": "Con",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bồ câu",
+   "source": "Bồ câu sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Bồ câu xôi",
+   "unit": "Con",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bồ câu",
+   "source": "Bồ câu sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Bồ câu sống",
+   "unit": "Con",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Bồ câu",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá bống kho tiêu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá bống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá diêu hông canh",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá diêu hồng chiên",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.6,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá diêu hồng phile",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.1,
+   "group": null,
+   "source": null,
+   "loss_ratio": 0.4
+  },
+  {
+   "name": "Cá hồi kho",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá hồi",
+   "source": "Cá hồi sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá hồi sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cá hồi",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá hú canh",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá hú",
+   "source": "Cá hú sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá hú kho",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá hú",
+   "source": "Cá hú sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá hú sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cá hú",
+   "source": null,
+   "loss_ratio": 0.32
+  },
+  {
+   "name": "Cá lăng canh",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá lăng",
+   "source": "Cá lăng sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá lăng lẩu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.6,
+   "group": "Cá lăng",
+   "source": "Cá lăng sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá lăng nướng",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.5,
+   "group": "Cá lăng",
+   "source": "Cá lăng sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá lăng sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cá lăng",
+   "source": null,
+   "loss_ratio": 0.25
+  },
+  {
+   "name": "Cá lăng ( chá cá lã võng)",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá lăng",
+   "source": "Cá lăng sống",
+   "loss_ratio": 0.5
+  },
+  {
+   "name": "Cá lăng gỏi",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.1,
+   "group": "Cá lăng",
+   "source": "Cá lăng sống",
+   "loss_ratio": 0.5
+  },
+  {
+   "name": "Cá lăng phi lê",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": "Cá lăng",
+   "source": "Cá lăng sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá lóc canh",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá lóc",
+   "source": "Cá lóc sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá lóc kho",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": "Cá lóc",
+   "source": "Cá lóc sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá lóc sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cá lóc",
+   "source": null,
+   "loss_ratio": 0.16
+  },
+  {
+   "name": "Cá tầm lẩu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.6,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá tầm nướng",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.7,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá thác lác canh",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá thác lác nạo",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả cá thì là",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá thu kho",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": "Cá thu",
+   "source": "Cá thu sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá thu sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cá thu",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá trắm kho riềng",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.35,
+   "group": "Cá trắm",
+   "source": "Cá trắm sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Cá trắm sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cá trắm",
+   "source": null,
+   "loss_ratio": 0.36
+  },
+  {
+   "name": "Chả cây/ chả quế",
+   "unit": "Cây",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả lụa",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chim cút bằm",
+   "unit": "kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Còi sò điệp",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Còi ốc bươu",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ốc bươu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ốc bươu (Kg)",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Xôi cua",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.35,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cua biển sống",
+   "unit": "kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Cua biển",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cua xay",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.1,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ếch",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà canh",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà chiên mắm",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà kho gừng",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà rang",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà kho sả",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà lẩu lá é",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.9,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà xé (soup)",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.05,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Xương gà",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà tre",
+   "unit": "Con",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gà H mông",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.9,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hải sâm",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hàu bịch",
+   "unit": "Bịch",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hàu con (8-10)",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Lươn",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.3,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hến",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Khoai tây",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Khoai tây ( khoai tay chiên tam vị)",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.15,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Khô cá dứa",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.12,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mực lẩu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mực xào",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.12,
+   "group": null,
+   "source": null,
+   "loss_ratio": 0.24
+  },
+  {
+   "name": "Nạm bò chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Nạm bò",
+   "source": "Nạm bò sống",
+   "loss_ratio": 0.38
+  },
+  {
+   "name": "Nạm bò sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Nạm bò",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nhân cơm sen",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.05,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nhân cơm lá é",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.1,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sụn gà chiên",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": "Sụn gà",
+   "source": "Sụn gà sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Sụn gà rang muối",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.18,
+   "group": "Sụn gà",
+   "source": "Sụn gà sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Sụn gà sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Sụn gà",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sườn rim",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": 0.15
+  },
+  {
+   "name": "Sườn canh",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.15,
+   "group": null,
+   "source": null,
+   "loss_ratio": 0.15
+  },
+  {
+   "name": "Sườn xào chua ngọt",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": 0.15
+  },
+  {
+   "name": "Sườn chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": 0.15
+  },
+  {
+   "name": "Tai heo chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Tai heo",
+   "source": "Tai heo sống",
+   "loss_ratio": 0.5
+  },
+  {
+   "name": "Tai heo sống",
+   "unit": "kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Tai heo",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tép",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt càng cua",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt cua biển",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt kho trứng",
+   "unit": "Phần",
+   "category": "Khác",
+   "cost_per_unit": 0,
+   "base_factor": 0.15,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt xào mắm ruốc",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt xay chín",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Thịt xay",
+   "source": "Thịt xay sống",
+   "loss_ratio": 0.1
+  },
+  {
+   "name": "Thịt xay sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Thịt xay",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tôm chín",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Tôm",
+   "source": "Tôm sống",
+   "loss_ratio": 0.5
+  },
+  {
+   "name": "Tôm sống",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Tôm",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tôm nõn",
+   "unit": "Kg",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Tôm",
+   "source": "Tôm sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Tôm càng",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.13,
+   "group": "Tôm",
+   "source": "Tôm sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Vịt sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Vịt",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Vịt om sấu",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.6,
+   "group": "Vịt",
+   "source": "Vịt sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Vịt chao tỏi",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.3,
+   "group": "Vịt",
+   "source": "Vịt sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Vịt kho gừng",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.8,
+   "group": "Vịt",
+   "source": "Vịt sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Heo quay",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giò heo",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Giò",
+   "source": "Giò sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Mỡ",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mỡ chài",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mỡ xay",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giò sống",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Giò",
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giò heo bó",
+   "unit": "Kg",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": "Giò",
+   "source": "Giò sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Đuôi heo",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nọng heo",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nghêu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.3,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Lòng đỏ trứng muối",
+   "unit": "Quả",
+   "category": "Khác",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Trứng gà",
+   "unit": "Quả",
+   "category": "Khác",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Trứng cút",
+   "unit": "Quả",
+   "category": "Khác",
+   "cost_per_unit": 0,
+   "base_factor": 1.0,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nem lụi",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả ốc hấp",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.4,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả ốc mỡ chài",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả giò ốc",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.25,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả mai cua",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.06,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả cua hấp",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.2,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt viên bún chả",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt nướng bún chả",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ốc om chuối đậu",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thịt om chuối đậu",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bò cuốn lá lốt",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chạo tôm (nõn)",
+   "unit": "Phần",
+   "category": "Hải sản",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chạo bò (bò xay, mỡ)",
+   "unit": "Phần",
+   "category": "Thịt",
+   "cost_per_unit": 0,
+   "base_factor": 0.09,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh bía",
+   "unit": "xấp",
+   "category": "Đồ khô",
+   "cost_per_unit": 10000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh đa",
+   "unit": "Cái",
+   "category": "Đồ khô",
+   "cost_per_unit": 3437.5,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh đa cua HP",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 32000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh mì sandwich",
+   "unit": "cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 15000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh phồng tôm",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 29000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bánh tráng nhỏ",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 117000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bắp hạt 500g",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bào ngư ngâm",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột bánh bèo",
+   "unit": "gói",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột bánh xèo",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 38000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột bắp",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 53750.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột canh",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 22500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột chanh 400g",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 110000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột gạo",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 35000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột giòn",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 35000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột hành",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 120000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột mì",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 19800.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột nêm gà",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột năng",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 75000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột nghệ",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 55000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột ngọt",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 51000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột phomai",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 450000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột quế",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 130000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột sư tử Lion",
+   "unit": "Lon",
+   "category": "Đồ khô",
+   "cost_per_unit": 43000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột tỏi",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 100000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột trà xanh",
+   "unit": "Chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 800000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột xù",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 45600.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bột khoai tây 340g",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 26000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bơ lạt (bơ phe)",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 150000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bơ tường an 800g",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 43333.33333,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bún rồng phụng",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 11000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bún tàu",
+   "unit": "cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 155000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cam thảo",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 200000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Catchup",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 68000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chà bông gà",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 200000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chả giò chay",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 40000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Chao mặn",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 22600.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cốt dừa",
+   "unit": "lon",
+   "category": "Đồ khô",
+   "cost_per_unit": 30000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu ăn",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu hào Thành Tài",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu hào 1,2kg",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 65000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu mè",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 45000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu oliu",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 220000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu ớt",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đại hồi (Hoa Hồi)",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 240000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đẳng sâm",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 480000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đậu phộng",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 48500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đậu tương",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đậu tương hạt",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 30000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đậu xanh",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 50000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đinh hương",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 280000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đỗ trọng",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 170000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đông trùng khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 350000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đường phèn",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 25000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đường thốt nốt",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 30000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đường",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 18400.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấm gạo 5L",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 145000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấm bổng 5L",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 80000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấm đầu bếp",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 9000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấm trắng mekong 870ml",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 9000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấy bạc",
+   "unit": "cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 270000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạnh nhân",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 320000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hành phi",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 90000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạt dỗi",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 800000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạt điều màu",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 150000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạt nêm heo",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 235000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạt nêm gà",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 110000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạt ngò",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 70000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hạt sen khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 190000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hắc xì dầu",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Kem tươi",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 157000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Rich (lùn)",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Kỷ tử",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 240000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Lá thơm khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Lạp xưởng",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 150000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Lộc nhung khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mạch nha 0,5kg",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 50000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Màng bọc",
+   "unit": "cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 150000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Màu gạch tôm 50gr",
+   "unit": "gói",
+   "category": "Đồ khô",
+   "cost_per_unit": 20000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mayonnaise",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 285000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắc kén",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 350000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm cá cơm Dì Cẩn",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm cày",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm chua ngọt",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm nêm",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm ruốc",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 24000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm ruốc (hũ)",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm tôm",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 100000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm tôm Hải Đăng 5L",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 91000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mắm tôm chua",
+   "unit": "phần",
+   "category": "Đồ khô",
+   "cost_per_unit": 60000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mật mía",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 30000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mật ong",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 65000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mẻ",
+   "unit": "bình/1l",
+   "category": "Đồ khô",
+   "cost_per_unit": 8000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Me cục",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 25000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mè đen",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 130000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mè trắng",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 55000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mỳ gói",
+   "unit": "gói",
+   "category": "Đồ khô",
+   "cost_per_unit": 3066.666667,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Miến ( bún miến) Đạt Phát",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 40000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Miến thái",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Miến (miến dong) Việt Cường",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mù tạt",
+   "unit": "Tuyp",
+   "category": "Đồ khô",
+   "cost_per_unit": 20000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mù tạt vàng (sốt)",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 35000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Muối hột",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 4500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Muối sấy",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 5000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mỳ milicat",
+   "unit": "gói",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Mỳ trứng",
+   "unit": "gói",
+   "category": "Đồ khô",
+   "cost_per_unit": 550000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nấm đông trùng",
+   "unit": "gói",
+   "category": "Đồ khô",
+   "cost_per_unit": 350000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nấm hương khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 350000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nấm mèo",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ngũ vị hương",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nhãn nhục",
+   "unit": "phần",
+   "category": "Đồ khô",
+   "cost_per_unit": 140000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước cốt chanh 5L",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 423500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước cốt gà",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 90000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước cốt tắc 1L",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 93200.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước mắm Hưng Thịnh",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 154000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước mắm NN 5l",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 67000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước rửa chén",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 137500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước tương halay (Hải Thiên) 500ml",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 42500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước tương lee kum hee",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 26666.66667,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước tương maggi 700ml",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 24000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nước tương TTT",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 7000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Nếp",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 25000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ớt bột",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 125000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ớt khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 50000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Phomai bò cười",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 62000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Phomai sợi",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 175000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Phèn chua",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 12000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Vỏ quế",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 80000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Rượu mai quế lộ",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 45000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Rượu mộc quế hương",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Rượu nếp",
+   "unit": "Chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 12000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Rượu vang",
+   "unit": "Chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 95000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sa tế tôm 170gr",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 23333.33333,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt bào ngư 380g",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 59000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt tương chua ngọt 2,27kg",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt mè rang",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 185000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt Sacha Leekumkee",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt ướp thịt nướng Cholimex",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 20000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt xá xíu",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt Spaghetti ( cà chua )",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sốt gà yummy",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sữa đặc",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 64000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Sữa tươi",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 29166.66667,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Táo đỏ",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 55000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thảo quả",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 201000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Thục địa",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 100000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tiêu đen xay",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 150000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tiểu hồi",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 100000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tiêu sọ hột",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 220000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tỏi phi",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 70000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tomyum",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 105000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tôm khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 460000.0,
+   "base_factor": null,
+   "group": "Tôm",
+   "source": "Tôm sống",
+   "loss_ratio": null
+  },
+  {
+   "name": "Tép khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Trà băc",
+   "unit": "bịch",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Trà khô",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 180000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Trần bì",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 100000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương bần",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 15000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương cà 2,1kg",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 56666.66667,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương đậu nành halay",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương đen 230g",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 9305.555556,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương ngọt",
+   "unit": "hũ",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương ớt 2,1",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 57000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương ớt 5kg",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 125000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tương xí muội 270gr",
+   "unit": "chai",
+   "category": "Đồ khô",
+   "cost_per_unit": 15000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Xiên que",
+   "unit": "Bịch",
+   "category": "Đồ khô",
+   "cost_per_unit": 14000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Dầu ăn (can)",
+   "unit": "can",
+   "category": "Đồ khô",
+   "cost_per_unit": 1020000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gia vị bò kho 500gr",
+   "unit": "hộp",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gạo ST",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 26000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Gạo chiên",
+   "unit": "kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 16000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấy emos",
+   "unit": "Bịch",
+   "category": "Đồ khô",
+   "cost_per_unit": 7333.333333,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Giấy vệ sinh",
+   "unit": "Cuộn",
+   "category": "Đồ khô",
+   "cost_per_unit": 30000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Đũa muỗng",
+   "unit": "Bịch",
+   "category": "Đồ khô",
+   "cost_per_unit": 43333.33333,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Muỗng",
+   "unit": "Bịch",
+   "category": "Đồ khô",
+   "cost_per_unit": 0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hộp xốp lớn",
+   "unit": "Cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 122000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hộp xốp nhỏ",
+   "unit": "Cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 37000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tô giấy 1000ml",
+   "unit": "Cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 37000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Tô giấy 450ml",
+   "unit": "Cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 33750.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Ly 120ml",
+   "unit": "Cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 12800.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bịch 5kg",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 45000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bịch 3kg",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 45000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bịch lẩu 5kg",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 52000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bịch lẩu 2kg",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 52000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bịch canh/ nước lèo 1kg",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 52000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bịch nhí",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 46000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Hủ nắp liền",
+   "unit": "Cây",
+   "category": "Đồ khô",
+   "cost_per_unit": 14500.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Túi rác cuộn lớn",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 29000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Túi rác cuôn nhỏ",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 30000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Bao rác quai đen",
+   "unit": "Kg",
+   "category": "Đồ khô",
+   "cost_per_unit": 34000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  },
+  {
+   "name": "Cồn (60cục)",
+   "unit": "Thùng",
+   "category": "Đồ khô",
+   "cost_per_unit": 280000.0,
+   "base_factor": null,
+   "group": null,
+   "source": null,
+   "loss_ratio": null
+  }
+ ]
+}

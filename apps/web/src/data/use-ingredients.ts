@@ -37,6 +37,7 @@ type BtpFields = {
   base_factor?: number | null
   source_ingredient_id?: string | null
   yield_ratio?: number | null
+  loss_ratio?: number | null
 }
 
 export function useCreateIngredient() {

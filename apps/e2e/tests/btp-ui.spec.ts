@@ -91,7 +91,7 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     await expect(page.getByText('Đã duyệt phiếu nhập')).toBeVisible({ timeout: 15000 })
   })
 
-  test('Tạo BTP chín (nhóm + nguồn + yield + base_factor)', async ({ page }) => {
+  test('Tạo BTP chín (nhóm + nguồn + định mức + hao hụt + base_factor)', async ({ page }) => {
     await page.locator('[data-testid="sidebar-ingredients"]').click()
     await page.locator('[data-testid="toolbar-Thêm"]').click()
     const dialog = page.locator('[data-testid="dialog"]')
@@ -104,9 +104,24 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     await selectByText(dialog.locator('[data-testid="select-Nhóm"]'), GROUP)
     await dialog.locator('[data-testid="input-Hệ số về nhóm"]').fill('0.22')
     await selectByText(dialog.locator('[data-testid="select-Làm từ (nguồn)"]'), SONG)
-    await dialog.locator('[data-testid="input-Định mức (yield)"]').fill('4')
+    await dialog.locator('[data-testid="input-Định mức chế biến"]').fill('4')
+    await dialog.locator('[data-testid="input-Hao hụt sơ chế"]').fill('0.1')
     await dialog.getByRole('button', { name: 'OK' }).click()
     await expect(page.getByText('Thêm nguyên liệu thành công')).toBeVisible({ timeout: 15000 })
+  })
+
+  test('Click nhóm → hiện chi tiết thành viên', async ({ page }) => {
+    await page.locator('[data-testid="sidebar-groups"]').click()
+    await page.waitForURL('**/ingredient-groups')
+    await page.waitForTimeout(500)
+    await page.locator('[data-testid^="grid-row-"]', { hasText: GROUP }).first().click()
+    // Panel chi tiết hiện tên nhóm + các thành viên (sống + chín)
+    await expect(page.getByText(`Chi tiết nhóm "${GROUP}"`)).toBeVisible({ timeout: 10000 })
+    const panel = page.locator('table').last()
+    await expect(panel.getByText(SONG, { exact: true })).toBeVisible()
+    await expect(panel.getByText(CHIN, { exact: true })).toBeVisible()
+    // Cột "Loại" phân biệt Nguồn/gốc vs BTP
+    await expect(panel.getByText('BTP').first()).toBeVisible()
   })
 
   test('Tạo phiếu chế biến', async ({ page }) => {
