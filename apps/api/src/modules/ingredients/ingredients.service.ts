@@ -13,6 +13,7 @@ type IngredientBody = {
   base_factor?: number | null;
   source_ingredient_id?: string | null;
   yield_ratio?: number | null;
+  loss_ratio?: number | null;
   units?: UnitInput[];
 };
 
@@ -64,6 +65,7 @@ export class IngredientsService {
         baseFactor: body.base_factor ?? null,
         sourceIngredientId: body.source_ingredient_id ?? null,
         yieldRatio: body.yield_ratio ?? null,
+        lossRatio: body.loss_ratio ?? null,
         units: body.units?.length
           ? {
               create: body.units.map((u) => ({
@@ -109,6 +111,7 @@ export class IngredientsService {
         baseFactor: body.base_factor,
         sourceIngredientId: body.source_ingredient_id,
         yieldRatio: body.yield_ratio,
+        lossRatio: body.loss_ratio,
       },
       include: { group: true, units: true },
     });
