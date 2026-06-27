@@ -7,6 +7,7 @@ const GROUP = `E2E Nhóm ${RUN}`
 const SONG = `E2E Sống ${RUN}`
 const CHIN = `E2E Chín ${RUN}`
 const SUP = `E2E NCC BTP ${RUN}`
+const DRINK = `E2E Nước ngọt ${RUN}`
 
 async function login(page: Page) {
   await page.goto('/login')
@@ -73,9 +74,9 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     dialog = page.locator('[data-testid="dialog"]')
     await expect(dialog).toBeVisible()
     await selectByText(dialog.locator('[data-testid="select-Nhà cung cấp"]'), SUP)
-    await selectByText(dialog.locator('table select').first(), SONG)
-    await dialog.locator('table input[type="number"]').nth(0).fill('10')
-    await dialog.locator('table input[type="number"]').nth(1).fill('120000')
+    await selectByText(dialog.locator('[data-testid="item-0-ingredient"]'), SONG)
+    await dialog.locator('[data-testid="item-0-quantity"]').fill('10')
+    await dialog.locator('[data-testid="item-0-price"]').fill('120000')
     await dialog.getByRole('button', { name: 'Lưu' }).click()
     await expect(page.getByText('Tạo phiếu nhập thành công')).toBeVisible({ timeout: 15000 })
 
@@ -129,5 +130,36 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     await page.locator('[data-testid="toolbar-Hoàn thành"]').click()
     await page.getByRole('button', { name: 'Yes' }).click()
     await expect(page.getByText('Đã hoàn thành chế biến')).toBeVisible({ timeout: 15000 })
+  })
+
+  test('Nhập theo thùng (hệ số 24) → tồn quy ra 120 chai', async ({ page }) => {
+    // NL tính theo chai
+    await page.locator('[data-testid="sidebar-ingredients"]').click()
+    await page.locator('[data-testid="toolbar-Thêm"]').click()
+    let dialog = page.locator('[data-testid="dialog"]')
+    await expect(dialog).toBeVisible()
+    await dialog.locator('[data-testid="input-Tên"]').fill(DRINK)
+    await dialog.locator('[data-testid="select-Đơn vị"]').selectOption('chai')
+    await dialog.locator('[data-testid="select-Phân loại"]').selectOption('Đồ uống')
+    await dialog.locator('[data-testid="input-Giá/đơn vị"]').fill('8000')
+    await dialog.locator('[data-testid="input-Tồn kho min"]').fill('0')
+    await dialog.getByRole('button', { name: 'OK' }).click()
+    await expect(page.getByText('Thêm nguyên liệu thành công')).toBeVisible({ timeout: 15000 })
+
+    // Nhập 5 thùng × 24 chai/thùng
+    await page.locator('[data-testid="sidebar-imports"]').click()
+    await page.locator('[data-testid="toolbar-Tạo phiếu"]').click()
+    dialog = page.locator('[data-testid="dialog"]')
+    await expect(dialog).toBeVisible()
+    await selectByText(dialog.locator('[data-testid="select-Nhà cung cấp"]'), SUP)
+    await selectByText(dialog.locator('[data-testid="item-0-ingredient"]'), DRINK)
+    await dialog.locator('[data-testid="item-0-quantity"]').fill('5')
+    await dialog.locator('[data-testid="item-0-factor"]').fill('24')
+    await dialog.locator('[data-testid="item-0-price"]').fill('8000')
+    // Thành tiền hiển thị = 5 × 24 × 8000 = 960.000
+    await expect(dialog).toContainText('960')
+    await dialog.getByRole('button', { name: 'Lưu' }).click()
+    await expect(page.getByText('Tạo phiếu nhập thành công')).toBeVisible({ timeout: 15000 })
+    // (Quy đổi factor→tồn 120 chai được kiểm bởi btp-processing.spec API TC-UOM)
   })
 })

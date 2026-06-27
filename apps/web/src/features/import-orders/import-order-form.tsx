@@ -10,6 +10,8 @@ import { formatCurrency, formatNumber } from '@wms/shared'
 const itemSchema = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
   quantity: z.coerce.number().min(0.01, '> 0'),
+  // Hệ số quy đổi: 1 ĐVT nhập = factor ĐVT tồn (vd 1 thùng = 24 chai). Mặc định 1.
+  factor: z.coerce.number().min(0.0001, '> 0').default(1),
   unit_price: z.coerce.number().min(0, '>= 0'),
   expiry_date: z.string().optional(),
 })
@@ -42,12 +44,14 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     defaultValues: {
       supplier_id: '',
       note: '',
-      items: [{ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' }],
+      items: [{ ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, expiry_date: '' }],
     },
   })
   const { fields, append, remove } = useFieldArray({ control, name: 'items' })
   const items = watch('items')
-  const total = items.reduce((sum, i) => sum + (i.quantity || 0) * (i.unit_price || 0), 0)
+  const lineTotal = (i: { quantity?: number; factor?: number; unit_price?: number }) =>
+    (i.quantity || 0) * (i.factor || 1) * (i.unit_price || 0)
+  const total = items.reduce((sum, i) => sum + lineTotal(i), 0)
 
   const [suppliers, setSuppliers] = useState<{ value: string; label: string }[]>([])
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
@@ -55,7 +59,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   useEffect(() => {
     if (open) {
-      reset({ supplier_id: '', note: '', paid: false, items: [{ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' }] })
+      reset({ supplier_id: '', note: '', paid: false, items: [{ ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, expiry_date: '' }] })
       setSubmitError('')
       Promise.all([api.get('/suppliers?limit=100'), api.get('/ingredients?limit=100')]).then(([s, i]) => {
         setSuppliers((s.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
@@ -82,7 +86,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       title="📄 Tạo Phiếu Nhập Kho"
       open={open}
       onClose={onClose}
-      width={680}
+      width={760}
       footer={
         <>
           <span className="text-xs mr-auto font-semibold">Tổng: {formatCurrency(total)}</span>
@@ -121,7 +125,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       <WinGroupBox title="Chi tiết nguyên liệu">
         <button
           type="button"
-          onClick={() => append({ ingredient_id: '', quantity: 0, unit_price: 0, expiry_date: '' })}
+          onClick={() => append({ ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, expiry_date: '' })}
           className="flex items-center gap-1 text-[11px] text-win-active-title hover:underline cursor-pointer mb-2"
         >
           <Plus size={12} /> Thêm dòng
@@ -132,9 +136,12 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
         <table className="w-full text-[11px] border border-win-grid-border">
           <thead>
             <tr className="bg-win-grid-header">
-              <th className="p-1 text-left w-[180px]">Nguyên liệu</th>
-              <th className="p-1 w-[70px]">Số lượng</th>
-              <th className="p-1 w-[100px]">Đơn giá</th>
+              <th className="p-1 text-left w-[170px]">Nguyên liệu</th>
+              <th className="p-1 w-[60px]">Số lượng</th>
+              <th className="p-1 w-[60px]" title="1 ĐVT nhập = ? ĐVT tồn (vd 1 thùng = 24 chai)">
+                Hệ số
+              </th>
+              <th className="p-1 w-[100px]">Đơn giá (ĐVT tồn)</th>
               <th className="p-1 w-[90px]">Thành tiền</th>
               <th className="p-1 w-[100px]">HSD</th>
               <th className="p-1 w-[30px]"></th>
@@ -145,6 +152,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
               <tr key={field.id} className="border-t border-win-grid-border">
                 <td className="p-0.5">
                   <select
+                    data-testid={`item-${i}-ingredient`}
                     {...register(`items.${i}.ingredient_id`)}
                     className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
                   >
@@ -160,6 +168,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                   <input
                     type="number"
                     step="0.01"
+                    data-testid={`item-${i}-quantity`}
                     {...register(`items.${i}.quantity`)}
                     className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
                   />
@@ -167,16 +176,25 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                 <td className="p-0.5">
                   <input
                     type="number"
+                    step="0.0001"
+                    data-testid={`item-${i}-factor`}
+                    {...register(`items.${i}.factor`)}
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
+                  />
+                </td>
+                <td className="p-0.5">
+                  <input
+                    type="number"
+                    data-testid={`item-${i}-price`}
                     {...register(`items.${i}.unit_price`)}
                     className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
                   />
                 </td>
-                <td className="p-0.5 text-right pr-2">
-                  {formatNumber((items[i]?.quantity || 0) * (items[i]?.unit_price || 0))}
-                </td>
+                <td className="p-0.5 text-right pr-2">{formatNumber(lineTotal(items[i] || {}))}</td>
                 <td className="p-0.5">
                   <input
                     type="date"
+                    data-testid={`item-${i}-expiry`}
                     {...register(`items.${i}.expiry_date`)}
                     className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
                   />

@@ -2,10 +2,30 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/services/api'
 import { QUERY_KEYS } from './query-keys'
 
+export interface StockGroupMember {
+  id: string
+  name: string
+  unit: string
+  currentStock: number
+  baseFactor: number
+  baseQty: number
+  value: number
+}
+export interface StockGroup {
+  id: string
+  name: string
+  baseUnit: string
+  minStock: number | null
+  items: StockGroupMember[]
+  totalStock: number
+  totalValue: number
+  isLow: boolean
+}
 interface StockSummary {
   total: number
   totalValue: number
   lowStock: { name: string; unit: string; currentStock: string; minStock: string }[]
+  groups: StockGroup[]
   ingredients: unknown[]
 }
 interface Transaction {
