@@ -27,8 +27,7 @@ export const QUERY_KEYS = {
   auditLogsList: (params?: Record<string, string>) => ['audit-logs', 'list', params] as const,
 
   kiotvietOrders: ['kiotviet-orders'] as const,
-  kiotvietOrdersList: (params?: Record<string, string | number | undefined>) =>
-    ['kiotviet-orders', 'list', params] as const,
+  kiotvietOrdersList: (params?: Record<string, string | number | undefined>) => ['kiotviet-orders', 'list', params] as const,
 
   ingredientUsage: ['ingredient-usage'] as const,
   ingredientUsageList: (params?: Record<string, string | undefined>) => ['ingredient-usage', 'list', params] as const,
@@ -47,11 +46,16 @@ export const QUERY_KEYS = {
   supplierPayments: ['supplier-payments'] as const,
   supplierPaymentsList: (supplierId: string) => ['supplier-payments', 'list', supplierId] as const,
 
+  ingredientGroups: ['ingredient-groups'] as const,
+  ingredientGroupsList: () => ['ingredient-groups', 'list'] as const,
+
+  processing: ['processing'] as const,
+  processingList: (params?: Record<string, string>) => ['processing', 'list', params] as const,
+
   reports: {
     stockSummary: ['reports', 'stock-summary'] as const,
     stockMovement: ['reports', 'stock-movement'] as const,
-    consumptionVariance: (params?: Record<string, string | undefined>) =>
-      ['reports', 'consumption-variance', params] as const,
+    consumptionVariance: (params?: Record<string, string | undefined>) => ['reports', 'consumption-variance', params] as const,
     expiring: (days: number) => ['reports', 'expiring', days] as const,
   },
 } as const

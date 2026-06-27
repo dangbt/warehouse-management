@@ -10,6 +10,8 @@ export const UNIT_OPTIONS = [
   { value: 'chai', label: 'chai' },
   { value: 'gói', label: 'gói' },
   { value: 'lon', label: 'lon' },
+  { value: 'phần', label: 'phần' },
+  { value: 'thùng', label: 'thùng' },
 ] as const
 
 export const STOCK_EXPORT_REASONS = [

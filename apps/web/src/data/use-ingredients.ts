@@ -20,19 +20,28 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useIngredients(params?: { page?: number; category?: string; search?: string }) {
+export function useIngredients(params?: { page?: number; category?: string; search?: string; limit?: number }) {
   const query = new URLSearchParams()
   if (params?.page) query.set('page', String(params.page))
   if (params?.category) query.set('category', params.category)
   if (params?.search) query.set('search', params.search)
+  if (params?.limit) query.set('limit', String(params.limit))
   const key = QUERY_KEYS.ingredientsList(Object.fromEntries(query))
 
   return useQuery<ListResponse>({ queryKey: key, queryFn: () => api.get(`/ingredients?${query}`) })
 }
 
+// Trường bán thành phẩm + gom nhóm (tuỳ chọn)
+type BtpFields = {
+  group_id?: string | null
+  base_factor?: number | null
+  source_ingredient_id?: string | null
+  yield_ratio?: number | null
+}
+
 export function useCreateIngredient() {
   return useMutation({
-    mutationFn: (data: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number }) =>
+    mutationFn: (data: { name: string; unit: string; category: string; cost_per_unit: number; min_stock: number } & BtpFields) =>
       api.post('/ingredients', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
@@ -59,7 +68,7 @@ export function useUpdateIngredient() {
       category?: string
       cost_per_unit?: number
       min_stock?: number
-    }) => api.put(`/ingredients/${id}`, data),
+    } & BtpFields) => api.put(`/ingredients/${id}`, data),
     onSuccess: (updated) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.ingredients }, (old) => {
         if (!old) return old

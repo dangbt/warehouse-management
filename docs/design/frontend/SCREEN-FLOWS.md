@@ -1,5 +1,12 @@
 # Screen Flows & User Journey
 
+> **Trạng thái (2026-06-26):** Một số flow dưới đây là thiết kế gốc, chưa khớp 100% code:
+>
+> - "Huỷ phiếu nhập đã duyệt" (mục 2) — ❌ chưa có.
+> - "Xem lịch sử" nguyên liệu (mục 3) — lịch sử ở stock_transactions/batches, chưa chắc có dialog riêng.
+> - Notification System (mục 7) — 🟡 chưa có push; có report lô sắp hết hạn + highlight tồn thấp.
+> - **Màn hình mới đã có:** Kiểm kê (`/stocktake`, `/stocktake/:id`), Trả hàng NCC (`/purchase-returns`), Đồng bộ KiotViet (`/kiotviet`), báo cáo tiêu hao (`/ingredient-usage`), chênh lệch định mức (`/consumption-variance`), trang "Không có quyền truy cập".
+
 ---
 
 ## 1. Login Flow

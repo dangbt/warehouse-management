@@ -26,9 +26,7 @@ const columns: Column<IngredientRow>[] = [
     width: 80,
     align: 'right',
     render: (r) => (
-      <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>
-        {formatNumber(r.currentStock)}
-      </span>
+      <span className={Number(r.currentStock) <= Number(r.minStock) ? 'text-win-error font-bold' : ''}>{formatNumber(r.currentStock)}</span>
     ),
   },
   { key: 'minStock', header: 'Min', width: 60, align: 'right', render: (r) => formatNumber(r.minStock) },
@@ -62,6 +60,10 @@ export function IngredientsPage() {
     category: string
     cost_per_unit: number
     min_stock: number
+    group_id?: string | null
+    base_factor?: number | null
+    source_ingredient_id?: string | null
+    yield_ratio?: number | null
   }) => {
     if (formMode === 'add') {
       await createMutation.mutateAsync(formData)
@@ -98,13 +100,7 @@ export function IngredientsPage() {
             setFormOpen(true)
           }}
         />
-        <WinToolbar.Button
-          icon={<Trash2 size={14} />}
-          label="Xoá"
-          danger
-          disabled={!selected}
-          onClick={() => setConfirmDelete(true)}
-        />
+        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={14} />} label="Export" />
@@ -113,12 +109,18 @@ export function IngredientsPage() {
           type="text"
           placeholder="Tìm kiếm..."
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
           className="border border-win-input-border rounded-sm px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus bg-white"
         />
         <select
           value={category}
-          onChange={(e) => { setCategory(e.target.value); setPage(1) }}
+          onChange={(e) => {
+            setCategory(e.target.value)
+            setPage(1)
+          }}
           className="border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none bg-white"
         >
           <option value="">Tất cả loại</option>
@@ -146,13 +148,7 @@ export function IngredientsPage() {
         storageKey="ingredients"
       />
 
-      <IngredientForm
-        open={formOpen}
-        mode={formMode}
-        data={selected as any}
-        onClose={() => setFormOpen(false)}
-        onSave={handleSave}
-      />
+      <IngredientForm open={formOpen} mode={formMode} data={selected as any} onClose={() => setFormOpen(false)} onSave={handleSave} />
       <WinMessageBox
         type="question"
         title="Xác nhận"
@@ -181,14 +177,31 @@ const batchColumns: Column<Batch>[] = [
   { key: 'batchCode', header: 'Mã lô', width: 120 },
   { key: 'costPerUnit', header: 'Giá/ĐV', width: 100, align: 'right', render: (r) => formatCurrency(r.costPerUnit) },
   { key: 'quantity', header: 'Số lượng', width: 80, align: 'right', render: (r) => formatNumber(r.quantity) },
-  { key: 'expiryDate', header: 'HSD', width: 100, render: (r) => r.expiryDate ? <span className={isExpiringSoon(r.expiryDate) ? 'text-win-error font-bold' : ''}>{formatDate(r.expiryDate)}{isExpiringSoon(r.expiryDate) ? ' ⚠️' : ''}</span> : '-' },
+  {
+    key: 'expiryDate',
+    header: 'HSD',
+    width: 100,
+    render: (r) =>
+      r.expiryDate ? (
+        <span className={isExpiringSoon(r.expiryDate) ? 'text-win-error font-bold' : ''}>
+          {formatDate(r.expiryDate)}
+          {isExpiringSoon(r.expiryDate) ? ' ⚠️' : ''}
+        </span>
+      ) : (
+        '-'
+      ),
+  },
   {
     key: 'status',
     header: 'Trạng thái',
     width: 100,
     align: 'center',
     render: (r) => {
-      const colors: Record<string, string> = { ACTIVE: 'bg-green-100 text-green-800', EXPIRED: 'bg-red-100 text-red-800', DEPLETED: 'bg-gray-100 text-gray-600' }
+      const colors: Record<string, string> = {
+        ACTIVE: 'bg-green-100 text-green-800',
+        EXPIRED: 'bg-red-100 text-red-800',
+        DEPLETED: 'bg-gray-100 text-gray-600',
+      }
       const labels: Record<string, string> = { ACTIVE: 'Còn hàng', EXPIRED: 'Hết hạn', DEPLETED: 'Đã hết' }
       return <span className={`px-2 py-0.5 text-[10px] rounded ${colors[r.status] ?? ''}`}>{labels[r.status] ?? r.status}</span>
     },
@@ -201,12 +214,7 @@ function BatchesPanel({ ingredientId }: { ingredientId: string }) {
   return (
     <div className="border-t border-win-grid-border max-h-[200px] overflow-auto">
       <WinGroupBox title="📦 Lô hàng">
-        <WinDataGrid
-          columns={batchColumns}
-          data={batches ?? []}
-          loading={isLoading}
-          storageKey="ingredient-batches"
-        />
+        <WinDataGrid columns={batchColumns} data={batches ?? []} loading={isLoading} storageKey="ingredient-batches" />
       </WinGroupBox>
     </div>
   )

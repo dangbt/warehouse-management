@@ -3,6 +3,15 @@ import { IngredientsService } from './ingredients.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
+type UnitInput = { unit_name: string; factor: number; is_default_buy?: boolean };
+type ExtraFields = {
+  group_id?: string | null;
+  base_factor?: number | null;
+  source_ingredient_id?: string | null;
+  yield_ratio?: number | null;
+  units?: UnitInput[];
+};
+
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('ingredients')
 export class IngredientsController {
@@ -33,7 +42,7 @@ export class IngredientsController {
       category: string;
       cost_per_unit: number;
       min_stock: number;
-    },
+    } & ExtraFields,
   ) {
     return this.svc.create(body);
   }
@@ -49,7 +58,7 @@ export class IngredientsController {
       category?: string;
       cost_per_unit?: number;
       min_stock?: number;
-    },
+    } & ExtraFields,
   ) {
     return this.svc.update(id, body);
   }

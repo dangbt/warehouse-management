@@ -1,7 +1,44 @@
-import { RefreshCw } from 'lucide-react'
+import { useState } from 'react'
+import { RefreshCw, ChevronRight, ChevronDown } from 'lucide-react'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement } from '@/data'
+import type { StockGroup } from '@/data/use-reports'
 import { formatDateTime, formatCurrency, formatNumber } from '@wms/shared'
+
+function GroupRow({ g }: { g: StockGroup }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <tr className={`border-b border-win-grid-border cursor-pointer hover:bg-win-menu-hover ${g.isLow ? 'text-win-error' : ''}`} onClick={() => setOpen((o) => !o)}>
+        <td className="p-1">
+          <span className="inline-flex items-center gap-1 font-semibold">
+            {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            {g.name}
+          </span>
+        </td>
+        <td className="p-1 text-right font-bold">
+          {formatNumber(g.totalStock)} {g.baseUnit}
+          {g.isLow ? ' ⚠️' : ''}
+        </td>
+        <td className="p-1 text-center">{g.minStock != null ? `${formatNumber(g.minStock)} ${g.baseUnit}` : '-'}</td>
+        <td className="p-1 text-right">{formatCurrency(g.totalValue)}</td>
+      </tr>
+      {open &&
+        g.items.map((m) => (
+          <tr key={m.id} className="border-b border-win-grid-border bg-win-grid-row-alt text-win-text-secondary">
+            <td className="p-1 pl-6">
+              {m.name} <span className="opacity-60">({formatNumber(m.currentStock)} {m.unit} × {m.baseFactor})</span>
+            </td>
+            <td className="p-1 text-right">
+              {formatNumber(m.baseQty)} {g.baseUnit}
+            </td>
+            <td className="p-1"></td>
+            <td className="p-1 text-right">{formatCurrency(m.value)}</td>
+          </tr>
+        ))}
+    </>
+  )
+}
 
 export function ReportsPage() {
   const { data: summary, isLoading, refetch } = useStockSummary()
@@ -29,6 +66,26 @@ export function ReportsPage() {
             <div className="text-[11px] text-win-text-secondary">Giá trị kho</div>
           </div>
         </div>
+
+        {summary && summary.groups?.length > 0 && (
+          <WinGroupBox title="📦 Tồn kho theo nhóm (tự quy đổi về đơn vị gốc)">
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr className="bg-win-grid-header">
+                  <th className="text-left p-1">Nhóm / Nguyên liệu</th>
+                  <th className="text-right p-1">Tồn (quy đổi)</th>
+                  <th className="text-center p-1">Min nhóm</th>
+                  <th className="text-right p-1">Giá trị</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.groups.map((g) => (
+                  <GroupRow key={g.id} g={g} />
+                ))}
+              </tbody>
+            </table>
+          </WinGroupBox>
+        )}
 
         {summary && summary.lowStock.length > 0 && (
           <WinGroupBox title="⚠️ Cảnh báo tồn kho thấp">
@@ -79,6 +136,10 @@ export function ReportsPage() {
                   EXPORT: { label: '📤 Xuất', color: 'text-red-700 bg-red-50' },
                   ORDER_DEDUCT: { label: '🍳 Trừ kho', color: 'text-orange-700 bg-orange-50' },
                   ORDER_RESTORE: { label: '↩️ Hoàn', color: 'text-blue-700 bg-blue-50' },
+                  PROCESS_OUT: { label: '🔪 Chế biến (trừ)', color: 'text-orange-700 bg-orange-50' },
+                  PROCESS_IN: { label: '🍲 Chế biến (thu)', color: 'text-green-700 bg-green-50' },
+                  RETURN: { label: '↩️ Trả NCC', color: 'text-red-700 bg-red-50' },
+                  STOCKTAKE_ADJUST: { label: '📋 Kiểm kê', color: 'text-purple-700 bg-purple-50' },
                 }
                 const typeInfo = typeMap[t.type] ?? { label: t.type, color: '' }
                 return (

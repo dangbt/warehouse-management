@@ -20,9 +20,11 @@ import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
 import { Route as AppPurchaseReturnsRouteImport } from './routes/_app/purchase-returns'
+import { Route as AppProcessingRouteImport } from './routes/_app/processing'
 import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
 import { Route as AppIngredientsRouteImport } from './routes/_app/ingredients'
 import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient-usage'
+import { Route as AppIngredientGroupsRouteImport } from './routes/_app/ingredient-groups'
 import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
@@ -83,6 +85,11 @@ const AppPurchaseReturnsRoute = AppPurchaseReturnsRouteImport.update({
   path: '/purchase-returns',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProcessingRoute = AppProcessingRouteImport.update({
+  id: '/processing',
+  path: '/processing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppKiotvietRoute = AppKiotvietRouteImport.update({
   id: '/kiotviet',
   path: '/kiotviet',
@@ -96,6 +103,11 @@ const AppIngredientsRoute = AppIngredientsRouteImport.update({
 const AppIngredientUsageRoute = AppIngredientUsageRouteImport.update({
   id: '/ingredient-usage',
   path: '/ingredient-usage',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIngredientGroupsRoute = AppIngredientGroupsRouteImport.update({
+  id: '/ingredient-groups',
+  path: '/ingredient-groups',
   getParentRoute: () => AppRoute,
 } as any)
 const AppImportOrdersRoute = AppImportOrdersRouteImport.update({
@@ -131,9 +143,11 @@ export interface FileRoutesByFullPath {
   '/consumption-variance': typeof AppConsumptionVarianceRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
+  '/ingredient-groups': typeof AppIngredientGroupsRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
   '/kiotviet': typeof AppKiotvietRoute
+  '/processing': typeof AppProcessingRoute
   '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
@@ -151,9 +165,11 @@ export interface FileRoutesByTo {
   '/consumption-variance': typeof AppConsumptionVarianceRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
+  '/ingredient-groups': typeof AppIngredientGroupsRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
   '/kiotviet': typeof AppKiotvietRoute
+  '/processing': typeof AppProcessingRoute
   '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
@@ -173,9 +189,11 @@ export interface FileRoutesById {
   '/_app/consumption-variance': typeof AppConsumptionVarianceRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/import-orders': typeof AppImportOrdersRoute
+  '/_app/ingredient-groups': typeof AppIngredientGroupsRoute
   '/_app/ingredient-usage': typeof AppIngredientUsageRoute
   '/_app/ingredients': typeof AppIngredientsRoute
   '/_app/kiotviet': typeof AppKiotvietRoute
+  '/_app/processing': typeof AppProcessingRoute
   '/_app/purchase-returns': typeof AppPurchaseReturnsRoute
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/reports': typeof AppReportsRoute
@@ -195,9 +213,11 @@ export interface FileRouteTypes {
     | '/consumption-variance'
     | '/dashboard'
     | '/import-orders'
+    | '/ingredient-groups'
     | '/ingredient-usage'
     | '/ingredients'
     | '/kiotviet'
+    | '/processing'
     | '/purchase-returns'
     | '/recipes'
     | '/reports'
@@ -215,9 +235,11 @@ export interface FileRouteTypes {
     | '/consumption-variance'
     | '/dashboard'
     | '/import-orders'
+    | '/ingredient-groups'
     | '/ingredient-usage'
     | '/ingredients'
     | '/kiotviet'
+    | '/processing'
     | '/purchase-returns'
     | '/recipes'
     | '/reports'
@@ -236,9 +258,11 @@ export interface FileRouteTypes {
     | '/_app/consumption-variance'
     | '/_app/dashboard'
     | '/_app/import-orders'
+    | '/_app/ingredient-groups'
     | '/_app/ingredient-usage'
     | '/_app/ingredients'
     | '/_app/kiotviet'
+    | '/_app/processing'
     | '/_app/purchase-returns'
     | '/_app/recipes'
     | '/_app/reports'
@@ -335,6 +359,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPurchaseReturnsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/processing': {
+      id: '/_app/processing'
+      path: '/processing'
+      fullPath: '/processing'
+      preLoaderRoute: typeof AppProcessingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/kiotviet': {
       id: '/_app/kiotviet'
       path: '/kiotviet'
@@ -354,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/ingredient-usage'
       fullPath: '/ingredient-usage'
       preLoaderRoute: typeof AppIngredientUsageRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ingredient-groups': {
+      id: '/_app/ingredient-groups'
+      path: '/ingredient-groups'
+      fullPath: '/ingredient-groups'
+      preLoaderRoute: typeof AppIngredientGroupsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/import-orders': {
@@ -399,9 +437,11 @@ interface AppRouteChildren {
   AppConsumptionVarianceRoute: typeof AppConsumptionVarianceRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppImportOrdersRoute: typeof AppImportOrdersRoute
+  AppIngredientGroupsRoute: typeof AppIngredientGroupsRoute
   AppIngredientUsageRoute: typeof AppIngredientUsageRoute
   AppIngredientsRoute: typeof AppIngredientsRoute
   AppKiotvietRoute: typeof AppKiotvietRoute
+  AppProcessingRoute: typeof AppProcessingRoute
   AppPurchaseReturnsRoute: typeof AppPurchaseReturnsRoute
   AppRecipesRoute: typeof AppRecipesRoute
   AppReportsRoute: typeof AppReportsRoute
@@ -418,9 +458,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppConsumptionVarianceRoute: AppConsumptionVarianceRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppImportOrdersRoute: AppImportOrdersRoute,
+  AppIngredientGroupsRoute: AppIngredientGroupsRoute,
   AppIngredientUsageRoute: AppIngredientUsageRoute,
   AppIngredientsRoute: AppIngredientsRoute,
   AppKiotvietRoute: AppKiotvietRoute,
+  AppProcessingRoute: AppProcessingRoute,
   AppPurchaseReturnsRoute: AppPurchaseReturnsRoute,
   AppRecipesRoute: AppRecipesRoute,
   AppReportsRoute: AppReportsRoute,

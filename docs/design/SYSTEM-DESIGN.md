@@ -2,10 +2,24 @@
 
 ## Hệ Thống Quản Lý Xuất Nhập Kho Nguyên Liệu Nhà Hàng
 
-| Thông tin | Chi tiết   |
-| --------- | ---------- |
-| Phiên bản | 1.0        |
-| Ngày tạo  | 2026-06-25 |
+| Thông tin | Chi tiết               |
+| --------- | ---------------------- |
+| Phiên bản | 1.1                    |
+| Ngày tạo  | 2026-06-25             |
+| Cập nhật  | 2026-06-26 (sync code) |
+
+---
+
+## 0. Trạng Thái Triển Khai (vs thiết kế gốc)
+
+Tài liệu này mô tả thiết kế dự kiến. Khác biệt so với code hiện tại:
+
+- **Redis / Bull Queue:** CHƯA tích hợp. Auto-deduct chạy đồng bộ trong DB transaction, không qua queue/cache.
+- **Trừ kho tự động:** KHÔNG qua webhook từ Order Service. Thực tế: đồng bộ order từ **KiotViet (POS)** rồi gọi endpoint `POST /kiotviet/orders/:id/deduct`.
+- **Auth:** chỉ có access token (login). CHƯA có refresh token, logout, rate limiting/khoá tài khoản.
+- **Swagger/OpenAPI:** CHƯA bật.
+- **Module mới (đã có trong code, ngoài thiết kế gốc):** `batches` (lô + HSD), `stocktake` (kiểm kê), `purchase-returns` (trả hàng NCC + công nợ), `supplier-payments` (thanh toán NCC), `kiotviet` (tích hợp POS).
+- **Monorepo:** Turborepo + npm workspaces (`apps/api`, `apps/web`, `apps/e2e`, `packages/*`); global prefix API `/api/v1`.
 
 ---
 
@@ -50,19 +64,22 @@
 
 ## 2. Tech Stack Chi Tiết
 
-| Component         | Technology      | Lý do                         |
-| ----------------- | --------------- | ----------------------------- |
-| Backend Framework | NestJS          | Modular, TypeScript, DI       |
-| Language          | TypeScript      | Type safety                   |
-| Database          | PostgreSQL      | JSONB cho audit, reliable     |
-| ORM               | Prisma          | Type-safe queries, migrations |
-| Cache             | Redis           | Session, stock cache          |
-| Queue             | Bull + Redis    | Async stock deduct            |
-| Auth              | JWT (Passport)  | Stateless, scalable           |
-| Frontend          | React + Vite    | Fast, modern                  |
-| UI Library        | @dangbt/pro-ui  | Consistent UI                 |
-| CSS               | Tailwind CSS v4 | Utility-first                 |
-| API Docs          | Swagger/OpenAPI | Auto-generated                |
+| Component         | Technology                                 | Lý do                                      |
+| ----------------- | ------------------------------------------ | ------------------------------------------ |
+| Backend Framework | NestJS                                     | Modular, TypeScript, DI                    |
+| Language          | TypeScript                                 | Type safety                                |
+| Database          | PostgreSQL                                 | JSONB cho audit, reliable                  |
+| ORM               | Prisma                                     | Type-safe queries, migrations              |
+| Cache             | Redis _(planned)_                          | Session, stock cache — chưa dùng           |
+| Queue             | Bull + Redis _(planned)_                   | Async stock deduct — chưa dùng             |
+| Auth              | JWT (Passport)                             | Stateless (access token; refresh chưa làm) |
+| Frontend          | React + Vite                               | Fast, modern                               |
+| Routing/Data      | TanStack Router + TanStack Query + Zustand | Routing, server state, store               |
+| UI Library        | @dangbt/pro-ui                             | Consistent UI                              |
+| CSS               | Tailwind CSS v4                            | Utility-first                              |
+| Charts/Forms      | recharts + react-hook-form                 | Báo cáo + form                             |
+| Test              | Jest (api), Vitest (web), Playwright (e2e) | Unit + E2E                                 |
+| API Docs          | Swagger/OpenAPI _(planned)_                | Chưa bật                                   |
 
 ---
 
@@ -104,11 +121,15 @@ audit/
 - Capture response (new_values)
 - Ghi audit_logs async (không block response)
 
-### 3.3 Stock Deduct Flow
+### 3.x Module thực tế (NestJS, dưới `apps/api/src/modules`)
+
+`auth`, `users`, `common` (departments/roles/menu-items), `ingredients`, `batches`, `suppliers`, `import-orders`, `stock-exports`, `recipes`, `kiotviet`, `stocktake`, `purchase-returns`, `supplier-payments`, `audit-logs`, `reports`.
+
+### 3.3 Stock Deduct Flow (thực tế: KiotViet, không phải webhook)
 
 ```
-Order Service ──webhook──► WMS API
-                              │
+KiotViet (POS) ──sync──► kiotviet_orders (deducted=false)
+                              │  POST /kiotviet/orders/:id/deduct
                               ▼
                     StockDeductService
                               │
@@ -215,11 +236,12 @@ PUT    /api/v1/{resource}/:id/{action}  # Custom action (approve, cancel)
 ### 6.1 Authentication Flow
 
 ```
-Login → Access Token (15min) + Refresh Token (7 days)
+Login → Access Token (JWT)        # refresh token: PLANNED, chưa làm
      → Mỗi request gửi Access Token trong Authorization header
-     → Khi expired → dùng Refresh Token lấy Access Token mới
-     → Refresh Token expired → login lại
+     → Token expired → login lại
 ```
+
+> Thiết kế gốc dự kiến access (15m) + refresh (7d). Hiện code chỉ phát access token khi login.
 
 ### 6.2 Authorization Flow
 

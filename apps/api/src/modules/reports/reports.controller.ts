@@ -11,11 +11,65 @@ export class ReportsController {
   async stockSummary() {
     const ingredients = await this.prisma.ingredient.findMany({
       orderBy: { name: 'asc' },
+      include: { group: true },
     });
     const total = ingredients.length;
     const totalValue = ingredients.reduce((s, i) => s + Number(i.currentStock) * Number(i.costPerUnit), 0);
     const lowStock = ingredients.filter((i) => Number(i.currentStock) <= Number(i.minStock));
-    return { total, totalValue, lowStock, ingredients };
+
+    // Gom nhóm: quy đổi tồn từng NL về base_unit của nhóm (current_stock × base_factor)
+    type Member = {
+      id: string;
+      name: string;
+      unit: string;
+      currentStock: number;
+      baseFactor: number;
+      baseQty: number;
+      value: number;
+    };
+    const groupMap = new Map<string, { id: string; name: string; baseUnit: string; minStock: number | null; items: Member[] }>();
+
+    for (const i of ingredients) {
+      if (!i.group) continue;
+      const baseFactor = i.baseFactor != null ? Number(i.baseFactor) : 1;
+      const stock = Number(i.currentStock);
+      const member: Member = {
+        id: i.id,
+        name: i.name,
+        unit: i.unit,
+        currentStock: stock,
+        baseFactor,
+        baseQty: +(stock * baseFactor).toFixed(3),
+        value: +(stock * Number(i.costPerUnit)).toFixed(2),
+      };
+      const g = groupMap.get(i.group.id);
+      if (g) {
+        g.items.push(member);
+      } else {
+        groupMap.set(i.group.id, {
+          id: i.group.id,
+          name: i.group.name,
+          baseUnit: i.group.baseUnit,
+          minStock: i.group.minStock != null ? Number(i.group.minStock) : null,
+          items: [member],
+        });
+      }
+    }
+
+    const groups = Array.from(groupMap.values()).map((g) => {
+      const totalStock = +g.items.reduce((s, m) => s + m.baseQty, 0).toFixed(3);
+      const groupValue = +g.items.reduce((s, m) => s + m.value, 0).toFixed(2);
+      return {
+        ...g,
+        totalStock,
+        totalValue: groupValue,
+        isLow: g.minStock != null && totalStock <= g.minStock,
+      };
+    });
+
+    const ungrouped = ingredients.filter((i) => !i.groupId);
+
+    return { total, totalValue, lowStock, groups, ungrouped, ingredients };
   }
 
   @Get('stock-movement')
@@ -55,7 +109,14 @@ export class ReportsController {
       const existing = map.get(key);
       const qty = Math.abs(Number(t.quantity));
       if (!existing) {
-        map.set(key, { id: t.ingredient.id, name: t.ingredient.name, unit: t.ingredient.unit, imported: 0, exported: 0, currentStock: Number(t.ingredient.currentStock) });
+        map.set(key, {
+          id: t.ingredient.id,
+          name: t.ingredient.name,
+          unit: t.ingredient.unit,
+          imported: 0,
+          exported: 0,
+          currentStock: Number(t.ingredient.currentStock),
+        });
       }
       const entry = map.get(key)!;
       if (t.type === 'IMPORT') entry.imported += qty;
@@ -66,7 +127,7 @@ export class ReportsController {
       period: q.period || 'week',
       from: from.toISOString(),
       to: to.toISOString(),
-      data: Array.from(map.values()).sort((a, b) => (b.imported + b.exported) - (a.imported + a.exported)),
+      data: Array.from(map.values()).sort((a, b) => b.imported + b.exported - (a.imported + a.exported)),
     };
   }
 
@@ -113,7 +174,7 @@ export class ReportsController {
       where: { id: { in: ingredientIds } },
       select: { id: true, name: true, unit: true },
     });
-    const ingredientLookup = new Map(ingredients.map((i) => [i.id, i]));
+    const ingredientLookup = new Map(ingredients.map((i) => [i.id, i] as const));
 
     const data = ingredientIds.map((id) => {
       const theoretical = theoreticalMap.get(id) || 0;

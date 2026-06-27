@@ -2,6 +2,12 @@
 
 ## Tech: React + @dangbt/pro-ui + Tailwind CSS v4
 
+> **Trạng thái thực tế (2026-06-26):** code nằm ở `apps/web/`, routing dùng **TanStack Router (file-based)** trong `src/routes/` (không phải `router.tsx` tập trung), server state dùng **TanStack Query**, store dùng **Zustand**, form dùng **react-hook-form**, chart dùng **recharts**. Phần dưới là spec thiết kế gốc; cấu trúc thư mục & routing thực tế đã khác.
+>
+> **Routes thực tế** (dưới `src/routes/_app/`): `dashboard`, `ingredients`, `suppliers`, `import-orders`, `stock-exports`, `recipes`, `kiotviet`, `stocktake` (+ `stocktake/:id`), `purchase-returns`, `users`, `roles`, `audit-logs`, `reports`, `ingredient-usage`, `consumption-variance`; ngoài app: `login`, `index`.
+>
+> **Features thực tế** (`src/features/`): audit-logs, auth, dashboard, errors, import-orders, ingredients, kiotviet, purchase-returns, recipes, reports, roles, stock-exports, stocktake, suppliers, users. _Không_ có page `menu-items` riêng; reports tách thành các route riêng (ingredient-usage, consumption-variance) thay vì `CostAnalysisReport`.
+
 ---
 
 ## 1. Project Structure
@@ -257,13 +263,7 @@ function IngredientsPage() {
       />
 
       {/* Form Dialog */}
-      <IngredientForm
-        open={formOpen}
-        mode={formMode}
-        data={selectedIngredient}
-        onClose={() => setFormOpen(false)}
-        onSave={handleSave}
-      />
+      <IngredientForm open={formOpen} mode={formMode} data={selectedIngredient} onClose={() => setFormOpen(false)} onSave={handleSave} />
     </div>
   )
 }

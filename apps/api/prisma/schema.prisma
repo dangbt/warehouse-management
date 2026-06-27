@@ -38,6 +38,7 @@ model User {
   stocktakeSessions  StocktakeSession[] @relation("StocktakeCreatedBy")
   purchaseReturns    PurchaseReturn[] @relation("ReturnCreatedBy")
   supplierPayments   SupplierPayment[] @relation("PaymentCreatedBy")
+  processingOrders   ProcessingOrder[] @relation("ProcessingCreatedBy")
 
   @@map("users")
 }
@@ -83,12 +84,27 @@ model Ingredient {
   costPerUnit  Decimal  @default(0) @map("cost_per_unit") @db.Decimal(12, 2)
   category     String
   createdAt    DateTime @default(now()) @map("created_at")
+
+  // Gom nhóm để báo cáo tồn (quy về base_unit của nhóm)
+  groupId      String?  @map("group_id")
+  group        IngredientGroup? @relation(fields: [groupId], references: [id])
+  baseFactor   Decimal? @map("base_factor") @db.Decimal(12, 6)
+
+  // Bán thành phẩm: làm từ NL nguồn nào + định mức quy đổi mặc định
+  sourceIngredientId String? @map("source_ingredient_id")
+  source       Ingredient?  @relation("Derivation", fields: [sourceIngredientId], references: [id])
+  derived      Ingredient[] @relation("Derivation")
+  yieldRatio   Decimal? @map("yield_ratio") @db.Decimal(10, 4)
+
   importOrderItems ImportOrderItem[]
   stockTransactions StockTransaction[]
   recipeIngredients RecipeIngredient[]
   batches      IngredientBatch[]
   stocktakeItems StocktakeItem[]
   purchaseReturnItems PurchaseReturnItem[]
+  units        IngredientUnit[]
+  processingAsSource ProcessingOrder[] @relation("ProcSource")
+  processingAsOutput ProcessingOrder[] @relation("ProcOutput")
 
   @@map("ingredients")
 }
@@ -336,4 +352,47 @@ model SupplierPayment {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("supplier_payments")
+}
+
+model IngredientGroup {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  baseUnit    String       @map("base_unit")
+  minStock    Decimal?     @map("min_stock") @db.Decimal(10, 3)
+  note        String?
+  ingredients Ingredient[]
+
+  @@map("ingredient_groups")
+}
+
+model IngredientUnit {
+  id           String     @id @default(uuid())
+  ingredientId String     @map("ingredient_id")
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  unitName     String     @map("unit_name")
+  factor       Decimal    @db.Decimal(12, 4)
+  isDefaultBuy Boolean    @default(false) @map("is_default_buy")
+
+  @@unique([ingredientId, unitName])
+  @@map("ingredient_units")
+}
+
+model ProcessingOrder {
+  id                 String     @id @default(uuid())
+  code               String     @unique
+  sourceIngredientId String     @map("source_ingredient_id")
+  source             Ingredient @relation("ProcSource", fields: [sourceIngredientId], references: [id])
+  sourceQty          Decimal    @map("source_qty") @db.Decimal(10, 3)
+  outputIngredientId String     @map("output_ingredient_id")
+  output             Ingredient @relation("ProcOutput", fields: [outputIngredientId], references: [id])
+  expectedQty        Decimal    @map("expected_qty") @db.Decimal(10, 3)
+  outputQty          Decimal    @map("output_qty") @db.Decimal(10, 3)
+  status             String     @default("DRAFT")
+  note               String?
+  createdById        String     @map("created_by")
+  createdBy          User       @relation("ProcessingCreatedBy", fields: [createdById], references: [id])
+  completedAt        DateTime?  @map("completed_at")
+  createdAt          DateTime   @default(now()) @map("created_at")
+
+  @@map("processing_orders")
 }

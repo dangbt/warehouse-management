@@ -32,7 +32,7 @@ export function useCreateImportOrder() {
       supplier_id: string
       note?: string
       paid?: boolean
-      items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string }[]
+      items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string; unit?: string; factor?: number }[]
     }) => api.post('/import-orders', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) =>
