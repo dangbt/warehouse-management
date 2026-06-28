@@ -21,6 +21,7 @@ import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
 import { Route as AppPurchaseReturnsRouteImport } from './routes/_app/purchase-returns'
 import { Route as AppProcessingRouteImport } from './routes/_app/processing'
+import { Route as AppMenuRouteImport } from './routes/_app/menu'
 import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
 import { Route as AppIngredientsRouteImport } from './routes/_app/ingredients'
 import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient-usage'
@@ -90,6 +91,11 @@ const AppProcessingRoute = AppProcessingRouteImport.update({
   path: '/processing',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMenuRoute = AppMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppKiotvietRoute = AppKiotvietRouteImport.update({
   id: '/kiotviet',
   path: '/kiotviet',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
   '/kiotviet': typeof AppKiotvietRoute
+  '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
   '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
   '/kiotviet': typeof AppKiotvietRoute
+  '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
   '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/_app/ingredient-usage': typeof AppIngredientUsageRoute
   '/_app/ingredients': typeof AppIngredientsRoute
   '/_app/kiotviet': typeof AppKiotvietRoute
+  '/_app/menu': typeof AppMenuRoute
   '/_app/processing': typeof AppProcessingRoute
   '/_app/purchase-returns': typeof AppPurchaseReturnsRoute
   '/_app/recipes': typeof AppRecipesRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/ingredient-usage'
     | '/ingredients'
     | '/kiotviet'
+    | '/menu'
     | '/processing'
     | '/purchase-returns'
     | '/recipes'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/ingredient-usage'
     | '/ingredients'
     | '/kiotviet'
+    | '/menu'
     | '/processing'
     | '/purchase-returns'
     | '/recipes'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/_app/ingredient-usage'
     | '/_app/ingredients'
     | '/_app/kiotviet'
+    | '/_app/menu'
     | '/_app/processing'
     | '/_app/purchase-returns'
     | '/_app/recipes'
@@ -366,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProcessingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/menu': {
+      id: '/_app/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof AppMenuRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/kiotviet': {
       id: '/_app/kiotviet'
       path: '/kiotviet'
@@ -441,6 +460,7 @@ interface AppRouteChildren {
   AppIngredientUsageRoute: typeof AppIngredientUsageRoute
   AppIngredientsRoute: typeof AppIngredientsRoute
   AppKiotvietRoute: typeof AppKiotvietRoute
+  AppMenuRoute: typeof AppMenuRoute
   AppProcessingRoute: typeof AppProcessingRoute
   AppPurchaseReturnsRoute: typeof AppPurchaseReturnsRoute
   AppRecipesRoute: typeof AppRecipesRoute
@@ -462,6 +482,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIngredientUsageRoute: AppIngredientUsageRoute,
   AppIngredientsRoute: AppIngredientsRoute,
   AppKiotvietRoute: AppKiotvietRoute,
+  AppMenuRoute: AppMenuRoute,
   AppProcessingRoute: AppProcessingRoute,
   AppPurchaseReturnsRoute: AppPurchaseReturnsRoute,
   AppRecipesRoute: AppRecipesRoute,

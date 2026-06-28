@@ -20,6 +20,7 @@ import { PurchaseReturnsModule } from './modules/purchase-returns/purchase-retur
 import { SupplierPaymentsModule } from './modules/supplier-payments/supplier-payments.module';
 import { IngredientGroupsModule } from './modules/ingredient-groups/ingredient-groups.module';
 import { ProcessingModule } from './modules/processing/processing.module';
+import { MenuModule } from './modules/menu/menu.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ProcessingModule } from './modules/processing/processing.module';
     SupplierPaymentsModule,
     IngredientGroupsModule,
     ProcessingModule,
+    MenuModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],

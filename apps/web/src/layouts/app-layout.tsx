@@ -29,7 +29,10 @@ const menuTree: TreeNode[] = [
     label: 'Bếp',
     icon: '🍳',
     permission: 'recipes:read',
-    children: [{ id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' }],
+    children: [
+      { id: 'menu', label: 'Thực đơn', route: '/menu', permission: 'recipes:read' },
+      { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
+    ],
   },
   { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
