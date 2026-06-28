@@ -44,7 +44,7 @@ export class KiotVietService {
   }
 
   /** Sync from KiotViet API directly */
-  async syncFromApi(config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }) {
+  async syncFromApi(config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }, userId: string) {
     // 1. Get access token
     const tokenRes = await fetch('https://id.kiotviet.vn/connect/token', {
       method: 'POST',
@@ -79,10 +79,10 @@ export class KiotVietService {
       })),
     }));
 
-    return this.syncOrders(orders);
+    return this.syncOrders(orders, userId);
   }
-  async syncOrders(orders: KiotVietOrderInput[]) {
-    const results = { synced: 0, skipped: 0, errors: [] as string[] };
+  async syncOrders(orders: KiotVietOrderInput[], userId: string) {
+    const results = { synced: 0, skipped: 0, deducted: 0, errors: [] as string[] };
 
     for (const order of orders) {
       const exists = await this.prisma.kiotVietOrder.findUnique({ where: { kiotVietId: order.id } });
@@ -101,7 +101,7 @@ export class KiotVietService {
         return { productName: item.productName, menuItemId: matched?.id || null, quantity: item.quantity, price: item.price };
       });
 
-      await this.prisma.kiotVietOrder.create({
+      const created = await this.prisma.kiotVietOrder.create({
         data: {
           kiotVietId: order.id,
           code: order.code,
@@ -112,6 +112,14 @@ export class KiotVietService {
         },
       });
       results.synced++;
+
+      // Tự động trừ kho ngay sau khi sync (best-effort: 1 order lỗi không chặn các order khác)
+      try {
+        await this.deductOrder(created.id, userId);
+        results.deducted++;
+      } catch (e) {
+        results.errors.push(`${order.code}: ${(e as Error).message}`);
+      }
     }
 
     return results;
