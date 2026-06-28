@@ -107,6 +107,7 @@ model Ingredient {
   units        IngredientUnit[]
   processingAsSource ProcessingOrder[] @relation("ProcSource")
   processingAsOutput ProcessingOrder[] @relation("ProcOutput")
+  directMenuItems    MenuItem[] @relation("DirectIngredient")
 
   @@map("ingredients")
 }
@@ -203,6 +204,13 @@ model MenuItem {
   price    Decimal @db.Decimal(12, 2)
   category String
   isActive Boolean @default(true) @map("is_active")
+  // Khớp ổn định với sản phẩm KiotViet (thay vì khớp theo tên)
+  kiotvietProductId String? @unique @map("kiotviet_product_id")
+  // Cách trừ tồn: null = chưa cấu hình, RECIPE = theo công thức, DIRECT = trừ thẳng 1 NL, NONE = không quản tồn
+  inventoryMode String? @map("inventory_mode")
+  // NL trừ trực tiếp khi inventoryMode = DIRECT (vd Coca → ingredient "Coca")
+  directIngredientId String? @map("direct_ingredient_id")
+  directIngredient   Ingredient? @relation("DirectIngredient", fields: [directIngredientId], references: [id])
   recipe   Recipe?
   kiotVietOrderItems KiotVietOrderItem[]
 

@@ -81,8 +81,35 @@ export class KiotVietService {
 
     return this.syncOrders(orders, userId);
   }
+  /** Đồng bộ danh sách sản phẩm (thực đơn) từ KiotViet → menu_items (upsert theo mã KiotViet) */
+  async syncProducts(products: { id: string; name: string; price?: number; category?: string }[]) {
+    const results = { created: 0, updated: 0 };
+    for (const p of products) {
+      const existing = await this.prisma.menuItem.findUnique({ where: { kiotvietProductId: String(p.id) } });
+      if (existing) {
+        await this.prisma.menuItem.update({
+          where: { id: existing.id },
+          data: { name: p.name, price: p.price ?? existing.price, category: p.category ?? existing.category, isActive: true },
+        });
+        results.updated++;
+      } else {
+        await this.prisma.menuItem.create({
+          data: {
+            name: p.name,
+            price: p.price ?? 0,
+            category: p.category ?? 'KiotViet',
+            kiotvietProductId: String(p.id),
+            // Món mới = chưa cấu hình cách trừ tồn (inventoryMode = null)
+          },
+        });
+        results.created++;
+      }
+    }
+    return results;
+  }
+
   async syncOrders(orders: KiotVietOrderInput[], userId: string) {
-    const results = { synced: 0, skipped: 0, deducted: 0, errors: [] as string[] };
+    const results = { synced: 0, skipped: 0, deducted: 0, unconfigured: [] as string[], errors: [] as string[] };
 
     for (const order of orders) {
       const exists = await this.prisma.kiotVietOrder.findUnique({ where: { kiotVietId: order.id } });
@@ -115,8 +142,9 @@ export class KiotVietService {
 
       // Tự động trừ kho ngay sau khi sync (best-effort: 1 order lỗi không chặn các order khác)
       try {
-        await this.deductOrder(created.id, userId);
-        results.deducted++;
+        const r = await this.deductOrder(created.id, userId);
+        if (r.deductions > 0) results.deducted++;
+        for (const u of r.unconfigured) if (!results.unconfigured.includes(u)) results.unconfigured.push(u);
       } catch (e) {
         results.errors.push(`${order.code}: ${(e as Error).message}`);
       }
@@ -134,44 +162,63 @@ export class KiotVietService {
     if (!order) throw new BadRequestException('Đơn hàng không tồn tại');
     if (order.deducted) throw new BadRequestException('Đơn hàng đã được trừ kho');
 
-    // Collect all ingredients to deduct
+    // Gom NL cần trừ theo cách cấu hình của từng món (mode)
     const deductions: { ingredientId: string; quantity: number }[] = [];
+    const unconfigured: string[] = []; // tên món chưa cấu hình cách trừ tồn
+    const add = (ingredientId: string, quantity: number) => {
+      const e = deductions.find((d) => d.ingredientId === ingredientId);
+      if (e) e.quantity += quantity;
+      else deductions.push({ ingredientId, quantity });
+    };
 
     for (const item of order.items) {
-      if (!item.menuItem?.recipe) continue;
-      const recipe = item.menuItem.recipe;
-      for (const ri of recipe.ingredients) {
-        const qty = (Number(ri.quantity) * item.quantity) / recipe.servingSize;
-        const existing = deductions.find((d) => d.ingredientId === ri.ingredientId);
-        if (existing) existing.quantity += qty;
-        else deductions.push({ ingredientId: ri.ingredientId, quantity: qty });
+      const mi = item.menuItem;
+      if (!mi) {
+        unconfigured.push(item.productName);
+        continue;
+      }
+      const mode = mi.inventoryMode;
+      if (mode === 'NONE') continue; // không quản tồn → bỏ qua êm
+      if ((mode === 'RECIPE' || mode == null) && mi.recipe) {
+        // Món chế biến: trừ NL theo công thức
+        for (const ri of mi.recipe.ingredients) {
+          add(ri.ingredientId, (Number(ri.quantity) * item.quantity) / mi.recipe.servingSize);
+        }
+      } else if (mode === 'DIRECT' && mi.directIngredientId) {
+        // Hàng bán thẳng: 1 món = 1 đơn vị tồn của NL gắn trực tiếp
+        add(mi.directIngredientId, item.quantity);
+      } else {
+        unconfigured.push(mi.name); // mode set nhưng thiếu cấu hình, hoặc chưa gán công thức
       }
     }
 
-    if (deductions.length === 0) throw new BadRequestException('Không có nguyên liệu nào để trừ (kiểm tra công thức)');
-
-    // Execute deduction in transaction
-    await this.prisma.$transaction(async (tx) => {
-      for (const d of deductions) {
-        const batchResults = await this.batchDeduction.deductFromBatches(tx, d.ingredientId, d.quantity);
-        await tx.ingredient.update({ where: { id: d.ingredientId }, data: { currentStock: { decrement: d.quantity } } });
-        for (const b of batchResults) {
-          await tx.stockTransaction.create({
-            data: {
-              ingredientId: d.ingredientId,
-              type: 'ORDER_DEDUCT',
-              quantity: -b.qty,
-              referenceId: b.batchId,
-              note: `Trừ kho từ đơn KiotViet ${order.code}`,
-              createdById: userId,
-            },
-          });
+    if (deductions.length > 0) {
+      await this.prisma.$transaction(async (tx) => {
+        for (const d of deductions) {
+          const batchResults = await this.batchDeduction.deductFromBatches(tx, d.ingredientId, d.quantity);
+          await tx.ingredient.update({ where: { id: d.ingredientId }, data: { currentStock: { decrement: d.quantity } } });
+          for (const b of batchResults) {
+            await tx.stockTransaction.create({
+              data: {
+                ingredientId: d.ingredientId,
+                type: 'ORDER_DEDUCT',
+                quantity: -b.qty,
+                referenceId: b.batchId,
+                note: `Trừ kho từ đơn KiotViet ${order.code}`,
+                createdById: userId,
+              },
+            });
+          }
         }
-      }
-      await tx.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true } });
-    });
+        await tx.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true } });
+      });
+    } else if (unconfigured.length === 0) {
+      // Toàn món "không quản tồn" → đánh dấu đã xử lý
+      await this.prisma.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true } });
+    }
+    // else: có món chưa cấu hình & chưa trừ gì → để deducted=false, retry sau khi cấu hình
 
-    return { message: `Đã trừ kho cho đơn ${order.code}`, deductions: deductions.length };
+    return { message: `Đơn ${order.code}: trừ ${deductions.length} NL`, deductions: deductions.length, unconfigured };
   }
 
   async getOrders(query: { page?: string; limit?: string; deducted?: string }) {
