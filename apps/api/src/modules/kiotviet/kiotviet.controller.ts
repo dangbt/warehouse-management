@@ -36,14 +36,14 @@ export class KiotVietController {
 
   @Post('sync')
   @RequirePermissions('kiotviet:sync')
-  sync(@Body() body: SyncBody) {
-    return this.svc.syncOrders(body.orders);
+  sync(@Body() body: SyncBody, @Req() req: Request & { user: { id: string } }) {
+    return this.svc.syncOrders(body.orders, req.user.id);
   }
 
   @Post('sync-api')
   @RequirePermissions('kiotviet:sync')
-  syncFromApi(@Body() body: SyncApiBody) {
-    return this.svc.syncFromApi(body);
+  syncFromApi(@Body() body: SyncApiBody, @Req() req: Request & { user: { id: string } }) {
+    return this.svc.syncFromApi(body, req.user.id);
   }
 
   @Post('orders/:id/deduct')
