@@ -32,13 +32,20 @@ export function useKiotVietOrders(params?: { page?: number; deducted?: string })
   })
 }
 
+type SyncResult = { synced: number; skipped: number; deducted: number; errors: string[] }
+
+function onSyncSuccess(res: SyncResult) {
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.kiotvietOrders })
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients }) // tồn đã tự trừ
+  const t = useToastStore.getState()
+  t.success(`Đồng bộ ${res.synced} đơn · tự trừ kho ${res.deducted}${res.skipped ? ` · bỏ qua ${res.skipped}` : ''}`)
+  if (res.errors?.length) t.error(`${res.errors.length} đơn chưa trừ được: ${res.errors[0]}`)
+}
+
 export function useSyncKiotViet() {
   return useMutation({
-    mutationFn: (orders: unknown[]) => api.post('/kiotviet/sync', { orders }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.kiotvietOrders })
-      useToastStore.getState().success('Đồng bộ KiotViet thành công')
-    },
+    mutationFn: (orders: unknown[]) => api.post('/kiotviet/sync', { orders }) as Promise<SyncResult>,
+    onSuccess: onSyncSuccess,
     onError: (e: Error) => {
       useToastStore.getState().error(e.message)
     },
@@ -48,11 +55,8 @@ export function useSyncKiotViet() {
 export function useSyncKiotVietApi() {
   return useMutation({
     mutationFn: (config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }) =>
-      api.post('/kiotviet/sync-api', config),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.kiotvietOrders })
-      useToastStore.getState().success('Đồng bộ từ KiotViet API thành công')
-    },
+      api.post('/kiotviet/sync-api', config) as Promise<SyncResult>,
+    onSuccess: onSyncSuccess,
     onError: (e: Error) => {
       useToastStore.getState().error(e.message)
     },
