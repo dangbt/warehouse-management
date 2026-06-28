@@ -46,6 +46,12 @@ export class KiotVietController {
     return this.svc.syncFromApi(body, req.user.id);
   }
 
+  @Post('sync-products')
+  @RequirePermissions('kiotviet:sync')
+  syncProducts(@Body() body: { products: { id: string; name: string; price?: number; category?: string }[] }) {
+    return this.svc.syncProducts(body.products);
+  }
+
   @Post('orders/:id/deduct')
   @RequirePermissions('kiotviet:deduct')
   deduct(@Param('id') id: string, @Req() req: Request & { user: { id: string } }) {

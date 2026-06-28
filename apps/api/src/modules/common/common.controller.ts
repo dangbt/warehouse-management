@@ -37,9 +37,4 @@ export class CommonController {
       include: { permissions: true },
     });
   }
-
-  @Get('menu-items')
-  menuItems() {
-    return this.prisma.menuItem.findMany();
-  }
 }
