@@ -32,14 +32,15 @@ export function useKiotVietOrders(params?: { page?: number; deducted?: string })
   })
 }
 
-type SyncResult = { synced: number; skipped: number; deducted: number; errors: string[] }
+type SyncResult = { synced: number; skipped: number; deducted: number; unconfigured?: string[]; errors: string[] }
 
 function onSyncSuccess(res: SyncResult) {
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.kiotvietOrders })
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients }) // tồn đã tự trừ
   const t = useToastStore.getState()
   t.success(`Đồng bộ ${res.synced} đơn · tự trừ kho ${res.deducted}${res.skipped ? ` · bỏ qua ${res.skipped}` : ''}`)
-  if (res.errors?.length) t.error(`${res.errors.length} đơn chưa trừ được: ${res.errors[0]}`)
+  if (res.unconfigured?.length) t.error(`${res.unconfigured.length} món chưa cấu hình trừ tồn: ${res.unconfigured.slice(0, 3).join(', ')} — vào Thực đơn để cấu hình`)
+  if (res.errors?.length) t.error(`${res.errors.length} đơn lỗi: ${res.errors[0]}`)
 }
 
 export function useSyncKiotViet() {
