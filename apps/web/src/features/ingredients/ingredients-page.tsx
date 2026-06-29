@@ -136,6 +136,7 @@ export function IngredientsPage() {
       </WinToolbar>
 
       <WinDataGrid searchable
+        onSearch={(q) => { setSearch(q); setPage(1) }}
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
