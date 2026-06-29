@@ -16,10 +16,7 @@ export class SupplierPaymentsController {
 
   @Post()
   @RequirePermissions('supplier_payments:create')
-  create(
-    @Req() req,
-    @Body() body: { supplier_id: string; amount: number; method: string; note?: string },
-  ) {
+  create(@Req() req, @Body() body: { supplier_id: string; amount: number; method: string; note?: string }) {
     return this.svc.create(req.user.id, body);
   }
 }

@@ -44,7 +44,10 @@ export class KiotVietService {
   }
 
   /** Sync from KiotViet API directly */
-  async syncFromApi(config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string }, userId: string) {
+  async syncFromApi(
+    config: { clientId: string; clientSecret: string; retailer: string; fromDate?: string; toDate?: string },
+    userId: string,
+  ) {
     // 1. Get access token
     const tokenRes = await fetch('https://id.kiotviet.vn/connect/token', {
       method: 'POST',
