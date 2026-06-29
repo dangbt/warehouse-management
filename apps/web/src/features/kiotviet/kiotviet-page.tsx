@@ -74,7 +74,7 @@ export function KiotVietPage() {
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileChange} />
-      <WinDataGrid
+      <WinDataGrid searchable
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}

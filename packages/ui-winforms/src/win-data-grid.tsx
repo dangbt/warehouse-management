@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Columns3, ArrowUp, ArrowDown } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Columns3, ArrowUp, ArrowDown, Search } from 'lucide-react'
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   flexRender,
   type ColumnDef,
   type SortingState,
@@ -30,6 +31,7 @@ interface Props<T> {
   onRowDoubleClick?: (row: T) => void
   getRowClass?: (row: T) => string
   storageKey?: string
+  searchable?: boolean
   tableOptions?: Partial<Omit<TableOptions<T>, 'data' | 'columns' | 'getCoreRowModel'>>
 }
 
@@ -53,12 +55,14 @@ export function WinDataGrid<T extends { id?: string }>({
   onRowDoubleClick,
   getRowClass,
   storageKey,
+  searchable,
   tableOptions,
 }: Props<T>) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showColMenu, setShowColMenu] = useState(false)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [globalFilter, setGlobalFilter] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -106,8 +110,9 @@ export function WinDataGrid<T extends { id?: string }>({
   const table = useReactTable({
     data,
     columns: columnDefs,
-    state: { sorting, columnVisibility, ...tableOptions?.state },
+    state: { sorting, columnVisibility, globalFilter, ...tableOptions?.state },
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: (updater) => {
       const next = typeof updater === 'function' ? updater(columnVisibility) : updater
       setColumnVisibility(next)
@@ -115,18 +120,30 @@ export function WinDataGrid<T extends { id?: string }>({
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     ...tableOptions,
-    // Ensure state is merged, not overwritten
-    ...(tableOptions?.state ? { state: { sorting, columnVisibility, ...tableOptions.state } } : {}),
+    ...(tableOptions?.state ? { state: { sorting, columnVisibility, globalFilter, ...tableOptions.state } } : {}),
   })
 
   const totalPages = pagination ? Math.ceil(pagination.total / pagination.limit) : 1
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden border border-win-grid-border">
+      {searchable && (
+        <div className="flex items-center gap-1 px-2 py-1 border-b border-win-grid-border bg-win-menu shrink-0">
+          <Search size={12} className="text-win-text-secondary" />
+          <input
+            type="text"
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Tìm kiếm..."
+            className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus bg-white"
+          />
+        </div>
+      )}
       <div className="flex-1 overflow-auto">
         <table className="w-full text-[11px] border-collapse">
-          <thead className="sticky top-0 z-10">
+          <thead className="sticky top-0 z-10 bg-win-grid-header">
             <tr className="bg-win-grid-header border-b border-win-grid-border">
               {table.getHeaderGroups()[0].headers.map((header) => {
                 const meta = header.column.columnDef.meta as { align?: string } | undefined

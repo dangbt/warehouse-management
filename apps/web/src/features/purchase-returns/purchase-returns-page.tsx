@@ -60,7 +60,7 @@ export function PurchaseReturnsPage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid
+      <WinDataGrid searchable
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}

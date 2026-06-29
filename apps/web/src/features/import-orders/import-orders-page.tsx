@@ -110,7 +110,7 @@ export function ImportOrdersPage() {
         </select>
       </WinToolbar>
 
-      <WinDataGrid
+      <WinDataGrid searchable
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
