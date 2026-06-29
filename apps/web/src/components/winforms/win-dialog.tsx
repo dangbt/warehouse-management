@@ -16,7 +16,7 @@ export function WinDialog({ title, open, onClose, width = 480, footer, children 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
         data-testid="dialog"
-        className="bg-win-control border border-win-grid-border rounded shadow-lg"
+        className="bg-win-control border border-win-grid-border shadow-lg"
         style={{ width }}
         onClick={(e) => e.stopPropagation()}
       >

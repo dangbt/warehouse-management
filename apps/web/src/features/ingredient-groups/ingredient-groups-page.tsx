@@ -180,13 +180,13 @@ export function IngredientGroupsPage() {
             <button
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting}
-              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer disabled:opacity-50"
+              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? 'Đang lưu...' : 'OK'}
             </button>
             <button
               onClick={() => setFormOpen(false)}
-              className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+              className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
             >
               Cancel
             </button>

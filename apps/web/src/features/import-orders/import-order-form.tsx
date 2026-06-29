@@ -93,13 +93,13 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
           <button
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer disabled:opacity-50"
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Đang lưu...' : 'Lưu'}
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+            className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
           >
             Huỷ
           </button>
@@ -154,7 +154,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                   <select
                     data-testid={`item-${i}-ingredient`}
                     {...register(`items.${i}.ingredient_id`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
                   >
                     <option value="">--</option>
                     {ingredients.map((o) => (
@@ -170,7 +170,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     step="0.01"
                     data-testid={`item-${i}-quantity`}
                     {...register(`items.${i}.quantity`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
@@ -179,7 +179,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     step="0.0001"
                     data-testid={`item-${i}-factor`}
                     {...register(`items.${i}.factor`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
@@ -187,7 +187,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     type="number"
                     data-testid={`item-${i}-price`}
                     {...register(`items.${i}.unit_price`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5 text-right pr-2">{formatNumber(lineTotal(items[i] || {}))}</td>
@@ -196,7 +196,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     type="date"
                     data-testid={`item-${i}-expiry`}
                     {...register(`items.${i}.expiry_date`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
                   />
                 </td>
                 <td className="p-0.5 text-center">

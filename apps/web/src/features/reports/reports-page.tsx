@@ -53,15 +53,15 @@ export function ReportsPage() {
       </WinToolbar>
       <div className="p-4 overflow-auto space-y-3">
         <div className="grid grid-cols-3 gap-3">
-          <div className="border border-win-grid-border bg-win-control rounded p-3 text-center">
+          <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold">{summary?.total}</div>
             <div className="text-[11px] text-win-text-secondary">Nguyên liệu</div>
           </div>
-          <div className="border border-win-grid-border bg-win-control rounded p-3 text-center">
+          <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold text-win-error">{summary?.lowStock.length}</div>
             <div className="text-[11px] text-win-text-secondary">Tồn kho thấp</div>
           </div>
-          <div className="border border-win-grid-border bg-win-control rounded p-3 text-center">
+          <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold text-win-success">{formatCurrency(summary?.totalValue)}</div>
             <div className="text-[11px] text-win-text-secondary">Giá trị kho</div>
           </div>

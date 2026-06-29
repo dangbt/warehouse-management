@@ -150,13 +150,13 @@ export function WinDataGrid<T extends { id?: string }>({
               })}
               {storageKey && (
                 <th className="w-6 px-0 border-r border-win-grid-border relative">
-                  <button onClick={() => setShowColMenu(!showColMenu)} className="p-0.5 hover:bg-win-menu-hover rounded-sm" title="Chọn cột hiển thị">
+                  <button onClick={() => setShowColMenu(!showColMenu)} className="p-0.5 hover:bg-win-menu-hover" title="Chọn cột hiển thị">
                     <Columns3 size={12} />
                   </button>
                   {showColMenu && (
-                    <div ref={menuRef} className="absolute right-0 top-full mt-1 bg-white border border-win-grid-border shadow-md rounded z-50 p-1 min-w-[140px]">
+                    <div ref={menuRef} className="absolute right-0 top-full mt-1 bg-white border border-win-grid-border shadow-md z-50 p-1 min-w-[140px]">
                       {table.getAllColumns().map((col) => (
-                        <label key={col.id} className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] cursor-pointer hover:bg-win-menu-hover rounded-sm">
+                        <label key={col.id} className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] cursor-pointer hover:bg-win-menu-hover">
                           <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()} className="w-3 h-3" />
                           {String(col.columnDef.header)}
                         </label>

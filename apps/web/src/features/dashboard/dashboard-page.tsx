@@ -47,7 +47,7 @@ export function DashboardPage() {
         {cards.map((s) => (
           <div
             key={s.label}
-            className="border border-win-grid-border bg-win-control rounded p-3 flex items-center gap-3"
+            className="border border-win-grid-border bg-win-control p-3 flex items-center gap-3"
           >
             <div className={s.color}>{s.icon}</div>
             <div>

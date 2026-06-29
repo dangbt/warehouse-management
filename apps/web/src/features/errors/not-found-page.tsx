@@ -12,13 +12,13 @@ export function NotFoundPage() {
         <div className="flex gap-2 justify-center">
           <button
             onClick={() => navigate({ to: '/dashboard' })}
-            className="px-4 py-1.5 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm cursor-pointer"
+            className="px-4 py-1.5 text-xs bg-win-active-title text-white border border-win-active-title cursor-pointer"
           >
             Về Dashboard
           </button>
           <button
             onClick={() => window.history.back()}
-            className="px-4 py-1.5 text-xs bg-win-button border border-win-button-border rounded-sm cursor-pointer hover:bg-win-button-hover"
+            className="px-4 py-1.5 text-xs bg-win-button border border-win-button-border cursor-pointer hover:bg-win-button-hover"
           >
             Quay lại
           </button>

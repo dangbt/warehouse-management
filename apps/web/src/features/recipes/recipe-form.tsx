@@ -108,13 +108,13 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
           <button
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
-            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer disabled:opacity-50"
+            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Đang lưu...' : 'Lưu'}
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+            className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
           >
             Huỷ
           </button>
@@ -162,7 +162,7 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
                 <td className="p-0.5">
                   <select
                     {...register(`ingredients.${i}.ingredient_id`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
                   >
                     <option value="">--</option>
                     {ingredientOptions.map((o) => (
@@ -177,13 +177,13 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
                     type="number"
                     step="0.001"
                     {...register(`ingredients.${i}.quantity`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm text-right bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
                   <select
                     {...register(`ingredients.${i}.unit`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] rounded-sm bg-white"
+                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
                   >
                     <option value="">--</option>
                     {UNIT_OPTIONS.map((o) => (

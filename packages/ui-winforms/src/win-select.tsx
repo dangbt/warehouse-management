@@ -14,7 +14,7 @@ export const WinSelect = forwardRef<HTMLSelectElement, Props>(({ label, error, o
         ref={ref}
         data-testid={`select-${label}`}
         {...props}
-        className={`w-full border px-2 py-0.5 text-[11px] rounded-sm outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
+        className={`w-full border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
       >
         <option value="">-- Chọn --</option>
         {options.map((o) => (

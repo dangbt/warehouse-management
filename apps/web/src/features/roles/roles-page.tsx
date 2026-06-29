@@ -132,13 +132,13 @@ export function RolesPage() {
                   setFormOpen(false)
                 }
               }}
-              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer"
             >
               OK
             </button>
             <button
               onClick={() => setFormOpen(false)}
-              className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+              className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
             >
               Cancel
             </button>
@@ -152,7 +152,7 @@ export function RolesPage() {
               <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] rounded-sm outline-none focus:border-win-input-focus"
+                className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export function RolesPage() {
               <input
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value)}
-                className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] rounded-sm outline-none focus:border-win-input-focus"
+                className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus"
               />
             </div>
           </div>
@@ -177,13 +177,13 @@ export function RolesPage() {
           <>
             <button
               onClick={savePermissions}
-              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer"
+              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer"
             >
               Lưu
             </button>
             <button
               onClick={() => setPermOpen(false)}
-              className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+              className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
             >
               Đóng
             </button>
