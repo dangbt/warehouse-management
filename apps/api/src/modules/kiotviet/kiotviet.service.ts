@@ -159,7 +159,7 @@ export class KiotVietService {
   async deductOrder(orderId: string, userId: string) {
     const order = await this.prisma.kiotVietOrder.findUnique({
       where: { id: orderId },
-      include: { items: { include: { menuItem: { include: { recipe: { include: { ingredients: true } } } } } } },
+      include: { items: { include: { menuItem: { include: { recipe: { include: { ingredients: { include: { ingredient: { select: { id: true, trackStock: true } } } } } } } } } } },
     });
 
     if (!order) throw new BadRequestException('Đơn hàng không tồn tại');
@@ -185,11 +185,13 @@ export class KiotVietService {
       if ((mode === 'RECIPE' || mode == null) && mi.recipe) {
         // Món chế biến: trừ NL theo công thức
         for (const ri of mi.recipe.ingredients) {
+          if (ri.ingredient && !ri.ingredient.trackStock) continue;
           add(ri.ingredientId, (Number(ri.quantity) * item.quantity) / mi.recipe.servingSize);
         }
       } else if (mode === 'DIRECT' && mi.directIngredientId) {
         // Hàng bán thẳng: 1 món = 1 đơn vị tồn của NL gắn trực tiếp
-        add(mi.directIngredientId, item.quantity);
+        const directIng = await this.prisma.ingredient.findUnique({ where: { id: mi.directIngredientId }, select: { trackStock: true } });
+        if (directIng?.trackStock !== false) add(mi.directIngredientId, item.quantity);
       } else {
         unconfigured.push(mi.name); // mode set nhưng thiếu cấu hình, hoặc chưa gán công thức
       }

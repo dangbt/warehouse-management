@@ -16,8 +16,11 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useRecipes() {
-  return useQuery<ListResponse>({ queryKey: QUERY_KEYS.recipesList(), queryFn: () => api.get('/recipes?limit=50') })
+export function useRecipes(page = 1, limit = 20) {
+  return useQuery<ListResponse>({
+    queryKey: [...QUERY_KEYS.recipesList(), page, limit],
+    queryFn: () => api.get(`/recipes?page=${page}&limit=${limit}`),
+  })
 }
 
 export function useCreateRecipe() {

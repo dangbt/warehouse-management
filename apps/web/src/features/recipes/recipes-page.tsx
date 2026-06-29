@@ -25,8 +25,9 @@ export function RecipesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<RecipeRow | null>(null)
   const [selected, setSelected] = useState<RecipeRow | null>(null)
+  const [page, setPage] = useState(1)
 
-  const { data: res, isLoading, refetch } = useRecipes()
+  const { data: res, isLoading, refetch } = useRecipes(page)
 
   const openEdit = (row: RecipeRow) => {
     setEditData(row)
@@ -57,7 +58,8 @@ export function RecipesPage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
+        onPageChange={setPage}
         onRowClick={setSelected}
         onRowDoubleClick={openEdit}
       />

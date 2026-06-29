@@ -15,6 +15,7 @@ interface IngredientRow {
   minStock: string
   costPerUnit: string
   category: string
+  trackStock: boolean
 }
 
 const columns: Column<IngredientRow>[] = [
@@ -38,6 +39,7 @@ const columns: Column<IngredientRow>[] = [
     render: (r) => formatCurrency(r.costPerUnit),
   },
   { key: 'category', header: 'Phân loại', width: 80, align: 'center' },
+  { key: 'trackStock', header: 'Quản tồn', width: 70, align: 'center', render: (r) => r.trackStock ? '✓' : '—' },
 ]
 
 export function IngredientsPage() {

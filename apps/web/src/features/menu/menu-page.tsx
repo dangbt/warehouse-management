@@ -62,6 +62,8 @@ export function MenuPage() {
   const [selected, setSelected] = useState<MenuItemFull | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [cfgOpen, setCfgOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const limit = 20
 
   const { data: menu, isLoading, refetch } = useMenuList()
   const { data: ingRes } = useIngredients({ limit: 1000 })
@@ -115,8 +117,10 @@ export function MenuPage() {
 
       <WinDataGrid searchable
         columns={columns}
-        data={menu ?? []}
+        data={(menu ?? []).slice((page - 1) * limit, page * limit)}
         loading={isLoading}
+        pagination={{ page, limit, total: menu?.length ?? 0 }}
+        onPageChange={setPage}
         onRowClick={setSelected}
         onRowDoubleClick={(r) => {
           setSelected(r)
