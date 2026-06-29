@@ -5,6 +5,7 @@ import { WinTreeView, WinStatusBar } from '@wms/ui-winforms'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
 import { SupportWidget } from '@/components/support-widget'
+import { useHealth } from '@/data/use-health'
 import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
@@ -58,6 +59,7 @@ export function AppLayout() {
   const { user, logout } = useAuthStore()
   const { sidebarExpanded, toggleSidebar } = useUIStore()
   const hasPermission = useAuthStore((s) => s.hasPermission)
+  const health = useHealth()
 
   const filteredTree = filterTree(menuTree, hasPermission)
   const activeNode = findActive(filteredTree, location.pathname)
@@ -211,13 +213,14 @@ export function AppLayout() {
 
       {/* Status Bar */}
       <WinStatusBar>
-        <WinStatusBar.Section>✓ Sẵn sàng</WinStatusBar.Section>
+        <WinStatusBar.Section>{health.isError ? '⚠ Mất kết nối' : '✓ Sẵn sàng'}</WinStatusBar.Section>
         <WinStatusBar.Section>User: {user?.full_name ?? '-'}</WinStatusBar.Section>
         <WinStatusBar.Section>Role: {user?.roles?.[0] ?? '-'}</WinStatusBar.Section>
         <WinStatusBar.Section>{now()}</WinStatusBar.Section>
         <WinStatusBar.Section>v{__APP_VERSION__}</WinStatusBar.Section>
+        <div className="flex-1" />
+        <SupportWidget />
       </WinStatusBar>
-      <SupportWidget />
     </div>
   )
 }

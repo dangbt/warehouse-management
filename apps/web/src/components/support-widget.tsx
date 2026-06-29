@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { MessageCircle, Send, X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { WinSelect } from '@wms/ui-winforms'
@@ -22,6 +22,7 @@ interface FormData {
 
 export function SupportWidget() {
   const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
   const mutation = useSendSupport()
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>()
 
@@ -32,10 +33,27 @@ export function SupportWidget() {
     })
   }
 
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 px-2 h-full text-white/90 hover:text-white cursor-pointer"
+        title="Hỗ trợ kỹ thuật"
+      >
+        <MessageCircle size={12} />
+        <span className="hidden md:inline">Hỗ trợ</span>
+      </button>
       {open && (
-        <div className="mb-2 w-72 border border-win-grid-border bg-win-control shadow-lg">
+        <div className="absolute bottom-full right-0 mb-1 w-72 border border-win-grid-border bg-win-control shadow-lg z-50">
           <div className="flex items-center justify-between px-3 py-2 bg-win-active-title text-white text-xs font-semibold">
             <span>Hỗ trợ kỹ thuật</span>
             <button onClick={() => setOpen(false)}><X size={14} /></button>
@@ -66,13 +84,6 @@ export function SupportWidget() {
           </form>
         </div>
       )}
-      <button
-        onClick={() => setOpen(!open)}
-        className="ml-auto flex items-center justify-center w-10 h-10 bg-win-active-title text-white shadow-lg border border-win-active-title hover:opacity-90 cursor-pointer"
-        title="Hỗ trợ"
-      >
-        <MessageCircle size={20} />
-      </button>
     </div>
   )
 }
