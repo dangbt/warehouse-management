@@ -113,7 +113,7 @@ export function MenuPage() {
         </span>
       </WinToolbar>
 
-      <WinDataGrid
+      <WinDataGrid searchable
         columns={columns}
         data={menu ?? []}
         loading={isLoading}

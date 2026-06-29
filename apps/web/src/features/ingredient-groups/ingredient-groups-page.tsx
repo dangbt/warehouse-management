@@ -155,7 +155,7 @@ export function IngredientGroupsPage() {
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
-      <WinDataGrid
+      <WinDataGrid searchable
         columns={columns}
         data={groups ?? []}
         loading={isLoading}
