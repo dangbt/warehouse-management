@@ -22,10 +22,7 @@ export class SupplierPaymentsService {
     return { data, meta: { page, limit, total } };
   }
 
-  async create(
-    userId: string,
-    body: { supplier_id: string; amount: number; method: string; note?: string },
-  ) {
+  async create(userId: string, body: { supplier_id: string; amount: number; method: string; note?: string }) {
     if (!body.supplier_id || !body.amount || body.amount <= 0) {
       throw new BadRequestException('Thiếu thông tin hoặc số tiền không hợp lệ');
     }

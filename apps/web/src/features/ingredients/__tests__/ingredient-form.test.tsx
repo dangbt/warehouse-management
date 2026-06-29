@@ -2,6 +2,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { IngredientForm } from '../ingredient-form'
 
+vi.mock('@/data', () => ({
+  useIngredientGroups: () => ({ data: [], isLoading: false }),
+  useIngredients: () => ({ data: [], isLoading: false }),
+}))
+
 describe('IngredientForm', () => {
   it('renders nothing when closed', () => {
     const { container } = render(<IngredientForm open={false} mode="add" data={null} onClose={() => {}} />)

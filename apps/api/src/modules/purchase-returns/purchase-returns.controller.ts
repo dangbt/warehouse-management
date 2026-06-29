@@ -18,7 +18,8 @@ export class PurchaseReturnsController {
   @RequirePermissions('purchase_returns:create')
   create(
     @Req() req,
-    @Body() body: { supplier_id: string; reason: string; note?: string; items: { ingredient_id: string; quantity: number; unit_price: number }[] },
+    @Body()
+    body: { supplier_id: string; reason: string; note?: string; items: { ingredient_id: string; quantity: number; unit_price: number }[] },
   ) {
     return this.svc.create(req.user.id, body);
   }
