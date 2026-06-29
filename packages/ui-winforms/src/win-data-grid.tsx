@@ -32,6 +32,7 @@ interface Props<T> {
   getRowClass?: (row: T) => string
   storageKey?: string
   searchable?: boolean
+  onSearch?: (query: string) => void
   tableOptions?: Partial<Omit<TableOptions<T>, 'data' | 'columns' | 'getCoreRowModel'>>
 }
 
@@ -56,6 +57,7 @@ export function WinDataGrid<T extends { id?: string }>({
   getRowClass,
   storageKey,
   searchable,
+  onSearch,
   tableOptions,
 }: Props<T>) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -110,9 +112,9 @@ export function WinDataGrid<T extends { id?: string }>({
   const table = useReactTable({
     data,
     columns: columnDefs,
-    state: { sorting, columnVisibility, globalFilter, ...tableOptions?.state },
+    state: { sorting, columnVisibility, globalFilter: onSearch ? '' : globalFilter, ...tableOptions?.state },
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: onSearch ? undefined : setGlobalFilter,
     onColumnVisibilityChange: (updater) => {
       const next = typeof updater === 'function' ? updater(columnVisibility) : updater
       setColumnVisibility(next)
@@ -122,7 +124,7 @@ export function WinDataGrid<T extends { id?: string }>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     ...tableOptions,
-    ...(tableOptions?.state ? { state: { sorting, columnVisibility, globalFilter, ...tableOptions.state } } : {}),
+    ...(tableOptions?.state ? { state: { sorting, columnVisibility, globalFilter: onSearch ? '' : globalFilter, ...tableOptions.state } } : {}),
   })
 
   const totalPages = pagination ? Math.ceil(pagination.total / pagination.limit) : 1
@@ -135,7 +137,10 @@ export function WinDataGrid<T extends { id?: string }>({
           <input
             type="text"
             value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
+            onChange={(e) => {
+              setGlobalFilter(e.target.value)
+              onSearch?.(e.target.value)
+            }}
             placeholder="Tìm kiếm..."
             className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus bg-white"
           />
