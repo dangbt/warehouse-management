@@ -11,6 +11,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "db:seed:mamvi": "tsx prisma/seed-mamvi.ts",
+    "db:seed:recipes": "tsx prisma/seed-recipes.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

@@ -14,6 +14,7 @@ const schema = z.object({
   category: z.string().min(1, 'Bắt buộc'),
   cost_per_unit: z.coerce.number().min(0, 'Phải >= 0'),
   min_stock: z.coerce.number().min(0, 'Phải >= 0'),
+  track_stock: z.boolean().optional(),
   group_id: z.string().optional(),
   base_factor: optionalNumber.optional(),
   source_ingredient_id: z.string().optional(),
@@ -47,6 +48,7 @@ interface IngredientData {
   sourceIngredientId?: string | null
   yieldRatio?: string | null
   lossRatio?: string | null
+  trackStock?: boolean
 }
 
 interface Props {
@@ -89,6 +91,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               category: data.category,
               cost_per_unit: Number(data.costPerUnit ?? data.cost_per_unit),
               min_stock: Number(data.minStock ?? data.min_stock),
+              track_stock: data.trackStock !== false,
               group_id: data.groupId ?? '',
               base_factor: data.baseFactor != null ? Number(data.baseFactor) : null,
               source_ingredient_id: data.sourceIngredientId ?? '',
@@ -101,6 +104,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               category: '',
               cost_per_unit: 0,
               min_stock: 0,
+              track_stock: true,
               group_id: '',
               base_factor: null,
               source_ingredient_id: '',
@@ -157,6 +161,11 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
             <WinSelect label="Phân loại" {...register('category')} options={categories} error={errors.category?.message} />
             <WinInput label="Giá/đơn vị" type="number" {...register('cost_per_unit')} error={errors.cost_per_unit?.message} />
             <WinInput label="Tồn kho min" type="number" {...register('min_stock')} error={errors.min_stock?.message} />
+            <div className="flex items-center gap-2">
+              <label className="text-[11px] w-24 text-right shrink-0">Quản tồn:</label>
+              <input type="checkbox" {...register('track_stock')} className="w-3.5 h-3.5" />
+              <span className="text-[10px] text-win-text-secondary">Trừ kho khi có đơn hàng</span>
+            </div>
           </div>
         </WinGroupBox>
 

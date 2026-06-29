@@ -60,7 +60,7 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
   useEffect(() => {
     if (open) {
       setSubmitError('')
-      Promise.all([api.get('/menu-items'), api.get('/ingredients?limit=100')]).then(([m, i]) => {
+      Promise.all([api.get('/menu-items'), api.get('/ingredients?limit=1000')]).then(([m, i]) => {
         setMenuItems((m as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
         setIngredientOptions((i.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
         if (editData) {

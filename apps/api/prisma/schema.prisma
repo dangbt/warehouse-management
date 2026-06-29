@@ -84,6 +84,7 @@ model Ingredient {
   costPerUnit  Decimal  @default(0) @map("cost_per_unit") @db.Decimal(12, 2)
   category     String
   createdAt    DateTime @default(now()) @map("created_at")
+  trackStock   Boolean  @default(true) @map("track_stock")
 
   // Gom nhóm để báo cáo tồn (quy về base_unit của nhóm)
   groupId      String?  @map("group_id")

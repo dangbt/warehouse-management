@@ -9,6 +9,7 @@ type IngredientBody = {
   category?: string;
   cost_per_unit?: number;
   min_stock?: number;
+  track_stock?: boolean;
   group_id?: string | null;
   base_factor?: number | null;
   source_ingredient_id?: string | null;
@@ -61,6 +62,7 @@ export class IngredientsService {
         category: body.category,
         costPerUnit: body.cost_per_unit,
         minStock: body.min_stock,
+        trackStock: body.track_stock ?? true,
         groupId: body.group_id ?? null,
         baseFactor: body.base_factor ?? null,
         sourceIngredientId: body.source_ingredient_id ?? null,
@@ -107,6 +109,7 @@ export class IngredientsService {
         category: body.category,
         costPerUnit: body.cost_per_unit,
         minStock: body.min_stock,
+        trackStock: body.track_stock,
         groupId: body.group_id,
         baseFactor: body.base_factor,
         sourceIngredientId: body.source_ingredient_id,
