@@ -174,11 +174,11 @@ export function SuppliersPage() {
                 type="number"
                 value={payAmount}
                 onChange={(e) => setPayAmount(e.target.value)}
-                className="flex-1 border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
+                className="flex-1 border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
               />
               <button
                 onClick={() => setPayAmount(String(Number(selected?.totalDebt ?? 0)))}
-                className="px-2 py-1 text-[10px] bg-win-active-title text-white rounded-sm whitespace-nowrap"
+                className="px-2 py-1 text-[10px] bg-win-active-title text-white whitespace-nowrap"
               >
                 Tất cả
               </button>
@@ -189,7 +189,7 @@ export function SuppliersPage() {
             <select
               value={payMethod}
               onChange={(e) => setPayMethod(e.target.value as 'CASH' | 'TRANSFER')}
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
             >
               <option value="CASH">Tiền mặt</option>
               <option value="TRANSFER">Chuyển khoản</option>
@@ -202,12 +202,12 @@ export function SuppliersPage() {
               value={payNote}
               onChange={(e) => setPayNote(e.target.value)}
               placeholder="Ghi chú thanh toán"
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
             />
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-win-grid-border">
-            <button onClick={() => setPaymentOpen(false)} className="px-3 py-1 text-[11px] border border-win-grid-border rounded-sm hover:bg-win-menu-hover">Huỷ</button>
-            <button onClick={handlePayment} className="px-3 py-1 text-[11px] bg-win-active-title text-white rounded-sm hover:opacity-90">Thanh toán</button>
+            <button onClick={() => setPaymentOpen(false)} className="px-3 py-1 text-[11px] border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
+            <button onClick={handlePayment} className="px-3 py-1 text-[11px] bg-win-active-title text-white hover:opacity-90">Thanh toán</button>
           </div>
         </div>
       </WinDialog>

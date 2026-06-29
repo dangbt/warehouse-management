@@ -11,7 +11,7 @@ export function AppNotFound() {
         <p className="text-xs text-win-text-secondary mb-3">Trang này không tồn tại trong hệ thống</p>
         <button
           onClick={() => navigate({ to: '/dashboard' })}
-          className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm cursor-pointer"
+          className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title cursor-pointer"
         >
           Về Dashboard
         </button>

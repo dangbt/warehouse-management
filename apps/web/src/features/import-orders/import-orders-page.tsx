@@ -101,7 +101,7 @@ export function ImportOrdersPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none"
+          className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none"
         >
           <option value="">Tất cả</option>
           <option value="PENDING">Chờ duyệt</option>

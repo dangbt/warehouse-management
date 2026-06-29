@@ -74,7 +74,7 @@ export function PurchaseReturnsPage() {
             <select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
             >
               <option value="">Chọn NCC</option>
               {suppliersRes?.data.map((s) => (
@@ -88,7 +88,7 @@ export function PurchaseReturnsPage() {
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full border border-win-input-border rounded-sm px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
             />
           </div>
           <div>
@@ -109,7 +109,7 @@ export function PurchaseReturnsPage() {
                       <select
                         value={item.ingredientId}
                         onChange={(e) => updateItem(idx, 'ingredientId', e.target.value)}
-                        className="w-full border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] bg-white"
+                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
                       >
                         <option value="">Chọn NL</option>
                         {ingredientsRes?.data.map((ing) => (
@@ -122,7 +122,7 @@ export function PurchaseReturnsPage() {
                         type="number"
                         value={item.quantity || ''}
                         onChange={(e) => updateItem(idx, 'quantity', Number(e.target.value))}
-                        className="w-full border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] text-right bg-white"
+                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
                       />
                     </td>
                     <td className="p-1">
@@ -130,7 +130,7 @@ export function PurchaseReturnsPage() {
                         type="number"
                         value={item.unitPrice || ''}
                         onChange={(e) => updateItem(idx, 'unitPrice', Number(e.target.value))}
-                        className="w-full border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] text-right bg-white"
+                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
                       />
                     </td>
                     <td className="p-1">
@@ -145,8 +145,8 @@ export function PurchaseReturnsPage() {
             <button onClick={addItem} className="mt-1 text-[11px] text-win-active-title hover:underline">+ Thêm dòng</button>
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-win-grid-border">
-            <button onClick={() => setDialogOpen(false)} className="px-3 py-1 text-[11px] border border-win-grid-border rounded-sm hover:bg-win-menu-hover">Huỷ</button>
-            <button onClick={handleSubmit} className="px-3 py-1 text-[11px] bg-win-active-title text-white rounded-sm hover:opacity-90">Tạo phiếu</button>
+            <button onClick={() => setDialogOpen(false)} className="px-3 py-1 text-[11px] border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
+            <button onClick={handleSubmit} className="px-3 py-1 text-[11px] bg-win-active-title text-white hover:opacity-90">Tạo phiếu</button>
           </div>
         </div>
       </WinDialog>

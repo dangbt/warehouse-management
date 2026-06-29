@@ -134,10 +134,10 @@ export function MenuPage() {
         width={400}
         footer={
           <>
-            <button onClick={addForm.handleSubmit(onAdd)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer">
+            <button onClick={addForm.handleSubmit(onAdd)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer">
               OK
             </button>
-            <button onClick={() => setAddOpen(false)} className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover">
+            <button onClick={() => setAddOpen(false)} className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover">
               Cancel
             </button>
           </>
@@ -160,10 +160,10 @@ export function MenuPage() {
         width={440}
         footer={
           <>
-            <button onClick={cfgForm.handleSubmit(onConfig)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title rounded-sm min-w-[75px] cursor-pointer">
+            <button onClick={cfgForm.handleSubmit(onConfig)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer">
               Lưu
             </button>
-            <button onClick={() => setCfgOpen(false)} className="px-4 py-1 text-xs bg-win-button border border-win-button-border rounded-sm min-w-[75px] cursor-pointer hover:bg-win-button-hover">
+            <button onClick={() => setCfgOpen(false)} className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover">
               Huỷ
             </button>
           </>

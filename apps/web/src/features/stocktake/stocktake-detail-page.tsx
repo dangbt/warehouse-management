@@ -126,7 +126,7 @@ export function StocktakeDetailPage() {
                       value={item.actualQty}
                       onChange={(e) => handleActualChange(idx, e.target.value)}
                       disabled={isCompleted}
-                      className="w-full border border-win-input-border rounded-sm px-1 py-0.5 text-right text-[11px] outline-none focus:border-win-input-focus disabled:bg-gray-100"
+                      className="w-full border border-win-input-border px-1 py-0.5 text-right text-[11px] outline-none focus:border-win-input-focus disabled:bg-gray-100"
                     />
                   </td>
                   <td className={`p-1 text-right font-bold ${item.difference !== 0 ? 'text-win-error' : ''}`}>
@@ -138,7 +138,7 @@ export function StocktakeDetailPage() {
                       value={item.note}
                       onChange={(e) => handleNoteChange(idx, e.target.value)}
                       disabled={isCompleted}
-                      className="w-full border border-win-input-border rounded-sm px-1 py-0.5 text-[11px] outline-none focus:border-win-input-focus disabled:bg-gray-100"
+                      className="w-full border border-win-input-border px-1 py-0.5 text-[11px] outline-none focus:border-win-input-focus disabled:bg-gray-100"
                     />
                   </td>
                 </tr>

@@ -171,14 +171,14 @@ export function AppLayout() {
 
       {/* Toolbar */}
       <div className="h-9 bg-win-menu border-b border-win-grid-border flex items-center px-2 gap-1 shrink-0">
-        <button onClick={toggleSidebar} className="p-1 hover:bg-win-menu-hover rounded">
+        <button onClick={toggleSidebar} className="p-1 hover:bg-win-menu-hover">
           {sidebarExpanded ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
         </button>
         <div className="w-px h-5 bg-win-grid-border mx-1" />
-        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-[11px] hover:bg-win-menu-hover rounded-sm">
+        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-[11px] hover:bg-win-menu-hover">
           🏠 Dashboard
         </button>
-        <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover rounded">
+        <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover">
           <RefreshCw size={14} />
         </button>
       </div>
@@ -236,12 +236,12 @@ function MenuDrop({ label, items, onNav }: { label: string; items: { label: stri
     <div className="relative" ref={ref}>
       <span
         onClick={() => setOpen(!open)}
-        className={`px-2.5 py-0.5 rounded-sm cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
+        className={`px-2.5 py-0.5 cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
       >
         {label}
       </span>
       {open && (
-        <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md rounded-sm z-50 min-w-[160px] py-0.5">
+        <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md z-50 min-w-[160px] py-0.5">
           {items.map((item) => (
             <div
               key={item.route}
