@@ -4,6 +4,7 @@ import { RefreshCw, Bell, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { WinTreeView, WinStatusBar } from '@wms/ui-winforms'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
+import { SupportWidget } from '@/components/support-widget'
 import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
@@ -216,6 +217,7 @@ export function AppLayout() {
         <WinStatusBar.Section>{now()}</WinStatusBar.Section>
         <WinStatusBar.Section>v{__APP_VERSION__}</WinStatusBar.Section>
       </WinStatusBar>
+      <SupportWidget />
     </div>
   )
 }
