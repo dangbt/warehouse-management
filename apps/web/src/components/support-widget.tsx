@@ -53,7 +53,7 @@ export function SupportWidget() {
         <span className="hidden md:inline">Hỗ trợ</span>
       </button>
       {open && (
-        <div className="absolute bottom-full right-0 mb-1 w-72 border border-win-grid-border bg-win-control shadow-lg z-50">
+        <div className="absolute bottom-full right-0 mb-1 w-72 border border-win-grid-border bg-win-control shadow-lg z-50 text-win-text">
           <div className="flex items-center justify-between px-3 py-2 bg-win-active-title text-white text-xs font-semibold">
             <span>Hỗ trợ kỹ thuật</span>
             <button onClick={() => setOpen(false)}><X size={14} /></button>
