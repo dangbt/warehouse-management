@@ -95,7 +95,7 @@ export function AppLayout() {
         <span className="sm:hidden">Mâm Vị</span>
       </div>
 
-      {/* Menu Bar (overflow-visible để dropdown không bị clip trên mobile) */}
+      {/* Menu Bar */}
       <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 relative z-30 overflow-visible">
         <MenuDrop
           label="Hệ thống"
@@ -104,6 +104,7 @@ export function AppLayout() {
             ...(hasPermission('users:read')
               ? [
                   { label: '👥 Users', route: '/users' },
+                  { label: '🔐 Roles & Permissions', route: '/roles' },
                   { label: '📋 Audit Logs', route: '/audit-logs' },
                 ]
               : []),
@@ -115,18 +116,42 @@ export function AppLayout() {
             label="Kho"
             items={[
               { label: '📦 Nguyên liệu', route: '/ingredients' },
+              { label: '📂 Nhóm nguyên liệu', route: '/ingredient-groups' },
               ...(hasPermission('import_orders:read') ? [{ label: '📥 Nhập kho', route: '/import-orders' }] : []),
               ...(hasPermission('stock_exports:read') ? [{ label: '📤 Xuất kho', route: '/stock-exports' }] : []),
+              ...(hasPermission('processing:read') ? [{ label: '🔥 Chế biến', route: '/processing' }] : []),
               ...(hasPermission('suppliers:read') ? [{ label: '🏢 Nhà cung cấp', route: '/suppliers' }] : []),
+              { label: '📋 Kiểm kê', route: '/stocktake' },
+              ...(hasPermission('purchase_returns:read') ? [{ label: '↩️ Trả hàng', route: '/purchase-returns' }] : []),
             ]}
             onNav={(r) => navigate({ to: r })}
           />
         )}
         {hasPermission('recipes:read') && (
-          <MenuDrop label="Công thức" items={[{ label: '🍳 Công thức', route: '/recipes' }]} onNav={(r) => navigate({ to: r })} />
+          <MenuDrop
+            label="Bếp"
+            items={[
+              { label: '📖 Thực đơn', route: '/menu' },
+              { label: '🍳 Công thức', route: '/recipes' },
+            ]}
+            onNav={(r) => navigate({ to: r })}
+          />
         )}
+        <MenuDrop
+          label="KiotViet"
+          items={[{ label: '🛒 KiotViet', route: '/kiotviet' }]}
+          onNav={(r) => navigate({ to: r })}
+        />
         {hasPermission('reports:read') && (
-          <MenuDrop label="Báo cáo" items={[{ label: '📊 Báo cáo', route: '/reports' }]} onNav={(r) => navigate({ to: r })} />
+          <MenuDrop
+            label="Báo cáo"
+            items={[
+              { label: '📊 Báo cáo', route: '/reports' },
+              { label: '📉 Báo cáo NL', route: '/ingredient-usage' },
+              { label: '⚖️ Định mức', route: '/consumption-variance' },
+            ]}
+            onNav={(r) => navigate({ to: r })}
+          />
         )}
         <div className="flex-1" />
         <div className="flex items-center gap-2 pr-2 shrink-0">
