@@ -5,16 +5,20 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class ImportOrdersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string }) {
+  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
     const where: { status?: string } = q.status ? { status: q.status } : {};
+
+    const sortField = q.orderBy || 'createdAt';
+    const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
+
     const [data, total] = await Promise.all([
       this.prisma.importOrder.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortField]: sortDir },
         include: { supplier: true, items: { include: { ingredient: true } } },
       }),
       this.prisma.importOrder.count({ where }),

@@ -64,8 +64,10 @@ export function ImportOrdersPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
+  const [orderBy, setOrderBy] = useState('createdAt')
+  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
 
-  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined })
+  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined, orderBy, sort })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
@@ -115,6 +117,7 @@ export function ImportOrdersPage() {
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
         onRowClick={setSelected}
         onRowDoubleClick={setSelected}
         storageKey="import-orders"

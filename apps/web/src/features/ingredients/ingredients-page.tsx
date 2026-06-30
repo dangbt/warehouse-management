@@ -46,12 +46,14 @@ export function IngredientsPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
+  const [orderBy, setOrderBy] = useState('name')
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<IngredientRow | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined })
+  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined, orderBy, sort })
   const createMutation = useCreateIngredient()
   const updateMutation = useUpdateIngredient()
   const deleteMutation = useDeleteIngredient()
@@ -142,6 +144,7 @@ export function IngredientsPage() {
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
+        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
         onRowClick={setSelected}
         onRowDoubleClick={(row) => {
           setSelected(row)

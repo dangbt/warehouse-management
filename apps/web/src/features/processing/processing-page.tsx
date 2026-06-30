@@ -35,8 +35,10 @@ export function ProcessingPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<ProcessingOrder | null>(null)
   const [confirmComplete, setConfirmComplete] = useState(false)
+  const [orderBy, setOrderBy] = useState('createdAt')
+  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
 
-  const { data: res, isLoading, refetch } = useProcessingOrders()
+  const { data: res, isLoading, refetch } = useProcessingOrders({ orderBy, sort })
   const createMutation = useCreateProcessing()
   const completeMutation = useCompleteProcessing()
 
@@ -76,6 +78,7 @@ export function ProcessingPage() {
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
         onRowClick={setSelected}
         storageKey="processing"
       />

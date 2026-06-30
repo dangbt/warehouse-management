@@ -19,13 +19,15 @@ interface KiotVietOrdersResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useKiotVietOrders(params?: { page?: number; deducted?: string }) {
+export function useKiotVietOrders(params?: { page?: number; deducted?: string; orderBy?: string; sort?: string }) {
   return useQuery<KiotVietOrdersResponse>({
     queryKey: QUERY_KEYS.kiotvietOrdersList(params),
     queryFn: () => {
       const search = new URLSearchParams()
       if (params?.page) search.set('page', String(params.page))
       if (params?.deducted) search.set('deducted', params.deducted)
+      if (params?.orderBy) search.set('orderBy', params.orderBy)
+      if (params?.sort) search.set('sort', params.sort)
       const qs = search.toString()
       return api.get(`/kiotviet/orders${qs ? `?${qs}` : ''}`)
     },

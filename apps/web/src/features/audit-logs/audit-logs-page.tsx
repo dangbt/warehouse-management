@@ -27,7 +27,9 @@ const columns: Column<AuditLog>[] = [
 
 export function AuditLogsPage() {
   const [detail, setDetail] = useState<AuditLog | null>(null)
-  const { data: res, isLoading, refetch } = useAuditLogs()
+  const [orderBy, setOrderBy] = useState('createdAt')
+  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
+  const { data: res, isLoading, refetch } = useAuditLogs({ orderBy, sort })
 
   return (
     <div className="flex flex-col h-full">
@@ -41,6 +43,7 @@ export function AuditLogsPage() {
             data={res?.data ?? []}
             loading={isLoading}
             onRowDoubleClick={setDetail}
+            onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
             pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
           />
         </div>

@@ -10,13 +10,18 @@ export class RecipesController {
 
   @Get()
   @RequirePermissions('recipes:read')
-  async findAll(@Query() q: { page?: string; limit?: string }) {
+  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string }) {
     const page = Math.max(1, +(q.page || 1)),
       limit = Math.min(100, Math.max(1, +(q.limit || 20)));
+
+    const sortField = q.orderBy || 'name';
+    const sortDir = q.sort === 'desc' ? 'desc' : 'asc';
+
     const [data, total] = await Promise.all([
       this.prisma.recipe.findMany({
         skip: (page - 1) * limit,
         take: limit,
+        orderBy: { [sortField]: sortDir },
         include: {
           menuItem: true,
           ingredients: { include: { ingredient: true } },

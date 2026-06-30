@@ -30,7 +30,7 @@ export class KiotVietController {
 
   @Get('orders')
   @RequirePermissions('kiotviet:read')
-  getOrders(@Query() q: { page?: string; limit?: string; deducted?: string }) {
+  getOrders(@Query() q: { page?: string; limit?: string; deducted?: string; orderBy?: string; sort?: string }) {
     return this.svc.getOrders(q);
   }
 

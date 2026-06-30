@@ -18,6 +18,8 @@ export class AuditLogsController {
       user_id?: string;
       action?: string;
       resource?: string;
+      orderBy?: string;
+      sort?: string;
     },
   ) {
     const page = Math.max(1, +(q.page || 1)),
@@ -27,12 +29,15 @@ export class AuditLogsController {
     if (q.action) where.action = q.action;
     if (q.resource) where.resource = q.resource;
 
+    const sortField = q.orderBy || 'createdAt';
+    const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
+
     const [data, total] = await Promise.all([
       this.prisma.auditLog.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortField]: sortDir },
         include: { user: { select: { id: true, fullName: true } } },
       }),
       this.prisma.auditLog.count({ where }),
