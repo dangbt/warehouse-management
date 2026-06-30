@@ -18,11 +18,15 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useImportOrders(params?: { status?: string }) {
-  const query = params?.status ? `?status=${params.status}&limit=50` : '?limit=50'
+export function useImportOrders(params?: { status?: string; page?: number; orderBy?: string; sort?: string }) {
+  const query = new URLSearchParams({ limit: '50' })
+  if (params?.status) query.set('status', params.status)
+  if (params?.page) query.set('page', String(params.page))
+  if (params?.orderBy) query.set('orderBy', params.orderBy)
+  if (params?.sort) query.set('sort', params.sort)
   return useQuery<ListResponse>({
-    queryKey: QUERY_KEYS.importOrdersList(params as Record<string, string>),
-    queryFn: () => api.get(`/import-orders${query}`),
+    queryKey: QUERY_KEYS.importOrdersList(Object.fromEntries(query)),
+    queryFn: () => api.get(`/import-orders?${query}`),
   })
 }
 

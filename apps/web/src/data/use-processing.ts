@@ -24,10 +24,12 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useProcessingOrders(params?: { page?: number; status?: string }) {
+export function useProcessingOrders(params?: { page?: number; status?: string; orderBy?: string; sort?: string }) {
   const query = new URLSearchParams()
   if (params?.page) query.set('page', String(params.page))
   if (params?.status) query.set('status', params.status)
+  if (params?.orderBy) query.set('orderBy', params.orderBy)
+  if (params?.sort) query.set('sort', params.sort)
   return useQuery<ListResponse>({
     queryKey: QUERY_KEYS.processingList(Object.fromEntries(query)),
     queryFn: () => api.get(`/processing?${query}`),

@@ -38,7 +38,9 @@ const columns: Column<StockExport>[] = [
 
 export function StockExportsPage() {
   const [formOpen, setFormOpen] = useState(false)
-  const { data: res, isLoading, refetch } = useStockExports()
+  const [orderBy, setOrderBy] = useState('createdAt')
+  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
+  const { data: res, isLoading, refetch } = useStockExports({ orderBy, sort })
   const createMutation = useCreateStockExport()
 
   return (
@@ -53,6 +55,7 @@ export function StockExportsPage() {
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
         storageKey="stock-exports"
       />
       <StockExportForm

@@ -29,7 +29,9 @@ const columns: Column<KiotVietOrder>[] = [
 export function KiotVietPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { data: res, isLoading, refetch } = useKiotVietOrders()
+  const [orderBy, setOrderBy] = useState('orderDate')
+  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
+  const { data: res, isLoading, refetch } = useKiotVietOrders({ orderBy, sort })
   const syncMutation = useSyncKiotViet()
   const deductMutation = useDeductOrder()
 
@@ -80,6 +82,7 @@ export function KiotVietPage() {
         loading={isLoading}
         selectedId={selectedId}
         onRowClick={(row) => setSelectedId(row.id)}
+        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
         pagination={{ page: 1, limit: 20, total: res?.meta?.total ?? 0 }}
         storageKey="kiotviet"
       />

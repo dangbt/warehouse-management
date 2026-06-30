@@ -20,12 +20,14 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useIngredients(params?: { page?: number; category?: string; search?: string; limit?: number }) {
+export function useIngredients(params?: { page?: number; category?: string; search?: string; limit?: number; orderBy?: string; sort?: string }) {
   const query = new URLSearchParams()
   if (params?.page) query.set('page', String(params.page))
   if (params?.category) query.set('category', params.category)
   if (params?.search) query.set('search', params.search)
   if (params?.limit) query.set('limit', String(params.limit))
+  if (params?.orderBy) query.set('orderBy', params.orderBy)
+  if (params?.sort) query.set('sort', params.sort)
   const key = QUERY_KEYS.ingredientsList(Object.fromEntries(query))
 
   return useQuery<ListResponse>({ queryKey: key, queryFn: () => api.get(`/ingredients?${query}`) })

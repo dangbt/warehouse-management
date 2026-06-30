@@ -17,10 +17,14 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useStockExports() {
+export function useStockExports(params?: { page?: number; orderBy?: string; sort?: string }) {
+  const query = new URLSearchParams({ limit: '20' })
+  if (params?.page) query.set('page', String(params.page))
+  if (params?.orderBy) query.set('orderBy', params.orderBy)
+  if (params?.sort) query.set('sort', params.sort)
   return useQuery<ListResponse>({
-    queryKey: QUERY_KEYS.stockExportsList(),
-    queryFn: () => api.get('/stock-exports?limit=20'),
+    queryKey: [...QUERY_KEYS.stockExportsList(), Object.fromEntries(query)],
+    queryFn: () => api.get(`/stock-exports?${query}`),
   })
 }
 

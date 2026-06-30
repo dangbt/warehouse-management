@@ -10,7 +10,7 @@ export class ProcessingController {
 
   @Get()
   @RequirePermissions('processing:read')
-  findAll(@Query() q: { page?: string; limit?: string; status?: string }) {
+  findAll(@Query() q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
     return this.svc.findAll(q);
   }
 

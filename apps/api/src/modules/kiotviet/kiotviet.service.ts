@@ -234,17 +234,20 @@ export class KiotVietService {
     return { message: `Đơn ${order.code}: trừ ${deductions.length} NL`, deductions: deductions.length, unconfigured };
   }
 
-  async getOrders(query: { page?: string; limit?: string; deducted?: string }) {
+  async getOrders(query: { page?: string; limit?: string; deducted?: string; orderBy?: string; sort?: string }) {
     const page = Math.max(1, +(query.page || 1));
     const limit = Math.min(100, Math.max(1, +(query.limit || 20)));
     const where = query.deducted !== undefined ? { deducted: query.deducted === 'true' } : {};
+
+    const sortField = query.orderBy || 'orderDate';
+    const sortDir = query.sort === 'asc' ? 'asc' : 'desc';
 
     const [data, total] = await Promise.all([
       this.prisma.kiotVietOrder.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { orderDate: 'desc' },
+        orderBy: { [sortField]: sortDir },
         include: { items: { include: { menuItem: true } } },
       }),
       this.prisma.kiotVietOrder.count({ where }),

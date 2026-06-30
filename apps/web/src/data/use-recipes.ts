@@ -16,10 +16,15 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useRecipes(page = 1, limit = 20) {
+export function useRecipes(params?: { page?: number; limit?: number; orderBy?: string; sort?: string }) {
+  const page = params?.page ?? 1
+  const limit = params?.limit ?? 20
+  const query = new URLSearchParams({ page: String(page), limit: String(limit) })
+  if (params?.orderBy) query.set('orderBy', params.orderBy)
+  if (params?.sort) query.set('sort', params.sort)
   return useQuery<ListResponse>({
-    queryKey: [...QUERY_KEYS.recipesList(), page, limit],
-    queryFn: () => api.get(`/recipes?page=${page}&limit=${limit}`),
+    queryKey: [...QUERY_KEYS.recipesList(), Object.fromEntries(query)],
+    queryFn: () => api.get(`/recipes?${query}`),
   })
 }
 

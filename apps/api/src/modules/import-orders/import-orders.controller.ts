@@ -10,7 +10,7 @@ export class ImportOrdersController {
 
   @Get()
   @RequirePermissions('import_orders:read')
-  findAll(@Query() q: { page?: string; limit?: string; status?: string }) {
+  findAll(@Query() q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
     return this.svc.findAll(q);
   }
 

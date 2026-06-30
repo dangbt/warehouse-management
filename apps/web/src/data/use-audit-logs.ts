@@ -18,14 +18,17 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useAuditLogs(params?: { user_id?: string; action?: string; resource?: string }) {
+export function useAuditLogs(params?: { user_id?: string; action?: string; resource?: string; page?: number; orderBy?: string; sort?: string }) {
   const query = new URLSearchParams({ limit: '100' })
   if (params?.user_id) query.set('user_id', params.user_id)
   if (params?.action) query.set('action', params.action)
   if (params?.resource) query.set('resource', params.resource)
+  if (params?.page) query.set('page', String(params.page))
+  if (params?.orderBy) query.set('orderBy', params.orderBy)
+  if (params?.sort) query.set('sort', params.sort)
 
   return useQuery<ListResponse>({
-    queryKey: QUERY_KEYS.auditLogsList(params as Record<string, string>),
+    queryKey: QUERY_KEYS.auditLogsList(Object.fromEntries(query)),
     queryFn: () => api.get(`/audit-logs?${query}`),
   })
 }

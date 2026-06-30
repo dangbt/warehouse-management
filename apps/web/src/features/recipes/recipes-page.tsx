@@ -26,8 +26,10 @@ export function RecipesPage() {
   const [editData, setEditData] = useState<RecipeRow | null>(null)
   const [selected, setSelected] = useState<RecipeRow | null>(null)
   const [page, setPage] = useState(1)
+  const [orderBy, setOrderBy] = useState('name')
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
 
-  const { data: res, isLoading, refetch } = useRecipes(page)
+  const { data: res, isLoading, refetch } = useRecipes({ page, orderBy, sort })
 
   const openEdit = (row: RecipeRow) => {
     setEditData(row)
@@ -60,6 +62,7 @@ export function RecipesPage() {
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
+        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
         onRowClick={setSelected}
         onRowDoubleClick={openEdit}
       />

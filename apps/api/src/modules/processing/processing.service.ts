@@ -9,16 +9,20 @@ export class ProcessingService {
     private batchDeduction: BatchDeductionService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string }) {
+  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
     const page = +(q.page || 1);
     const limit = +(q.limit || 20);
     const where: { status?: string } = q.status ? { status: q.status } : {};
+
+    const sortField = q.orderBy || 'createdAt';
+    const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
+
     const [data, total] = await Promise.all([
       this.prisma.processingOrder.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortField]: sortDir },
         include: {
           source: { select: { id: true, name: true, unit: true } },
           output: { select: { id: true, name: true, unit: true } },

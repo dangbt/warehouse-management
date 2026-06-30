@@ -14,15 +14,19 @@ export class StockExportsController {
 
   @Get()
   @RequirePermissions('stock_exports:read')
-  async findAll(@Query() q: { page?: string; limit?: string }) {
+  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
+
+    const sortField = q.orderBy || 'createdAt';
+    const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
+
     const [data, total] = await Promise.all([
       this.prisma.stockTransaction.findMany({
         where: { type: 'EXPORT' },
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [sortField]: sortDir },
         include: { ingredient: true, createdBy: true },
       }),
       this.prisma.stockTransaction.count({ where: { type: 'EXPORT' } }),
