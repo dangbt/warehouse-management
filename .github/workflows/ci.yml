@@ -26,6 +26,7 @@ jobs:
         uses: brunojppb/turbo-cache-server@4.0.3
         env:
           PORT: "8585"
+          OTEL_SDK_DISABLED: "true"
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           S3_BUCKET_NAME: ${{ secrets.TURBO_CACHE_BUCKET }}
           S3_REGION: "auto"
