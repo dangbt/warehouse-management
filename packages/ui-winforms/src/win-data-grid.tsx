@@ -33,6 +33,7 @@ interface Props<T> {
   storageKey?: string
   searchable?: boolean
   onSearch?: (query: string) => void
+  onSort?: (field: string, direction: 'asc' | 'desc') => void
   tableOptions?: Partial<Omit<TableOptions<T>, 'data' | 'columns' | 'getCoreRowModel'>>
 }
 
@@ -58,6 +59,7 @@ export function WinDataGrid<T extends { id?: string }>({
   storageKey,
   searchable,
   onSearch,
+  onSort,
   tableOptions,
 }: Props<T>) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -113,7 +115,13 @@ export function WinDataGrid<T extends { id?: string }>({
     data,
     columns: columnDefs,
     state: { sorting, columnVisibility, globalFilter: onSearch ? '' : globalFilter, ...tableOptions?.state },
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(sorting) : updater
+      setSorting(next)
+      if (onSort && next.length > 0) {
+        onSort(next[0].id, next[0].desc ? 'desc' : 'asc')
+      }
+    },
     onGlobalFilterChange: onSearch ? undefined : setGlobalFilter,
     onColumnVisibilityChange: (updater) => {
       const next = typeof updater === 'function' ? updater(columnVisibility) : updater
@@ -121,8 +129,9 @@ export function WinDataGrid<T extends { id?: string }>({
       persistVisibility(next)
     },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: onSort ? undefined : getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    manualSorting: !!onSort,
     ...tableOptions,
     ...(tableOptions?.state ? { state: { sorting, columnVisibility, globalFilter: onSearch ? '' : globalFilter, ...tableOptions.state } } : {}),
   })
