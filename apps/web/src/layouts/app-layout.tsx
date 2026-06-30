@@ -94,7 +94,7 @@ export function AppLayout() {
             MV
           </text>
         </svg>
-        <span className="hidden sm:inline">Mâm Vị - Quản Lý Kho Nguyên Liệu</span>
+        <span className="hidden sm:inline">Mâm Vị</span>
         <span className="sm:hidden">Mâm Vị</span>
       </div>
 

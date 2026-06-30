@@ -27,7 +27,7 @@ describe('LoginPage', () => {
 
   it('renders login form', () => {
     render(<LoginPage />)
-    expect(screen.getByText('Quản Lý Kho')).toBeInTheDocument()
+    expect(screen.getByText('Mâm Vị')).toBeInTheDocument()
     expect(screen.getByText('Đăng Nhập')).toBeInTheDocument()
   })
 
