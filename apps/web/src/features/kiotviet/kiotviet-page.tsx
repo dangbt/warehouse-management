@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { RefreshCw, Upload, MinusCircle } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useKiotVietOrders, useSyncKiotViet, useDeductOrder } from '@/data'
 import { formatDate, formatCurrency } from '@wms/shared'
 import type { KiotVietOrder } from '@/data/use-kiotviet'
+import { Route } from '@/routes/_app/kiotviet'
 
 const columns: Column<KiotVietOrder>[] = [
   { key: 'code', header: 'Mã đơn', width: 120 },
@@ -27,11 +29,17 @@ const columns: Column<KiotVietOrder>[] = [
 ]
 
 export function KiotVietPage() {
+  const { page, deducted, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [orderBy, setOrderBy] = useState('orderDate')
-  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
-  const { data: res, isLoading, refetch } = useKiotVietOrders({ orderBy, sort })
+  const { data: res, isLoading, refetch } = useKiotVietOrders({ page, deducted: deducted || undefined, orderBy, sort })
   const syncMutation = useSyncKiotViet()
   const deductMutation = useDeductOrder()
 
@@ -82,8 +90,9 @@ export function KiotVietPage() {
         loading={isLoading}
         selectedId={selectedId}
         onRowClick={(row) => setSelectedId(row.id)}
-        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
-        pagination={{ page: 1, limit: 20, total: res?.meta?.total ?? 0 }}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
+        onPageChange={setPage}
+        pagination={{ page, limit: 20, total: res?.meta?.total ?? 0 }}
         storageKey="kiotviet"
       />
     </div>
