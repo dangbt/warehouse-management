@@ -42,7 +42,6 @@ export function LoginPage() {
       >
         <div className="px-4 py-3 border-b border-win-grid-border flex items-center gap-2">
           <img src="/logo.svg" alt="Mâm Vị" className="h-6" />
-          <span className="text-sm font-semibold">Mâm Vị</span>
         </div>
         <div className="p-5 space-y-3">
           <div>
