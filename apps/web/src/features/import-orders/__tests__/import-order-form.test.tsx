@@ -32,7 +32,13 @@ describe('ImportOrderForm', () => {
   it('loads suppliers and ingredients', async () => {
     render(<ImportOrderForm {...defaultProps} />)
     await waitFor(() => {
+      // Suppliers in native select
       expect(screen.getByText('NCC A')).toBeInTheDocument()
+    })
+    // Ingredients in WinSearchSelect dropdown
+    const ingTrigger = screen.getByTestId('select-items.0.ingredient_id')
+    fireEvent.click(ingTrigger)
+    await waitFor(() => {
       expect(screen.getByText('Thịt bò')).toBeInTheDocument()
     })
   })
@@ -71,15 +77,22 @@ describe('ImportOrderForm', () => {
       expect(screen.getByText('NCC A')).toBeInTheDocument()
     })
 
-    // Select supplier
-    const selects = screen.getAllByRole('combobox')
-    fireEvent.change(selects[0], { target: { value: 's1' } })
+    // Select supplier (native select)
+    const supplierSelect = screen.getByTestId('select-Nhà cung cấp')
+    fireEvent.change(supplierSelect, { target: { value: 's1' } })
 
-    // Fill first item row
-    fireEvent.change(selects[1], { target: { value: 'i1' } })
+    // Select ingredient via WinSearchSelect
+    const ingTrigger = screen.getByTestId('select-items.0.ingredient_id')
+    fireEvent.click(ingTrigger)
+    await waitFor(() => {
+      expect(screen.getByText('Thịt bò')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByText('Thịt bò'))
+
+    // Fill quantity and price
     const numbers = screen.getAllByRole('spinbutton')
     fireEvent.change(numbers[0], { target: { value: '5' } })
-    fireEvent.change(numbers[1], { target: { value: '100000' } })
+    fireEvent.change(numbers[2], { target: { value: '100000' } })
 
     fireEvent.click(screen.getByText('Lưu'))
     await waitFor(() => {
@@ -98,12 +111,19 @@ describe('ImportOrderForm', () => {
       expect(screen.getByText('NCC A')).toBeInTheDocument()
     })
 
-    const selects = screen.getAllByRole('combobox')
-    fireEvent.change(selects[0], { target: { value: 's1' } })
-    fireEvent.change(selects[1], { target: { value: 'i1' } })
+    const supplierSelect = screen.getByTestId('select-Nhà cung cấp')
+    fireEvent.change(supplierSelect, { target: { value: 's1' } })
+
+    const ingTrigger = screen.getByTestId('select-items.0.ingredient_id')
+    fireEvent.click(ingTrigger)
+    await waitFor(() => {
+      expect(screen.getByText('Thịt bò')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByText('Thịt bò'))
+
     const numbers = screen.getAllByRole('spinbutton')
     fireEvent.change(numbers[0], { target: { value: '5' } })
-    fireEvent.change(numbers[1], { target: { value: '100000' } })
+    fireEvent.change(numbers[2], { target: { value: '100000' } })
 
     fireEvent.click(screen.getByText('Lưu'))
     await waitFor(() => {

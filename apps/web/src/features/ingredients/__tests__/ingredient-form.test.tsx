@@ -1,11 +1,21 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { IngredientForm } from '../ingredient-form'
 
 vi.mock('@/data', () => ({
   useIngredientGroups: () => ({ data: [], isLoading: false }),
-  useIngredients: () => ({ data: [], isLoading: false }),
 }))
+
+vi.mock('@/services/api', () => ({
+  api: {
+    get: vi.fn().mockResolvedValue({ data: [] }),
+  },
+}))
+
+afterEach(() => {
+  cleanup()
+  vi.clearAllTimers()
+})
 
 describe('IngredientForm', () => {
   it('renders nothing when closed', () => {

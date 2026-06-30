@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useEffect, useState, useCallback } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { Plus, Settings, RefreshCw } from 'lucide-react'
-import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
+import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { useMenuList, useCreateMenuItem, useUpdateMenuItem, useIngredients } from '@/data'
+import { useMenuList, useCreateMenuItem, useUpdateMenuItem } from '@/data'
 import type { MenuItemFull } from '@/data'
 import { formatCurrency } from '@wms/shared'
+import { api } from '@/services/api'
 
 const modeLabels: Record<string, { label: string; color: string }> = {
   RECIPE: { label: 'Theo công thức', color: 'bg-blue-100 text-blue-800' },
@@ -63,17 +64,22 @@ export function MenuPage() {
   const [addOpen, setAddOpen] = useState(false)
   const [cfgOpen, setCfgOpen] = useState(false)
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
   const limit = 20
 
   const { data: menu, isLoading, refetch } = useMenuList()
-  const { data: ingRes } = useIngredients({ limit: 1000 })
   const createMutation = useCreateMenuItem()
   const updateMutation = useUpdateMenuItem()
 
-  const ingredientOptions = [
-    { value: '', label: '— Chọn nguyên liệu —' },
-    ...(ingRes?.data ?? []).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })),
-  ]
+  // Search nguyên liệu từ API
+  const [ingOptions, setIngOptions] = useState<{ value: string; label: string }[]>([])
+  const [ingLoading, setIngLoading] = useState(false)
+  const fetchIngredients = useCallback((q: string) => {
+    setIngLoading(true)
+    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
+      setIngOptions((res.data as { id: string; name: string; unit: string }[]).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
+    }).finally(() => setIngLoading(false))
+  }, [])
 
   // form thêm món
   const addForm = useForm<{ name: string; price: number; category: string }>()
@@ -117,10 +123,14 @@ export function MenuPage() {
 
       <WinDataGrid searchable
         columns={columns}
-        data={(menu ?? []).slice((page - 1) * limit, page * limit)}
+        data={(() => {
+          const filtered = (menu ?? []).filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase()))
+          return filtered.slice((page - 1) * limit, page * limit)
+        })()}
         loading={isLoading}
-        pagination={{ page, limit, total: menu?.length ?? 0 }}
+        pagination={{ page, limit, total: (menu ?? []).filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase())).length }}
         onPageChange={setPage}
+        onSearch={(v) => { setSearch(v); setPage(1) }}
         onRowClick={setSelected}
         onRowDoubleClick={(r) => {
           setSelected(r)
@@ -186,7 +196,22 @@ export function MenuPage() {
               ]}
             />
             {cfgMode === 'DIRECT' && (
-              <WinSelect label="Nguyên liệu trừ" {...cfgForm.register('direct_ingredient_id')} options={ingredientOptions} />
+              <Controller
+                name="direct_ingredient_id"
+                control={cfgForm.control}
+                render={({ field }) => (
+                  <WinSearchSelect
+                    label="Nguyên liệu trừ"
+                    name={field.name}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={ingOptions}
+                    onSearch={fetchIngredients}
+                    loading={ingLoading}
+                  />
+                )}
+              />
             )}
             {cfgMode === 'RECIPE' && (
               <p className="text-[11px] text-win-info">

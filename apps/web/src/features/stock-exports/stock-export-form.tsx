@@ -1,8 +1,8 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect } from 'react'
-import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
+import { useState, useEffect, useCallback } from 'react'
+import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 
 const schema = z.object({
@@ -31,18 +31,20 @@ interface Props {
 export function StockExportForm({ open, onClose, onSave }: Props) {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
+  const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  useEffect(() => {
-    if (open) {
-      reset()
-      setSubmitError('')
-      api.get('/ingredients?limit=100').then((res) => {
+  const fetchIngredients = useCallback((search: string) => {
+    setIngLoading(true)
+    api
+      .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}`)
+      .then((res) => {
         setIngredients(
           (res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({
             value: i.id,
@@ -50,8 +52,16 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
           })),
         )
       })
+      .finally(() => setIngLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (open) {
+      reset()
+      setSubmitError('')
+      fetchIngredients('')
     }
-  }, [open, reset])
+  }, [open, reset, fetchIngredients])
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -90,11 +100,22 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
     >
       <WinGroupBox title="Thông tin xuất kho">
         <div className="space-y-2.5">
-          <WinSelect
-            label="Nguyên liệu"
-            {...register('ingredient_id')}
-            options={ingredients}
-            error={errors.ingredient_id?.message}
+          <Controller
+            name="ingredient_id"
+            control={control}
+            render={({ field }) => (
+              <WinSearchSelect
+                label="Nguyên liệu"
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                options={ingredients}
+                onSearch={fetchIngredients}
+                loading={ingLoading}
+                error={errors.ingredient_id?.message}
+              />
+            )}
           />
           <WinInput
             label="Số lượng"

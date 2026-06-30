@@ -1,10 +1,11 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useEffect, useState } from 'react'
-import { WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
+import { useEffect, useState, useCallback } from 'react'
+import { WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@wms/ui-winforms'
 import { UNIT_OPTIONS } from '@wms/shared'
-import { useIngredientGroups, useIngredients } from '@/data'
+import { useIngredientGroups } from '@/data'
+import { api } from '@/services/api'
 
 const optionalNumber = z.preprocess((v) => (v === '' || v == null ? null : Number(v)), z.number().nullable())
 
@@ -62,6 +63,7 @@ interface Props {
 export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -69,15 +71,24 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
   const [submitError, setSubmitError] = useState('')
 
   const { data: groups } = useIngredientGroups()
-  const { data: ingRes } = useIngredients({ limit: 1000 })
+
+  // Search nguyên liệu nguồn từ API
+  const [sourceOptions, setSourceOptions] = useState<{ value: string; label: string }[]>([])
+  const [sourceLoading, setSourceLoading] = useState(false)
+  const fetchSourceIngredients = useCallback((q: string) => {
+    setSourceLoading(true)
+    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
+      setSourceOptions(
+        (res.data as { id: string; name: string; unit: string }[])
+          .filter((i) => i.id !== data?.id)
+          .map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })),
+      )
+    }).finally(() => setSourceLoading(false))
+  }, [data?.id])
 
   const groupOptions = [
     { value: '', label: '— Không thuộc nhóm —' },
     ...(groups ?? []).map((g) => ({ value: g.id, label: `${g.name} (gốc: ${g.baseUnit})` })),
-  ]
-  const sourceOptions = [
-    { value: '', label: '— Không (mua ngoài) —' },
-    ...(ingRes?.data ?? []).filter((i) => i.id !== data?.id).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })),
   ]
 
   useEffect(() => {
@@ -179,7 +190,22 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               placeholder="1 phần = 0.22 kg ⇒ 0.22"
               {...register('base_factor')}
             />
-            <WinSelect label="Làm từ (nguồn)" {...register('source_ingredient_id')} options={sourceOptions} />
+            <Controller
+              name="source_ingredient_id"
+              control={control}
+              render={({ field }) => (
+                <WinSearchSelect
+                  label="Làm từ (nguồn)"
+                  name={field.name}
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  options={sourceOptions}
+                  onSearch={fetchSourceIngredients}
+                  loading={sourceLoading}
+                />
+              )}
+            />
             <WinInput
               label="Định mức chế biến"
               type="number"

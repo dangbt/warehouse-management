@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Plus, RefreshCw } from 'lucide-react'
-import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
+import { WinToolbar, WinDataGrid, WinDialog, WinSearchSelect } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { usePurchaseReturns, useCreatePurchaseReturn, useSuppliers, useIngredients } from '@/data'
+import { usePurchaseReturns, useCreatePurchaseReturn, useSuppliers } from '@/data'
 import { formatDateTime, formatCurrency } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
+import { api } from '@/services/api'
 
 const columns: Column<PurchaseReturn>[] = [
   { key: 'code', header: 'Mã phiếu', width: 120 },
@@ -25,16 +26,26 @@ export function PurchaseReturnsPage() {
   const { data: res, isLoading, refetch } = usePurchaseReturns()
   const createMutation = useCreatePurchaseReturn()
   const { data: suppliersRes } = useSuppliers()
-  const { data: ingredientsRes } = useIngredients()
 
   const [supplierId, setSupplierId] = useState('')
   const [reason, setReason] = useState('')
   const [items, setItems] = useState<ReturnItem[]>([{ ingredientId: '', quantity: 0, unitPrice: 0 }])
 
+  // Search nguyên liệu từ API
+  const [ingOptions, setIngOptions] = useState<{ value: string; label: string }[]>([])
+  const [ingLoading, setIngLoading] = useState(false)
+  const fetchIngredients = useCallback((q: string) => {
+    setIngLoading(true)
+    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((r) => {
+      setIngOptions((r.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
+    }).finally(() => setIngLoading(false))
+  }, [])
+
   const resetForm = () => {
     setSupplierId('')
     setReason('')
     setItems([{ ingredientId: '', quantity: 0, unitPrice: 0 }])
+    fetchIngredients('')
   }
 
   const handleSubmit = async () => {
@@ -56,7 +67,7 @@ export function PurchaseReturnsPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu trả" onClick={() => setDialogOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu trả" onClick={() => { setDialogOpen(true); fetchIngredients('') }} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
@@ -106,16 +117,14 @@ export function PurchaseReturnsPage() {
                 {items.map((item, idx) => (
                   <tr key={idx} className="border-b border-win-grid-border">
                     <td className="p-1">
-                      <select
+                      <WinSearchSelect
                         value={item.ingredientId}
                         onChange={(e) => updateItem(idx, 'ingredientId', e.target.value)}
-                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
-                      >
-                        <option value="">Chọn NL</option>
-                        {ingredientsRes?.data.map((ing) => (
-                          <option key={ing.id} value={ing.id}>{ing.name}</option>
-                        ))}
-                      </select>
+                        options={ingOptions}
+                        onSearch={fetchIngredients}
+                        loading={ingLoading}
+                        placeholder="Chọn NL"
+                      />
                     </td>
                     <td className="p-1">
                       <input
