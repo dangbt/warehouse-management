@@ -159,7 +159,15 @@ export class KiotVietService {
   async deductOrder(orderId: string, userId: string) {
     const order = await this.prisma.kiotVietOrder.findUnique({
       where: { id: orderId },
-      include: { items: { include: { menuItem: { include: { recipe: { include: { ingredients: { include: { ingredient: { select: { id: true, trackStock: true } } } } } } } } } } },
+      include: {
+        items: {
+          include: {
+            menuItem: {
+              include: { recipe: { include: { ingredients: { include: { ingredient: { select: { id: true, trackStock: true } } } } } } },
+            },
+          },
+        },
+      },
     });
 
     if (!order) throw new BadRequestException('Đơn hàng không tồn tại');
