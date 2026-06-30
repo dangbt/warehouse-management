@@ -1,9 +1,9 @@
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useEffect, useState } from 'react'
-import { WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
-import { useIngredients } from '@/data'
+import { useEffect, useState, useCallback } from 'react'
+import { WinDialog, WinGroupBox, WinInput, WinSearchSelect } from '@wms/ui-winforms'
+import { api } from '@/services/api'
 
 const optionalNumber = z.preprocess((v) => (v === '' || v == null ? undefined : Number(v)), z.number().positive().optional())
 
@@ -34,32 +34,53 @@ interface Ing {
 export function ProcessingForm({ open, onClose, onSave }: Props) {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
-  const { data: ingRes } = useIngredients({ limit: 1000 })
-  const ingredients = (ingRes?.data ?? []) as unknown as Ing[]
+
+  // Search nguồn (tất cả NL)
+  const [sourceOptions, setSourceOptions] = useState<{ value: string; label: string }[]>([])
+  const [sourceLoading, setSourceLoading] = useState(false)
+  const fetchSource = useCallback((q: string) => {
+    setSourceLoading(true)
+    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
+      setSourceOptions((res.data as Ing[]).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
+    }).finally(() => setSourceLoading(false))
+  }, [])
+
+  // Search BTP (chỉ NL có sourceIngredientId)
+  const [outputOptions, setOutputOptions] = useState<{ value: string; label: string }[]>([])
+  const [outputLoading, setOutputLoading] = useState(false)
+  const [allOutputs, setAllOutputs] = useState<Ing[]>([])
+  const fetchOutput = useCallback((q: string) => {
+    setOutputLoading(true)
+    api.get(`/ingredients?limit=50&search=${encodeURIComponent(q)}`).then((res) => {
+      const data = res.data as Ing[]
+      const btp = data.filter((i) => i.sourceIngredientId)
+      const list = btp.length ? btp : data
+      setAllOutputs(list)
+      setOutputOptions(list.map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
+    }).finally(() => setOutputLoading(false))
+  }, [])
 
   useEffect(() => {
     if (open) {
       setSubmitError('')
       reset({ source_ingredient_id: '', source_qty: 0, output_ingredient_id: '', output_qty: undefined, note: '' })
+      fetchSource('')
+      fetchOutput('')
     }
-  }, [open, reset])
+  }, [open, reset, fetchSource, fetchOutput])
 
   const outputId = watch('output_ingredient_id')
   const sourceQty = watch('source_qty')
-  const output = ingredients.find((i) => i.id === outputId)
+  const output = allOutputs.find((i) => i.id === outputId)
   const yieldRatio = output?.yieldRatio != null ? Number(output.yieldRatio) : null
   const suggested = yieldRatio != null && sourceQty ? +(Number(sourceQty) * yieldRatio).toFixed(3) : null
-
-  const sourceOptions = ingredients.map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` }))
-  // Ưu tiên thành phẩm là bán thành phẩm (có nguồn); nếu chưa có thì cho chọn tất cả
-  const btp = ingredients.filter((i) => i.sourceIngredientId)
-  const outputOptions = (btp.length ? btp : ingredients).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` }))
 
   const onSubmit = async (formData: FormData) => {
     try {
@@ -97,18 +118,40 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
     >
       <WinGroupBox title="Nguyên liệu sống → Bán thành phẩm">
         <div className="space-y-2.5">
-          <WinSelect
-            label="Nguyên liệu nguồn"
-            {...register('source_ingredient_id')}
-            options={sourceOptions}
-            error={errors.source_ingredient_id?.message}
+          <Controller
+            name="source_ingredient_id"
+            control={control}
+            render={({ field }) => (
+              <WinSearchSelect
+                label="Nguyên liệu nguồn"
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                options={sourceOptions}
+                onSearch={fetchSource}
+                loading={sourceLoading}
+                error={errors.source_ingredient_id?.message}
+              />
+            )}
           />
           <WinInput label="Lượng nguồn dùng" type="number" step="0.001" {...register('source_qty')} error={errors.source_qty?.message} />
-          <WinSelect
-            label="Thành phẩm (BTP)"
-            {...register('output_ingredient_id')}
-            options={outputOptions}
-            error={errors.output_ingredient_id?.message}
+          <Controller
+            name="output_ingredient_id"
+            control={control}
+            render={({ field }) => (
+              <WinSearchSelect
+                label="Thành phẩm (BTP)"
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                options={outputOptions}
+                onSearch={fetchOutput}
+                loading={outputLoading}
+                error={errors.output_ingredient_id?.message}
+              />
+            )}
           />
           <WinInput
             label="Lượng thực thu"

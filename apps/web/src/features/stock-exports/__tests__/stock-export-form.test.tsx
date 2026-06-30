@@ -25,8 +25,11 @@ describe('StockExportForm', () => {
     expect(container.innerHTML).toBe('')
   })
 
-  it('loads ingredients on open', async () => {
+  it('loads ingredients on open and shows in dropdown', async () => {
     render(<StockExportForm {...defaultProps} />)
+    // Click the ingredient search-select trigger to open dropdown
+    const trigger = screen.getByTestId('select-Nguyên liệu')
+    fireEvent.click(trigger)
     await waitFor(() => {
       expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument()
     })
@@ -34,9 +37,13 @@ describe('StockExportForm', () => {
 
   it('validates required fields on submit', async () => {
     render(<StockExportForm {...defaultProps} />)
+    await waitFor(() => {
+      expect(screen.getByTestId('select-Nguyên liệu')).toBeInTheDocument()
+    })
     fireEvent.click(screen.getByText('Xuất'))
     await waitFor(() => {
-      expect(screen.getByText('Chọn nguyên liệu')).toBeInTheDocument()
+      // Reason is also required (native select)
+      expect(screen.getByText('Chọn lý do')).toBeInTheDocument()
     })
   })
 
@@ -55,14 +62,18 @@ describe('StockExportForm', () => {
     const onClose = vi.fn()
     render(<StockExportForm open={true} onClose={onClose} onSave={onSave} />)
 
+    // Open ingredient dropdown and select
+    const trigger = screen.getByTestId('select-Nguyên liệu')
+    fireEvent.click(trigger)
     await waitFor(() => {
       expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument()
     })
+    fireEvent.click(screen.getByText('Thịt bò (tồn: 10 kg)'))
 
-    const selects = screen.getAllByRole('combobox')
-    fireEvent.change(selects[0], { target: { value: '1' } })
+    // Fill quantity
     fireEvent.change(screen.getAllByRole('spinbutton')[0], { target: { value: '2' } })
-    fireEvent.change(selects[1], { target: { value: 'DAMAGED' } })
+    // Select reason (still native select)
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'DAMAGED' } })
 
     fireEvent.click(screen.getByText('Xuất'))
     await waitFor(() => {
@@ -77,14 +88,15 @@ describe('StockExportForm', () => {
     const onSave = vi.fn().mockRejectedValue(new Error('Không đủ tồn kho'))
     render(<StockExportForm open={true} onClose={vi.fn()} onSave={onSave} />)
 
+    // Select ingredient
+    fireEvent.click(screen.getByTestId('select-Nguyên liệu'))
     await waitFor(() => {
       expect(screen.getByText('Thịt bò (tồn: 10 kg)')).toBeInTheDocument()
     })
+    fireEvent.click(screen.getByText('Thịt bò (tồn: 10 kg)'))
 
-    const selects = screen.getAllByRole('combobox')
-    fireEvent.change(selects[0], { target: { value: '1' } })
     fireEvent.change(screen.getAllByRole('spinbutton')[0], { target: { value: '2' } })
-    fireEvent.change(selects[1], { target: { value: 'EXPIRED' } })
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'EXPIRED' } })
 
     fireEvent.click(screen.getByText('Xuất'))
     await waitFor(() => {

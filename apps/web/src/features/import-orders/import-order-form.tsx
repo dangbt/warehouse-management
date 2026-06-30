@@ -1,9 +1,9 @@
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
-import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
+import { WinDialog, WinGroupBox, WinSelect, WinInput, WinSearchSelect } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { formatCurrency, formatNumber } from '@wms/shared'
 
@@ -55,18 +55,26 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   const [suppliers, setSuppliers] = useState<{ value: string; label: string }[]>([])
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
+  const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
+
+  const fetchIngredients = useCallback((q: string) => {
+    setIngLoading(true)
+    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
+      setIngredients((res.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
+    }).finally(() => setIngLoading(false))
+  }, [])
 
   useEffect(() => {
     if (open) {
       reset({ supplier_id: '', note: '', paid: false, items: [{ ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, expiry_date: '' }] })
       setSubmitError('')
-      Promise.all([api.get('/suppliers?limit=1000'), api.get('/ingredients?limit=1000')]).then(([s, i]) => {
+      api.get('/suppliers?limit=1000').then((s) => {
         setSuppliers((s.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
-        setIngredients((i.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
       })
+      fetchIngredients('')
     }
-  }, [open, reset])
+  }, [open, reset, fetchIngredients])
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -151,18 +159,23 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
             {fields.map((field, i) => (
               <tr key={field.id} className="border-t border-win-grid-border">
                 <td className="p-0.5">
-                  <select
-                    data-testid={`item-${i}-ingredient`}
-                    {...register(`items.${i}.ingredient_id`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
-                  >
-                    <option value="">--</option>
-                    {ingredients.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name={`items.${i}.ingredient_id`}
+                    control={control}
+                    render={({ field }) => (
+                      <WinSearchSelect
+                        name={field.name}
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        options={ingredients}
+                        onSearch={fetchIngredients}
+                        loading={ingLoading}
+                        placeholder="-- NL --"
+                        data-testid={`item-${i}-ingredient`}
+                      />
+                    )}
+                  />
                 </td>
                 <td className="p-0.5">
                   <input

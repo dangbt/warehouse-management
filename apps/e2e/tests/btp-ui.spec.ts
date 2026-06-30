@@ -23,6 +23,15 @@ async function selectByText(select: Locator, text: string) {
   await select.selectOption(value)
 }
 
+// Mở WinSearchSelect dropdown, gõ tìm, chọn option
+async function searchAndSelect(dialog: Locator, testId: string, text: string) {
+  await dialog.locator(`[data-testid="select-${testId}"]`).click()
+  await dialog.locator(`[data-testid="search-${testId}"]`).fill(text)
+  const option = dialog.locator(`[data-testid="option-${testId}"]`, { hasText: text }).first()
+  await expect(option).toBeVisible({ timeout: 10000 })
+  await option.click()
+}
+
 test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
   test.beforeEach(async ({ page }) => {
     await login(page)
@@ -74,7 +83,7 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     dialog = page.locator('[data-testid="dialog"]')
     await expect(dialog).toBeVisible()
     await selectByText(dialog.locator('[data-testid="select-Nhà cung cấp"]'), SUP)
-    await selectByText(dialog.locator('[data-testid="item-0-ingredient"]'), SONG)
+    await searchAndSelect(dialog, 'items.0.ingredient_id', SONG)
     await dialog.locator('[data-testid="item-0-quantity"]').fill('10')
     await dialog.locator('[data-testid="item-0-price"]').fill('120000')
     await dialog.getByRole('button', { name: 'Lưu' }).click()
@@ -103,7 +112,7 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     await dialog.locator('[data-testid="input-Tồn kho min"]').fill('0')
     await selectByText(dialog.locator('[data-testid="select-Nhóm"]'), GROUP)
     await dialog.locator('[data-testid="input-Hệ số về nhóm"]').fill('0.22')
-    await selectByText(dialog.locator('[data-testid="select-Làm từ (nguồn)"]'), SONG)
+    await searchAndSelect(dialog, 'Làm từ (nguồn)', SONG)
     await dialog.locator('[data-testid="input-Định mức chế biến"]').fill('4')
     await dialog.locator('[data-testid="input-Hao hụt sơ chế"]').fill('0.1')
     await dialog.getByRole('button', { name: 'OK' }).click()
@@ -130,9 +139,9 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     await page.locator('[data-testid="toolbar-Tạo phiếu"]').click()
     const dialog = page.locator('[data-testid="dialog"]')
     await expect(dialog).toBeVisible()
-    await selectByText(dialog.locator('[data-testid="select-Nguyên liệu nguồn"]'), SONG)
+    await searchAndSelect(dialog, 'Nguyên liệu nguồn', SONG)
     await dialog.locator('[data-testid="input-Lượng nguồn dùng"]').fill('1')
-    await selectByText(dialog.locator('[data-testid="select-Thành phẩm (BTP)"]'), CHIN)
+    await searchAndSelect(dialog, 'Thành phẩm (BTP)', CHIN)
     await dialog.getByRole('button', { name: 'Lưu' }).click()
     await expect(page.getByText('Tạo phiếu chế biến thành công')).toBeVisible({ timeout: 15000 })
   })
@@ -167,7 +176,7 @@ test.describe.serial('Bán thành phẩm / Chế biến (UI)', () => {
     dialog = page.locator('[data-testid="dialog"]')
     await expect(dialog).toBeVisible()
     await selectByText(dialog.locator('[data-testid="select-Nhà cung cấp"]'), SUP)
-    await selectByText(dialog.locator('[data-testid="item-0-ingredient"]'), DRINK)
+    await searchAndSelect(dialog, 'items.0.ingredient_id', DRINK)
     await dialog.locator('[data-testid="item-0-quantity"]').fill('5')
     await dialog.locator('[data-testid="item-0-factor"]').fill('24')
     await dialog.locator('[data-testid="item-0-price"]').fill('8000')

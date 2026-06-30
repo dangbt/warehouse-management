@@ -18,7 +18,17 @@ async function login(page: Page) {
   await page.waitForURL('**/dashboard')
 }
 
-// Chọn option theo text hiển thị (không phụ thuộc index/định dạng tồn kho)
+// Mở dropdown search-select, gõ tìm, chọn option theo text
+async function searchAndSelect(dialog: Locator, label: string, text: string) {
+  await dialog.locator(`[data-testid="select-${label}"]`).click()
+  await dialog.locator(`[data-testid="search-${label}"]`).fill(text)
+  // Đợi option xuất hiện sau khi API trả về
+  const option = dialog.locator(`[data-testid="option-${label}"]`, { hasText: text }).first()
+  await expect(option).toBeVisible({ timeout: 10000 })
+  await option.click()
+}
+
+// Chọn option trong native <select> theo text hiển thị
 async function selectByText(select: Locator, text: string) {
   const value = await select.locator('option', { hasText: text }).first().getAttribute('value')
   if (!value) throw new Error(`Không tìm thấy option chứa "${text}"`)
@@ -79,7 +89,7 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       const dialog = page.locator('[data-testid="dialog"]')
       await expect(dialog).toBeVisible()
       await selectByText(dialog.locator('[data-testid="select-Nhà cung cấp"]'), SUP)
-      await selectByText(dialog.locator('[data-testid="item-0-ingredient"]'), ING)
+      await searchAndSelect(dialog, 'items.0.ingredient_id', ING)
       await dialog.locator('[data-testid="item-0-quantity"]').fill('10')
       await dialog.locator('[data-testid="item-0-price"]').fill('50000')
       await dialog.getByRole('button', { name: 'Lưu' }).click()
@@ -107,7 +117,7 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
         await page.locator('[data-testid="toolbar-Xuất kho"]').click()
         const dialog = page.locator('[data-testid="dialog"]')
         await expect(dialog).toBeVisible()
-        await selectByText(dialog.locator('[data-testid="select-Nguyên liệu"]'), ING)
+        await searchAndSelect(dialog, 'Nguyên liệu', ING)
         await dialog.locator('[data-testid="input-Số lượng"]').fill('1')
         await dialog.locator('[data-testid="select-Lý do"]').selectOption(r.reason)
         if (r.note) await dialog.locator('[data-testid="input-Ghi chú"]').fill(r.note)
@@ -121,7 +131,7 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       await page.locator('[data-testid="toolbar-Xuất kho"]').click()
       const dialog = page.locator('[data-testid="dialog"]')
       await expect(dialog).toBeVisible()
-      await selectByText(dialog.locator('[data-testid="select-Nguyên liệu"]'), ING)
+      await searchAndSelect(dialog, 'Nguyên liệu', ING)
       await dialog.locator('[data-testid="input-Số lượng"]').fill('999999')
       await dialog.locator('[data-testid="select-Lý do"]').selectOption('OTHER')
       await dialog.getByRole('button', { name: 'Xuất' }).click()
@@ -135,7 +145,7 @@ test.describe('Warehouse Mâm Vị - Full Flow', () => {
       const dialog = page.locator('[data-testid="dialog"]')
       await expect(dialog).toBeVisible()
       await selectByText(dialog.locator('[data-testid="select-Nhà cung cấp"]'), SUP)
-      await selectByText(dialog.locator('[data-testid="item-0-ingredient"]'), ING)
+      await searchAndSelect(dialog, 'items.0.ingredient_id', ING)
       await dialog.locator('[data-testid="item-0-quantity"]').fill('5')
       await dialog.locator('[data-testid="item-0-price"]').fill('20000')
       await dialog.getByRole('button', { name: 'Lưu' }).click()
