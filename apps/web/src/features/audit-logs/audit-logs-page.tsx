@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useAuditLogs } from '@/data'
 import { formatDateTime } from '@wms/shared'
+import { Route } from '@/routes/_app/audit-logs'
 
 interface AuditLog {
   id: string
@@ -26,10 +28,16 @@ const columns: Column<AuditLog>[] = [
 ]
 
 export function AuditLogsPage() {
+  const { page, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [detail, setDetail] = useState<AuditLog | null>(null)
-  const [orderBy, setOrderBy] = useState('createdAt')
-  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
-  const { data: res, isLoading, refetch } = useAuditLogs({ orderBy, sort })
+  const { data: res, isLoading, refetch } = useAuditLogs({ page, orderBy, sort })
 
   return (
     <div className="flex flex-col h-full">
@@ -43,8 +51,9 @@ export function AuditLogsPage() {
             data={res?.data ?? []}
             loading={isLoading}
             onRowDoubleClick={setDetail}
-            onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
-            pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+            onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
+            onPageChange={setPage}
+            pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
           />
         </div>
         {detail && (

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, CheckCircle, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -6,6 +7,7 @@ import { ProcessingForm } from './processing-form'
 import { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from '@/data'
 import type { ProcessingOrder } from '@/data'
 import { formatDate, formatNumber } from '@wms/shared'
+import { Route } from '@/routes/_app/processing'
 
 const statusLabels: Record<string, string> = { DRAFT: 'Nháp', COMPLETED: 'Hoàn thành' }
 const statusColors: Record<string, string> = {
@@ -32,13 +34,19 @@ const columns: Column<ProcessingOrder>[] = [
 ]
 
 export function ProcessingPage() {
+  const { page, status, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<ProcessingOrder | null>(null)
   const [confirmComplete, setConfirmComplete] = useState(false)
-  const [orderBy, setOrderBy] = useState('createdAt')
-  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
 
-  const { data: res, isLoading, refetch } = useProcessingOrders({ orderBy, sort })
+  const { data: res, isLoading, refetch } = useProcessingOrders({ page, status: status || undefined, orderBy, sort })
   const createMutation = useCreateProcessing()
   const completeMutation = useCompleteProcessing()
 
@@ -77,8 +85,9 @@ export function ProcessingPage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
-        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
+        pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
+        onPageChange={setPage}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         storageKey="processing"
       />

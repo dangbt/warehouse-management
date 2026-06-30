@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, Pencil, Trash2, RefreshCw, Download } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -6,6 +7,7 @@ import { IngredientForm } from './ingredient-form'
 import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient, useIngredientBatches } from '@/data'
 import type { Batch } from '@/data/use-batches'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
+import { Route } from '@/routes/_app/ingredients'
 
 interface IngredientRow {
   id: string
@@ -43,11 +45,14 @@ const columns: Column<IngredientRow>[] = [
 ]
 
 export function IngredientsPage() {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('')
-  const [orderBy, setOrderBy] = useState('name')
-  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
+  const { page, search, category, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<IngredientRow | null>(null)
@@ -114,18 +119,12 @@ export function IngredientsPage() {
           type="text"
           placeholder="Tìm kiếm..."
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value)
-            setPage(1)
-          }}
+          onChange={(e) => setParams({ search: e.target.value, page: 1 })}
           className="border border-win-input-border px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus bg-white"
         />
         <select
           value={category}
-          onChange={(e) => {
-            setCategory(e.target.value)
-            setPage(1)
-          }}
+          onChange={(e) => setParams({ category: e.target.value, page: 1 })}
           className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none bg-white"
         >
           <option value="">Tất cả loại</option>
@@ -138,13 +137,13 @@ export function IngredientsPage() {
       </WinToolbar>
 
       <WinDataGrid searchable
-        onSearch={(q) => { setSearch(q); setPage(1) }}
+        onSearch={(q) => setParams({ search: q, page: 1 })}
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
-        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         onRowDoubleClick={(row) => {
           setSelected(row)

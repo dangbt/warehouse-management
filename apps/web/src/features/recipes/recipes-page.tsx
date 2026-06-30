@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, Pencil, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { RecipeForm } from './recipe-form'
 import { useRecipes } from '@/data'
+import { Route } from '@/routes/_app/recipes'
 
 interface RecipeRow {
   id: string
@@ -22,12 +24,17 @@ const columns: Column<RecipeRow>[] = [
 ]
 
 export function RecipesPage() {
+  const { page, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<RecipeRow | null>(null)
   const [selected, setSelected] = useState<RecipeRow | null>(null)
-  const [page, setPage] = useState(1)
-  const [orderBy, setOrderBy] = useState('name')
-  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
 
   const { data: res, isLoading, refetch } = useRecipes({ page, orderBy, sort })
 
@@ -62,7 +69,7 @@ export function RecipesPage() {
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
-        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         onRowDoubleClick={openEdit}
       />

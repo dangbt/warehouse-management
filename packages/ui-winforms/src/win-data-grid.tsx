@@ -250,16 +250,34 @@ export function WinDataGrid<T extends { id?: string }>({
       {pagination && (
         <div className="h-7 border-t border-win-grid-border bg-win-menu flex items-center justify-between px-2 text-[11px] shrink-0">
           <span>
-            Hiển thị {(pagination.page - 1) * pagination.limit + 1}-
-            {Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total}
+            {pagination.total > 0
+              ? `${(pagination.page - 1) * pagination.limit + 1}-${Math.min(pagination.page * pagination.limit, pagination.total)} / ${pagination.total}`
+              : '0 kết quả'}
           </span>
           <div className="flex items-center gap-1">
-            <button onClick={() => onPageChange?.(pagination.page - 1)} disabled={pagination.page <= 1} className="p-0.5 disabled:opacity-30">
+            <button onClick={() => onPageChange?.(1)} disabled={pagination.page <= 1} className="px-1 py-0.5 disabled:opacity-30 hover:bg-win-menu-hover" title="Trang đầu">
+              ⟨⟨
+            </button>
+            <button onClick={() => onPageChange?.(pagination.page - 1)} disabled={pagination.page <= 1} className="p-0.5 disabled:opacity-30 hover:bg-win-menu-hover">
               <ChevronLeft size={14} />
             </button>
-            <span>Trang {pagination.page}/{totalPages}</span>
-            <button onClick={() => onPageChange?.(pagination.page + 1)} disabled={pagination.page >= totalPages} className="p-0.5 disabled:opacity-30">
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              value={pagination.page}
+              onChange={(e) => {
+                const p = Math.max(1, Math.min(totalPages, Number(e.target.value) || 1))
+                onPageChange?.(p)
+              }}
+              className="w-8 text-center border border-win-input-border px-0.5 py-0 text-[11px] outline-none bg-white"
+            />
+            <span>/ {totalPages}</span>
+            <button onClick={() => onPageChange?.(pagination.page + 1)} disabled={pagination.page >= totalPages} className="p-0.5 disabled:opacity-30 hover:bg-win-menu-hover">
               <ChevronRight size={14} />
+            </button>
+            <button onClick={() => onPageChange?.(totalPages)} disabled={pagination.page >= totalPages} className="px-1 py-0.5 disabled:opacity-30 hover:bg-win-menu-hover" title="Trang cuối">
+              ⟩⟩
             </button>
           </div>
         </div>

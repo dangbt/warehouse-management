@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './stock-export-form'
 import { useStockExports, useCreateStockExport } from '@/data'
 import { formatDate, formatNumber } from '@wms/shared'
+import { Route } from '@/routes/_app/stock-exports'
 
 interface StockExport {
   id: string
@@ -37,10 +39,16 @@ const columns: Column<StockExport>[] = [
 ]
 
 export function StockExportsPage() {
+  const { page, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [formOpen, setFormOpen] = useState(false)
-  const [orderBy, setOrderBy] = useState('createdAt')
-  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
-  const { data: res, isLoading, refetch } = useStockExports({ orderBy, sort })
+  const { data: res, isLoading, refetch } = useStockExports({ page, orderBy, sort })
   const createMutation = useCreateStockExport()
 
   return (
@@ -54,8 +62,9 @@ export function StockExportsPage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
-        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
+        pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
+        onPageChange={setPage}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         storageKey="stock-exports"
       />
       <StockExportForm

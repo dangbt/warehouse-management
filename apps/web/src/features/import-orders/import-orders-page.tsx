@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, Check, X, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
+import { Route } from '@/routes/_app/import-orders'
 
 interface ImportOrderItem {
   id: string
@@ -60,14 +62,19 @@ const columns: Column<ImportOrder>[] = [
 ]
 
 export function ImportOrdersPage() {
+  const { page, status, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
-  const [statusFilter, setStatusFilter] = useState('')
-  const [orderBy, setOrderBy] = useState('createdAt')
-  const [sort, setSort] = useState<'asc' | 'desc'>('desc')
 
-  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined, orderBy, sort })
+  const { data: res, isLoading, refetch } = useImportOrders({ status: status || undefined, orderBy, sort, page })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
@@ -101,8 +108,8 @@ export function ImportOrdersPage() {
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          value={status}
+          onChange={(e) => setParams({ status: e.target.value, page: 1 })}
           className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none"
         >
           <option value="">Tất cả</option>
@@ -116,8 +123,9 @@ export function ImportOrdersPage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
-        onSort={(field, dir) => { setOrderBy(field); setSort(dir) }}
+        pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
+        onPageChange={setPage}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         onRowDoubleClick={setSelected}
         storageKey="import-orders"

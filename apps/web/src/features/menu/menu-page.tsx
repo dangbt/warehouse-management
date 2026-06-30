@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { useForm, Controller } from 'react-hook-form'
 import { Plus, Settings, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@wms/ui-winforms'
@@ -7,6 +8,7 @@ import { useMenuList, useCreateMenuItem, useUpdateMenuItem } from '@/data'
 import type { MenuItemFull } from '@/data'
 import { formatCurrency } from '@wms/shared'
 import { api } from '@/services/api'
+import { Route } from '@/routes/_app/menu'
 
 const modeLabels: Record<string, { label: string; color: string }> = {
   RECIPE: { label: 'Theo công thức', color: 'bg-blue-100 text-blue-800' },
@@ -60,11 +62,17 @@ interface ConfigForm {
 }
 
 export function MenuPage() {
+  const { page, search, orderBy, sort } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+
+  const setParams = (updates: Record<string, unknown>) => {
+    navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  }
+  const setPage = (p: number) => setParams({ page: p })
+
   const [selected, setSelected] = useState<MenuItemFull | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [cfgOpen, setCfgOpen] = useState(false)
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
   const limit = 20
 
   const { data: menu, isLoading, refetch } = useMenuList()
@@ -109,6 +117,17 @@ export function MenuPage() {
     setCfgOpen(false)
   }
 
+  // Client-side filtering and sorting
+  const filtered = (menu ?? []).filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase()))
+  const sorted = [...filtered].sort((a, b) => {
+    const aVal = (a as Record<string, unknown>)[orderBy] as string | number ?? ''
+    const bVal = (b as Record<string, unknown>)[orderBy] as string | number ?? ''
+    if (aVal < bVal) return sort === 'asc' ? -1 : 1
+    if (aVal > bVal) return sort === 'asc' ? 1 : -1
+    return 0
+  })
+  const paginated = sorted.slice((page - 1) * limit, page * limit)
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
@@ -123,14 +142,12 @@ export function MenuPage() {
 
       <WinDataGrid searchable
         columns={columns}
-        data={(() => {
-          const filtered = (menu ?? []).filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase()))
-          return filtered.slice((page - 1) * limit, page * limit)
-        })()}
+        data={paginated}
         loading={isLoading}
-        pagination={{ page, limit, total: (menu ?? []).filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase())).length }}
+        pagination={{ page, limit, total: filtered.length }}
         onPageChange={setPage}
-        onSearch={(v) => { setSearch(v); setPage(1) }}
+        onSearch={(v) => setParams({ search: v, page: 1 })}
+        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         onRowDoubleClick={(r) => {
           setSelected(r)
