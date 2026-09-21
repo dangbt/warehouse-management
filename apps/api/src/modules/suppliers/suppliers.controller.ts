@@ -32,6 +32,20 @@ function normalizeTaxCode(raw: string | undefined): string | null {
   return trimmed;
 }
 
+/**
+ * Chuẩn hoá + validate số CCCD/CMND của người bán cá nhân.
+ * Cho phép 9 chữ số (CMND cũ) hoặc 12 chữ số (CCCD). Rỗng/undefined ⇒ null.
+ */
+function normalizeIdNumber(raw: string | undefined): string | null {
+  if (raw === undefined) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (!/^\d{9}$/.test(trimmed) && !/^\d{12}$/.test(trimmed)) {
+    throw new BadRequestException('Số CCCD/CMND phải có 9 hoặc 12 chữ số');
+  }
+  return trimmed;
+}
+
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('suppliers')
 export class SuppliersController {
@@ -64,6 +78,8 @@ export class SuppliersController {
       address?: string;
       tax_code?: string;
       note?: string;
+      is_individual?: boolean;
+      id_number?: string;
     },
   ) {
     return this.prisma.supplier.create({
@@ -73,6 +89,8 @@ export class SuppliersController {
         address: body.address,
         taxCode: normalizeTaxCode(body.tax_code),
         note: body.note,
+        isIndividual: body.is_individual ?? false,
+        idNumber: normalizeIdNumber(body.id_number),
       },
     });
   }
@@ -82,16 +100,34 @@ export class SuppliersController {
   async update(
     @Param('id') id: string,
     @Body()
-    body: { name?: string; phone?: string; address?: string; tax_code?: string; note?: string },
+    body: {
+      name?: string;
+      phone?: string;
+      address?: string;
+      tax_code?: string;
+      note?: string;
+      is_individual?: boolean;
+      id_number?: string;
+    },
   ) {
     const exists = await this.prisma.supplier.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Nhà cung cấp không tồn tại');
-    const data: { name?: string; phone?: string; address?: string; taxCode?: string | null; note?: string } = {};
+    const data: {
+      name?: string;
+      phone?: string;
+      address?: string;
+      taxCode?: string | null;
+      note?: string;
+      isIndividual?: boolean;
+      idNumber?: string | null;
+    } = {};
     if (body.name !== undefined) data.name = body.name;
     if (body.phone !== undefined) data.phone = body.phone;
     if (body.address !== undefined) data.address = body.address;
     if (body.note !== undefined) data.note = body.note;
     if (body.tax_code !== undefined) data.taxCode = normalizeTaxCode(body.tax_code);
+    if (body.is_individual !== undefined) data.isIndividual = body.is_individual;
+    if (body.id_number !== undefined) data.idNumber = normalizeIdNumber(body.id_number);
     return this.prisma.supplier.update({ where: { id }, data });
   }
 

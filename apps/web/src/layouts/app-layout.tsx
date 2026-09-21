@@ -45,6 +45,7 @@ const menuTree: TreeNode[] = [
     children: [
       { id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' },
       { id: 'tax-input-invoices', label: 'Bảng kê mua vào', route: '/tax/input-invoices', permission: 'tax:read' },
+      { id: 'tax-no-invoice-purchases', label: 'Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases', permission: 'tax:read' },
     ],
   },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },

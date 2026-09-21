@@ -42,7 +42,7 @@ export function SuppliersPage() {
   const { data: payments } = useSupplierPayments(selected?.id)
   const paymentMutation = useCreateSupplierPayment()
 
-  const handleSave = async (formData: { name: string; phone: string; address: string; tax_code?: string; note?: string }) => {
+  const handleSave = async (formData: { name: string; phone: string; address: string; tax_code?: string; note?: string; is_individual?: boolean; id_number?: string }) => {
     if (formMode === 'add') {
       await createMutation.mutateAsync(formData)
     } else if (selected) {

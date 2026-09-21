@@ -27,6 +27,8 @@ export interface CreateImportOrderInput {
   invoice_no?: string;
   invoice_symbol?: string;
   invoice_date?: string;
+  // Địa chỉ nơi mua (áp dụng khi không có hoá đơn). Bỏ trống ⇒ mặc định lấy từ địa chỉ NCC.
+  purchase_address?: string;
   items: ImportOrderItemInput[];
 }
 
@@ -118,6 +120,22 @@ export class ImportOrdersService {
     const vatAmount = lines.reduce((s, l) => s + l.vatAmount, 0);
     const totalAmount = subtotal + vatAmount;
 
+    // Địa chỉ nơi mua: chỉ áp dụng cho hàng không có hoá đơn.
+    // Ưu tiên giá trị nhập tay; nếu bỏ trống thì mặc định lấy địa chỉ NCC.
+    let purchaseAddress: string | null = null;
+    if (!hasInvoice) {
+      const explicit = body.purchase_address?.trim();
+      if (explicit) {
+        purchaseAddress = explicit;
+      } else {
+        const supplier = await this.prisma.supplier.findUnique({
+          where: { id: body.supplier_id },
+          select: { address: true },
+        });
+        purchaseAddress = supplier?.address?.trim() || null;
+      }
+    }
+
     return await this.prisma.importOrder.create({
       data: {
         code,
@@ -126,6 +144,7 @@ export class ImportOrdersService {
         invoiceNo,
         invoiceSymbol,
         invoiceDate,
+        purchaseAddress,
         subtotal,
         vatAmount,
         totalAmount,

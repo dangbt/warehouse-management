@@ -27,6 +27,7 @@ const schema = z
     invoice_symbol: z.string().optional(),
     invoice_no: z.string().optional(),
     invoice_date: z.string().optional(),
+    purchase_address: z.string().optional(),
     items: z.array(itemSchema).min(1, 'Ít nhất 1 dòng'),
   })
   .superRefine((data, ctx) => {
@@ -68,17 +69,23 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       invoice_symbol: '',
       invoice_no: '',
       invoice_date: '',
+      purchase_address: '',
       items: [{ ...DEFAULT_ITEM }],
     },
   })
   const { fields, append, remove } = useFieldArray({ control, name: 'items' })
   const items = watch('items')
   const hasInvoice = watch('has_invoice')
+  const supplierId = watch('supplier_id')
   const totals = computeVatTotals(items ?? [], hasInvoice)
 
   const [suppliers, setSuppliers] = useState<{ value: string; label: string }[]>([])
+  const [supplierMap, setSupplierMap] = useState<Record<string, { isIndividual: boolean; address: string | null }>>({})
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
   const [submitError, setSubmitError] = useState('')
+
+  // Người bán cá nhân không có hoá đơn ⇒ hiện field "Địa chỉ mua hàng".
+  const showPurchaseAddress = !hasInvoice && !!supplierId && !!supplierMap[supplierId]?.isIndividual
 
   useEffect(() => {
     if (open) {
@@ -90,11 +97,16 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
         invoice_symbol: '',
         invoice_no: '',
         invoice_date: '',
+        purchase_address: '',
         items: [{ ...DEFAULT_ITEM }],
       })
       setSubmitError('')
       Promise.all([api.get('/suppliers?limit=1000'), api.get('/ingredients?limit=1000')]).then(([s, i]) => {
-        setSuppliers((s.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
+        const supplierList = s.data as { id: string; name: string; isIndividual?: boolean; address?: string | null }[]
+        setSuppliers(supplierList.map((x) => ({ value: x.id, label: x.name })))
+        setSupplierMap(
+          Object.fromEntries(supplierList.map((x) => [x.id, { isIndividual: !!x.isIndividual, address: x.address ?? null }])),
+        )
         setIngredients((i.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
       })
     }
@@ -105,7 +117,10 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       setSubmitError('')
       // Khi không có hoá đơn: gửi has_invoice=false và bỏ thuế suất từng dòng.
       const payload: FormData = data.has_invoice
-        ? data
+        ? {
+            ...data,
+            purchase_address: undefined,
+          }
         : {
             ...data,
             invoice_symbol: undefined,
@@ -167,6 +182,13 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
             <input type="checkbox" {...register('has_invoice')} className="w-3 h-3" />
             Có hoá đơn GTGT
           </label>
+          {showPurchaseAddress && (
+            <WinInput
+              label="Địa chỉ mua hàng"
+              {...register('purchase_address')}
+              placeholder={supplierMap[supplierId]?.address ?? 'Địa chỉ nơi mua (mặc định lấy từ NCC)'}
+            />
+          )}
         </div>
       </WinGroupBox>
 

@@ -120,6 +120,10 @@ model Supplier {
   address    String?
   taxCode    String? @map("tax_code")
   note       String?
+  // Người bán là cá nhân/hộ không có hoá đơn (chợ, nông dân...). Dùng cho bảng kê 01/TNDN.
+  isIndividual Boolean @default(false) @map("is_individual")
+  // Số CCCD/CMND của người bán cá nhân (nếu có).
+  idNumber   String? @map("id_number")
   totalDebt  Decimal @default(0) @map("total_debt") @db.Decimal(14, 2)
   importOrders    ImportOrder[]
   purchaseReturns PurchaseReturn[]
@@ -143,6 +147,8 @@ model ImportOrder {
   status      String   @default("PENDING")
   paid        Boolean  @default(false)
   note        String?
+  // Địa chỉ nơi mua (hàng không có hoá đơn của NCC cá nhân). Mặc định lấy từ NCC khi tạo.
+  purchaseAddress String? @map("purchase_address")
   createdById String   @map("created_by")
   createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
   approvedById String? @map("approved_by")

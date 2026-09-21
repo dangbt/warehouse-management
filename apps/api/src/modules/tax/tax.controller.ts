@@ -25,6 +25,12 @@ export class TaxController {
     return this.reports.inputInvoiceRegister(period);
   }
 
+  @Get('no-invoice-purchases')
+  @RequirePermissions('tax:read')
+  noInvoicePurchases(@Query('period') period?: string) {
+    return this.reports.noInvoicePurchaseRegister(period);
+  }
+
   @Put('settings')
   @RequirePermissions('tax:manage')
   updateSettings(@Body() body: UpdateTaxSettingDto) {

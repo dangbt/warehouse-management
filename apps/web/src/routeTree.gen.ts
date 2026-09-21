@@ -31,6 +31,7 @@ import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
+import { Route as AppTaxNoInvoicePurchasesRouteImport } from './routes/_app/tax/no-invoice-purchases'
 import { Route as AppTaxInputInvoicesRouteImport } from './routes/_app/tax/input-invoices'
 import { Route as AppStocktakeIdRouteImport } from './routes/_app/stocktake_.$id'
 
@@ -143,6 +144,12 @@ const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
   path: '/audit-logs',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTaxNoInvoicePurchasesRoute =
+  AppTaxNoInvoicePurchasesRouteImport.update({
+    id: '/tax/no-invoice-purchases',
+    path: '/tax/no-invoice-purchases',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppTaxInputInvoicesRoute = AppTaxInputInvoicesRouteImport.update({
   id: '/tax/input-invoices',
   path: '/tax/input-invoices',
@@ -178,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
   '/tax/input-invoices': typeof AppTaxInputInvoicesRoute
+  '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -203,6 +211,7 @@ export interface FileRoutesByTo {
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
   '/tax/input-invoices': typeof AppTaxInputInvoicesRoute
+  '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -230,6 +239,7 @@ export interface FileRoutesById {
   '/_app/users': typeof AppUsersRoute
   '/_app/stocktake_/$id': typeof AppStocktakeIdRoute
   '/_app/tax/input-invoices': typeof AppTaxInputInvoicesRoute
+  '/_app/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/stocktake/$id'
     | '/tax/input-invoices'
+    | '/tax/no-invoice-purchases'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/stocktake/$id'
     | '/tax/input-invoices'
+    | '/tax/no-invoice-purchases'
   id:
     | '__root__'
     | '/'
@@ -308,6 +320,7 @@ export interface FileRouteTypes {
     | '/_app/users'
     | '/_app/stocktake_/$id'
     | '/_app/tax/input-invoices'
+    | '/_app/tax/no-invoice-purchases'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditLogsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tax/no-invoice-purchases': {
+      id: '/_app/tax/no-invoice-purchases'
+      path: '/tax/no-invoice-purchases'
+      fullPath: '/tax/no-invoice-purchases'
+      preLoaderRoute: typeof AppTaxNoInvoicePurchasesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/tax/input-invoices': {
       id: '/_app/tax/input-invoices'
       path: '/tax/input-invoices'
@@ -511,6 +531,7 @@ interface AppRouteChildren {
   AppUsersRoute: typeof AppUsersRoute
   AppStocktakeIdRoute: typeof AppStocktakeIdRoute
   AppTaxInputInvoicesRoute: typeof AppTaxInputInvoicesRoute
+  AppTaxNoInvoicePurchasesRoute: typeof AppTaxNoInvoicePurchasesRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -535,6 +556,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppUsersRoute: AppUsersRoute,
   AppStocktakeIdRoute: AppStocktakeIdRoute,
   AppTaxInputInvoicesRoute: AppTaxInputInvoicesRoute,
+  AppTaxNoInvoicePurchasesRoute: AppTaxNoInvoicePurchasesRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
