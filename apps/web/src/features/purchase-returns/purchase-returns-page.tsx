@@ -56,9 +56,9 @@ export function PurchaseReturnsPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu trả" onClick={() => setDialogOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu trả" onClick={() => setDialogOpen(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       <WinDataGrid searchable
         columns={columns}
@@ -70,11 +70,11 @@ export function PurchaseReturnsPage() {
       <WinDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Tạo phiếu trả hàng" width={600}>
         <div className="space-y-3 p-3">
           <div>
-            <label className="text-[11px] block mb-0.5">Nhà cung cấp</label>
+            <label className="text-win-base block mb-0.5">Nhà cung cấp</label>
             <select
               value={supplierId}
               onChange={(e) => setSupplierId(e.target.value)}
-              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
             >
               <option value="">Chọn NCC</option>
               {suppliersRes?.data.map((s) => (
@@ -83,17 +83,17 @@ export function PurchaseReturnsPage() {
             </select>
           </div>
           <div>
-            <label className="text-[11px] block mb-0.5">Lý do</label>
+            <label className="text-win-base block mb-0.5">Lý do</label>
             <input
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
             />
           </div>
           <div>
-            <label className="text-[11px] block mb-1">Danh sách hàng trả</label>
-            <table className="w-full text-[11px]">
+            <label className="text-win-base block mb-1">Danh sách hàng trả</label>
+            <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">Nguyên liệu</th>
@@ -109,7 +109,7 @@ export function PurchaseReturnsPage() {
                       <select
                         value={item.ingredientId}
                         onChange={(e) => updateItem(idx, 'ingredientId', e.target.value)}
-                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
+                        className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
                       >
                         <option value="">Chọn NL</option>
                         {ingredientsRes?.data.map((ing) => (
@@ -122,7 +122,7 @@ export function PurchaseReturnsPage() {
                         type="number"
                         value={item.quantity || ''}
                         onChange={(e) => updateItem(idx, 'quantity', Number(e.target.value))}
-                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
+                        className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
                       />
                     </td>
                     <td className="p-1">
@@ -130,23 +130,23 @@ export function PurchaseReturnsPage() {
                         type="number"
                         value={item.unitPrice || ''}
                         onChange={(e) => updateItem(idx, 'unitPrice', Number(e.target.value))}
-                        className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
+                        className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
                       />
                     </td>
                     <td className="p-1">
                       {items.length > 1 && (
-                        <button onClick={() => removeItem(idx)} className="text-win-error text-[11px]">✕</button>
+                        <button onClick={() => removeItem(idx)} className="text-win-error text-win-base">✕</button>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <button onClick={addItem} className="mt-1 text-[11px] text-win-active-title hover:underline">+ Thêm dòng</button>
+            <button onClick={addItem} className="mt-1 text-win-base text-win-active-title hover:underline">+ Thêm dòng</button>
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-win-grid-border">
-            <button onClick={() => setDialogOpen(false)} className="px-3 py-1 text-[11px] border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
-            <button onClick={handleSubmit} className="px-3 py-1 text-[11px] bg-win-active-title text-white hover:opacity-90">Tạo phiếu</button>
+            <button onClick={() => setDialogOpen(false)} className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
+            <button onClick={handleSubmit} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">Tạo phiếu</button>
           </div>
         </div>
       </WinDialog>

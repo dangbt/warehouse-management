@@ -118,12 +118,12 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
             {...register('output_qty')}
           />
           {suggested != null && (
-            <p className="text-[11px] text-win-info">
+            <p className="text-win-base text-win-info">
               💡 Định mức: {sourceQty} × {yieldRatio} = <b>{suggested}</b> {output?.unit}. Sửa lại nếu hao hụt khác.
             </p>
           )}
           <WinInput label="Ghi chú" {...register('note')} />
-          {submitError && <p className="text-[11px] text-win-error font-semibold">⚠️ {submitError}</p>}
+          {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
         </div>
       </WinGroupBox>
     </WinDialog>

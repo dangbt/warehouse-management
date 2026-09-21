@@ -26,15 +26,15 @@ function GroupMembersPanel({ group }: { group: IngredientGroup }) {
   return (
     <div className="border-t border-win-grid-border max-h-[240px] overflow-auto">
       <WinGroupBox title={`📦 Chi tiết nhóm "${group.name}" — ${members.length} NL · tổng quy đổi ${formatNumber(totalBase)} ${group.baseUnit}`}>
-        <table className="w-full text-[11px]">
+        <table className="w-full text-win-base">
           <thead>
             <tr className="bg-win-grid-header">
-              <th className="text-left p-1">Nguyên liệu</th>
-              <th className="text-center p-1">ĐVT</th>
-              <th className="text-right p-1">Hệ số về nhóm</th>
-              <th className="text-center p-1">Loại</th>
-              <th className="text-right p-1">Hao hụt</th>
-              <th className="text-right p-1">Tồn (quy đổi)</th>
+              <th className="text-left py-2 px-1">Nguyên liệu</th>
+              <th className="text-center py-2 px-1">ĐVT</th>
+              <th className="text-right py-2 px-1">Hệ số về nhóm</th>
+              <th className="text-center py-2 px-1">Loại</th>
+              <th className="text-right py-2 px-1">Hao hụt</th>
+              <th className="text-right py-2 px-1">Tồn (quy đổi)</th>
             </tr>
           </thead>
           <tbody>
@@ -42,16 +42,16 @@ function GroupMembersPanel({ group }: { group: IngredientGroup }) {
               const bf = m.baseFactor != null ? Number(m.baseFactor) : 1
               return (
                 <tr key={m.id} className="border-b border-win-grid-border">
-                  <td className="p-1">{m.name}</td>
-                  <td className="p-1 text-center">{m.unit}</td>
-                  <td className="p-1 text-right">{bf}</td>
-                  <td className="p-1 text-center">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${m.sourceIngredientId ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
+                  <td className="py-1.5 px-1">{m.name}</td>
+                  <td className="py-1.5 px-1 text-center">{m.unit}</td>
+                  <td className="py-1.5 px-1 text-right">{bf}</td>
+                  <td className="py-1.5 px-1 text-center">
+                    <span className={`px-1.5 py-0.5 rounded text-win-xs ${m.sourceIngredientId ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
                       {m.sourceIngredientId ? 'BTP' : 'Nguồn/gốc'}
                     </span>
                   </td>
-                  <td className="p-1 text-right">{m.lossRatio != null ? `${(Number(m.lossRatio) * 100).toFixed(0)}%` : '-'}</td>
-                  <td className="p-1 text-right">
+                  <td className="py-1.5 px-1 text-right">{m.lossRatio != null ? `${(Number(m.lossRatio) * 100).toFixed(0)}%` : '-'}</td>
+                  <td className="py-1.5 px-1 text-right">
                     {formatNumber(Number(m.currentStock) * bf)} {group.baseUnit}
                   </td>
                 </tr>
@@ -134,7 +134,7 @@ export function IngredientGroupsPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
-          icon={<Plus size={14} />}
+          icon={<Plus size={16} />}
           label="Thêm"
           onClick={() => {
             setMode('add')
@@ -143,7 +143,7 @@ export function IngredientGroupsPage() {
           }}
         />
         <WinToolbar.Button
-          icon={<Pencil size={14} />}
+          icon={<Pencil size={16} />}
           label="Sửa"
           disabled={!selected}
           onClick={() => {
@@ -152,7 +152,7 @@ export function IngredientGroupsPage() {
           }}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
       <WinDataGrid searchable

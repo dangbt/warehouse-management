@@ -115,7 +115,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
             error={errors.supplier_id?.message}
           />
           <WinInput label="Ghi chú" {...register('note')} />
-          <label className="flex items-center gap-2 text-[11px] mt-1">
+          <label className="flex items-center gap-2 text-win-base mt-1">
             <input type="checkbox" {...register('paid')} className="w-3 h-3" />
             Đã thanh toán cho NCC
           </label>
@@ -126,14 +126,14 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
         <button
           type="button"
           onClick={() => append({ ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, expiry_date: '' })}
-          className="flex items-center gap-1 text-[11px] text-win-active-title hover:underline cursor-pointer mb-2"
+          className="flex items-center gap-1 text-win-base text-win-active-title hover:underline cursor-pointer mb-2"
         >
-          <Plus size={12} /> Thêm dòng
+          <Plus size={14} /> Thêm dòng
         </button>
-        {errors.items?.root && <p className="text-[10px] text-win-error mb-1">{errors.items.root.message}</p>}
-        {submitError && <p className="text-[11px] text-win-error font-semibold mb-1">⚠️ {submitError}</p>}
+        {errors.items?.root && <p className="text-win-xs text-win-error mb-1">{errors.items.root.message}</p>}
+        {submitError && <p className="text-win-base text-win-error font-semibold mb-1">⚠️ {submitError}</p>}
 
-        <table className="w-full text-[11px] border border-win-grid-border">
+        <table className="w-full text-win-base border border-win-grid-border">
           <thead>
             <tr className="bg-win-grid-header">
               <th className="p-1 text-left w-[170px]">Nguyên liệu</th>
@@ -154,7 +154,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                   <select
                     data-testid={`item-${i}-ingredient`}
                     {...register(`items.${i}.ingredient_id`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
                   >
                     <option value="">--</option>
                     {ingredients.map((o) => (
@@ -170,7 +170,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     step="0.01"
                     data-testid={`item-${i}-quantity`}
                     {...register(`items.${i}.quantity`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
@@ -179,7 +179,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     step="0.0001"
                     data-testid={`item-${i}-factor`}
                     {...register(`items.${i}.factor`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
@@ -187,7 +187,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     type="number"
                     data-testid={`item-${i}-price`}
                     {...register(`items.${i}.unit_price`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5 text-right pr-2">{formatNumber(lineTotal(items[i] || {}))}</td>
@@ -196,7 +196,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                     type="date"
                     data-testid={`item-${i}-expiry`}
                     {...register(`items.${i}.expiry_date`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
                   />
                 </td>
                 <td className="p-0.5 text-center">
@@ -206,7 +206,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
                       onClick={() => remove(i)}
                       className="text-win-error hover:opacity-70 cursor-pointer"
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </td>

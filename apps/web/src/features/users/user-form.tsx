@@ -115,7 +115,7 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
           {mode === 'add' && (
             <WinInput label="Mật khẩu" type="password" {...register('password')} placeholder="Mặc định: 123456" />
           )}
-          {submitError && <p className="text-[11px] text-win-error font-semibold mt-2">⚠️ {submitError}</p>}
+          {submitError && <p className="text-win-base text-win-error font-semibold mt-2">⚠️ {submitError}</p>}
         </div>
       </WinGroupBox>
     </WinDialog>

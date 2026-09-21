@@ -82,7 +82,7 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
           <WinInput label="Điện thoại" {...register('phone')} error={errors.phone?.message} />
           <WinInput label="Địa chỉ" {...register('address')} error={errors.address?.message} />
           <WinInput label="Ghi chú" {...register('note')} />
-          {submitError && <p className="text-[11px] text-win-error font-semibold">⚠️ {submitError}</p>}
+          {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
         </div>
       </WinGroupBox>
     </WinDialog>

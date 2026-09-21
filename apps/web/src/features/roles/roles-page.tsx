@@ -90,7 +90,7 @@ export function RolesPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
-          icon={<Plus size={14} />}
+          icon={<Plus size={16} />}
           label="Thêm Role"
           onClick={() => {
             setNewName('')
@@ -99,13 +99,13 @@ export function RolesPage() {
           }}
         />
         <WinToolbar.Button
-          icon={<Shield size={14} />}
+          icon={<Shield size={16} />}
           label="Phân quyền"
           disabled={!selected}
           onClick={() => selected && openPermissions(selected)}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
       <WinDataGrid
@@ -148,19 +148,19 @@ export function RolesPage() {
         <WinGroupBox title="Thông tin Role">
           <div className="space-y-2.5">
             <div className="flex items-center gap-2">
-              <label className="text-[11px] w-24 text-right shrink-0">Tên:</label>
+              <label className="text-win-base w-30 text-right shrink-0">Tên:</label>
               <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus"
+                className="flex-1 border border-win-input-border h-8 px-2 text-win-base outline-none focus:border-win-input-focus"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[11px] w-24 text-right shrink-0">Mã:</label>
+              <label className="text-win-base w-30 text-right shrink-0">Mã:</label>
               <input
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value)}
-                className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus"
+                className="flex-1 border border-win-input-border h-8 px-2 text-win-base outline-none focus:border-win-input-focus"
               />
             </div>
           </div>
@@ -191,12 +191,12 @@ export function RolesPage() {
         }
       >
         <div className="overflow-auto max-h-[400px]">
-          <table className="w-full text-[11px] border border-win-grid-border">
+          <table className="w-full text-win-base border border-win-grid-border">
             <thead className="sticky top-0">
               <tr className="bg-win-grid-header">
-                <th className="p-1.5 text-left border-r border-win-grid-border">Module</th>
+                <th className="py-2 px-1.5 text-left border-r border-win-grid-border">Module</th>
                 {ACTIONS.map((a) => (
-                  <th key={a} className="p-1.5 text-center border-r border-win-grid-border w-[60px]">
+                  <th key={a} className="py-2 px-1.5 text-center border-r border-win-grid-border w-[60px]">
                     {ACTION_LABELS[a]}
                   </th>
                 ))}
@@ -205,9 +205,9 @@ export function RolesPage() {
             <tbody>
               {RESOURCES.map((res) => (
                 <tr key={res} className="border-t border-win-grid-border hover:bg-win-menu-hover">
-                  <td className="p-1.5 font-medium border-r border-win-grid-border">{RESOURCE_LABELS[res] || res}</td>
+                  <td className="py-1.5 px-1.5 font-medium border-r border-win-grid-border">{RESOURCE_LABELS[res] || res}</td>
                   {ACTIONS.map((act) => (
-                    <td key={act} className="p-1.5 text-center border-r border-win-grid-border">
+                    <td key={act} className="py-1.5 px-1.5 text-center border-r border-win-grid-border">
                       <input
                         type="checkbox"
                         checked={!!perms[`${res}:${act}`]}

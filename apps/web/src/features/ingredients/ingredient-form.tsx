@@ -162,9 +162,9 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
             <WinInput label="Giá/đơn vị" type="number" {...register('cost_per_unit')} error={errors.cost_per_unit?.message} />
             <WinInput label="Tồn kho min" type="number" {...register('min_stock')} error={errors.min_stock?.message} />
             <div className="flex items-center gap-2">
-              <label className="text-[11px] w-24 text-right shrink-0">Quản tồn:</label>
+              <label className="text-win-base w-30 text-right shrink-0">Quản tồn:</label>
               <input type="checkbox" {...register('track_stock')} className="w-3.5 h-3.5" />
-              <span className="text-[10px] text-win-text-secondary">Trừ kho khi có đơn hàng</span>
+              <span className="text-win-xs text-win-text-secondary">Trừ kho khi có đơn hàng</span>
             </div>
           </div>
         </WinGroupBox>
@@ -197,7 +197,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
           </div>
         </WinGroupBox>
 
-        {submitError && <p className="text-[11px] text-win-error font-semibold">⚠️ {submitError}</p>}
+        {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
       </div>
     </WinDialog>
   )

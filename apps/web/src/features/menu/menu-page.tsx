@@ -37,9 +37,9 @@ const columns: Column<MenuItemFull>[] = [
     align: 'center',
     render: (r) =>
       r.inventoryMode ? (
-        <span className={`px-2 py-0.5 text-[10px] rounded ${modeLabels[r.inventoryMode]?.color ?? ''}`}>{modeLabels[r.inventoryMode]?.label}</span>
+        <span className={`px-2 py-0.5 text-win-xs rounded ${modeLabels[r.inventoryMode]?.color ?? ''}`}>{modeLabels[r.inventoryMode]?.label}</span>
       ) : (
-        <span className="text-[10px] text-win-error">— chưa đặt —</span>
+        <span className="text-win-xs text-win-error">— chưa đặt —</span>
       ),
   },
   {
@@ -106,11 +106,11 @@ export function MenuPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Thêm món" onClick={() => setAddOpen(true)} />
-        <WinToolbar.Button icon={<Settings size={14} />} label="Cấu hình trừ tồn" disabled={!selected} onClick={() => setCfgOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Thêm món" onClick={() => setAddOpen(true)} />
+        <WinToolbar.Button icon={<Settings size={16} />} label="Cấu hình trừ tồn" disabled={!selected} onClick={() => setCfgOpen(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
-        <span className="ml-2 text-[11px] text-win-text-secondary">
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
+        <span className="ml-2 text-win-base text-win-text-secondary">
           {menu ? `${menu.filter((m) => configStatus(m).warn).length} món chưa cấu hình` : ''}
         </span>
       </WinToolbar>
@@ -189,7 +189,7 @@ export function MenuPage() {
               <WinSelect label="Nguyên liệu trừ" {...cfgForm.register('direct_ingredient_id')} options={ingredientOptions} />
             )}
             {cfgMode === 'RECIPE' && (
-              <p className="text-[11px] text-win-info">
+              <p className="text-win-base text-win-info">
                 💡 Vào trang <b>Công thức</b> để gán nguyên liệu + định lượng cho món này.
                 {selected?.recipe ? ` Hiện có ${selected.recipe._count.ingredients} NL.` : ' Hiện chưa có công thức.'}
               </p>

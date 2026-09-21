@@ -86,7 +86,7 @@ export function IngredientsPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
-          icon={<Plus size={14} />}
+          icon={<Plus size={16} />}
           label="Thêm"
           onClick={() => {
             setFormMode('add')
@@ -95,7 +95,7 @@ export function IngredientsPage() {
           }}
         />
         <WinToolbar.Button
-          icon={<Pencil size={14} />}
+          icon={<Pencil size={16} />}
           label="Sửa"
           disabled={!selected}
           onClick={() => {
@@ -103,10 +103,10 @@ export function IngredientsPage() {
             setFormOpen(true)
           }}
         />
-        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
-        <WinToolbar.Button icon={<Download size={14} />} label="Export" />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<Download size={16} />} label="Export" />
         <WinToolbar.Separator />
         <input
           type="text"
@@ -116,7 +116,7 @@ export function IngredientsPage() {
             setSearch(e.target.value)
             setPage(1)
           }}
-          className="border border-win-input-border px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus bg-white"
+          className="border border-win-input-border h-8 px-2 text-win-base w-32 outline-none focus:border-win-input-focus bg-white"
         />
         <select
           value={category}
@@ -124,7 +124,7 @@ export function IngredientsPage() {
             setCategory(e.target.value)
             setPage(1)
           }}
-          className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none bg-white"
+          className="border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
         >
           <option value="">Tất cả loại</option>
           <option value="Thịt">Thịt</option>
@@ -207,7 +207,7 @@ const batchColumns: Column<Batch>[] = [
         DEPLETED: 'bg-gray-100 text-gray-600',
       }
       const labels: Record<string, string> = { ACTIVE: 'Còn hàng', EXPIRED: 'Hết hạn', DEPLETED: 'Đã hết' }
-      return <span className={`px-2 py-0.5 text-[10px] rounded ${colors[r.status] ?? ''}`}>{labels[r.status] ?? r.status}</span>
+      return <span className={`px-2 py-0.5 text-win-xs rounded ${colors[r.status] ?? ''}`}>{labels[r.status] ?? r.status}</span>
     },
   },
 ]

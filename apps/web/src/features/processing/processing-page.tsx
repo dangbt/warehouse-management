@@ -25,7 +25,7 @@ const columns: Column<ProcessingOrder>[] = [
     width: 100,
     align: 'center',
     render: (r) => (
-      <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] ?? ''}`}>{statusLabels[r.status] ?? r.status}</span>
+      <span className={`px-2 py-0.5 text-win-xs rounded ${statusColors[r.status] ?? ''}`}>{statusLabels[r.status] ?? r.status}</span>
     ),
   },
   { key: 'createdAt', header: 'Ngày tạo', width: 110, render: (r) => formatDate(r.createdAt) },
@@ -60,15 +60,15 @@ export function ProcessingPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
         <WinToolbar.Button
-          icon={<CheckCircle size={14} />}
+          icon={<CheckCircle size={16} />}
           label="Hoàn thành"
           disabled={!selected || selected.status !== 'DRAFT'}
           onClick={() => setConfirmComplete(true)}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
       <WinDataGrid searchable

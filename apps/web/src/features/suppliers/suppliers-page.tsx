@@ -65,7 +65,7 @@ export function SuppliersPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
-          icon={<Plus size={14} />}
+          icon={<Plus size={16} />}
           label="Thêm"
           onClick={() => {
             setFormMode('add')
@@ -74,7 +74,7 @@ export function SuppliersPage() {
           }}
         />
         <WinToolbar.Button
-          icon={<Pencil size={14} />}
+          icon={<Pencil size={16} />}
           label="Sửa"
           disabled={!selected}
           onClick={() => {
@@ -83,7 +83,7 @@ export function SuppliersPage() {
           }}
         />
         <WinToolbar.Button
-          icon={<Trash2 size={14} />}
+          icon={<Trash2 size={16} />}
           label="Xoá"
           danger
           disabled={!selected}
@@ -91,13 +91,13 @@ export function SuppliersPage() {
         />
         <WinToolbar.Separator />
         <WinToolbar.Button
-          icon={<Banknote size={14} />}
+          icon={<Banknote size={16} />}
           label="Thanh toán"
           disabled={!selected}
           onClick={() => setPaymentOpen(true)}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       <WinDataGrid
         columns={columns}
@@ -115,7 +115,7 @@ export function SuppliersPage() {
       {selected && payments && payments.length > 0 && (
         <div className="border-t border-win-grid-border max-h-[180px] overflow-auto">
           <WinGroupBox title={`💰 Lịch sử thanh toán - ${selected.name}`}>
-            <table className="w-full text-[11px]">
+            <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">Ngày</th>
@@ -165,49 +165,49 @@ export function SuppliersPage() {
 
       <WinDialog open={paymentOpen} onClose={() => setPaymentOpen(false)} title="Thanh toán cho NCC" width={400}>
         <div className="space-y-3 p-3">
-          <div className="text-[11px]">NCC: <strong>{selected?.name}</strong></div>
-          <div className="text-[11px]">Nợ hiện tại: <strong className="text-win-error">{formatCurrency(selected?.totalDebt)}</strong></div>
+          <div className="text-win-base">NCC: <strong>{selected?.name}</strong></div>
+          <div className="text-win-base">Nợ hiện tại: <strong className="text-win-error">{formatCurrency(selected?.totalDebt)}</strong></div>
           <div>
-            <label className="text-[11px] block mb-0.5">Số tiền thanh toán</label>
+            <label className="text-win-base block mb-0.5">Số tiền thanh toán</label>
             <div className="flex gap-1">
               <input
                 type="number"
                 value={payAmount}
                 onChange={(e) => setPayAmount(e.target.value)}
-                className="flex-1 border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
+                className="flex-1 border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
               />
               <button
                 onClick={() => setPayAmount(String(Number(selected?.totalDebt ?? 0)))}
-                className="px-2 py-1 text-[10px] bg-win-active-title text-white whitespace-nowrap"
+                className="px-2 py-1 text-win-xs bg-win-active-title text-white whitespace-nowrap"
               >
                 Tất cả
               </button>
             </div>
           </div>
           <div>
-            <label className="text-[11px] block mb-0.5">Phương thức</label>
+            <label className="text-win-base block mb-0.5">Phương thức</label>
             <select
               value={payMethod}
               onChange={(e) => setPayMethod(e.target.value as 'CASH' | 'TRANSFER')}
-              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
             >
               <option value="CASH">Tiền mặt</option>
               <option value="TRANSFER">Chuyển khoản</option>
             </select>
           </div>
           <div>
-            <label className="text-[11px] block mb-0.5">Ghi chú</label>
+            <label className="text-win-base block mb-0.5">Ghi chú</label>
             <input
               type="text"
               value={payNote}
               onChange={(e) => setPayNote(e.target.value)}
               placeholder="Ghi chú thanh toán"
-              className="w-full border border-win-input-border px-2 py-1 text-[11px] outline-none bg-white"
+              className="w-full border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
             />
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-win-grid-border">
-            <button onClick={() => setPaymentOpen(false)} className="px-3 py-1 text-[11px] border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
-            <button onClick={handlePayment} className="px-3 py-1 text-[11px] bg-win-active-title text-white hover:opacity-90">Thanh toán</button>
+            <button onClick={() => setPaymentOpen(false)} className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
+            <button onClick={handlePayment} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">Thanh toán</button>
           </div>
         </div>
       </WinDialog>
