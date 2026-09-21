@@ -1,7 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
-import { VAT_RATES, VatRate, vatRatePercent, computeUnitCost, TaxRegime } from '../tax/vat';
+import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
+
+// Re-export để giữ tương thích với các import cũ từ module này (vd spec).
+export { roundVnd, computeLineVat };
 
 export interface ImportOrderItemInput {
   ingredient_id: string;
@@ -27,20 +30,6 @@ export interface CreateImportOrderInput {
   items: ImportOrderItemInput[];
 }
 
-/** Làm tròn tiền thuế về đồng (0 chữ số thập phân). */
-export function roundVnd(value: number): number {
-  return Math.round(value);
-}
-
-/**
- * Tính tiền thuế VAT của một dòng (đã làm tròn về đồng).
- * `vatRate` null ⇒ 0. Áp dụng phần trăm thuế suất lên `totalPrice` (giá chưa thuế).
- */
-export function computeLineVat(totalPrice: number, vatRate: VatRate | null): number {
-  if (vatRate == null) return 0;
-  return roundVnd((totalPrice * vatRatePercent(vatRate)) / 100);
-}
-
 @Injectable()
 export class ImportOrdersService {
   constructor(
@@ -48,10 +37,14 @@ export class ImportOrdersService {
     private tax: TaxService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string }) {
+  async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { status?: string } = q.status ? { status: q.status } : {};
+    const where: { status?: string; supplierId?: string; hasInvoice?: boolean } = {};
+    if (q.status) where.status = q.status;
+    if (q.supplier_id) where.supplierId = q.supplier_id;
+    if (q.has_invoice === 'true') where.hasInvoice = true;
+    else if (q.has_invoice === 'false') where.hasInvoice = false;
     const [data, total] = await Promise.all([
       this.prisma.importOrder.findMany({
         where,

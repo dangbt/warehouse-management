@@ -21,7 +21,7 @@ export {
   useUpdateStocktakeItems,
   useCompleteStocktake,
 } from './use-stocktake'
-export { usePurchaseReturns, useCreatePurchaseReturn } from './use-purchase-returns'
+export { usePurchaseReturns, useCreatePurchaseReturn, useCompletedImportOrders } from './use-purchase-returns'
 export { useSupplierPayments, useCreateSupplierPayment } from './use-supplier-payments'
 export { useConsumptionVariance } from './use-variance'
 export { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup } from './use-ingredient-groups'
