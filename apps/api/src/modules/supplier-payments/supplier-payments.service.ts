@@ -30,7 +30,7 @@ export class SupplierPaymentsService {
       throw new BadRequestException('Phương thức thanh toán không hợp lệ');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       const payment = await tx.supplierPayment.create({
         data: {
           supplierId: body.supplier_id,

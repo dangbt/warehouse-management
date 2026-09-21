@@ -61,7 +61,7 @@ export class ImportOrdersService {
     const code = `PN-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-4)}`;
     const totalAmount = lines.reduce((s, l) => s + l.totalPrice, 0);
 
-    return this.prisma.importOrder.create({
+    return await this.prisma.importOrder.create({
       data: {
         code,
         supplierId: body.supplier_id,
@@ -76,7 +76,7 @@ export class ImportOrdersService {
   }
 
   async approve(id: string, approvedById: string) {
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       const order = await tx.importOrder.findUnique({
         where: { id },
         include: { items: true },
