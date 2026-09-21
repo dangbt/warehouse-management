@@ -43,7 +43,7 @@ export class PurchaseReturnsService {
     const code = `PTH-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-4)}`;
     const totalAmount = body.items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
 
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       const purchaseReturn = await tx.purchaseReturn.create({
         data: {
           code,
