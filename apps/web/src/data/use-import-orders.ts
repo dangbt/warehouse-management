@@ -11,6 +11,12 @@ interface ImportOrder {
   totalAmount: string
   status: string
   createdAt: string
+  hasInvoice?: boolean
+  invoiceNo?: string | null
+  invoiceSymbol?: string | null
+  invoiceDate?: string | null
+  subtotal?: string
+  vatAmount?: string
   items: unknown[]
 }
 interface ListResponse {
@@ -32,7 +38,19 @@ export function useCreateImportOrder() {
       supplier_id: string
       note?: string
       paid?: boolean
-      items: { ingredient_id: string; quantity: number; unit_price: number; expiry_date?: string; unit?: string; factor?: number }[]
+      has_invoice?: boolean
+      invoice_no?: string
+      invoice_symbol?: string
+      invoice_date?: string
+      items: {
+        ingredient_id: string
+        quantity: number
+        unit_price: number
+        expiry_date?: string
+        unit?: string
+        factor?: number
+        vat_rate?: string
+      }[]
     }) => api.post('/import-orders', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) =>

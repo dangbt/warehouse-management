@@ -4,7 +4,8 @@ import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
-import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
+import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
+import type { VatRate } from '@wms/shared'
 
 interface ImportOrderItem {
   id: string
@@ -12,6 +13,8 @@ interface ImportOrderItem {
   quantity: string
   unitPrice: string
   totalPrice: string
+  vatRate?: string | null
+  vatAmount?: string
 }
 
 interface ImportOrder {
@@ -21,6 +24,12 @@ interface ImportOrder {
   totalAmount: string
   status: string
   createdAt: string
+  hasInvoice?: boolean
+  invoiceNo?: string | null
+  invoiceSymbol?: string | null
+  invoiceDate?: string | null
+  subtotal?: string
+  vatAmount?: string
   items?: ImportOrderItem[]
   note?: string
 }
@@ -40,6 +49,19 @@ const statusLabels: Record<string, string> = {
 const columns: Column<ImportOrder>[] = [
   { key: 'code', header: 'Mã phiếu', width: 170 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier?.name },
+  {
+    key: 'invoiceNo',
+    header: 'Số HĐ',
+    width: 110,
+    render: (r) => (r.hasInvoice ? [r.invoiceSymbol, r.invoiceNo].filter(Boolean).join('/') || '—' : '—'),
+  },
+  {
+    key: 'vatAmount',
+    header: 'Tiền thuế',
+    width: 110,
+    align: 'right',
+    render: (r) => (r.hasInvoice ? formatCurrency(r.vatAmount) : '—'),
+  },
   {
     key: 'totalAmount',
     header: 'Tổng tiền',
@@ -123,6 +145,13 @@ export function ImportOrdersPage() {
       {selected?.items && selected.items.length > 0 && (
         <div className="border-t border-win-grid-border bg-win-control p-2 max-h-40 overflow-auto shrink-0">
           <div className="text-win-base font-semibold mb-1">📋 Chi tiết phiếu {selected.code}:</div>
+          {selected.hasInvoice && (
+            <div className="text-win-base mb-1">
+              🧾 HĐ: <strong>{[selected.invoiceSymbol, selected.invoiceNo].filter(Boolean).join('/') || '—'}</strong>
+              {selected.invoiceDate ? ` · Ngày ${formatDate(selected.invoiceDate)}` : ''}
+              {selected.vatAmount ? ` · Tiền thuế ${formatCurrency(selected.vatAmount)}` : ''}
+            </div>
+          )}
           <table className="w-full text-win-base">
             <thead>
               <tr className="bg-win-grid-header">
@@ -131,6 +160,8 @@ export function ImportOrdersPage() {
                 <th className="text-right p-1">SL</th>
                 <th className="text-right p-1">Đơn giá</th>
                 <th className="text-right p-1">Thành tiền</th>
+                {selected.hasInvoice && <th className="text-center p-1">Thuế suất</th>}
+                {selected.hasInvoice && <th className="text-right p-1">Tiền thuế</th>}
               </tr>
             </thead>
             <tbody>
@@ -141,6 +172,12 @@ export function ImportOrdersPage() {
                   <td className="p-1 text-right">{formatNumber(item.quantity)}</td>
                   <td className="p-1 text-right">{formatCurrency(item.unitPrice)}</td>
                   <td className="p-1 text-right">{formatCurrency(item.totalPrice)}</td>
+                  {selected.hasInvoice && (
+                    <td className="p-1 text-center">
+                      {item.vatRate ? VAT_RATE_LABELS[item.vatRate as VatRate] ?? item.vatRate : '—'}
+                    </td>
+                  )}
+                  {selected.hasInvoice && <td className="p-1 text-right">{formatCurrency(item.vatAmount)}</td>}
                 </tr>
               ))}
             </tbody>

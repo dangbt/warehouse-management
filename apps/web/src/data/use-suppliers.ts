@@ -25,7 +25,7 @@ export function useSuppliers() {
 
 export function useCreateSupplier() {
   return useMutation({
-    mutationFn: (data: { name: string; phone?: string; address?: string; note?: string }) =>
+    mutationFn: (data: { name: string; phone?: string; address?: string; tax_code?: string; note?: string }) =>
       api.post('/suppliers', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.suppliers }, (old) =>
@@ -41,7 +41,7 @@ export function useCreateSupplier() {
 
 export function useUpdateSupplier() {
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: string; name?: string; phone?: string; address?: string; note?: string }) =>
+    mutationFn: ({ id, ...data }: { id: string; name?: string; phone?: string; address?: string; tax_code?: string; note?: string }) =>
       api.put(`/suppliers/${id}`, data),
     onSuccess: (updated) => {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.suppliers }, (old) =>
