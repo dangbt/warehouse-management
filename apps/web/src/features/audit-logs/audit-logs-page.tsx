@@ -45,7 +45,7 @@ export function AuditLogsPage() {
           />
         </div>
         {detail && (
-          <div className="h-32 border-t border-win-grid-border bg-win-control p-2 overflow-auto text-[11px] shrink-0">
+          <div className="h-32 border-t border-win-grid-border bg-win-control p-2 overflow-auto text-win-base shrink-0">
             <div className="font-semibold mb-1">Chi tiết: {detail.action}</div>
             {detail.oldValues && (
               <div>
