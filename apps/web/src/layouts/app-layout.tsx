@@ -6,65 +6,76 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
 import { SupportWidget } from '@/components/support-widget'
 import { useHealth } from '@/data/use-health'
+import { useTaxSettings } from '@/data'
 import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
-const menuTree: TreeNode[] = [
-  {
-    id: 'warehouse',
-    label: 'Kho',
-    icon: '📦',
-    permission: 'ingredients:read',
-    children: [
-      { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
-      { id: 'groups', label: 'Nhóm nguyên liệu', route: '/ingredient-groups', permission: 'ingredients:read' },
-      { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
-      { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
-      { id: 'processing', label: 'Chế biến', route: '/processing', permission: 'processing:read' },
-      { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
-      { id: 'stocktake', label: 'Kiểm kê', route: '/stocktake', permission: 'ingredients:read' },
-      { id: 'returns', label: 'Trả hàng', route: '/purchase-returns', permission: 'purchase_returns:read' },
-    ],
-  },
-  {
-    id: 'kitchen',
-    label: 'Bếp',
-    icon: '🍳',
-    permission: 'recipes:read',
-    children: [
-      { id: 'menu', label: 'Thực đơn', route: '/menu', permission: 'recipes:read' },
-      { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
-    ],
-  },
-  { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
-  {
-    id: 'tax',
-    label: 'Thuế',
-    icon: '🧾',
-    permission: 'tax:read',
-    children: [
-      { id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' },
-      { id: 'tax-input-invoices', label: 'Bảng kê mua vào', route: '/tax/input-invoices', permission: 'tax:read' },
-      { id: 'tax-no-invoice-purchases', label: 'Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases', permission: 'tax:read' },
-      { id: 'tax-output-revenue', label: 'Doanh thu theo thuế suất', route: '/tax/output-revenue', permission: 'tax:read' },
-      { id: 'tax-summary', label: 'Tổng hợp kỳ thuế', route: '/tax/summary', permission: 'tax:read' },
-    ],
-  },
-  { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
-  { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
-  { id: 'variance', label: 'Định mức', icon: '⚖️', route: '/consumption-variance', permission: 'reports:read' },
-  {
-    id: 'admin',
-    label: 'Quản trị',
-    icon: '⚙️',
-    permission: 'users:read',
-    children: [
-      { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
-      { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
-      { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
-    ],
-  },
-]
+/**
+ * Cây menu bên trái. `isHousehold` bật mục "Sổ hộ kinh doanh" (chỉ áp dụng cho
+ * hộ kinh doanh; ẩn khi chế độ VAT khấu trừ).
+ */
+function buildMenuTree(isHousehold: boolean): TreeNode[] {
+  const taxChildren: TreeNode[] = [
+    { id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' },
+    { id: 'tax-input-invoices', label: 'Bảng kê mua vào', route: '/tax/input-invoices', permission: 'tax:read' },
+    { id: 'tax-no-invoice-purchases', label: 'Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases', permission: 'tax:read' },
+    { id: 'tax-output-revenue', label: 'Doanh thu theo thuế suất', route: '/tax/output-revenue', permission: 'tax:read' },
+    { id: 'tax-summary', label: 'Tổng hợp kỳ thuế', route: '/tax/summary', permission: 'tax:read' },
+  ]
+  if (isHousehold) {
+    taxChildren.push({ id: 'tax-books', label: 'Sổ hộ kinh doanh', route: '/tax/books', permission: 'tax:read' })
+  }
+  return [
+    {
+      id: 'warehouse',
+      label: 'Kho',
+      icon: '📦',
+      permission: 'ingredients:read',
+      children: [
+        { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
+        { id: 'groups', label: 'Nhóm nguyên liệu', route: '/ingredient-groups', permission: 'ingredients:read' },
+        { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
+        { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
+        { id: 'processing', label: 'Chế biến', route: '/processing', permission: 'processing:read' },
+        { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
+        { id: 'stocktake', label: 'Kiểm kê', route: '/stocktake', permission: 'ingredients:read' },
+        { id: 'returns', label: 'Trả hàng', route: '/purchase-returns', permission: 'purchase_returns:read' },
+      ],
+    },
+    {
+      id: 'kitchen',
+      label: 'Bếp',
+      icon: '🍳',
+      permission: 'recipes:read',
+      children: [
+        { id: 'menu', label: 'Thực đơn', route: '/menu', permission: 'recipes:read' },
+        { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
+      ],
+    },
+    { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
+    {
+      id: 'tax',
+      label: 'Thuế',
+      icon: '🧾',
+      permission: 'tax:read',
+      children: taxChildren,
+    },
+    { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
+    { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
+    { id: 'variance', label: 'Định mức', icon: '⚖️', route: '/consumption-variance', permission: 'reports:read' },
+    {
+      id: 'admin',
+      label: 'Quản trị',
+      icon: '⚙️',
+      permission: 'users:read',
+      children: [
+        { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
+        { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
+        { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
+      ],
+    },
+  ]
+}
 
 export function AppLayout() {
   const navigate = useNavigate()
@@ -73,8 +84,11 @@ export function AppLayout() {
   const { sidebarExpanded, toggleSidebar } = useUIStore()
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const health = useHealth()
+  // Chỉ hộ kinh doanh mới có sổ kế toán hộ KD (S1/S2). Ẩn khi VAT khấu trừ.
+  const taxSettings = useTaxSettings()
+  const isHousehold = taxSettings.data?.regime === 'HOUSEHOLD'
 
-  const filteredTree = filterTree(menuTree, hasPermission)
+  const filteredTree = filterTree(buildMenuTree(isHousehold), hasPermission)
   const activeNode = findActive(filteredTree, location.pathname)
 
   function findActive(nodes: TreeNode[], path: string): string | undefined {
@@ -166,6 +180,7 @@ export function AppLayout() {
               { label: '📑 Bảng kê mua vào', route: '/tax/input-invoices' },
               { label: '📄 Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases' },
               { label: '💰 Doanh thu theo thuế suất', route: '/tax/output-revenue' },
+              ...(isHousehold ? [{ label: '📚 Sổ hộ kinh doanh', route: '/tax/books' }] : []),
             ]}
             onNav={(r) => navigate({ to: r })}
           />
