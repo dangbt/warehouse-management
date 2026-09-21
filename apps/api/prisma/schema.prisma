@@ -407,3 +407,20 @@ model ProcessingOrder {
 
   @@map("processing_orders")
 }
+
+model TaxSetting {
+  id                       String   @id @default("default")
+  regime                   String   @default("VAT_DEDUCTION")
+  companyName              String?  @map("company_name")
+  taxCode                  String?  @map("tax_code")
+  address                  String?
+  periodType               String   @default("QUARTER") @map("period_type")
+  defaultOutputVatRate     String   @default("8") @map("default_output_vat_rate")
+  pricesIncludeVat         Boolean  @default(true) @map("prices_include_vat")
+  householdVatPercent      Decimal  @default(3) @map("household_vat_percent") @db.Decimal(5, 2)
+  householdPitPercent      Decimal  @default(1.5) @map("household_pit_percent") @db.Decimal(5, 2)
+  householdExemptThreshold Decimal  @default(200000000) @map("household_exempt_threshold") @db.Decimal(14, 2)
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  @@map("tax_settings")
+}

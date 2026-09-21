@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as AppTaxSettingsRouteImport } from './routes/_app/tax-settings'
 import { Route as AppSuppliersRouteImport } from './routes/_app/suppliers'
 import { Route as AppStocktakeRouteImport } from './routes/_app/stocktake'
 import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports'
@@ -49,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppUsersRoute = AppUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTaxSettingsRoute = AppTaxSettingsRouteImport.update({
+  id: '/tax-settings',
+  path: '/tax-settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSuppliersRoute = AppSuppliersRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/stock-exports': typeof AppStockExportsRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
+  '/tax-settings': typeof AppTaxSettingsRoute
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
 }
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/stock-exports': typeof AppStockExportsRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
+  '/tax-settings': typeof AppTaxSettingsRoute
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
 }
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/_app/stock-exports': typeof AppStockExportsRoute
   '/_app/stocktake': typeof AppStocktakeRoute
   '/_app/suppliers': typeof AppSuppliersRoute
+  '/_app/tax-settings': typeof AppTaxSettingsRoute
   '/_app/users': typeof AppUsersRoute
   '/_app/stocktake_/$id': typeof AppStocktakeIdRoute
 }
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/stock-exports'
     | '/stocktake'
     | '/suppliers'
+    | '/tax-settings'
     | '/users'
     | '/stocktake/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/stock-exports'
     | '/stocktake'
     | '/suppliers'
+    | '/tax-settings'
     | '/users'
     | '/stocktake/$id'
   id:
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/_app/stock-exports'
     | '/_app/stocktake'
     | '/_app/suppliers'
+    | '/_app/tax-settings'
     | '/_app/users'
     | '/_app/stocktake_/$id'
   fileRoutesById: FileRoutesById
@@ -320,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tax-settings': {
+      id: '/_app/tax-settings'
+      path: '/tax-settings'
+      fullPath: '/tax-settings'
+      preLoaderRoute: typeof AppTaxSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/suppliers': {
@@ -469,6 +488,7 @@ interface AppRouteChildren {
   AppStockExportsRoute: typeof AppStockExportsRoute
   AppStocktakeRoute: typeof AppStocktakeRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
+  AppTaxSettingsRoute: typeof AppTaxSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
   AppStocktakeIdRoute: typeof AppStocktakeIdRoute
 }
@@ -491,6 +511,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppStockExportsRoute: AppStockExportsRoute,
   AppStocktakeRoute: AppStocktakeRoute,
   AppSuppliersRoute: AppSuppliersRoute,
+  AppTaxSettingsRoute: AppTaxSettingsRoute,
   AppUsersRoute: AppUsersRoute,
   AppStocktakeIdRoute: AppStocktakeIdRoute,
 }

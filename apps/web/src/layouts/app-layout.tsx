@@ -37,6 +37,13 @@ const menuTree: TreeNode[] = [
     ],
   },
   { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
+  {
+    id: 'tax',
+    label: 'Thuế',
+    icon: '🧾',
+    permission: 'tax:read',
+    children: [{ id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' }],
+  },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
   { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
   { id: 'variance', label: 'Định mức', icon: '⚖️', route: '/consumption-variance', permission: 'reports:read' },
@@ -145,6 +152,13 @@ export function AppLayout() {
           items={[{ label: '🛒 KiotViet', route: '/kiotviet' }]}
           onNav={(r) => navigate({ to: r })}
         />
+        {hasPermission('tax:read') && (
+          <MenuDrop
+            label="Thuế"
+            items={[{ label: '🧾 Cấu hình thuế', route: '/tax-settings' }]}
+            onNav={(r) => navigate({ to: r })}
+          />
+        )}
         {hasPermission('reports:read') && (
           <MenuDrop
             label="Báo cáo"
