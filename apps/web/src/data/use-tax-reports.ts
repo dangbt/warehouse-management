@@ -40,3 +40,37 @@ export function useInputInvoices(period: string | undefined) {
     enabled: !!period,
   })
 }
+
+export interface NoInvoicePurchaseRow {
+  stt: number
+  date: string
+  sellerName: string
+  sellerAddress: string | null
+  sellerIdNumber: string | null
+  missingIdNumber: boolean
+  ingredientName: string
+  unit: string
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  importOrderCode: string
+}
+
+export interface NoInvoicePurchaseReport {
+  period: { value: string; label: string; from: string; to: string }
+  settings: { companyName: string | null; taxCode: string | null; address: string | null }
+  rows: NoInvoicePurchaseRow[]
+  total: { totalPrice: number }
+}
+
+/**
+ * Bảng kê thu mua hàng hoá không có hoá đơn (mẫu 01/TNDN) theo kỳ.
+ * `enabled` = có period hợp lệ.
+ */
+export function useNoInvoicePurchases(period: string | undefined) {
+  return useQuery<NoInvoicePurchaseReport>({
+    queryKey: QUERY_KEYS.tax.noInvoicePurchases(period),
+    queryFn: () => api.get(`/tax/no-invoice-purchases?period=${encodeURIComponent(period ?? '')}`),
+    enabled: !!period,
+  })
+}

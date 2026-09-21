@@ -56,6 +56,7 @@ export const QUERY_KEYS = {
 
   tax: {
     inputInvoices: (period?: string) => ['tax', 'input-invoices', period] as const,
+    noInvoicePurchases: (period?: string) => ['tax', 'no-invoice-purchases', period] as const,
   },
 
   reports: {

@@ -32,6 +32,31 @@ export interface InputInvoiceReport {
   total: { subtotal: number; vatAmount: number };
 }
 
+/** Một dòng trong bảng kê 01/TNDN (mỗi dòng hàng của phiếu nhập không hoá đơn). */
+export interface NoInvoicePurchaseRow {
+  stt: number;
+  date: string;
+  sellerName: string;
+  sellerAddress: string | null;
+  sellerIdNumber: string | null;
+  /** Cờ cảnh báo thiếu CCCD để UI/Excel tô vàng. */
+  missingIdNumber: boolean;
+  ingredientName: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  importOrderCode: string;
+}
+
+/** Bảng kê thu mua hàng hoá, dịch vụ mua vào không có hoá đơn (mẫu 01/TNDN). */
+export interface NoInvoicePurchaseReport {
+  period: { value: string; label: string; from: string; to: string };
+  settings: { companyName: string | null; taxCode: string | null; address: string | null };
+  rows: NoInvoicePurchaseRow[];
+  total: { totalPrice: number };
+}
+
 /** Thứ tự hiển thị nhóm thuế suất trong báo cáo. */
 const VAT_RATE_ORDER = new Map<string, number>(VAT_RATES.map((r, i) => [r, i]));
 
@@ -138,6 +163,72 @@ export class TaxReportsService {
       period: { value: periodValue!, label: period.label, from: period.from.toISOString(), to: period.to.toISOString() },
       settings: { companyName: setting?.companyName ?? null, taxCode: setting?.taxCode ?? null },
       groups,
+      total,
+    };
+  }
+
+  /**
+   * Bảng kê thu mua hàng hoá, dịch vụ mua vào không có hoá đơn (mẫu 01/TNDN).
+   *
+   * Nguồn dữ liệu: `ImportOrder` status `COMPLETED`, `hasInvoice = false`, của NCC
+   * là cá nhân (`isIndividual = true`), `createdAt` trong kỳ (cột timestamp ⇒ from/to).
+   * Mỗi dòng hàng (`ImportOrderItem`) là một dòng bảng kê.
+   *
+   * Thiếu CCCD vẫn liệt kê nhưng đánh dấu `missingIdNumber = true` để cảnh báo.
+   * Tiền từng dòng làm tròn về đồng rồi mới cộng tổng.
+   */
+  async noInvoicePurchaseRegister(periodValue: string | undefined): Promise<NoInvoicePurchaseReport> {
+    const period = parsePeriod(periodValue);
+
+    const [setting, orders] = await Promise.all([
+      this.prisma.taxSetting.findUnique({ where: { id: 'default' } }),
+      this.prisma.importOrder.findMany({
+        where: {
+          status: 'COMPLETED',
+          hasInvoice: false,
+          // `createdAt` là cột timestamp ⇒ dùng from/to (ranh giới ngày theo giờ VN).
+          createdAt: { gte: period.from, lte: period.to },
+          supplier: { is: { isIndividual: true } },
+        },
+        include: { supplier: true, items: { include: { ingredient: true } } },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    const rows: NoInvoicePurchaseRow[] = [];
+    for (const order of orders) {
+      // Địa chỉ nơi mua ưu tiên purchaseAddress của phiếu, fallback địa chỉ NCC.
+      const sellerAddress = order.purchaseAddress ?? order.supplier.address ?? null;
+      const sellerIdNumber = order.supplier.idNumber ?? null;
+      for (const item of order.items) {
+        rows.push({
+          stt: 0,
+          date: order.createdAt.toISOString(),
+          sellerName: order.supplier.name,
+          sellerAddress,
+          sellerIdNumber,
+          missingIdNumber: !sellerIdNumber,
+          ingredientName: item.ingredient.name,
+          unit: item.ingredient.unit,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unitPrice),
+          totalPrice: roundVnd(Number(item.totalPrice)),
+          importOrderCode: order.code,
+        });
+      }
+    }
+
+    rows.forEach((r, i) => (r.stt = i + 1));
+    const total = { totalPrice: rows.reduce((s, r) => s + r.totalPrice, 0) };
+
+    return {
+      period: { value: periodValue!, label: period.label, from: period.from.toISOString(), to: period.to.toISOString() },
+      settings: {
+        companyName: setting?.companyName ?? null,
+        taxCode: setting?.taxCode ?? null,
+        address: setting?.address ?? null,
+      },
+      rows,
       total,
     };
   }

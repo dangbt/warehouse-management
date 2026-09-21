@@ -16,6 +16,13 @@ const schema = z.object({
       message: 'MST phải có 10 hoặc 13 chữ số (cho phép dạng 0123456789-001)',
     }),
   note: z.string().optional(),
+  is_individual: z.boolean().default(false),
+  id_number: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\d{9}$/.test(v) || /^\d{12}$/.test(v), {
+      message: 'Số CCCD/CMND phải có 9 hoặc 12 chữ số',
+    }),
 })
 
 type FormData = z.infer<typeof schema>
@@ -33,9 +40,11 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
+  const isIndividual = watch('is_individual')
 
   useEffect(() => {
     if (open) {
@@ -48,8 +57,10 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
               address: data.address,
               tax_code: (data as { taxCode?: string | null }).taxCode ?? data.tax_code ?? '',
               note: data.note ?? '',
+              is_individual: (data as { isIndividual?: boolean }).isIndividual ?? false,
+              id_number: (data as { idNumber?: string | null }).idNumber ?? data.id_number ?? '',
             }
-          : { name: '', phone: '', address: '', tax_code: '', note: '' },
+          : { name: '', phone: '', address: '', tax_code: '', note: '', is_individual: false, id_number: '' },
       )
     }
   }, [open, mode, data, reset])
@@ -94,6 +105,18 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
           <WinInput label="Điện thoại" {...register('phone')} error={errors.phone?.message} />
           <WinInput label="Địa chỉ" {...register('address')} error={errors.address?.message} />
           <WinInput label="Mã số thuế" {...register('tax_code')} error={errors.tax_code?.message} placeholder="10 hoặc 13 chữ số" />
+          <label className="flex items-center gap-2 text-win-base">
+            <input type="checkbox" {...register('is_individual')} className="w-3 h-3" />
+            Người bán cá nhân (không có HĐ)
+          </label>
+          {isIndividual && (
+            <WinInput
+              label="Số CCCD/CMND"
+              {...register('id_number')}
+              error={errors.id_number?.message}
+              placeholder="9 hoặc 12 chữ số"
+            />
+          )}
           <WinInput label="Ghi chú" {...register('note')} />
           {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
         </div>
