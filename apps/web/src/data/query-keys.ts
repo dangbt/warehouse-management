@@ -58,6 +58,7 @@ export const QUERY_KEYS = {
     inputInvoices: (period?: string) => ['tax', 'input-invoices', period] as const,
     noInvoicePurchases: (period?: string) => ['tax', 'no-invoice-purchases', period] as const,
     outputRevenue: (period?: string) => ['tax', 'output-revenue', period] as const,
+    summary: (period?: string, carriedForward?: number) => ['tax', 'summary', period, carriedForward] as const,
   },
 
   reports: {

@@ -39,6 +39,7 @@ model User {
   purchaseReturns    PurchaseReturn[] @relation("ReturnCreatedBy")
   supplierPayments   SupplierPayment[] @relation("PaymentCreatedBy")
   processingOrders   ProcessingOrder[] @relation("ProcessingCreatedBy")
+  taxPeriodCloses    TaxPeriodClose[] @relation("TaxPeriodClosedBy")
 
   @@map("users")
 }
@@ -454,4 +455,23 @@ model TaxSetting {
   updatedAt                DateTime @updatedAt @map("updated_at")
 
   @@map("tax_settings")
+}
+
+/// Kỳ thuế đã được chốt: lưu snapshot số liệu cố định tại thời điểm chốt để
+/// tờ khai đã lập không đổi khi phiếu/đơn phát sinh sau đó bị sửa.
+model TaxPeriodClose {
+  id               String   @id @default(uuid())
+  /// Kỳ thuế, ví dụ "2026-Q3" hoặc "2026-09". Mỗi kỳ chỉ chốt một lần.
+  period           String   @unique
+  /// Chế độ thuế tại thời điểm chốt (VAT_DEDUCTION hoặc HOUSEHOLD).
+  regime           String
+  /// Thuế còn được khấu trừ kỳ trước chuyển sang (nhập tay), chỉ dùng cho VAT_DEDUCTION.
+  carriedForwardIn Decimal  @default(0) @map("carried_forward_in") @db.Decimal(14, 2)
+  /// Toàn bộ số liệu tổng hợp tại lúc chốt (JSON), dùng để trả lại cố định.
+  snapshot         Json
+  closedById       String?  @map("closed_by_id")
+  closedBy         User?    @relation("TaxPeriodClosedBy", fields: [closedById], references: [id])
+  closedAt         DateTime @default(now()) @map("closed_at")
+
+  @@map("tax_period_closes")
 }

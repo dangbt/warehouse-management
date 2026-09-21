@@ -47,6 +47,7 @@ const menuTree: TreeNode[] = [
       { id: 'tax-input-invoices', label: 'Bảng kê mua vào', route: '/tax/input-invoices', permission: 'tax:read' },
       { id: 'tax-no-invoice-purchases', label: 'Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases', permission: 'tax:read' },
       { id: 'tax-output-revenue', label: 'Doanh thu theo thuế suất', route: '/tax/output-revenue', permission: 'tax:read' },
+      { id: 'tax-summary', label: 'Tổng hợp kỳ thuế', route: '/tax/summary', permission: 'tax:read' },
     ],
   },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },

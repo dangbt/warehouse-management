@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Put, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { TaxService } from './tax.service';
 import type { UpdateTaxSettingDto } from './tax.service';
 import { TaxReportsService } from './tax-reports.service';
+import { TaxSummaryService } from './tax-summary.service';
 import { KiotVietService } from '../kiotviet/kiotviet.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
@@ -12,6 +14,7 @@ export class TaxController {
   constructor(
     private svc: TaxService,
     private reports: TaxReportsService,
+    private summary: TaxSummaryService,
     private kiotviet: KiotVietService,
   ) {}
 
@@ -43,6 +46,30 @@ export class TaxController {
   @RequirePermissions('tax:manage')
   recomputeOutputVat(@Query('period') period?: string) {
     return this.kiotviet.recomputeOutputVat(period);
+  }
+
+  @Get('summary')
+  @RequirePermissions('tax:read')
+  getSummary(@Query('period') period?: string, @Query('carried_forward') carriedForward?: string) {
+    const cf = carriedForward !== undefined && carriedForward !== '' ? Number(carriedForward) : undefined;
+    return this.summary.summary(period, cf);
+  }
+
+  @Post('periods/:period/close')
+  @RequirePermissions('tax:manage')
+  closePeriod(
+    @Param('period') period: string,
+    @Req() req: Request & { user: { id: string } },
+    @Query('carried_forward') carriedForward?: string,
+  ) {
+    const cf = carriedForward !== undefined && carriedForward !== '' ? Number(carriedForward) : undefined;
+    return this.summary.closePeriod(period, req.user?.id, cf);
+  }
+
+  @Delete('periods/:period/close')
+  @RequirePermissions('tax:manage')
+  reopenPeriod(@Param('period') period: string) {
+    return this.summary.reopenPeriod(period);
   }
 
   @Put('settings')

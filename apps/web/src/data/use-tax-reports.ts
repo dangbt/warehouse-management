@@ -119,3 +119,94 @@ export function useRecomputeOutputVat() {
     onError: (e: Error) => useToastStore.getState().error(e.message),
   })
 }
+
+// ---------------------------------------------------------------------------
+// Tổng hợp thuế kỳ (TASK-154)
+// ---------------------------------------------------------------------------
+
+/** Số liệu một bên (đầu ra/đầu vào) trong tổng hợp VAT khấu trừ. */
+export interface SummarySide {
+  byRate: { vatRate: string; amountBeforeTax: number; vatAmount: number }[]
+  totalBeforeTax: number
+  totalVat: number
+}
+
+export interface VatDeductionSummaryResult {
+  regime: 'VAT_DEDUCTION'
+  period: { value: string; label: string }
+  settings: { companyName: string | null; taxCode: string | null }
+  output: SummarySide
+  input: SummarySide
+  carriedForwardIn: number
+  payable: number
+  carryToNext: number
+  unsnapshottedOrders: number
+  closed: boolean
+  closedAt: string | null
+}
+
+export interface HouseholdSummaryResult {
+  regime: 'HOUSEHOLD'
+  period: { value: string; label: string }
+  settings: { companyName: string | null; taxCode: string | null }
+  revenue: number
+  yearToDateRevenue: number
+  vatPercent: number
+  pitPercent: number
+  exemptThreshold: number
+  belowExemptThreshold: boolean
+  vat: number
+  pit: number
+  closed: boolean
+  closedAt: string | null
+}
+
+export type TaxSummaryResult = VatDeductionSummaryResult | HouseholdSummaryResult
+
+/**
+ * Tổng hợp thuế kỳ để lập tờ khai (`period` dạng `YYYY-MM`/`YYYY-Qn`).
+ * `carriedForward` (tuỳ chọn) ghi đè thuế kỳ trước chuyển sang cho chế độ VAT khấu trừ.
+ */
+export function useTaxSummary(period: string | undefined, carriedForward?: number) {
+  return useQuery<TaxSummaryResult>({
+    queryKey: QUERY_KEYS.tax.summary(period, carriedForward),
+    queryFn: () => {
+      const params = new URLSearchParams({ period: period ?? '' })
+      if (carriedForward !== undefined && !Number.isNaN(carriedForward)) params.set('carried_forward', String(carriedForward))
+      return api.get(`/tax/summary?${params.toString()}`)
+    },
+    enabled: !!period,
+  })
+}
+
+/** Chốt kỳ thuế: lưu snapshot cố định (quyền `tax:manage`). */
+export function useCloseTaxPeriod() {
+  return useMutation({
+    mutationFn: (args: { period: string; carriedForward?: number }) => {
+      const params = new URLSearchParams()
+      if (args.carriedForward !== undefined && !Number.isNaN(args.carriedForward)) {
+        params.set('carried_forward', String(args.carriedForward))
+      }
+      const qs = params.toString()
+      return api.post(`/tax/periods/${encodeURIComponent(args.period)}/close${qs ? `?${qs}` : ''}`, {}) as Promise<TaxSummaryResult>
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['tax', 'summary'] })
+      useToastStore.getState().success(`Đã chốt kỳ ${res.period.label}`)
+    },
+    onError: (e: Error) => useToastStore.getState().error(e.message),
+  })
+}
+
+/** Mở lại kỳ đã chốt để tính lại động (quyền `tax:manage`). */
+export function useReopenTaxPeriod() {
+  return useMutation({
+    mutationFn: (period: string) =>
+      api.delete(`/tax/periods/${encodeURIComponent(period)}/close`) as Promise<{ period: string; reopened: boolean }>,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tax', 'summary'] })
+      useToastStore.getState().success('Đã mở lại kỳ để tính lại')
+    },
+    onError: (e: Error) => useToastStore.getState().error(e.message),
+  })
+}
