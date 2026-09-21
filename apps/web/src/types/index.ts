@@ -31,6 +31,7 @@ export interface Supplier {
   name: string
   phone: string
   address: string
+  tax_code?: string
   note?: string
 }
 

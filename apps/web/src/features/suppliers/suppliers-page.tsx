@@ -10,11 +10,13 @@ import { formatDateTime, formatCurrency } from '@wms/shared'
 
 interface SupplierWithDebt extends Supplier {
   totalDebt?: string
+  taxCode?: string | null
 }
 
 const columns: Column<SupplierWithDebt>[] = [
   { key: 'name', header: 'Tên NCC', width: 180 },
   { key: 'phone', header: 'Điện thoại', width: 120 },
+  { key: 'taxCode', header: 'MST', width: 130, render: (r) => r.taxCode || '—' },
   { key: 'address', header: 'Địa chỉ', width: 200 },
   { key: 'totalDebt', header: 'Nợ', width: 120, align: 'right', render: (r) => {
     const debt = Number(r.totalDebt ?? 0)
@@ -40,7 +42,7 @@ export function SuppliersPage() {
   const { data: payments } = useSupplierPayments(selected?.id)
   const paymentMutation = useCreateSupplierPayment()
 
-  const handleSave = async (formData: { name: string; phone: string; address: string; note?: string }) => {
+  const handleSave = async (formData: { name: string; phone: string; address: string; tax_code?: string; note?: string }) => {
     if (formMode === 'add') {
       await createMutation.mutateAsync(formData)
     } else if (selected) {

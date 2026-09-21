@@ -9,6 +9,12 @@ const schema = z.object({
   name: z.string().min(1, 'Bắt buộc'),
   phone: z.string().min(1, 'Bắt buộc'),
   address: z.string().min(1, 'Bắt buộc'),
+  tax_code: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\d{10}$/.test(v) || /^\d{13}$/.test(v) || /^\d{10}-\d{3}$/.test(v), {
+      message: 'MST phải có 10 hoặc 13 chữ số (cho phép dạng 0123456789-001)',
+    }),
   note: z.string().optional(),
 })
 
@@ -36,8 +42,14 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
       setSubmitError('')
       reset(
         mode === 'edit' && data
-          ? { name: data.name, phone: data.phone, address: data.address, note: data.note ?? '' }
-          : { name: '', phone: '', address: '', note: '' },
+          ? {
+              name: data.name,
+              phone: data.phone,
+              address: data.address,
+              tax_code: (data as { taxCode?: string | null }).taxCode ?? data.tax_code ?? '',
+              note: data.note ?? '',
+            }
+          : { name: '', phone: '', address: '', tax_code: '', note: '' },
       )
     }
   }, [open, mode, data, reset])
@@ -81,6 +93,7 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
           <WinInput label="Tên NCC" {...register('name')} error={errors.name?.message} />
           <WinInput label="Điện thoại" {...register('phone')} error={errors.phone?.message} />
           <WinInput label="Địa chỉ" {...register('address')} error={errors.address?.message} />
+          <WinInput label="Mã số thuế" {...register('tax_code')} error={errors.tax_code?.message} placeholder="10 hoặc 13 chữ số" />
           <WinInput label="Ghi chú" {...register('note')} />
           {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
         </div>
