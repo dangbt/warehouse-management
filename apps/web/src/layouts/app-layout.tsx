@@ -87,8 +87,8 @@ export function AppLayout() {
   return (
     <div className="h-screen flex flex-col" data-testid="app-layout">
       {/* Title Bar */}
-      <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2 shrink-0">
+      <div className="h-9 bg-win-active-title text-white flex items-center px-3 text-[14px] font-semibold shrink-0 select-none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-6 w-6 mr-2 shrink-0">
           <circle cx="16" cy="16" r="14" fill="white" />
           <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">
             MV
@@ -99,7 +99,7 @@ export function AppLayout() {
       </div>
 
       {/* Menu Bar */}
-      <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 relative z-30 overflow-visible">
+      <div className="h-9 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-win-base shrink-0 relative z-30 overflow-visible">
         <MenuDrop
           label="Hệ thống"
           items={[
@@ -158,14 +158,14 @@ export function AppLayout() {
         )}
         <div className="flex-1" />
         <div className="flex items-center gap-2 pr-2 shrink-0">
-          <Bell size={14} className="cursor-pointer" />
-          <span className="text-[11px] hidden md:inline">👤 {user?.full_name ?? 'Guest'}</span>
+          <Bell size={16} className="cursor-pointer" />
+          <span className="text-win-base hidden md:inline">👤 {user?.full_name ?? 'Guest'}</span>
           <button
             onClick={() => {
               logout()
               navigate({ to: '/login' })
             }}
-            className="text-[11px] text-win-error hover:underline cursor-pointer"
+            className="text-win-base text-win-error hover:underline cursor-pointer"
           >
             Đăng xuất
           </button>
@@ -173,16 +173,16 @@ export function AppLayout() {
       </div>
 
       {/* Toolbar */}
-      <div className="h-9 bg-win-menu border-b border-win-grid-border flex items-center px-2 gap-1 shrink-0">
+      <div className="h-11 bg-win-menu border-b border-win-grid-border flex items-center px-2 gap-1 shrink-0">
         <button onClick={toggleSidebar} className="p-1 hover:bg-win-menu-hover">
           {sidebarExpanded ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
         </button>
         <div className="w-px h-5 bg-win-grid-border mx-1" />
-        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-[11px] hover:bg-win-menu-hover">
+        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-win-base hover:bg-win-menu-hover">
           🏠 Dashboard
         </button>
         <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover">
-          <RefreshCw size={14} />
+          <RefreshCw size={16} />
         </button>
       </div>
 
@@ -192,7 +192,7 @@ export function AppLayout() {
         {sidebarExpanded && (
           <>
             <div className="md:hidden fixed inset-0 bg-black/30 z-30" onClick={toggleSidebar} />
-            <div className="w-[200px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0 absolute md:relative z-40 h-full">
+            <div className="w-[240px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0 absolute md:relative z-40 h-full">
               <WinTreeView
                 nodes={filteredTree}
                 activeId={activeNode}
@@ -241,12 +241,12 @@ function MenuDrop({ label, items, onNav }: { label: string; items: { label: stri
     <div className="relative" ref={ref}>
       <span
         onClick={() => setOpen(!open)}
-        className={`px-2.5 py-0.5 cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
+        className={`px-3 py-0.5 cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
       >
         {label}
       </span>
       {open && (
-        <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md z-50 min-w-[160px] py-0.5">
+        <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md z-50 min-w-[200px] py-0.5">
           {items.map((item) => (
             <div
               key={item.route}
@@ -254,7 +254,7 @@ function MenuDrop({ label, items, onNav }: { label: string; items: { label: stri
                 onNav(item.route)
                 setOpen(false)
               }}
-              className="px-3 py-1 text-[11px] hover:bg-win-menu-hover cursor-pointer"
+              className="px-3 py-1.5 text-win-base hover:bg-win-menu-hover cursor-pointer"
             >
               {item.label}
             </div>

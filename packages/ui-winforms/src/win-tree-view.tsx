@@ -36,7 +36,7 @@ function TreeItem({
     <>
       <div
         data-testid={`sidebar-${node.id}`}
-        className={`flex items-center gap-1 py-1 cursor-pointer hover:bg-win-menu-hover ${activeId === node.id ? 'bg-win-grid-selected font-semibold' : ''}`}
+        className={`flex items-center gap-1 py-1.5 cursor-pointer hover:bg-win-menu-hover ${activeId === node.id ? 'bg-win-grid-selected font-semibold' : ''}`}
         style={{ paddingLeft: depth * 16 + 8 }}
         onClick={() => {
           if (hasChildren) setExpanded(!expanded)
