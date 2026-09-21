@@ -7,11 +7,20 @@ import { BadRequestException } from '@nestjs/common';
  *
  * - `from`: 00:00:00.000 ngày đầu kỳ (giờ VN) quy về UTC.
  * - `to`:   23:59:59.999 ngày cuối kỳ (giờ VN) quy về UTC.
+ * - `fromDate`: 00:00:00.000 UTC của ngày đầu kỳ (theo lịch), ví dụ 2026-09-01T00:00:00.000Z.
+ * - `toDate`:   00:00:00.000 UTC của ngày cuối kỳ (theo lịch), ví dụ 2026-09-30T00:00:00.000Z.
  * - `label`: nhãn hiển thị tiếng Việt, ví dụ "Tháng 09/2026" hoặc "Quý 3/2026".
+ *
+ * `from`/`to` dùng cho các cột timestamp (DateTime, ví dụ `createdAt`).
+ * `fromDate`/`toDate` dùng cho các cột chỉ-ngày (`@db.Date`, ví dụ `invoiceDate`):
+ * Prisma ép tham số của cột DATE về ngày UTC, nên phải so khớp bằng UTC-midnight
+ * của ngày lịch để tránh lệch biên (một hoá đơn ngày cuối tháng bị rơi sang kỳ sau).
  */
 export interface Period {
   from: Date;
   to: Date;
+  fromDate: Date;
+  toDate: Date;
   label: string;
 }
 
@@ -24,6 +33,14 @@ const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
  */
 function vnDateToUtc(year: number, month: number, day: number, h: number, m: number, s: number, ms: number): Date {
   return new Date(Date.UTC(year, month, day, h, m, s, ms) - VN_OFFSET_MS);
+}
+
+/**
+ * Tạo `Date` là 00:00:00.000 UTC của một ngày lịch — dùng cho các cột `@db.Date`.
+ * Ví dụ (2026, 8, 30) ⇒ 2026-09-30T00:00:00.000Z.
+ */
+function utcMidnight(year: number, month: number, day: number): Date {
+  return new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
 }
 
 /**
@@ -50,7 +67,11 @@ export function parsePeriod(period: string | undefined): Period {
     const from = vnDateToUtc(year, month - 1, 1, 0, 0, 0, 0);
     // Ngày 0 của tháng kế = ngày cuối tháng hiện tại.
     const to = vnDateToUtc(year, month, 0, 23, 59, 59, 999);
-    return { from, to, label: `Tháng ${String(month).padStart(2, '0')}/${year}` };
+    // Số ngày trong tháng: ngày 0 của tháng kế (UTC) cho ra ngày cuối tháng.
+    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const fromDate = utcMidnight(year, month - 1, 1);
+    const toDate = utcMidnight(year, month - 1, lastDay);
+    return { from, to, fromDate, toDate, label: `Tháng ${String(month).padStart(2, '0')}/${year}` };
   }
 
   const quarterMatch = /^(\d{4})-Q([1-4])$/.exec(period);
@@ -60,7 +81,11 @@ export function parsePeriod(period: string | undefined): Period {
     const startMonth = (quarter - 1) * 3; // chỉ số tháng 0-based
     const from = vnDateToUtc(year, startMonth, 1, 0, 0, 0, 0);
     const to = vnDateToUtc(year, startMonth + 3, 0, 23, 59, 59, 999);
-    return { from, to, label: `Quý ${quarter}/${year}` };
+    // Ngày cuối quý = ngày 0 của tháng ngay sau tháng cuối quý.
+    const lastDay = new Date(Date.UTC(year, startMonth + 3, 0)).getUTCDate();
+    const fromDate = utcMidnight(year, startMonth, 1);
+    const toDate = utcMidnight(year, startMonth + 2, lastDay);
+    return { from, to, fromDate, toDate, label: `Quý ${quarter}/${year}` };
   }
 
   throw new BadRequestException('Kỳ không hợp lệ. Định dạng: YYYY-MM hoặc YYYY-Qn');

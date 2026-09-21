@@ -59,7 +59,9 @@ export class TaxReportsService {
         where: {
           status: 'COMPLETED',
           hasInvoice: true,
-          invoiceDate: { gte: period.from, lte: period.to },
+          // `invoiceDate` là cột `@db.Date` ⇒ so khớp bằng UTC-midnight của ngày lịch
+          // (fromDate/toDate) để tránh lệch biên do Prisma ép tham số về ngày UTC.
+          invoiceDate: { gte: period.fromDate, lte: period.toDate },
         },
         include: { supplier: true, items: true },
         orderBy: { invoiceDate: 'asc' },
