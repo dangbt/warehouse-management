@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, Req } from '@nestjs/common';
 import { ImportOrdersService } from './import-orders.service';
+import type { CreateImportOrderInput } from './import-orders.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
@@ -16,21 +17,7 @@ export class ImportOrdersController {
 
   @Post()
   @RequirePermissions('import_orders:create')
-  create(
-    @Req() req,
-    @Body()
-    body: {
-      supplier_id: string;
-      note?: string;
-      paid?: boolean;
-      items: {
-        ingredient_id: string;
-        quantity: number;
-        unit_price: number;
-        expiry_date?: string;
-      }[];
-    },
-  ) {
+  create(@Req() req, @Body() body: CreateImportOrderInput) {
     return this.svc.create(req.user.id, body);
   }
 

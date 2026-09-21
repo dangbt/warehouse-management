@@ -1,7 +1,36 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
+
+/**
+ * Chuẩn hoá + validate mã số thuế NCC.
+ * Cho phép 10 hoặc 13 chữ số, hoặc dạng đơn vị phụ thuộc `0123456789-001`.
+ * Rỗng/undefined ⇒ null.
+ */
+function normalizeTaxCode(raw: string | undefined): string | null {
+  if (raw === undefined) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const valid = /^\d{10}$/.test(trimmed) || /^\d{13}$/.test(trimmed) || /^\d{10}-\d{3}$/.test(trimmed);
+  if (!valid) {
+    throw new BadRequestException('Mã số thuế phải có 10 hoặc 13 chữ số (cho phép dạng 0123456789-001)');
+  }
+  return trimmed;
+}
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('suppliers')
@@ -33,10 +62,19 @@ export class SuppliersController {
       name: string;
       phone?: string;
       address?: string;
+      tax_code?: string;
       note?: string;
     },
   ) {
-    return this.prisma.supplier.create({ data: body });
+    return this.prisma.supplier.create({
+      data: {
+        name: body.name,
+        phone: body.phone,
+        address: body.address,
+        taxCode: normalizeTaxCode(body.tax_code),
+        note: body.note,
+      },
+    });
   }
 
   @Put(':id')
@@ -44,11 +82,17 @@ export class SuppliersController {
   async update(
     @Param('id') id: string,
     @Body()
-    body: { name?: string; phone?: string; address?: string; note?: string },
+    body: { name?: string; phone?: string; address?: string; tax_code?: string; note?: string },
   ) {
     const exists = await this.prisma.supplier.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Nhà cung cấp không tồn tại');
-    return this.prisma.supplier.update({ where: { id }, data: body });
+    const data: { name?: string; phone?: string; address?: string; taxCode?: string | null; note?: string } = {};
+    if (body.name !== undefined) data.name = body.name;
+    if (body.phone !== undefined) data.phone = body.phone;
+    if (body.address !== undefined) data.address = body.address;
+    if (body.note !== undefined) data.note = body.note;
+    if (body.tax_code !== undefined) data.taxCode = normalizeTaxCode(body.tax_code);
+    return this.prisma.supplier.update({ where: { id }, data });
   }
 
   @Delete(':id')

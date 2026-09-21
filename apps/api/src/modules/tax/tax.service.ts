@@ -1,9 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { VAT_RATES } from './vat';
 
 const VALID_REGIMES = ['VAT_DEDUCTION', 'HOUSEHOLD'];
 const VALID_PERIOD_TYPES = ['MONTH', 'QUARTER'];
-const VALID_VAT_RATES = ['0', '5', '8', '10', 'KCT', 'KKKNT'];
 
 const DEFAULT_ID = 'default';
 
@@ -38,7 +38,7 @@ export class TaxService {
     if (body.periodType !== undefined && !VALID_PERIOD_TYPES.includes(body.periodType)) {
       throw new BadRequestException('Kỳ kê khai không hợp lệ');
     }
-    if (body.defaultOutputVatRate !== undefined && !VALID_VAT_RATES.includes(body.defaultOutputVatRate)) {
+    if (body.defaultOutputVatRate !== undefined && !(VAT_RATES as readonly string[]).includes(body.defaultOutputVatRate)) {
       throw new BadRequestException('Thuế suất mặc định không hợp lệ');
     }
 
