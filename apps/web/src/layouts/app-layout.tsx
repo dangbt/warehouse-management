@@ -85,7 +85,7 @@ export function AppLayout() {
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const health = useHealth()
   // Chỉ hộ kinh doanh mới có sổ kế toán hộ KD (S1/S2). Ẩn khi VAT khấu trừ.
-  const taxSettings = useTaxSettings()
+  const taxSettings = useTaxSettings({ enabled: hasPermission('tax:read') })
   const isHousehold = taxSettings.data?.regime === 'HOUSEHOLD'
 
   const filteredTree = filterTree(buildMenuTree(isHousehold), hasPermission)
