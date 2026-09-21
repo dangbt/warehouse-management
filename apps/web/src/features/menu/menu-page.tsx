@@ -5,7 +5,14 @@ import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect } 
 import type { Column } from '@wms/ui-winforms'
 import { useMenuList, useCreateMenuItem, useUpdateMenuItem, useIngredients } from '@/data'
 import type { MenuItemFull } from '@/data'
-import { formatCurrency } from '@wms/shared'
+import { formatCurrency, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
+import type { VatRate } from '@wms/shared'
+
+/** Nhãn thuế suất VAT đầu ra của món; null = dùng mặc định cấu hình. */
+function vatRateLabel(rate: string | null): string {
+  if (rate == null) return 'Mặc định'
+  return VAT_RATE_LABELS[rate as VatRate] ?? rate
+}
 
 const modeLabels: Record<string, { label: string; color: string }> = {
   RECIPE: { label: 'Theo công thức', color: 'bg-blue-100 text-blue-800' },
@@ -30,6 +37,13 @@ const columns: Column<MenuItemFull>[] = [
   { key: 'category', header: 'Loại', width: 110 },
   { key: 'price', header: 'Giá', width: 100, align: 'right', render: (r) => formatCurrency(r.price) },
   { key: 'kiotvietProductId', header: 'Mã KiotViet', width: 110, align: 'center', render: (r) => r.kiotvietProductId ?? '-' },
+  {
+    key: 'vatRate',
+    header: 'Thuế suất',
+    width: 110,
+    align: 'center',
+    render: (r) => <span className={r.vatRate == null ? 'text-win-text-secondary' : ''}>{vatRateLabel(r.vatRate)}</span>,
+  },
   {
     key: 'inventoryMode',
     header: 'Cách trừ tồn',
@@ -56,6 +70,7 @@ const columns: Column<MenuItemFull>[] = [
 interface ConfigForm {
   inventory_mode: 'RECIPE' | 'DIRECT' | 'NONE' | ''
   direct_ingredient_id?: string
+  vat_rate?: string
 }
 
 export function MenuPage() {
@@ -86,7 +101,11 @@ export function MenuPage() {
   }, [addOpen, addForm])
   useEffect(() => {
     if (cfgOpen && selected)
-      cfgForm.reset({ inventory_mode: selected.inventoryMode ?? '', direct_ingredient_id: selected.directIngredientId ?? '' })
+      cfgForm.reset({
+        inventory_mode: selected.inventoryMode ?? '',
+        direct_ingredient_id: selected.directIngredientId ?? '',
+        vat_rate: selected.vatRate ?? '',
+      })
   }, [cfgOpen, selected, cfgForm])
 
   const onAdd = async (d: { name: string; price: number; category: string }) => {
@@ -99,6 +118,7 @@ export function MenuPage() {
       id: selected.id,
       inventory_mode: d.inventory_mode || null,
       direct_ingredient_id: d.inventory_mode === 'DIRECT' ? d.direct_ingredient_id || null : null,
+      vat_rate: d.vat_rate ? d.vat_rate : null,
     })
     setCfgOpen(false)
   }
@@ -194,6 +214,21 @@ export function MenuPage() {
                 {selected?.recipe ? ` Hiện có ${selected.recipe._count.ingredients} NL.` : ' Hiện chưa có công thức.'}
               </p>
             )}
+          </div>
+        </WinGroupBox>
+        <WinGroupBox title="Thuế suất VAT đầu ra">
+          <div className="space-y-2.5">
+            <WinSelect
+              label="Thuế suất"
+              {...cfgForm.register('vat_rate')}
+              options={[
+                { value: '', label: 'Mặc định (theo cấu hình thuế)' },
+                ...VAT_RATES.map((r) => ({ value: r, label: VAT_RATE_LABELS[r] })),
+              ]}
+            />
+            <p className="text-win-base text-win-text-secondary">
+              Áp cho doanh thu bán món này khi đồng bộ từ KiotViet. Để "Mặc định" nếu dùng thuế suất mặc định của cấu hình thuế.
+            </p>
           </div>
         </WinGroupBox>
       </WinDialog>

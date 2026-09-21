@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
+import { splitLineTax, allocateDiscount, VAT_RATES, type VatRate } from '../tax/vat';
+import { parsePeriod } from '../tax/period';
 
 interface KiotVietOrderInput {
   id: string;
@@ -114,6 +116,9 @@ export class KiotVietService {
   async syncOrders(orders: KiotVietOrderInput[], userId: string) {
     const results = { synced: 0, skipped: 0, deducted: 0, unconfigured: [] as string[], errors: [] as string[] };
 
+    // Cấu hình thuế đầu ra dùng chung cho cả lần đồng bộ.
+    const setting = await this.getTaxDefaults();
+
     for (const order of orders) {
       const exists = await this.prisma.kiotVietOrder.findUnique({ where: { kiotVietId: order.id } });
       if (exists) {
@@ -123,13 +128,34 @@ export class KiotVietService {
 
       // Match items to menu items by name
       const menuItems = await this.prisma.menuItem.findMany();
-      const itemsData = order.items.map((item) => {
+      const matchedItems = order.items.map((item) => {
         const norm = this.normalize(item.productName);
         const matched =
           menuItems.find((m) => this.normalize(m.name) === norm) ||
           menuItems.find((m) => this.normalize(m.name).includes(norm) || norm.includes(this.normalize(m.name)));
-        return { productName: item.productName, menuItemId: matched?.id || null, quantity: item.quantity, price: item.price };
+        return { item, matched };
       });
+
+      // Snapshot thuế đầu ra: tách doanh thu chưa thuế + VAT theo thuế suất của từng món.
+      const snapshot = this.computeOutputVatSnapshot(
+        matchedItems.map(({ item, matched }) => ({
+          quantity: item.quantity,
+          price: item.price,
+          rate: this.resolveRate(matched?.vatRate ?? null, setting.defaultOutputVatRate),
+        })),
+        Number(order.totalAmount),
+        setting.pricesIncludeVat,
+      );
+
+      const itemsData = matchedItems.map(({ item, matched }, i) => ({
+        productName: item.productName,
+        menuItemId: matched?.id || null,
+        quantity: item.quantity,
+        price: item.price,
+        vatRate: snapshot.items[i].rate,
+        amountBeforeTax: snapshot.items[i].amountBeforeTax,
+        vatAmount: snapshot.items[i].vatAmount,
+      }));
 
       const created = await this.prisma.kiotVietOrder.create({
         data: {
@@ -137,6 +163,8 @@ export class KiotVietService {
           code: order.code,
           customerName: order.customerName,
           totalAmount: order.totalAmount,
+          amountBeforeTax: snapshot.amountBeforeTax,
+          vatAmount: snapshot.vatAmount,
           orderDate: new Date(order.orderDate),
           items: { create: itemsData },
         },
@@ -232,6 +260,101 @@ export class KiotVietService {
     // else: có món chưa cấu hình & chưa trừ gì → để deducted=false, retry sau khi cấu hình
 
     return { message: `Đơn ${order.code}: trừ ${deductions.length} NL`, deductions: deductions.length, unconfigured };
+  }
+
+  /** Lấy cấu hình thuế đầu ra (thuế suất mặc định + giá có gồm VAT hay chưa). */
+  private async getTaxDefaults(): Promise<{ defaultOutputVatRate: VatRate; pricesIncludeVat: boolean }> {
+    const setting = await this.prisma.taxSetting.findUnique({ where: { id: 'default' } });
+    const raw = setting?.defaultOutputVatRate ?? '8';
+    const defaultOutputVatRate = (VAT_RATES as readonly string[]).includes(raw) ? (raw as VatRate) : '8';
+    return { defaultOutputVatRate, pricesIncludeVat: setting?.pricesIncludeVat ?? true };
+  }
+
+  /** Thuế suất áp dụng cho dòng: dùng của món nếu hợp lệ, không thì mặc định cấu hình. */
+  private resolveRate(menuRate: string | null, fallback: VatRate): VatRate {
+    if (menuRate != null && (VAT_RATES as readonly string[]).includes(menuRate)) return menuRate as VatRate;
+    return fallback;
+  }
+
+  /**
+   * Tính snapshot thuế đầu ra cho một đơn hàng.
+   *
+   * - `lineGross = price × quantity` mỗi dòng; phân bổ chênh lệch với `totalAmount`
+   *   (chiết khấu cấp hoá đơn / làm tròn) theo tỷ lệ `lineGross`, dòng cuối nhận phần dư.
+   * - Tách mỗi dòng thành tiền chưa thuế + VAT theo thuế suất dòng và `pricesIncludeVat`.
+   * - Tổng đơn = Σ các dòng (tiền thuế làm tròn từng dòng rồi mới cộng).
+   */
+  private computeOutputVatSnapshot(
+    lines: { quantity: number; price: number; rate: VatRate }[],
+    totalAmount: number,
+    pricesIncludeVat: boolean,
+  ): {
+    amountBeforeTax: number;
+    vatAmount: number;
+    items: { rate: VatRate; amountBeforeTax: number; vatAmount: number }[];
+  } {
+    const grosses = lines.map((l) => l.price * l.quantity);
+    const allocated = allocateDiscount(grosses, totalAmount);
+
+    const items = lines.map((l, i) => {
+      const split = splitLineTax({ lineGross: allocated[i], rate: l.rate, pricesIncludeVat });
+      return { rate: l.rate, amountBeforeTax: split.amountBeforeTax, vatAmount: split.vatAmount };
+    });
+
+    return {
+      amountBeforeTax: items.reduce((s, it) => s + it.amountBeforeTax, 0),
+      vatAmount: items.reduce((s, it) => s + it.vatAmount, 0),
+      items,
+    };
+  }
+
+  /**
+   * Tính lại snapshot thuế đầu ra cho các đơn KiotViet trong kỳ.
+   *
+   * Dùng khi đổi thuế suất món hoặc cấu hình thuế. Chỉ ảnh hưởng các đơn có
+   * `orderDate` (cột timestamp) trong kỳ. Không tự chạy khi migrate/sync.
+   */
+  async recomputeOutputVat(periodValue: string | undefined) {
+    const period = parsePeriod(periodValue);
+    const setting = await this.getTaxDefaults();
+
+    const orders = await this.prisma.kiotVietOrder.findMany({
+      where: { orderDate: { gte: period.from, lte: period.to } },
+      include: { items: { include: { menuItem: { select: { vatRate: true } } } } },
+    });
+
+    let updated = 0;
+    for (const order of orders) {
+      const snapshot = this.computeOutputVatSnapshot(
+        order.items.map((it) => ({
+          quantity: it.quantity,
+          price: Number(it.price),
+          rate: this.resolveRate(it.menuItem?.vatRate ?? null, setting.defaultOutputVatRate),
+        })),
+        Number(order.totalAmount),
+        setting.pricesIncludeVat,
+      );
+
+      await this.prisma.$transaction([
+        this.prisma.kiotVietOrder.update({
+          where: { id: order.id },
+          data: { amountBeforeTax: snapshot.amountBeforeTax, vatAmount: snapshot.vatAmount },
+        }),
+        ...order.items.map((it, i) =>
+          this.prisma.kiotVietOrderItem.update({
+            where: { id: it.id },
+            data: {
+              vatRate: snapshot.items[i].rate,
+              amountBeforeTax: snapshot.items[i].amountBeforeTax,
+              vatAmount: snapshot.items[i].vatAmount,
+            },
+          }),
+        ),
+      ]);
+      updated++;
+    }
+
+    return { period: period.label, updated };
   }
 
   async getOrders(query: { page?: string; limit?: string; deducted?: string }) {
