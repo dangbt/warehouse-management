@@ -133,7 +133,7 @@ export function WinDataGrid<T extends { id?: string }>({
     <div className="flex flex-col flex-1 overflow-hidden border border-win-grid-border">
       {searchable && (
         <div className="flex items-center gap-1 px-2 py-1 border-b border-win-grid-border bg-win-menu shrink-0">
-          <Search size={12} className="text-win-text-secondary" />
+          <Search size={16} className="text-win-text-secondary" />
           <input
             type="text"
             value={globalFilter}
@@ -142,14 +142,14 @@ export function WinDataGrid<T extends { id?: string }>({
               onSearch?.(e.target.value)
             }}
             placeholder="Tìm kiếm..."
-            className="flex-1 border border-win-input-border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus bg-white"
+            className="flex-1 border border-win-input-border px-2 py-0.5 text-win-base outline-none focus:border-win-input-focus bg-white"
           />
         </div>
       )}
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-[11px] border-collapse">
+        <table className="w-full text-win-base border-collapse">
           <thead className="sticky top-0 z-10 bg-win-grid-header">
-            <tr className="bg-win-grid-header border-b border-win-grid-border">
+            <tr className="h-9 bg-win-grid-header border-b border-win-grid-border">
               {table.getHeaderGroups()[0].headers.map((header) => {
                 const meta = header.column.columnDef.meta as { align?: string } | undefined
                 const alignCls = meta?.align === 'right' ? 'text-right' : meta?.align === 'center' ? 'text-center' : 'text-left'
@@ -163,8 +163,8 @@ export function WinDataGrid<T extends { id?: string }>({
                     <span className="inline-flex items-center gap-0.5">
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {{
-                        asc: <ArrowUp size={10} />,
-                        desc: <ArrowDown size={10} />,
+                        asc: <ArrowUp size={14} />,
+                        desc: <ArrowDown size={14} />,
                       }[header.column.getIsSorted() as string] ?? null}
                     </span>
                   </th>
@@ -173,12 +173,12 @@ export function WinDataGrid<T extends { id?: string }>({
               {storageKey && (
                 <th className="w-6 px-0 border-r border-win-grid-border relative">
                   <button onClick={() => setShowColMenu(!showColMenu)} className="p-0.5 hover:bg-win-menu-hover" title="Chọn cột hiển thị">
-                    <Columns3 size={12} />
+                    <Columns3 size={16} />
                   </button>
                   {showColMenu && (
                     <div ref={menuRef} className="absolute right-0 top-full mt-1 bg-white border border-win-grid-border shadow-md z-50 p-1 min-w-[140px]">
                       {table.getAllColumns().map((col) => (
-                        <label key={col.id} className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] cursor-pointer hover:bg-win-menu-hover">
+                        <label key={col.id} className="flex items-center gap-1.5 px-2 py-0.5 text-win-xs cursor-pointer hover:bg-win-menu-hover">
                           <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()} className="w-3 h-3" />
                           {String(col.columnDef.header)}
                         </label>
@@ -209,7 +209,7 @@ export function WinDataGrid<T extends { id?: string }>({
                   <tr
                     key={original.id ?? i}
                     data-testid={`grid-row-${original.id ?? i}`}
-                    className={`border-b border-[#EBEBEB] cursor-pointer
+                    className={`h-8 border-b border-[#EBEBEB] cursor-pointer
                       ${i % 2 === 1 ? 'bg-win-grid-row-alt' : 'bg-white'}
                       ${selectedId === original.id ? '!bg-win-grid-selected' : 'hover:bg-win-menu-hover'}
                       ${getRowClass?.(original) ?? ''}`}
@@ -224,7 +224,7 @@ export function WinDataGrid<T extends { id?: string }>({
                       return (
                         <td
                           key={cell.id}
-                          className={`px-2 py-1 border-r border-[#F0F0F0] ${meta?.align === 'right' ? 'text-right' : meta?.align === 'center' ? 'text-center' : ''}`}
+                          className={`px-2 py-1.5 border-r border-[#F0F0F0] ${meta?.align === 'right' ? 'text-right' : meta?.align === 'center' ? 'text-center' : ''}`}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
@@ -239,18 +239,18 @@ export function WinDataGrid<T extends { id?: string }>({
         </table>
       </div>
       {pagination && (
-        <div className="h-7 border-t border-win-grid-border bg-win-menu flex items-center justify-between px-2 text-[11px] shrink-0">
+        <div className="h-9 border-t border-win-grid-border bg-win-menu flex items-center justify-between px-2 text-win-base shrink-0">
           <span>
             Hiển thị {(pagination.page - 1) * pagination.limit + 1}-
             {Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total}
           </span>
           <div className="flex items-center gap-1">
             <button onClick={() => onPageChange?.(pagination.page - 1)} disabled={pagination.page <= 1} className="p-0.5 disabled:opacity-30">
-              <ChevronLeft size={14} />
+              <ChevronLeft size={16} />
             </button>
             <span>Trang {pagination.page}/{totalPages}</span>
             <button onClick={() => onPageChange?.(pagination.page + 1)} disabled={pagination.page >= totalPages} className="p-0.5 disabled:opacity-30">
-              <ChevronRight size={14} />
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>

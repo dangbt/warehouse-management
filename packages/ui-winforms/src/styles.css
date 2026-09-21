@@ -22,4 +22,10 @@
   --color-win-input-border: #7a7a7a;
   --color-win-input-focus: #0078d4;
   --font-family-win: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+
+  /* MISA-style size tokens (font sizes) */
+  --text-win-xs: 11px;
+  --text-win-sm: 12px;
+  --text-win-base: 13px;
+  --text-win-lg: 15px;
 }
