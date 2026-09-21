@@ -1,7 +1,8 @@
-import { Controller, Get, Put, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Query, UseGuards } from '@nestjs/common';
 import { TaxService } from './tax.service';
 import type { UpdateTaxSettingDto } from './tax.service';
 import { TaxReportsService } from './tax-reports.service';
+import { KiotVietService } from '../kiotviet/kiotviet.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
@@ -11,6 +12,7 @@ export class TaxController {
   constructor(
     private svc: TaxService,
     private reports: TaxReportsService,
+    private kiotviet: KiotVietService,
   ) {}
 
   @Get('settings')
@@ -29,6 +31,18 @@ export class TaxController {
   @RequirePermissions('tax:read')
   noInvoicePurchases(@Query('period') period?: string) {
     return this.reports.noInvoicePurchaseRegister(period);
+  }
+
+  @Get('output-revenue')
+  @RequirePermissions('tax:read')
+  outputRevenue(@Query('period') period?: string) {
+    return this.reports.outputRevenue(period);
+  }
+
+  @Post('recompute-output-vat')
+  @RequirePermissions('tax:manage')
+  recomputeOutputVat(@Query('period') period?: string) {
+    return this.kiotviet.recomputeOutputVat(period);
   }
 
   @Put('settings')

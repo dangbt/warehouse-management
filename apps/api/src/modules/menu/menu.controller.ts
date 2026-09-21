@@ -8,6 +8,7 @@ type MenuBody = {
   price?: number;
   category?: string;
   kiotviet_product_id?: string | null;
+  vat_rate?: string | null;
   inventory_mode?: 'RECIPE' | 'DIRECT' | 'NONE' | null;
   direct_ingredient_id?: string | null;
   is_active?: boolean;

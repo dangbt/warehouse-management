@@ -57,9 +57,25 @@ export interface NoInvoicePurchaseReport {
   total: { totalPrice: number };
 }
 
+/** Nhóm doanh thu bán hàng theo một thuế suất VAT đầu ra. */
+export interface OutputRevenueGroup {
+  vatRate: string;
+  orderCount: number;
+  amountBeforeTax: number;
+  vatAmount: number;
+  gross: number;
+}
+
+/** Báo cáo doanh thu bán hàng theo thuế suất trong kỳ. */
+export interface OutputRevenueReport {
+  period: { value: string; label: string; from: string; to: string };
+  settings: { companyName: string | null; taxCode: string | null };
+  groups: OutputRevenueGroup[];
+  total: { orderCount: number; amountBeforeTax: number; vatAmount: number; gross: number };
+}
+
 /** Thứ tự hiển thị nhóm thuế suất trong báo cáo. */
 const VAT_RATE_ORDER = new Map<string, number>(VAT_RATES.map((r, i) => [r, i]));
-
 @Injectable()
 export class TaxReportsService {
   constructor(private prisma: PrismaService) {}
@@ -229,6 +245,65 @@ export class TaxReportsService {
         address: setting?.address ?? null,
       },
       rows,
+      total,
+    };
+  }
+
+  /**
+   * Doanh thu bán hàng đồng bộ từ KiotViet, tách theo thuế suất VAT đầu ra trong kỳ.
+   *
+   * Nguồn dữ liệu: `KiotVietOrder` có `orderDate` (cột timestamp ⇒ from/to) trong kỳ,
+   * đọc snapshot đã lưu tại thời điểm đồng bộ (`KiotVietOrderItem.vatRate/amountBeforeTax/vatAmount`).
+   *
+   * Gộp theo thuế suất dòng; `orderCount` là số đơn phân biệt có phát sinh ở mỗi nhóm.
+   * Tổng `gross` (chưa thuế + thuế) khớp Σ `totalAmount` các đơn trong kỳ (snapshot bảo toàn tổng).
+   */
+  async outputRevenue(periodValue: string | undefined): Promise<OutputRevenueReport> {
+    const period = parsePeriod(periodValue);
+
+    const [setting, orders] = await Promise.all([
+      this.prisma.taxSetting.findUnique({ where: { id: 'default' } }),
+      this.prisma.kiotVietOrder.findMany({
+        where: { orderDate: { gte: period.from, lte: period.to } },
+        include: { items: true },
+        orderBy: { orderDate: 'asc' },
+      }),
+    ]);
+
+    // Gom theo thuế suất; theo dõi tập đơn phân biệt cho từng nhóm.
+    const map = new Map<string, { amountBeforeTax: number; vatAmount: number; orderIds: Set<string> }>();
+    for (const order of orders) {
+      for (const item of order.items) {
+        const rate = item.vatRate ?? 'KCT';
+        const entry = map.get(rate) ?? { amountBeforeTax: 0, vatAmount: 0, orderIds: new Set<string>() };
+        entry.amountBeforeTax += Number(item.amountBeforeTax);
+        entry.vatAmount += Number(item.vatAmount);
+        entry.orderIds.add(order.id);
+        map.set(rate, entry);
+      }
+    }
+
+    const groups: OutputRevenueGroup[] = [...map.entries()]
+      .sort((a, b) => (VAT_RATE_ORDER.get(a[0]) ?? 99) - (VAT_RATE_ORDER.get(b[0]) ?? 99))
+      .map(([vatRate, agg]) => ({
+        vatRate,
+        orderCount: agg.orderIds.size,
+        amountBeforeTax: agg.amountBeforeTax,
+        vatAmount: agg.vatAmount,
+        gross: agg.amountBeforeTax + agg.vatAmount,
+      }));
+
+    const total = {
+      orderCount: orders.length,
+      amountBeforeTax: groups.reduce((s, g) => s + g.amountBeforeTax, 0),
+      vatAmount: groups.reduce((s, g) => s + g.vatAmount, 0),
+      gross: groups.reduce((s, g) => s + g.gross, 0),
+    };
+
+    return {
+      period: { value: periodValue!, label: period.label, from: period.from.toISOString(), to: period.to.toISOString() },
+      settings: { companyName: setting?.companyName ?? null, taxCode: setting?.taxCode ?? null },
+      groups,
       total,
     };
   }

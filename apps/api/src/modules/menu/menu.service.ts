@@ -6,6 +6,7 @@ type MenuBody = {
   price?: number;
   category?: string;
   kiotviet_product_id?: string | null;
+  vat_rate?: string | null;
   inventory_mode?: 'RECIPE' | 'DIRECT' | 'NONE' | null;
   direct_ingredient_id?: string | null;
   is_active?: boolean;
@@ -50,6 +51,7 @@ export class MenuService {
         price: body.price,
         category: body.category,
         kiotvietProductId: body.kiotviet_product_id,
+        vatRate: body.vat_rate,
         inventoryMode: body.inventory_mode,
         directIngredientId: directId,
         isActive: body.is_active,

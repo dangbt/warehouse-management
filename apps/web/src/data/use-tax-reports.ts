@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
+import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
+import { useToastStore } from '@/stores/toast.store'
 
 export interface InputInvoiceRow {
   stt: number
@@ -72,5 +74,48 @@ export function useNoInvoicePurchases(period: string | undefined) {
     queryKey: QUERY_KEYS.tax.noInvoicePurchases(period),
     queryFn: () => api.get(`/tax/no-invoice-purchases?period=${encodeURIComponent(period ?? '')}`),
     enabled: !!period,
+  })
+}
+
+export interface OutputRevenueGroup {
+  vatRate: string
+  orderCount: number
+  amountBeforeTax: number
+  vatAmount: number
+  gross: number
+}
+
+export interface OutputRevenueReport {
+  period: { value: string; label: string; from: string; to: string }
+  settings: { companyName: string | null; taxCode: string | null }
+  groups: OutputRevenueGroup[]
+  total: { orderCount: number; amountBeforeTax: number; vatAmount: number; gross: number }
+}
+
+/**
+ * Doanh thu bán hàng KiotViet theo thuế suất VAT đầu ra trong kỳ.
+ * `enabled` = có period hợp lệ.
+ */
+export function useOutputRevenue(period: string | undefined) {
+  return useQuery<OutputRevenueReport>({
+    queryKey: QUERY_KEYS.tax.outputRevenue(period),
+    queryFn: () => api.get(`/tax/output-revenue?period=${encodeURIComponent(period ?? '')}`),
+    enabled: !!period,
+  })
+}
+
+/**
+ * Tính lại snapshot thuế đầu ra cho các đơn KiotViet trong kỳ (quyền `tax:manage`).
+ * Dùng khi đổi thuế suất món hoặc cấu hình thuế.
+ */
+export function useRecomputeOutputVat() {
+  return useMutation({
+    mutationFn: (period: string) =>
+      api.post(`/tax/recompute-output-vat?period=${encodeURIComponent(period)}`, {}) as Promise<{ period: string; updated: number }>,
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['tax', 'output-revenue'] })
+      useToastStore.getState().success(`Đã tính lại thuế cho ${res.updated} đơn (${res.period})`)
+    },
+    onError: (e: Error) => useToastStore.getState().error(e.message),
   })
 }

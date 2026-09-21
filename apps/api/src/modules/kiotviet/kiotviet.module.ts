@@ -7,5 +7,6 @@ import { CommonModule } from '../common/common.module';
   imports: [CommonModule],
   controllers: [KiotVietController],
   providers: [KiotVietService],
+  exports: [KiotVietService],
 })
 export class KiotVietModule {}
