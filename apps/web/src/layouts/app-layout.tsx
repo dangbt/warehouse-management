@@ -42,7 +42,10 @@ const menuTree: TreeNode[] = [
     label: 'Thuế',
     icon: '🧾',
     permission: 'tax:read',
-    children: [{ id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' }],
+    children: [
+      { id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' },
+      { id: 'tax-input-invoices', label: 'Bảng kê mua vào', route: '/tax/input-invoices', permission: 'tax:read' },
+    ],
   },
   { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
   { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
@@ -155,7 +158,10 @@ export function AppLayout() {
         {hasPermission('tax:read') && (
           <MenuDrop
             label="Thuế"
-            items={[{ label: '🧾 Cấu hình thuế', route: '/tax-settings' }]}
+            items={[
+              { label: '🧾 Cấu hình thuế', route: '/tax-settings' },
+              { label: '📑 Bảng kê mua vào', route: '/tax/input-invoices' },
+            ]}
             onNav={(r) => navigate({ to: r })}
           />
         )}
