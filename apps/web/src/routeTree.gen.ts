@@ -31,6 +31,7 @@ import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
+import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
 import { Route as AppTaxOutputRevenueRouteImport } from './routes/_app/tax/output-revenue'
 import { Route as AppTaxNoInvoicePurchasesRouteImport } from './routes/_app/tax/no-invoice-purchases'
 import { Route as AppTaxInputInvoicesRouteImport } from './routes/_app/tax/input-invoices'
@@ -145,6 +146,11 @@ const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
   path: '/audit-logs',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTaxSummaryRoute = AppTaxSummaryRouteImport.update({
+  id: '/tax/summary',
+  path: '/tax/summary',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTaxOutputRevenueRoute = AppTaxOutputRevenueRouteImport.update({
   id: '/tax/output-revenue',
   path: '/tax/output-revenue',
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/tax/input-invoices': typeof AppTaxInputInvoicesRoute
   '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
+  '/tax/summary': typeof AppTaxSummaryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/tax/input-invoices': typeof AppTaxInputInvoicesRoute
   '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
+  '/tax/summary': typeof AppTaxSummaryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/_app/tax/input-invoices': typeof AppTaxInputInvoicesRoute
   '/_app/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/_app/tax/output-revenue': typeof AppTaxOutputRevenueRoute
+  '/_app/tax/summary': typeof AppTaxSummaryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/tax/input-invoices'
     | '/tax/no-invoice-purchases'
     | '/tax/output-revenue'
+    | '/tax/summary'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/tax/input-invoices'
     | '/tax/no-invoice-purchases'
     | '/tax/output-revenue'
+    | '/tax/summary'
   id:
     | '__root__'
     | '/'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/_app/tax/input-invoices'
     | '/_app/tax/no-invoice-purchases'
     | '/_app/tax/output-revenue'
+    | '/_app/tax/summary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -497,6 +509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditLogsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tax/summary': {
+      id: '/_app/tax/summary'
+      path: '/tax/summary'
+      fullPath: '/tax/summary'
+      preLoaderRoute: typeof AppTaxSummaryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/tax/output-revenue': {
       id: '/_app/tax/output-revenue'
       path: '/tax/output-revenue'
@@ -552,6 +571,7 @@ interface AppRouteChildren {
   AppTaxInputInvoicesRoute: typeof AppTaxInputInvoicesRoute
   AppTaxNoInvoicePurchasesRoute: typeof AppTaxNoInvoicePurchasesRoute
   AppTaxOutputRevenueRoute: typeof AppTaxOutputRevenueRoute
+  AppTaxSummaryRoute: typeof AppTaxSummaryRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -578,6 +598,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppTaxInputInvoicesRoute: AppTaxInputInvoicesRoute,
   AppTaxNoInvoicePurchasesRoute: AppTaxNoInvoicePurchasesRoute,
   AppTaxOutputRevenueRoute: AppTaxOutputRevenueRoute,
+  AppTaxSummaryRoute: AppTaxSummaryRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
