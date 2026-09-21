@@ -132,7 +132,7 @@ export function WinDataGrid<T extends { id?: string }>({
   return (
     <div className="flex flex-col flex-1 overflow-hidden border border-win-grid-border">
       {searchable && (
-        <div className="flex items-center gap-1 px-2 py-1 border-b border-win-grid-border bg-win-menu shrink-0">
+        <div className="flex items-center gap-1 px-2 py-1.5 border-b border-win-grid-border bg-win-menu shrink-0">
           <Search size={16} className="text-win-text-secondary" />
           <input
             type="text"
@@ -142,7 +142,7 @@ export function WinDataGrid<T extends { id?: string }>({
               onSearch?.(e.target.value)
             }}
             placeholder="Tìm kiếm..."
-            className="flex-1 border border-win-input-border px-2 py-0.5 text-win-base outline-none focus:border-win-input-focus bg-white"
+            className="flex-1 border border-win-input-border h-8 px-2 text-win-base outline-none focus:border-win-input-focus bg-white"
           />
         </div>
       )}
