@@ -9,6 +9,9 @@ describe('parsePeriod', () => {
       expect(p.from.toISOString()).toBe('2026-08-31T17:00:00.000Z');
       // 2026-09-30 23:59:59.999 VN = 2026-09-30T16:59:59.999Z
       expect(p.to.toISOString()).toBe('2026-09-30T16:59:59.999Z');
+      // Cột @db.Date: UTC-midnight của ngày đầu/cuối tháng theo lịch.
+      expect(p.fromDate.toISOString()).toBe('2026-09-01T00:00:00.000Z');
+      expect(p.toDate.toISOString()).toBe('2026-09-30T00:00:00.000Z');
       expect(p.label).toBe('Tháng 09/2026');
     });
 
@@ -18,9 +21,12 @@ describe('parsePeriod', () => {
       // Tháng 2 năm thường có 28 ngày.
       const feb = parsePeriod('2026-02');
       expect(feb.to.toISOString()).toBe('2026-02-28T16:59:59.999Z');
+      expect(feb.fromDate.toISOString()).toBe('2026-02-01T00:00:00.000Z');
+      expect(feb.toDate.toISOString()).toBe('2026-02-28T00:00:00.000Z');
       // Năm nhuận 2028: tháng 2 có 29 ngày.
       const febLeap = parsePeriod('2028-02');
       expect(febLeap.to.toISOString()).toBe('2028-02-29T16:59:59.999Z');
+      expect(febLeap.toDate.toISOString()).toBe('2028-02-29T00:00:00.000Z');
     });
   });
 
@@ -31,6 +37,9 @@ describe('parsePeriod', () => {
       expect(p.from.toISOString()).toBe('2026-06-30T17:00:00.000Z');
       // 2026-09-30 23:59:59.999 VN
       expect(p.to.toISOString()).toBe('2026-09-30T16:59:59.999Z');
+      // Cột @db.Date: UTC-midnight ngày đầu quý (01/07) và cuối quý (30/09) theo lịch.
+      expect(p.fromDate.toISOString()).toBe('2026-07-01T00:00:00.000Z');
+      expect(p.toDate.toISOString()).toBe('2026-09-30T00:00:00.000Z');
       expect(p.label).toBe('Quý 3/2026');
     });
 
@@ -38,11 +47,15 @@ describe('parsePeriod', () => {
       const q1 = parsePeriod('2026-Q1');
       expect(q1.from.toISOString()).toBe('2025-12-31T17:00:00.000Z');
       expect(q1.to.toISOString()).toBe('2026-03-31T16:59:59.999Z');
+      expect(q1.fromDate.toISOString()).toBe('2026-01-01T00:00:00.000Z');
+      expect(q1.toDate.toISOString()).toBe('2026-03-31T00:00:00.000Z');
       expect(q1.label).toBe('Quý 1/2026');
 
       const q4 = parsePeriod('2026-Q4');
       expect(q4.from.toISOString()).toBe('2026-09-30T17:00:00.000Z');
       expect(q4.to.toISOString()).toBe('2026-12-31T16:59:59.999Z');
+      expect(q4.fromDate.toISOString()).toBe('2026-10-01T00:00:00.000Z');
+      expect(q4.toDate.toISOString()).toBe('2026-12-31T00:00:00.000Z');
       expect(q4.label).toBe('Quý 4/2026');
     });
   });
