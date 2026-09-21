@@ -15,7 +15,7 @@ function Button({ icon, label, onClick, disabled, danger, active }: ToolbarButto
       onClick={onClick}
       disabled={disabled}
       data-testid={label ? `toolbar-${label}` : undefined}
-      className={`flex items-center gap-1 px-2 py-1 border text-[11px] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${active ? 'bg-win-active-title text-white border-win-active-title' : danger ? 'border-transparent text-win-error hover:bg-red-50 hover:border-win-error/40' : 'border-transparent hover:bg-win-menu-hover hover:border-win-button-border'}`}
+      className={`flex items-center gap-1 h-8 px-2.5 border text-win-base cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${active ? 'bg-win-active-title text-white border-win-active-title' : danger ? 'border-transparent text-win-error hover:bg-red-50 hover:border-win-error/40' : 'border-transparent hover:bg-win-menu-hover hover:border-win-button-border'}`}
     >
       {icon}
       {label && <span>{label}</span>}
@@ -29,7 +29,7 @@ function Separator() {
 
 export function WinToolbar({ children }: { children: ReactNode }) {
   return (
-    <div className="h-9 bg-win-menu border-b border-win-grid-border flex items-center px-1 gap-0.5 shrink-0">
+    <div className="h-11 bg-win-menu border-b border-win-grid-border flex items-center px-1 gap-0.5 shrink-0">
       {children}
     </div>
   )

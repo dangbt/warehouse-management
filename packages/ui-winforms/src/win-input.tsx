@@ -6,17 +6,17 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const WinInput = forwardRef<HTMLInputElement, Props>(({ label, error, placeholder, ...props }, ref) => (
-  <div className="flex items-start gap-2">
-    <label className="text-[11px] w-24 text-right shrink-0 pt-1">{label}:</label>
+  <div className="flex items-center gap-2">
+    <label className="text-win-base w-30 text-right shrink-0">{label}:</label>
     <div className="flex-1">
       <input
         ref={ref}
         data-testid={`input-${label}`}
         placeholder={placeholder ?? `Nhập ${label.toLowerCase()}`}
         {...props}
-        className={`w-full border px-2 py-0.5 text-[11px] outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
+        className={`w-full h-8 border px-2 text-win-base outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
       />
-      {error && <p className="text-[10px] text-win-error mt-0.5">{error}</p>}
+      {error && <p className="text-win-xs text-win-error mt-0.5">{error}</p>}
     </div>
   </div>
 ))
