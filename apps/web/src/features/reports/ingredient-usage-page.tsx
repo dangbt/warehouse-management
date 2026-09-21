@@ -47,10 +47,10 @@ function UsageChart({ data }: { data: IngredientUsageItem[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={50} />
-          <YAxis tick={{ fontSize: 10 }} />
-          <Tooltip contentStyle={{ fontSize: 11 }} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={50} />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip contentStyle={{ fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontSize: 12 }} />
           <Bar dataKey="Nhập" fill="#22c55e" radius={[2, 2, 0, 0]} />
           <Bar dataKey="Xuất" fill="#ef4444" radius={[2, 2, 0, 0]} />
           <Bar dataKey="Tồn kho" fill="#3b82f6" radius={[2, 2, 0, 0]} />
@@ -76,7 +76,7 @@ export function IngredientUsagePage() {
         <WinToolbar.Button label="Tháng" active={period === 'month'} onClick={() => { setPeriod('month'); setOffset(0) }} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<ChevronLeft size={14} />} onClick={() => setOffset(offset - 1)} />
-        <span className="text-[11px] px-2 font-medium">{label}</span>
+        <span className="text-win-base px-2 font-medium">{label}</span>
         <WinToolbar.Button icon={<ChevronRight size={14} />} disabled={offset >= 0} onClick={() => setOffset(offset + 1)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />

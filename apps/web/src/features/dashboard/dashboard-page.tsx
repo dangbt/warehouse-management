@@ -10,23 +10,23 @@ export function DashboardPage() {
   const { data: expiringBatches } = useExpiringBatches(7)
 
   const cards = [
-    { label: 'Nguyên liệu', value: summary?.total ?? 0, icon: <Package size={20} />, color: 'text-win-active-title' },
+    { label: 'Nguyên liệu', value: summary?.total ?? 0, icon: <Package size={24} />, color: 'text-win-active-title' },
     {
       label: 'Phiếu chờ duyệt',
       value: pendingOrders?.meta.total ?? 0,
-      icon: <FileText size={20} />,
+      icon: <FileText size={24} />,
       color: 'text-win-warning',
     },
     {
       label: 'Tồn kho thấp',
       value: summary?.lowStock.length ?? 0,
-      icon: <AlertTriangle size={20} />,
+      icon: <AlertTriangle size={24} />,
       color: 'text-win-error',
     },
     {
       label: 'Giá trị kho',
       value: `${((summary?.totalValue ?? 0) / 1000000).toFixed(1)}M`,
-      icon: <DollarSign size={20} />,
+      icon: <DollarSign size={24} />,
       color: 'text-win-success',
     },
   ]
@@ -37,9 +37,9 @@ export function DashboardPage() {
         <h2 className="text-sm font-semibold">📊 Dashboard</h2>
         <button
           onClick={() => refetchSummary()}
-          className="flex items-center gap-1 text-[11px] text-win-active-title hover:underline cursor-pointer"
+          className="flex items-center gap-1 text-win-base text-win-active-title hover:underline cursor-pointer"
         >
-          <RefreshCw size={12} /> Refresh
+          <RefreshCw size={14} /> Refresh
         </button>
       </div>
 
@@ -52,7 +52,7 @@ export function DashboardPage() {
             <div className={s.color}>{s.icon}</div>
             <div>
               <div className="text-lg font-bold">{s.value}</div>
-              <div className="text-[11px] text-win-text-secondary">{s.label}</div>
+              <div className="text-win-sm text-win-text-secondary">{s.label}</div>
             </div>
           </div>
         ))}
@@ -61,7 +61,7 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <WinGroupBox title="⚠️ Tồn kho thấp">
           {summary?.lowStock.length ? (
-            <table className="w-full text-[11px]">
+            <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">NL</th>
@@ -84,14 +84,14 @@ export function DashboardPage() {
               </tbody>
             </table>
           ) : (
-            <p className="text-[11px] text-win-success">✓ Tất cả đủ stock</p>
+            <p className="text-win-base text-win-success">✓ Tất cả đủ stock</p>
           )}
         </WinGroupBox>
 
         <WinGroupBox title="🕒 Hoạt động gần đây">
           <div className="space-y-1">
             {(movements ?? []).slice(0, 8).map((t: any) => (
-              <div key={t.id} className="flex gap-2 text-[11px]">
+              <div key={t.id} className="flex gap-2 text-win-base">
                 <span className="text-win-text-secondary w-[110px] shrink-0">{formatDateTime(t.createdAt)}</span>
                 <span>
                   {t.createdBy.fullName} {t.type === 'IMPORT' ? '📥' : '📤'} {formatNumber(Math.abs(Number(t.quantity)))}{' '}
@@ -99,7 +99,7 @@ export function DashboardPage() {
                 </span>
               </div>
             ))}
-            {!movements?.length && <p className="text-[11px] text-win-text-secondary">Chưa có hoạt động</p>}
+            {!movements?.length && <p className="text-win-base text-win-text-secondary">Chưa có hoạt động</p>}
           </div>
         </WinGroupBox>
       </div>
@@ -107,7 +107,7 @@ export function DashboardPage() {
       <div className="mt-3">
         <WinGroupBox title="⏰ Lô hàng sắp hết hạn (7 ngày)">
           {expiringBatches?.length ? (
-            <table className="w-full text-[11px]">
+            <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">Mã lô</th>
@@ -130,7 +130,7 @@ export function DashboardPage() {
               </tbody>
             </table>
           ) : (
-            <p className="text-[11px] text-win-success">✓ Không có lô sắp hết hạn</p>
+            <p className="text-win-base text-win-success">✓ Không có lô sắp hết hạn</p>
           )}
         </WinGroupBox>
       </div>

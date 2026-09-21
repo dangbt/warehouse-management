@@ -63,7 +63,7 @@ export function VarianceReportPage() {
         <WinToolbar.Button label="Tháng" active={period === 'month'} onClick={() => { setPeriod('month'); setOffset(0) }} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<ChevronLeft size={14} />} onClick={() => setOffset(offset - 1)} />
-        <span className="text-[11px] px-2 font-medium">{label}</span>
+        <span className="text-win-base px-2 font-medium">{label}</span>
         <WinToolbar.Button icon={<ChevronRight size={14} />} disabled={offset >= 0} onClick={() => setOffset(offset + 1)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
