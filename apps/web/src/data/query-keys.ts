@@ -52,6 +52,8 @@ export const QUERY_KEYS = {
   processing: ['processing'] as const,
   processingList: (params?: Record<string, string>) => ['processing', 'list', params] as const,
 
+  taxSettings: ['tax-settings'] as const,
+
   reports: {
     stockSummary: ['reports', 'stock-summary'] as const,
     stockMovement: ['reports', 'stock-movement'] as const,

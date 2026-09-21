@@ -43,3 +43,54 @@ export const TRANSACTION_TYPES = {
   ORDER_DEDUCT: { label: 'Trừ kho', color: 'bg-orange-100 text-orange-800' },
   ORDER_RESTORE: { label: 'Hoàn', color: 'bg-blue-100 text-blue-800' },
 } as const
+
+export const VAT_RATES = ['0', '5', '8', '10', 'KCT', 'KKKNT'] as const
+
+export type VatRate = (typeof VAT_RATES)[number]
+
+export const VAT_RATE_LABELS: Record<VatRate, string> = {
+  '0': '0%',
+  '5': '5%',
+  '8': '8%',
+  '10': '10%',
+  KCT: 'Không chịu thuế',
+  KKKNT: 'Không kê khai, tính nộp',
+}
+
+/**
+ * Trả về phần trăm thuế suất VAT dưới dạng số.
+ * Các mã không chịu thuế (`0`, `KCT`, `KKKNT`) trả về 0.
+ */
+export function vatRatePercent(rate: VatRate): number {
+  switch (rate) {
+    case '5':
+      return 5
+    case '8':
+      return 8
+    case '10':
+      return 10
+    case '0':
+    case 'KCT':
+    case 'KKKNT':
+    default:
+      return 0
+  }
+}
+
+export const TAX_REGIMES = ['VAT_DEDUCTION', 'HOUSEHOLD'] as const
+
+export type TaxRegime = (typeof TAX_REGIMES)[number]
+
+export const TAX_REGIME_LABELS: Record<TaxRegime, string> = {
+  VAT_DEDUCTION: 'Doanh nghiệp – khấu trừ',
+  HOUSEHOLD: 'Hộ kinh doanh – kê khai',
+}
+
+export const TAX_PERIOD_TYPES = ['MONTH', 'QUARTER'] as const
+
+export type TaxPeriodType = (typeof TAX_PERIOD_TYPES)[number]
+
+export const TAX_PERIOD_TYPE_LABELS: Record<TaxPeriodType, string> = {
+  MONTH: 'Theo tháng',
+  QUARTER: 'Theo quý',
+}

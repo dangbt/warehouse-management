@@ -30,3 +30,5 @@ export { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from 
 export type { ProcessingOrder } from './use-processing'
 export { useMenuList, useCreateMenuItem, useUpdateMenuItem } from './use-menu'
 export type { MenuItemFull } from './use-menu'
+export { useTaxSettings, useUpdateTaxSettings } from './use-tax'
+export type { TaxSetting, UpdateTaxSettingInput } from './use-tax'
