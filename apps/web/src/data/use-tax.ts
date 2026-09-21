@@ -33,10 +33,12 @@ export interface UpdateTaxSettingInput {
   householdExemptThreshold?: number
 }
 
-export function useTaxSettings() {
+export function useTaxSettings(options: { enabled?: boolean } = {}) {
+  const { enabled = true } = options
   return useQuery<TaxSetting>({
     queryKey: QUERY_KEYS.taxSettings,
     queryFn: () => api.get('/tax/settings'),
+    enabled,
   })
 }
 
