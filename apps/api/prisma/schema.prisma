@@ -149,6 +149,7 @@ model ImportOrder {
   approvedBy  User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
   createdAt   DateTime @default(now()) @map("created_at")
   items       ImportOrderItem[]
+  purchaseReturns PurchaseReturn[]
 
   @@map("import_orders")
 }
@@ -336,6 +337,10 @@ model PurchaseReturn {
   code        String   @unique
   supplierId  String   @map("supplier_id")
   supplier    Supplier @relation(fields: [supplierId], references: [id])
+  importOrderId String?    @map("import_order_id")
+  importOrder   ImportOrder? @relation(fields: [importOrderId], references: [id])
+  subtotal    Decimal  @default(0) @db.Decimal(14, 2)
+  vatAmount   Decimal  @default(0) @map("vat_amount") @db.Decimal(14, 2)
   totalAmount Decimal  @default(0) @map("total_amount") @db.Decimal(14, 2)
   reason      String
   note        String?
@@ -356,6 +361,8 @@ model PurchaseReturnItem {
   quantity       Decimal        @db.Decimal(10, 3)
   unitPrice      Decimal        @map("unit_price") @db.Decimal(12, 2)
   totalPrice     Decimal        @map("total_price") @db.Decimal(14, 2)
+  vatRate        String?        @map("vat_rate")
+  vatAmount      Decimal        @default(0) @map("vat_amount") @db.Decimal(14, 2)
 
   @@map("purchase_return_items")
 }

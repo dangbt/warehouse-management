@@ -29,6 +29,20 @@ export function vatRatePercent(rate: VatRate): number {
   }
 }
 
+/** Làm tròn tiền thuế về đồng (0 chữ số thập phân). */
+export function roundVnd(value: number): number {
+  return Math.round(value);
+}
+
+/**
+ * Tính tiền thuế VAT của một dòng (đã làm tròn về đồng).
+ * `vatRate` null ⇒ 0. Áp dụng phần trăm thuế suất lên `totalPrice` (giá chưa thuế).
+ */
+export function computeLineVat(totalPrice: number, vatRate: VatRate | null): number {
+  if (vatRate == null) return 0;
+  return roundVnd((totalPrice * vatRatePercent(vatRate)) / 100);
+}
+
 export type TaxRegime = 'VAT_DEDUCTION' | 'HOUSEHOLD';
 
 /**
