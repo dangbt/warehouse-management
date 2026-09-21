@@ -53,7 +53,7 @@ const columns: Column<ImportOrder>[] = [
     width: 100,
     align: 'center',
     render: (r) => (
-      <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] || ''}`}>{statusLabels[r.status] || r.status}</span>
+      <span className={`px-2 py-0.5 text-win-xs rounded ${statusColors[r.status] || ''}`}>{statusLabels[r.status] || r.status}</span>
     ),
   },
   { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },
@@ -80,28 +80,28 @@ export function ImportOrdersPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button
-          icon={<Check size={14} />}
+          icon={<Check size={16} />}
           label="Duyệt"
           disabled={selected?.status !== 'PENDING'}
           onClick={() => setConfirmAction('approve')}
         />
         <WinToolbar.Button
-          icon={<X size={14} />}
+          icon={<X size={16} />}
           label="Từ chối"
           danger
           disabled={selected?.status !== 'PENDING'}
           onClick={() => setConfirmAction('reject')}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none"
+          className="border border-win-input-border h-8 px-2 text-win-base outline-none"
         >
           <option value="">Tất cả</option>
           <option value="PENDING">Chờ duyệt</option>
@@ -122,8 +122,8 @@ export function ImportOrdersPage() {
 
       {selected?.items && selected.items.length > 0 && (
         <div className="border-t border-win-grid-border bg-win-control p-2 max-h-40 overflow-auto shrink-0">
-          <div className="text-[11px] font-semibold mb-1">📋 Chi tiết phiếu {selected.code}:</div>
-          <table className="w-full text-[11px]">
+          <div className="text-win-base font-semibold mb-1">📋 Chi tiết phiếu {selected.code}:</div>
+          <table className="w-full text-win-base">
             <thead>
               <tr className="bg-win-grid-header">
                 <th className="text-left p-1">Nguyên liệu</th>
@@ -145,7 +145,7 @@ export function ImportOrdersPage() {
               ))}
             </tbody>
           </table>
-          {selected.note && <div className="text-[10px] text-win-text-secondary mt-1">Ghi chú: {selected.note}</div>}
+          {selected.note && <div className="text-win-xs text-win-text-secondary mt-1">Ghi chú: {selected.note}</div>}
         </div>
       )}
 

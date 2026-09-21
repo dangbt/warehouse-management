@@ -105,7 +105,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
           />
           <WinSelect label="Lý do" {...register('reason')} options={reasons} error={errors.reason?.message} />
           <WinInput label="Ghi chú" {...register('note')} />
-          {submitError && <p className="text-[11px] text-win-error font-semibold">⚠️ {submitError}</p>}
+          {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
         </div>
       </WinGroupBox>
     </WinDialog>

@@ -19,9 +19,9 @@ const columns: Column<KiotVietOrder>[] = [
     align: 'center',
     render: (r) =>
       r.deducted ? (
-        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium text-green-700 bg-green-50">Đã trừ</span>
+        <span className="px-1.5 py-0.5 rounded text-win-xs font-medium text-green-700 bg-green-50">Đã trừ</span>
       ) : (
-        <span className="px-1.5 py-0.5 rounded text-[10px] font-medium text-orange-700 bg-orange-50">Chưa trừ</span>
+        <span className="px-1.5 py-0.5 rounded text-win-xs font-medium text-orange-700 bg-orange-50">Chưa trừ</span>
       ),
   },
 ]
@@ -55,13 +55,13 @@ export function KiotVietPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
-          icon={<Upload size={14} />}
+          icon={<Upload size={16} />}
           label="Sync"
           onClick={() => fileInputRef.current?.click()}
           disabled={syncMutation.isPending}
         />
         <WinToolbar.Button
-          icon={<MinusCircle size={14} />}
+          icon={<MinusCircle size={16} />}
           label="Trừ kho"
           onClick={() => {
             if (selectedOrder && !selectedOrder.deducted) {
@@ -71,7 +71,7 @@ export function KiotVietPage() {
           disabled={!selectedOrder || selectedOrder.deducted || deductMutation.isPending}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileChange} />
       <WinDataGrid searchable
