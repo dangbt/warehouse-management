@@ -35,6 +35,7 @@ import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
 import { Route as AppTaxOutputRevenueRouteImport } from './routes/_app/tax/output-revenue'
 import { Route as AppTaxNoInvoicePurchasesRouteImport } from './routes/_app/tax/no-invoice-purchases'
 import { Route as AppTaxInputInvoicesRouteImport } from './routes/_app/tax/input-invoices'
+import { Route as AppTaxBooksRouteImport } from './routes/_app/tax/books'
 import { Route as AppStocktakeIdRouteImport } from './routes/_app/stocktake_.$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -167,6 +168,11 @@ const AppTaxInputInvoicesRoute = AppTaxInputInvoicesRouteImport.update({
   path: '/tax/input-invoices',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTaxBooksRoute = AppTaxBooksRouteImport.update({
+  id: '/tax/books',
+  path: '/tax/books',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppStocktakeIdRoute = AppStocktakeIdRouteImport.update({
   id: '/stocktake_/$id',
   path: '/stocktake/$id',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/tax-settings': typeof AppTaxSettingsRoute
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
+  '/tax/books': typeof AppTaxBooksRoute
   '/tax/input-invoices': typeof AppTaxInputInvoicesRoute
   '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/tax-settings': typeof AppTaxSettingsRoute
   '/users': typeof AppUsersRoute
   '/stocktake/$id': typeof AppStocktakeIdRoute
+  '/tax/books': typeof AppTaxBooksRoute
   '/tax/input-invoices': typeof AppTaxInputInvoicesRoute
   '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/_app/tax-settings': typeof AppTaxSettingsRoute
   '/_app/users': typeof AppUsersRoute
   '/_app/stocktake_/$id': typeof AppStocktakeIdRoute
+  '/_app/tax/books': typeof AppTaxBooksRoute
   '/_app/tax/input-invoices': typeof AppTaxInputInvoicesRoute
   '/_app/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/_app/tax/output-revenue': typeof AppTaxOutputRevenueRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/tax-settings'
     | '/users'
     | '/stocktake/$id'
+    | '/tax/books'
     | '/tax/input-invoices'
     | '/tax/no-invoice-purchases'
     | '/tax/output-revenue'
@@ -312,6 +322,7 @@ export interface FileRouteTypes {
     | '/tax-settings'
     | '/users'
     | '/stocktake/$id'
+    | '/tax/books'
     | '/tax/input-invoices'
     | '/tax/no-invoice-purchases'
     | '/tax/output-revenue'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/_app/tax-settings'
     | '/_app/users'
     | '/_app/stocktake_/$id'
+    | '/_app/tax/books'
     | '/_app/tax/input-invoices'
     | '/_app/tax/no-invoice-purchases'
     | '/_app/tax/output-revenue'
@@ -537,6 +549,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTaxInputInvoicesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tax/books': {
+      id: '/_app/tax/books'
+      path: '/tax/books'
+      fullPath: '/tax/books'
+      preLoaderRoute: typeof AppTaxBooksRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/stocktake_/$id': {
       id: '/_app/stocktake_/$id'
       path: '/stocktake/$id'
@@ -568,6 +587,7 @@ interface AppRouteChildren {
   AppTaxSettingsRoute: typeof AppTaxSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
   AppStocktakeIdRoute: typeof AppStocktakeIdRoute
+  AppTaxBooksRoute: typeof AppTaxBooksRoute
   AppTaxInputInvoicesRoute: typeof AppTaxInputInvoicesRoute
   AppTaxNoInvoicePurchasesRoute: typeof AppTaxNoInvoicePurchasesRoute
   AppTaxOutputRevenueRoute: typeof AppTaxOutputRevenueRoute
@@ -595,6 +615,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppTaxSettingsRoute: AppTaxSettingsRoute,
   AppUsersRoute: AppUsersRoute,
   AppStocktakeIdRoute: AppStocktakeIdRoute,
+  AppTaxBooksRoute: AppTaxBooksRoute,
   AppTaxInputInvoicesRoute: AppTaxInputInvoicesRoute,
   AppTaxNoInvoicePurchasesRoute: AppTaxNoInvoicePurchasesRoute,
   AppTaxOutputRevenueRoute: AppTaxOutputRevenueRoute,

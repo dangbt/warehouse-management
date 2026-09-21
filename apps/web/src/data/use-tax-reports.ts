@@ -210,3 +210,83 @@ export function useReopenTaxPeriod() {
     onError: (e: Error) => useToastStore.getState().error(e.message),
   })
 }
+
+// ---------------------------------------------------------------------------
+// Sổ kế toán hộ kinh doanh (TASK-155): S1-HKD doanh thu, S2-HKD vật liệu hàng hoá
+// ---------------------------------------------------------------------------
+
+/** Một dòng sổ doanh thu (mỗi ngày có phát sinh một dòng). */
+export interface RevenueBookRow {
+  date: string
+  description: string
+  amount: number
+}
+
+/** Sổ chi tiết doanh thu bán hàng hoá, dịch vụ (mẫu S1-HKD). */
+export interface RevenueBookReport {
+  period: { value: string; label: string }
+  settings: { companyName: string | null; taxCode: string | null }
+  rows: RevenueBookRow[]
+  total: { amount: number }
+  tax: { regime: string; vat: number; pit: number }
+}
+
+/** Một dòng phát sinh trong sổ vật liệu (nhập hoặc xuất). */
+export interface MaterialsBookRow {
+  stt: number
+  date: string
+  type: string
+  document: string
+  description: string
+  inQuantity: number
+  inValue: number
+  outQuantity: number
+  outValue: number
+}
+
+/** Sổ chi tiết của một nguyên liệu trong kỳ. */
+export interface MaterialsBookEntry {
+  ingredientId: string
+  ingredientName: string
+  unit: string
+  opening: { quantity: number; value: number }
+  rows: MaterialsBookRow[]
+  totalIn: { quantity: number; value: number }
+  totalOut: { quantity: number; value: number }
+  closing: { quantity: number; value: number }
+}
+
+/** Sổ chi tiết vật liệu, dụng cụ, sản phẩm, hàng hoá (mẫu S2-HKD). */
+export interface MaterialsBookReport {
+  period: { value: string; label: string }
+  settings: { companyName: string | null; taxCode: string | null }
+  entries: MaterialsBookEntry[]
+}
+
+/**
+ * Sổ doanh thu bán hàng hoá, dịch vụ theo kỳ (`period` dạng `YYYY-MM`/`YYYY-Qn`).
+ * `enabled` = có period hợp lệ.
+ */
+export function useRevenueBook(period: string | undefined) {
+  return useQuery<RevenueBookReport>({
+    queryKey: QUERY_KEYS.tax.revenueBook(period),
+    queryFn: () => api.get(`/tax/books/revenue?period=${encodeURIComponent(period ?? '')}`),
+    enabled: !!period,
+  })
+}
+
+/**
+ * Sổ chi tiết vật liệu, hàng hoá theo kỳ. `ingredientId` rỗng ⇒ tất cả nguyên liệu.
+ * `enabled` = có period hợp lệ.
+ */
+export function useMaterialsBook(period: string | undefined, ingredientId?: string) {
+  return useQuery<MaterialsBookReport>({
+    queryKey: QUERY_KEYS.tax.materialsBook(period, ingredientId),
+    queryFn: () => {
+      const params = new URLSearchParams({ period: period ?? '' })
+      if (ingredientId) params.set('ingredient_id', ingredientId)
+      return api.get(`/tax/books/materials?${params.toString()}`)
+    },
+    enabled: !!period,
+  })
+}

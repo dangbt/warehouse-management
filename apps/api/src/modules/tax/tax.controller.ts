@@ -4,6 +4,7 @@ import { TaxService } from './tax.service';
 import type { UpdateTaxSettingDto } from './tax.service';
 import { TaxReportsService } from './tax-reports.service';
 import { TaxSummaryService } from './tax-summary.service';
+import { TaxBooksService } from './tax-books.service';
 import { KiotVietService } from '../kiotviet/kiotviet.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
@@ -15,6 +16,7 @@ export class TaxController {
     private svc: TaxService,
     private reports: TaxReportsService,
     private summary: TaxSummaryService,
+    private books: TaxBooksService,
     private kiotviet: KiotVietService,
   ) {}
 
@@ -40,6 +42,18 @@ export class TaxController {
   @RequirePermissions('tax:read')
   outputRevenue(@Query('period') period?: string) {
     return this.reports.outputRevenue(period);
+  }
+
+  @Get('books/revenue')
+  @RequirePermissions('tax:read')
+  revenueBook(@Query('period') period?: string) {
+    return this.books.revenueBook(period);
+  }
+
+  @Get('books/materials')
+  @RequirePermissions('tax:read')
+  materialsBook(@Query('period') period?: string, @Query('ingredient_id') ingredientId?: string) {
+    return this.books.materialsBook(period, ingredientId || undefined);
   }
 
   @Post('recompute-output-vat')
