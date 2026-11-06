@@ -139,10 +139,36 @@ export function WinDataGrid<T extends { id?: string }>({
       : {}),
   })
 
+  const rows = table.getRowModel().rows
+
+  /** Bàn phím: ↑/↓ chọn dòng, Enter/F4 mở dòng đang chọn (như double-click). */
+  const handleGridKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest('input,textarea,select,button')) return
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (rows.length === 0) return
+      e.preventDefault()
+      const cur = rows.findIndex((r) => r.original.id === selectedId)
+      const next = e.key === 'ArrowDown' ? Math.min(cur + 1, rows.length - 1) : Math.max(cur - 1, 0)
+      const row = rows[next < 0 ? 0 : next].original
+      setSelectedId(row.id ?? null)
+      onRowClick?.(row)
+      document.querySelector(`[data-testid="grid-row-${row.id}"]`)?.scrollIntoView?.({ block: 'nearest' })
+    } else if (e.key === 'Enter' || e.key === 'F4') {
+      const row = rows.find((r) => r.original.id === selectedId)
+      if (!row) return
+      e.preventDefault()
+      onRowDoubleClick?.(row.original)
+    }
+  }
+
   const totalPages = pagination ? Math.ceil(pagination.total / pagination.limit) : 1
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden border border-win-grid-border">
+    <div
+      tabIndex={0}
+      onKeyDown={handleGridKeyDown}
+      className="flex flex-col flex-1 overflow-hidden border border-win-grid-border outline-none"
+    >
       {searchable && (
         <div className="flex items-center gap-1 px-2 py-1.5 border-b border-win-grid-border bg-win-menu shrink-0">
           <Search size={16} className="text-win-text-secondary" />
@@ -246,7 +272,7 @@ export function WinDataGrid<T extends { id?: string }>({
                 </td>
               </tr>
             ) : (
-              table.getRowModel().rows.map((row, i) => {
+              rows.map((row, i) => {
                 const original = row.original
                 return (
                   <tr

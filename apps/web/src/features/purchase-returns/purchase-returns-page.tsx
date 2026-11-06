@@ -1,4 +1,7 @@
 import { useState, useMemo } from 'react'
+import { useListHotkeys } from '@/hooks/use-list-hotkeys'
+import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
+import { useGridEnterNav } from '@/hooks/use-grid-enter-nav'
 import { useNavigate } from '@tanstack/react-router'
 import { Plus, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
@@ -118,7 +121,7 @@ export function PurchaseReturnsPage() {
 
   const removeItem = (idx: number) => setItems((prev) => prev.filter((_, i) => i !== idx))
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (keepOpen = false) => {
     const validItems = items.filter((i) => i.ingredientId && i.quantity > 0 && i.unitPrice > 0)
     if (!supplierId || !reason || validItems.length === 0) return
     await createMutation.mutateAsync({
@@ -134,16 +137,33 @@ export function PurchaseReturnsPage() {
         vatRate: hasInvoice ? i.vatRate || undefined : undefined,
       })),
     })
-    setDialogOpen(false)
+    if (!keepOpen) setDialogOpen(false)
     resetForm()
   }
 
   const vatRateOptions = VAT_RATES.map((r) => ({ value: r, label: VAT_RATE_LABELS[r] }))
 
+  const isDirty = !!(supplierId || importOrderId || reason || items.some((i) => i.ingredientId || i.quantity || i.unitPrice))
+  const closeDialog = () => {
+    setDialogOpen(false)
+    resetForm()
+  }
+  const { requestClose, guard } = useFormHotkeys({
+    open: dialogOpen,
+    isDirty,
+    onClose: closeDialog,
+    onSave: () => void handleSubmit(),
+    onSaveNew: () => void handleSubmit(true),
+    onAddRow: addItem,
+    onRemoveRow: () => items.length > 1 && removeItem(items.length - 1),
+  })
+  const onGridKeyDown = useGridEnterNav(addItem)
+  useListHotkeys({ onAdd: () => setDialogOpen(true), enabled: !dialogOpen })
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu trả" onClick={() => setDialogOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu trả" shortcut="F2" onClick={() => setDialogOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
@@ -162,7 +182,7 @@ export function PurchaseReturnsPage() {
         storageKey="purchase-returns"
       />
 
-      <WinDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Tạo phiếu trả hàng" width={hasInvoice ? 760 : 600}>
+      <WinDialog open={dialogOpen} onClose={requestClose} title="Tạo phiếu trả hàng" width={hasInvoice ? 760 : 600}>
         <div className="space-y-3 p-3">
           <div className="space-y-2.5">
             <VoucherFields {...voucher} />
@@ -212,6 +232,7 @@ export function PurchaseReturnsPage() {
           </div>
           <div>
             <label className="text-win-base block mb-1">Danh sách hàng trả</label>
+            <div onKeyDown={onGridKeyDown}>
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
@@ -293,6 +314,7 @@ export function PurchaseReturnsPage() {
                 })}
               </tbody>
             </table>
+            </div>
             <button onClick={addItem} className="mt-1 text-win-base text-win-active-title hover:underline">
               + Thêm dòng
             </button>
@@ -315,16 +337,17 @@ export function PurchaseReturnsPage() {
           </div>
           <div className="flex justify-end gap-2">
             <button
-              onClick={() => setDialogOpen(false)}
+              onClick={requestClose}
               className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover"
             >
               Huỷ
             </button>
-            <button onClick={handleSubmit} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">
+            <button onClick={() => handleSubmit()} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">
               Tạo phiếu
             </button>
           </div>
         </div>
+        {guard}
       </WinDialog>
     </div>
   )

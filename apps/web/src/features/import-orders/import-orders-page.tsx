@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useListHotkeys } from '@/hooks/use-list-hotkeys'
 import { useNavigate } from '@tanstack/react-router'
 import { Check, ClipboardList, Copy, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
@@ -131,14 +132,22 @@ export function ImportOrdersPage() {
     setFormOpen(true)
   }
 
+  const openAdd = () => {
+    setSeed(null)
+    setFormOpen(true)
+  }
+  useListHotkeys({
+    onAdd: openAdd,
+    onClone: selected?.items?.length ? handleClone : undefined,
+    onDelete: selected?.status === 'PENDING' ? () => setConfirmAction('reject') : undefined,
+    enabled: !formOpen && !confirmAction,
+  })
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => {
-            setSeed(null)
-            setFormOpen(true)
-          }} />
-        <WinToolbar.Button icon={<Copy size={16} />} label="Nhân bản" disabled={!selected?.items?.length} onClick={handleClone} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" shortcut="F2" onClick={openAdd} />
+        <WinToolbar.Button icon={<Copy size={16} />} label="Nhân bản" shortcut="Ctrl+D" disabled={!selected?.items?.length} onClick={handleClone} />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Check size={16} />}
@@ -149,6 +158,7 @@ export function ImportOrdersPage() {
         <WinToolbar.Button
           icon={<X size={16} />}
           label="Từ chối"
+          shortcut="Delete"
           danger
           disabled={selected?.status !== 'PENDING'}
           onClick={() => setConfirmAction('reject')}

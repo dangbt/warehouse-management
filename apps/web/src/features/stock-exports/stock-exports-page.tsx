@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useListHotkeys } from '@/hooks/use-list-hotkeys'
 import { useNavigate } from '@tanstack/react-router'
 import { Copy, Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
@@ -81,14 +82,21 @@ export function StockExportsPage() {
     setFormOpen(true)
   }
 
+  const openAdd = () => {
+    setSeed(null)
+    setFormOpen(true)
+  }
+  useListHotkeys({
+    onAdd: openAdd,
+    onClone: selected ? () => handleClone(selected) : undefined,
+    enabled: !formOpen,
+  })
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" onClick={() => {
-            setSeed(null)
-            setFormOpen(true)
-          }} />
-        <WinToolbar.Button icon={<Copy size={14} />} label="Nhân bản" disabled={!selected} onClick={() => selected && handleClone(selected)} />
+        <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" shortcut="F2" onClick={openAdd} />
+        <WinToolbar.Button icon={<Copy size={14} />} label="Nhân bản" shortcut="Ctrl+D" disabled={!selected} onClick={() => selected && handleClone(selected)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
