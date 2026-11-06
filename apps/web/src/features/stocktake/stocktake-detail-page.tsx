@@ -5,9 +5,13 @@ import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStocktakeDetail, useUpdateStocktakeItems, useCompleteStocktake } from '@/data'
 import type { StocktakeItem } from '@/data/use-stocktake'
 import { useTerm } from '@/data/use-features'
+import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
+import type { MatrixLine } from '@/components/matrix-picker/matrix-logic'
+import { useToastStore } from '@/stores/toast.store'
 
 interface ItemRow {
   id: string
+  ingredientId: string
   ingredientName: string
   unit: string
   systemQty: number
@@ -30,6 +34,7 @@ export function StocktakeDetailPage() {
       setItems(
         detail.items.map((item: StocktakeItem) => ({
           id: item.id,
+          ingredientId: item.ingredient.id,
           ingredientName: item.ingredient.name,
           unit: item.ingredient.unit,
           systemQty: Number(item.systemQty),
@@ -48,6 +53,19 @@ export function StocktakeDetailPage() {
       next[index] = { ...next[index], actualQty: actual, difference: actual - next[index].systemQty }
       return next
     })
+  }
+
+  /** Điền số kiểm đếm theo biến thể từ ma trận vào các dòng có sẵn của phiên (khớp theo mã hàng). */
+  const applyMatrix = (lines: MatrixLine[]) => {
+    const byId = new Map(lines.map((l) => [l.itemId, l.quantity]))
+    setItems((prev) =>
+      prev.map((r) => {
+        const q = byId.get(r.ingredientId)
+        return q === undefined ? r : { ...r, actualQty: q, difference: q - r.systemQty }
+      }),
+    )
+    const missing = lines.filter((l) => !items.some((r) => r.ingredientId === l.itemId)).length
+    if (missing > 0) useToastStore.getState().error(`${missing} biến thể không có trong phiên kiểm kê này`)
   }
 
   const handleNoteChange = (index: number, val: string) => {
@@ -94,6 +112,10 @@ export function StocktakeDetailPage() {
           disabled={isCompleted}
           onClick={handleComplete}
         />
+        <WinToolbar.Separator />
+        <div className="px-1">
+          <MatrixAddButton mode="stocktake" disabled={isCompleted} onConfirm={applyMatrix} />
+        </div>
         <WinToolbar.Separator />
         <span className="text-win-base px-2">
           Phiên: <strong>{detail?.code}</strong> — {isCompleted ? 'Đã hoàn thành' : 'Đang kiểm'}

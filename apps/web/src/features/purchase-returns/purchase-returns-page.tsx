@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import { Plus, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -8,6 +8,8 @@ import type { VatRate } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
 import { lineTotalPrice, computeLineVat, computeVatTotals } from '../import-orders/vat'
 import { useTerm } from '@/data/use-features'
+import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
+import { mergeLines, type MatrixLine } from '@/components/matrix-picker/matrix-logic'
 
 const columns: Column<PurchaseReturn>[] = [
   { key: 'code', header: 'Mã phiếu', width: 120 },
@@ -45,6 +47,8 @@ export function PurchaseReturnsPage() {
   const [importOrderId, setImportOrderId] = useState('')
   const [reason, setReason] = useState('')
   const [items, setItems] = useState<ReturnItem[]>([{ ...EMPTY_ITEM }])
+  // Biến thể thêm từ ma trận: id → nhãn (có thể không nằm trong danh sách NL đang tải) để hiển thị nhóm theo SP.
+  const [matrixInfo, setMatrixInfo] = useState<Record<string, { product: string; variant: string }>>({})
 
   const { data: importOrders } = useCompletedImportOrders(supplierId)
   const selectedImportOrder = useMemo(() => importOrders?.find((o) => o.id === importOrderId), [importOrders, importOrderId])
@@ -65,6 +69,7 @@ export function PurchaseReturnsPage() {
     setImportOrderId('')
     setReason('')
     setItems([{ ...EMPTY_ITEM }])
+    setMatrixInfo({})
   }
 
   /** Thuế suất mặc định của nguyên liệu theo phiếu nhập gốc đang chọn. */
@@ -106,6 +111,13 @@ export function PurchaseReturnsPage() {
         return next
       }),
     )
+  }
+
+  const addMatrixLines = (lines: MatrixLine[]) => {
+    const incoming = lines.map((l) => ({ itemId: l.itemId, quantity: l.quantity, ingredientId: l.itemId, unitPrice: l.unitPrice, vatRate: defaultVatFor(l.itemId) }))
+    const current = items.filter((i) => i.ingredientId).map((i) => ({ ...i, itemId: i.ingredientId }))
+    setItems(mergeLines(current, incoming).map(({ itemId: _id, ...r }) => r))
+    setMatrixInfo((m) => ({ ...m, ...Object.fromEntries(lines.map((l) => [l.itemId, { product: l.productName, variant: l.variantLabel }])) }))
   }
 
   const removeItem = (idx: number) => setItems((prev) => prev.filter((_, i) => i !== idx))
@@ -201,7 +213,13 @@ export function PurchaseReturnsPage() {
                 {items.map((item, idx) => {
                   const total = lineTotalPrice({ quantity: item.quantity, unit_price: item.unitPrice })
                   return (
-                    <tr key={idx} className="border-b border-win-grid-border">
+                    <Fragment key={idx}>
+                    {matrixInfo[item.ingredientId] && matrixInfo[items[idx - 1]?.ingredientId]?.product !== matrixInfo[item.ingredientId].product && (
+                      <tr data-testid={`group-${idx}`} className="bg-win-grid-header">
+                        <td colSpan={hasInvoice ? 6 : 4} className="px-1 py-0.5 font-semibold">{matrixInfo[item.ingredientId].product}</td>
+                      </tr>
+                    )}
+                    <tr className="border-b border-win-grid-border">
                       <td className="p-1">
                         <select
                           value={item.ingredientId}
@@ -209,6 +227,9 @@ export function PurchaseReturnsPage() {
                           className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
                         >
                           <option value="">Chọn NL</option>
+                          {matrixInfo[item.ingredientId] && !ingredientsRes?.data.some((g) => g.id === item.ingredientId) && (
+                            <option value={item.ingredientId}>{matrixInfo[item.ingredientId].product} · {matrixInfo[item.ingredientId].variant}</option>
+                          )}
                           {ingredientsRes?.data.map((ing) => (
                             <option key={ing.id} value={ing.id}>
                               {ing.name}
@@ -263,13 +284,17 @@ export function PurchaseReturnsPage() {
                         )}
                       </td>
                     </tr>
+                    </Fragment>
                   )
                 })}
               </tbody>
             </table>
-            <button onClick={addItem} className="mt-1 text-win-base text-win-active-title hover:underline">
-              + Thêm dòng
-            </button>
+            <div className="flex items-center gap-3 mt-1">
+              <button onClick={addItem} className="text-win-base text-win-active-title hover:underline">
+                + Thêm dòng
+              </button>
+              <MatrixAddButton mode="return" onConfirm={addMatrixLines} />
+            </div>
           </div>
           <div className="flex flex-col items-end gap-0.5 pt-2 border-t border-win-grid-border text-win-base">
             <div className="flex gap-4">
