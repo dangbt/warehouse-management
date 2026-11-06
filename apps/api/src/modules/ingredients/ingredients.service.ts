@@ -67,6 +67,7 @@ export class IngredientsService {
         orderBy: { [sortField]: sortDir },
         include: {
           group: true,
+          product: { select: { id: true, code: true, name: true } },
           units: true,
           source: { select: { id: true, name: true } },
         },

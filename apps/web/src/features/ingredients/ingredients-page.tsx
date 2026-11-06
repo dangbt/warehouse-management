@@ -7,7 +7,7 @@ import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngr
 import type { TermKey } from '@/utils/terms'
 import type { Batch } from '@/data/use-batches'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
-import { useTerm } from '@/data/use-features'
+import { useTerm, useFeatures } from '@/data/use-features'
 
 interface IngredientRow {
   id: string
@@ -18,9 +18,18 @@ interface IngredientRow {
   costPerUnit: string
   category: string
   trackStock: boolean
+  sku?: string | null
+  product?: { id: string; code: string; name: string } | null
 }
 
-const makeColumns = (t: (k: TermKey) => string): Column<IngredientRow>[] => [
+/** Cột SP cha + SKU: chỉ chèn khi profile bật product_variants (FNB giữ nguyên giao diện). */
+const variantColumns: Column<IngredientRow>[] = [
+  { key: 'sku', header: 'SKU', width: 140, render: (r) => r.sku ?? '-' },
+  { key: 'product', header: 'SP cha', width: 160, render: (r) => r.product?.name ?? '-' },
+]
+
+const makeColumns = (t: (k: TermKey) => string, withVariants: boolean): Column<IngredientRow>[] => [
+  ...(withVariants ? variantColumns : []),
   { key: 'name', header: t('item_name'), width: 180 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
   {
@@ -52,7 +61,8 @@ const makeColumns = (t: (k: TermKey) => string): Column<IngredientRow>[] => [
 
 export function IngredientsPage() {
   const t = useTerm()
-  const columns = makeColumns(t)
+  const { isEnabled } = useFeatures()
+  const columns = makeColumns(t, isEnabled('product_variants'))
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')

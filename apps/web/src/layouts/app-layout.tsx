@@ -87,6 +87,20 @@ function buildMenuTree(isHousehold: boolean, t: (k: TermKey) => string): TreeNod
           permission: 'ingredients:read',
         },
         {
+          id: 'products',
+          label: 'Sản phẩm',
+          icon: <NavIcon id="/products" size={15} />,
+          route: '/products',
+          permission: 'ingredients:read',
+        },
+        {
+          id: 'product-attributes',
+          label: 'Thuộc tính',
+          icon: <NavIcon id="/product-attributes" size={15} />,
+          route: '/product-attributes',
+          permission: 'ingredients:read',
+        },
+        {
           id: 'imports',
           label: 'Nhập kho',
           icon: <NavIcon id="/import-orders" size={15} />,
@@ -267,6 +281,12 @@ export function AppLayout() {
             items={[
               { label: t('item'), route: '/ingredients' },
               { label: t('item_group'), route: '/ingredient-groups' },
+              ...(isEnabled('product_variants')
+                ? [
+                    { label: 'Sản phẩm', route: '/products' },
+                    { label: 'Thuộc tính', route: '/product-attributes' },
+                  ]
+                : []),
               ...(hasPermission('import_orders:read') ? [{ label: 'Nhập kho', route: '/import-orders' }] : []),
               ...(hasPermission('stock_exports:read') ? [{ label: 'Xuất kho', route: '/stock-exports' }] : []),
               ...(hasPermission('processing:read') && isEnabled('processing') ? [{ label: 'Chế biến', route: '/processing' }] : []),
