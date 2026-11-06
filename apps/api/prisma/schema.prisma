@@ -499,6 +499,8 @@ model StockExport {
   id          String   @id @default(uuid())
   voucherDate DateTime @default(now()) @map("voucher_date")
   voucherNo   String   @unique @map("voucher_no")
+  // POSTED = đã ghi sổ; CANCELLED = đã huỷ (bút toán kho đã được đảo).
+  status      String   @default("POSTED")
   createdAt   DateTime @default(now()) @map("created_at")
   transactions StockTransaction[]
 

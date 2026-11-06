@@ -56,6 +56,8 @@ export class AuditInterceptor implements NestInterceptor {
   private getAction(method: string, path: string): string {
     if (path.includes('/approve')) return 'APPROVE';
     if (path.includes('/reject')) return 'REJECT';
+    if (path.includes('/unpost')) return 'UNPOST';
+    if (path.includes('/cancel')) return 'CANCEL';
     if (path.includes('/toggle-active')) return 'TOGGLE_ACTIVE';
     if (path.includes('/permissions')) return 'UPDATE_PERMISSIONS';
     return ACTION_MAP[method] || 'UNKNOWN';

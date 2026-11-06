@@ -19,7 +19,7 @@ export function createApiClient(baseUrl: string, getToken: TokenGetter, onUnauth
     const data = await res.json()
     if (!res.ok) {
       // Giữ nguyên message; đính kèm status + error code (vd PERIOD_LOCKED) để UI dịch theo code.
-      throw Object.assign(new Error(data.message || 'API Error'), { status: res.status, code: typeof data.code === 'string' ? data.code : undefined })
+      throw Object.assign(new Error(data.message || 'API Error'), { status: res.status, code: typeof data.code === 'string' ? data.code : undefined, details: data })
     }
     return data
   }
