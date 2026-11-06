@@ -102,3 +102,20 @@ export function useRejectImportOrder() {
     },
   })
 }
+
+export interface BulkImportReport {
+  created: number
+  itemCount: number
+  totalAmount: number
+  orders: { id: string; code: string; voucherNo: string; supplierId: string; itemCount: number; totalAmount: number }[]
+}
+
+/** Tạo nhiều phiếu nhập (PENDING) một lần, all-or-nothing. */
+export function useBulkCreateImportOrders() {
+  return useMutation({
+    mutationFn: (orders: unknown[]): Promise<BulkImportReport> => api.post('/import-orders/bulk', { orders }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.importOrders })
+    },
+  })
+}
