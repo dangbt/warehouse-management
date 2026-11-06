@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CostingService } from '../costing/costing.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 import { splitLineTax, allocateDiscount, VAT_RATES, type VatRate } from '../tax/vat';
 import { parsePeriod } from '../tax/period';
@@ -33,6 +34,7 @@ export class KiotVietService {
   constructor(
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
+    private costing: CostingService,
   ) {}
 
   private normalize(s: string) {
@@ -236,6 +238,7 @@ export class KiotVietService {
     if (deductions.length > 0) {
       await this.prisma.$transaction(async (tx) => {
         for (const d of deductions) {
+          const cost = await this.costing.costOutbound(tx, d.ingredientId, d.quantity);
           const batchResults = await this.batchDeduction.deductFromBatches(tx, d.ingredientId, d.quantity);
           await tx.ingredient.update({ where: { id: d.ingredientId }, data: { currentStock: { decrement: d.quantity } } });
           for (const b of batchResults) {
@@ -244,6 +247,8 @@ export class KiotVietService {
                 ingredientId: d.ingredientId,
                 type: 'ORDER_DEDUCT',
                 quantity: -b.qty,
+                unitCost: cost.unitCost,
+                totalCost: +(b.qty * cost.unitCost).toFixed(2),
                 referenceId: b.batchId,
                 note: `Trừ kho từ đơn KiotViet ${order.code}`,
                 createdById: userId,

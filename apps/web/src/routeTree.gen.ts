@@ -30,6 +30,7 @@ import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient
 import { Route as AppIngredientGroupsRouteImport } from './routes/_app/ingredient-groups'
 import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppCostingRouteImport } from './routes/_app/costing'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
 import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
@@ -143,6 +144,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCostingRoute = AppCostingRouteImport.update({
+  id: '/costing',
+  path: '/costing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppConsumptionVarianceRoute = AppConsumptionVarianceRouteImport.update({
   id: '/consumption-variance',
   path: '/consumption-variance',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/audit-logs': typeof AppAuditLogsRoute
   '/consumption-variance': typeof AppConsumptionVarianceRoute
+  '/costing': typeof AppCostingRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
   '/ingredient-groups': typeof AppIngredientGroupsRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/audit-logs': typeof AppAuditLogsRoute
   '/consumption-variance': typeof AppConsumptionVarianceRoute
+  '/costing': typeof AppCostingRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
   '/ingredient-groups': typeof AppIngredientGroupsRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/audit-logs': typeof AppAuditLogsRoute
   '/_app/consumption-variance': typeof AppConsumptionVarianceRoute
+  '/_app/costing': typeof AppCostingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/import-orders': typeof AppImportOrdersRoute
   '/_app/ingredient-groups': typeof AppIngredientGroupsRoute
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/audit-logs'
     | '/consumption-variance'
+    | '/costing'
     | '/dashboard'
     | '/import-orders'
     | '/ingredient-groups'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/audit-logs'
     | '/consumption-variance'
+    | '/costing'
     | '/dashboard'
     | '/import-orders'
     | '/ingredient-groups'
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/audit-logs'
     | '/_app/consumption-variance'
+    | '/_app/costing'
     | '/_app/dashboard'
     | '/_app/import-orders'
     | '/_app/ingredient-groups'
@@ -526,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/costing': {
+      id: '/_app/costing'
+      path: '/costing'
+      fullPath: '/costing'
+      preLoaderRoute: typeof AppCostingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/consumption-variance': {
       id: '/_app/consumption-variance'
       path: '/consumption-variance'
@@ -588,6 +607,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAuditLogsRoute: typeof AppAuditLogsRoute
   AppConsumptionVarianceRoute: typeof AppConsumptionVarianceRoute
+  AppCostingRoute: typeof AppCostingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppImportOrdersRoute: typeof AppImportOrdersRoute
   AppIngredientGroupsRoute: typeof AppIngredientGroupsRoute
@@ -617,6 +637,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAuditLogsRoute: AppAuditLogsRoute,
   AppConsumptionVarianceRoute: AppConsumptionVarianceRoute,
+  AppCostingRoute: AppCostingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppImportOrdersRoute: AppImportOrdersRoute,
   AppIngredientGroupsRoute: AppIngredientGroupsRoute,

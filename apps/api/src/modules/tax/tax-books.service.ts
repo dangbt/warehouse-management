@@ -109,8 +109,8 @@ export class TaxBooksService {
    * liệt kê phát sinh nhập/xuất trong kỳ, và tồn cuối kỳ = tồn đầu + nhập − xuất.
    *
    * Tồn đầu kỳ = Σ phát sinh (theo chiều IN/OUT) của mọi giao dịch `voucherDate < from` (ngày chứng từ).
-   * Giá trị phát sinh không có `totalPrice` (vd EXPORT) suy ra bằng SL × giá vốn bình
-   * quân của nguyên liệu (`Ingredient.costPerUnit`) — xem `normalizeMovement`.
+   * Giá trị phát sinh lấy từ `totalCost` trên giao dịch (WMS-6); chỉ giao dịch cũ chưa có giá mới
+   * suy ra bằng SL × `Ingredient.costPerUnit` — xem `normalizeMovement`.
    *
    * @param ingredientId Lọc theo một nguyên liệu; bỏ trống ⇒ tất cả nguyên liệu có phát sinh/tồn.
    */
@@ -136,11 +136,11 @@ export class TaxBooksService {
       const [before, during] = await Promise.all([
         this.prisma.stockTransaction.findMany({
           where: { ingredientId: ing.id, voucherDate: { lt: period.from } },
-          select: { type: true, quantity: true, totalPrice: true, note: true, referenceId: true, voucherDate: true },
+          select: { type: true, quantity: true, totalPrice: true, totalCost: true, note: true, referenceId: true, voucherDate: true },
         }),
         this.prisma.stockTransaction.findMany({
           where: { ingredientId: ing.id, voucherDate: { gte: period.from, lte: period.to } },
-          select: { type: true, quantity: true, totalPrice: true, note: true, referenceId: true, voucherDate: true },
+          select: { type: true, quantity: true, totalPrice: true, totalCost: true, note: true, referenceId: true, voucherDate: true },
           orderBy: { voucherDate: 'asc' },
         }),
       ]);
@@ -181,6 +181,7 @@ export class TaxBooksService {
     type: string;
     quantity: unknown;
     totalPrice: unknown;
+    totalCost: unknown;
     note: string | null;
     referenceId: string | null;
     voucherDate: Date;
@@ -188,7 +189,8 @@ export class TaxBooksService {
     return {
       type: tx.type,
       quantity: Number(tx.quantity),
-      totalPrice: tx.totalPrice == null ? null : Number(tx.totalPrice),
+      // Giá trị lấy từ giá vốn trên giao dịch (WMS-6); giao dịch cũ chưa có thì dùng total_price
+      totalPrice: tx.totalCost != null ? Number(tx.totalCost) : tx.totalPrice == null ? null : Number(tx.totalPrice),
       note: tx.note,
       referenceId: tx.referenceId,
       createdAt: tx.voucherDate.toISOString(),
