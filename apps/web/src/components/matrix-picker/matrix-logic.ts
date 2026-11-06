@@ -34,6 +34,8 @@ export interface MatrixLine {
   unit: string
   quantity: number
   unitPrice: number
+  /** tồn hiện tại của biến thể lúc chọn (dùng kiểm lại tồn sau khi gộp khi xuất) */
+  stock?: number
 }
 
 export const cellKey = (rowId: string, colId: string) => `${rowId}|${colId}`
@@ -100,7 +102,7 @@ export interface CollectResult {
   errors: Record<string, string>
 }
 
-/** Bỏ ô trống/0, báo lỗi ô vượt tồn khi xuất; mỗi biến thể 1 dòng. */
+/** Bỏ ô trống/0 (kiểm kê giữ ô 0), báo lỗi ô vượt tồn khi xuất; mỗi biến thể 1 dòng. */
 export function collectLines(input: CollectInput): CollectResult {
   const { model, productName, mode, qty, prices, sharedPrice } = input
   const lines: MatrixLine[] = []
@@ -109,15 +111,17 @@ export function collectLines(input: CollectInput): CollectResult {
     for (const col of model.cols) {
       const v = model.cells[cellKey(row.id, col.id)]
       if (!v) continue
-      const q = Number(qty[v.itemId])
-      if (!(q > 0)) continue
+      const raw = qty[v.itemId]
+      const q = Number(raw)
+      // Kiểm kê: 0 là số thực tế có nghĩa → chỉ bỏ ô trống; các mode khác bỏ ô ≤ 0.
+      if (mode === 'stocktake' ? raw === undefined || raw.trim() === '' || !(q >= 0) : !(q > 0)) continue
       if (mode === 'export' && q > v.stock) {
         errors[v.itemId] = `Vượt tồn (${v.stock})`
         continue
       }
       const own = prices[v.itemId]
       const unitPrice = own !== undefined && own !== '' ? Number(own) || 0 : sharedPrice
-      lines.push({ itemId: v.itemId, productName, variantLabel: variantLabel(v, productName), sku: v.sku, unit: v.unit, quantity: q, unitPrice })
+      lines.push({ itemId: v.itemId, productName, variantLabel: variantLabel(v, productName), sku: v.sku, unit: v.unit, quantity: q, unitPrice, stock: v.stock })
     }
   }
   return { lines, errors }
@@ -140,3 +144,16 @@ export const rowTotal = (model: MatrixModel, rowId: string, qty: Record<string, 
   model.cols.reduce((s, c) => s + (Number(qty[model.cells[cellKey(rowId, c.id)]?.itemId ?? '']) || 0), 0)
 export const colTotal = (model: MatrixModel, colId: string, qty: Record<string, string>) =>
   model.rows.reduce((s, r) => s + (Number(qty[model.cells[cellKey(r.id, colId)]?.itemId ?? '']) || 0), 0)
+
+/** Gộp dòng xuất kho rồi kiểm lại tồn: tổng sau gộp > tồn → lỗi theo itemId, không gộp gì cả. */
+export function mergeExportLines<T extends { itemId: string; quantity: number; stock?: number }>(
+  existing: T[],
+  incoming: T[],
+): { lines: T[]; errors: Record<string, string> } {
+  const merged = mergeLines(existing, incoming)
+  const errors: Record<string, string> = {}
+  for (const l of merged) {
+    if (l.stock !== undefined && l.quantity > l.stock) errors[l.itemId] = `Vượt tồn (${l.stock})`
+  }
+  return Object.keys(errors).length > 0 ? { lines: existing, errors } : { lines: merged, errors }
+}

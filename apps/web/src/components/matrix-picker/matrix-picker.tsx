@@ -215,7 +215,7 @@ export function MatrixPicker({ open, mode, onClose, onConfirm }: Props) {
             {grid('price')}
           </div>
         )}
-        {model && <p className="text-[12px] text-win-text-secondary">Tab / Enter: sang ô kế tiếp · Enter ở ô cuối: xác nhận · ô trống hoặc 0 sẽ bị bỏ qua</p>}
+        {model && <p className="text-[12px] text-win-text-secondary">Tab / Enter: sang ô kế tiếp · Enter ở ô SL cuối: xác nhận (nếu đang bật giá riêng thì Enter nhảy tiếp sang lưới giá, xác nhận ở ô giá cuối) · ô trống hoặc 0 sẽ bị bỏ qua{mode === 'stocktake' ? ' (kiểm kê: ô trống bỏ qua, nhập 0 = kiểm được 0)' : ''}</p>}
       </div>
     </WinDialog>
   )

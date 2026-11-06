@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildMatrixModel, collectLines, mergeLines, cellKey } from '../matrix-logic'
+import { buildMatrixModel, collectLines, mergeLines, mergeExportLines, cellKey } from '../matrix-logic'
 import type { ProductDetail, ProductAttribute } from '@/data/use-products'
 
 const attrs: ProductAttribute[] = [
@@ -37,5 +37,28 @@ describe('matrix logic', () => {
   it('gộp dòng: trùng itemId cộng dồn số lượng', () => {
     const merged = mergeLines([{ itemId: 'a', quantity: 2 }], [{ itemId: 'a', quantity: 3 }, { itemId: 'b', quantity: 1 }])
     expect(merged).toEqual([{ itemId: 'a', quantity: 5 }, { itemId: 'b', quantity: 1 }])
+  })
+})
+
+describe('kiểm tồn sau khi gộp (xuất kho)', () => {
+  it('mở popup 2 lần cùng biến thể: tổng > tồn bị chặn, giữ nguyên danh sách cũ', () => {
+    const first = collectLines({ ...base, mode: 'export', qty: { 'c1-s0': '3' } }).lines
+    const second = collectLines({ ...base, mode: 'export', qty: { 'c1-s0': '3' } }).lines
+    const r = mergeExportLines(first, second)
+    expect(r.errors['c1-s0']).toMatch(/Vượt tồn \(5\)/)
+    expect(r.lines).toBe(first)
+  })
+  it('tổng sau gộp ≤ tồn thì gộp bình thường', () => {
+    const first = collectLines({ ...base, mode: 'export', qty: { 'c1-s0': '2' } }).lines
+    const r = mergeExportLines(first, collectLines({ ...base, mode: 'export', qty: { 'c1-s0': '3' } }).lines)
+    expect(r.errors).toEqual({})
+    expect(r.lines[0].quantity).toBe(5)
+  })
+})
+
+describe('kiểm kê', () => {
+  it('giữ ô nhập 0, bỏ ô trống', () => {
+    const r = collectLines({ ...base, mode: 'stocktake', qty: { 'c1-s0': '0', 'c1-s1': '', 'c1-s2': '4' } })
+    expect(r.lines.map((l) => [l.itemId, l.quantity])).toEqual([['c1-s0', 0], ['c1-s2', 4]])
   })
 })
