@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check, Download, Package, Pencil, Plus, RefreshCw, Trash2, TriangleAlert } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { BookOpen, Check, Download, Package, Pencil, Plus, RefreshCw, Trash2, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
@@ -49,6 +50,7 @@ const columns: Column<IngredientRow>[] = [
 ]
 
 export function IngredientsPage() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
@@ -111,6 +113,12 @@ export function IngredientsPage() {
         />
         <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
+        <WinToolbar.Button
+          icon={<BookOpen size={16} />}
+          label="Thẻ kho"
+          disabled={!selected}
+          onClick={() => selected && navigate({ to: '/stock-card', search: { ingredientId: selected.id, mode: 'qty' } })}
+        />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={16} />} label="Export" />
         <WinToolbar.Separator />
