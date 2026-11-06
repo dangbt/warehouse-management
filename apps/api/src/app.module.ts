@@ -25,6 +25,7 @@ import { SupportModule } from './modules/support/support.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { ProductsModule } from './modules/products/products.module';
 import { TaxModule } from './modules/tax/tax.module';
+import { SetupModule } from './modules/setup/setup.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { TaxModule } from './modules/tax/tax.module';
     MenuModule,
     SupportModule,
     TaxModule,
+    SetupModule,
     SettingsModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],

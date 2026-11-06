@@ -12,6 +12,8 @@ import { featureForPath } from '@/utils/route-features'
 import type { TermKey } from '@/utils/terms'
 import { now } from '@wms/shared'
 import { NavIcon } from '@/components/nav-icons'
+import { BrandMark } from '@/components/brand-mark'
+import { useApplyBranding } from '@/data/use-branding'
 import type { TreeNode } from '@wms/ui-winforms'
 
 /**
@@ -202,6 +204,7 @@ export function AppLayout() {
   const navigate = useNavigate()
   const location = useRouterState({ select: (s) => s.location })
   const { user, logout } = useAuthStore()
+  const brand = useApplyBranding()
   const { sidebarExpanded, toggleSidebar } = useUIStore()
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const health = useHealth()
@@ -248,14 +251,8 @@ export function AppLayout() {
     <div className="h-screen flex flex-col" data-testid="app-layout">
       {/* Title Bar */}
       <div className="h-9 bg-win-active-title text-white flex items-center px-3 text-[14px] font-semibold shrink-0 select-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-6 w-6 mr-2 shrink-0">
-          <circle cx="16" cy="16" r="14" fill="white" />
-          <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">
-            MV
-          </text>
-        </svg>
-        <span className="hidden sm:inline">Mâm Vị</span>
-        <span className="sm:hidden">Mâm Vị</span>
+        <BrandMark brand={brand} />
+        <span>{brand.name}</span>
       </div>
 
       {/* Menu Bar */}

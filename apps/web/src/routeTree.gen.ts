@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SetupRouteImport } from './routes/setup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -41,6 +42,11 @@ import { Route as AppTaxInputInvoicesRouteImport } from './routes/_app/tax/input
 import { Route as AppTaxBooksRouteImport } from './routes/_app/tax/books'
 import { Route as AppStocktakeIdRouteImport } from './routes/_app/stocktake_.$id'
 
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -200,6 +206,7 @@ const AppStocktakeIdRoute = AppStocktakeIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/setup': typeof SetupRoute
   '/audit-logs': typeof AppAuditLogsRoute
   '/consumption-variance': typeof AppConsumptionVarianceRoute
   '/dashboard': typeof AppDashboardRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/setup': typeof SetupRoute
   '/audit-logs': typeof AppAuditLogsRoute
   '/consumption-variance': typeof AppConsumptionVarianceRoute
   '/dashboard': typeof AppDashboardRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/setup': typeof SetupRoute
   '/_app/audit-logs': typeof AppAuditLogsRoute
   '/_app/consumption-variance': typeof AppConsumptionVarianceRoute
   '/_app/dashboard': typeof AppDashboardRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/setup'
     | '/audit-logs'
     | '/consumption-variance'
     | '/dashboard'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/setup'
     | '/audit-logs'
     | '/consumption-variance'
     | '/dashboard'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/login'
+    | '/setup'
     | '/_app/audit-logs'
     | '/_app/consumption-variance'
     | '/_app/dashboard'
@@ -399,10 +411,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SetupRoute: typeof SetupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -691,6 +711,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  SetupRoute: SetupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
