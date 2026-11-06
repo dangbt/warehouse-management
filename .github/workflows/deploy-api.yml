@@ -2,7 +2,7 @@ name: Deploy API
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master]
     paths:
       - apps/api/**
       - packages/**
@@ -12,7 +12,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    # Secrets deploy prod đang nằm ở environment tên 'development' (tên cũ, giữ để không phải tạo lại secret)
+    environment: development
 
     steps:
       - name: Trigger Render Deploy

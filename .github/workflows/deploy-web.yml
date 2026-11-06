@@ -2,7 +2,7 @@ name: Deploy Web
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master]
     paths:
       - apps/web/**
       - packages/**
@@ -10,14 +10,15 @@ on:
   workflow_dispatch:
 
 env:
-  TURBO_API: ${{ github.ref == 'refs/heads/develop' && 'http://127.0.0.1:8585' || '' }}
-  TURBO_TEAM: ${{ github.ref == 'refs/heads/develop' && 'warehouse-management' || '' }}
-  TURBO_TOKEN: ${{ github.ref == 'refs/heads/develop' && secrets.TURBO_TOKEN || '' }}
+  TURBO_API: ${{ github.ref == 'refs/heads/master' && 'http://127.0.0.1:8585' || '' }}
+  TURBO_TEAM: ${{ github.ref == 'refs/heads/master' && 'warehouse-management' || '' }}
+  TURBO_TOKEN: ${{ github.ref == 'refs/heads/master' && secrets.TURBO_TOKEN || '' }}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    # Secrets deploy prod đang nằm ở environment tên 'development' (tên cũ, giữ để không phải tạo lại secret)
+    environment: development
     permissions:
       contents: read
       deployments: write
@@ -31,7 +32,7 @@ jobs:
           cache: npm
 
       - name: Turborepo Remote Cache
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/master'
         uses: brunojppb/turbo-cache-server@4.0.3
         env:
           PORT: "8585"
