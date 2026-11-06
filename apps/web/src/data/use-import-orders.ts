@@ -26,8 +26,9 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useImportOrders(params?: { status?: string; page?: number; orderBy?: string; sort?: string }) {
+export function useImportOrders(params?: { id?: string; status?: string; page?: number; orderBy?: string; sort?: string }) {
   const query = new URLSearchParams({ limit: '50' })
+  if (params?.id) query.set('id', params.id)
   if (params?.status) query.set('status', params.status)
   if (params?.page) query.set('page', String(params.page))
   if (params?.orderBy) query.set('orderBy', params.orderBy)

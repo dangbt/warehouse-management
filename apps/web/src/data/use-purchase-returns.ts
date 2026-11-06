@@ -58,10 +58,12 @@ interface ImportOrderListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function usePurchaseReturns() {
+export function usePurchaseReturns(params?: { id?: string }) {
+  const query = new URLSearchParams({ limit: '50' })
+  if (params?.id) query.set('id', params.id)
   return useQuery<ListResponse>({
-    queryKey: QUERY_KEYS.purchaseReturnsList(),
-    queryFn: () => api.get('/purchase-returns?limit=50'),
+    queryKey: QUERY_KEYS.purchaseReturnsList(Object.fromEntries(query)),
+    queryFn: () => api.get(`/purchase-returns?${query}`),
   })
 }
 

@@ -3,13 +3,25 @@ import { fmtDisplay } from './inventory-summary-utils'
 
 export type StockCardMode = 'qty' | 'value'
 
-/** Trang danh sách chứng từ gốc theo loại (chưa có route chi tiết theo id, ngoại trừ kiểm kê). */
-export function docRoute(docType: StockDocType, docId: string): { to: string; params?: Record<string, string> } {
+/** Ngày chứng từ (ISO UTC) → "dd/mm/yyyy" theo giờ Việt Nam (UTC+7), không phụ thuộc múi giờ máy. */
+export function voucherDateVn(iso: string): string {
+  return fmtDisplay(new Date(new Date(iso).getTime() + 7 * 3600_000).toISOString().slice(0, 10))
+}
+
+type DocTarget =
+  | { to: '/import-orders'; search: { id: string } }
+  | { to: '/stock-exports'; search: { id: string } }
+  | { to: '/purchase-returns'; search: { id: string } }
+  | { to: '/processing'; search: { id: string } }
+  | { to: '/stocktake/$id'; params: { id: string } }
+
+/** Chứng từ gốc: trang danh sách lọc đúng phiếu (search.id) hoặc trang chi tiết kiểm kê. */
+export function docRoute(docType: StockDocType, docId: string): DocTarget {
   switch (docType) {
-    case 'IMPORT_ORDER': return { to: '/import-orders' }
-    case 'STOCK_EXPORT': return { to: '/stock-exports' }
-    case 'PURCHASE_RETURN': return { to: '/purchase-returns' }
-    case 'PROCESSING': return { to: '/processing' }
+    case 'IMPORT_ORDER': return { to: '/import-orders', search: { id: docId } }
+    case 'STOCK_EXPORT': return { to: '/stock-exports', search: { id: docId } }
+    case 'PURCHASE_RETURN': return { to: '/purchase-returns', search: { id: docId } }
+    case 'PROCESSING': return { to: '/processing', search: { id: docId } }
     case 'STOCKTAKE': return { to: '/stocktake/$id', params: { id: docId } }
   }
 }
@@ -29,7 +41,7 @@ export function excelColumns(mode: StockCardMode) {
 }
 
 function lineCells(l: StockCardLine, mode: StockCardMode): Cell[] {
-  const head: Cell[] = [l.voucherNo, fmtDisplay(l.voucherDate.slice(0, 10)), l.description]
+  const head: Cell[] = [l.voucherNo, voucherDateVn(l.voucherDate), l.description]
   return mode === 'qty'
     ? [...head, l.inQty || null, l.outQty || null, l.balanceQty]
     : [...head, l.unitPrice, l.inQty || null, l.outQty || null, l.balanceQty, l.inValue || null, l.outValue || null, l.balanceValue]

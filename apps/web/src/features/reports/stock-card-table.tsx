@@ -1,8 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import { formatNumber } from '@wms/shared'
 import type { StockCardData } from '@/data'
-import { fmtDisplay } from './inventory-summary-utils'
-import { docRoute, type StockCardMode } from './stock-card-utils'
+import { docRoute, voucherDateVn, type StockCardMode } from './stock-card-utils'
 
 const Num = ({ v, bold }: { v: number | null; bold?: boolean }) => (
   <td className={`px-2 py-0.5 text-right tabular-nums ${v !== null && v < 0 ? 'text-win-error' : ''} ${bold ? 'font-bold' : ''}`}>
@@ -43,13 +42,13 @@ export function StockCardTable({ card, mode }: { card: StockCardData; mode: Stoc
                   type="button"
                   className="text-win-link underline"
                   title="Mở chứng từ gốc"
-                  onClick={() => { const r = docRoute(l.docType!, l.docId!); navigate(r as never) }}
+                  onClick={() => { navigate(docRoute(l.docType!, l.docId!)) }}
                 >
                   {l.voucherNo}
                 </button>
               ) : (l.voucherNo ?? '')}
             </td>
-            <td className="px-2 py-0.5 text-center">{fmtDisplay(l.voucherDate.slice(0, 10))}</td>
+            <td className="px-2 py-0.5 text-center">{voucherDateVn(l.voucherDate)}</td>
             <td className="px-2 py-0.5">{l.description}</td>
             {value && <Num v={l.unitPrice} />}
             <Num v={l.inQty} />

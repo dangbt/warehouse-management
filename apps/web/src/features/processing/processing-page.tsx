@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Plus, CheckCircle, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
@@ -8,6 +8,7 @@ import { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from 
 import type { ProcessingOrder } from '@/data'
 import { formatDate, formatNumber } from '@wms/shared'
 import { Route } from '@/routes/_app/processing'
+import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
 
 const statusLabels: Record<string, string> = { DRAFT: 'Nháp', COMPLETED: 'Hoàn thành' }
 const statusColors: Record<string, string> = {
@@ -35,7 +36,7 @@ const columns: Column<ProcessingOrder>[] = [
 ]
 
 export function ProcessingPage() {
-  const { page, status, orderBy, sort } = Route.useSearch()
+  const { page, status, orderBy, sort, id: focusId } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
 
   const setParams = (updates: Record<string, unknown>) => {
@@ -47,9 +48,13 @@ export function ProcessingPage() {
   const [selected, setSelected] = useState<ProcessingOrder | null>(null)
   const [confirmComplete, setConfirmComplete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useProcessingOrders({ page, status: status || undefined, orderBy, sort })
+  const { data: res, isLoading, refetch } = useProcessingOrders({ id: focusId, page, status: status || undefined, orderBy, sort })
   const createMutation = useCreateProcessing()
   const completeMutation = useCompleteProcessing()
+
+  useEffect(() => {
+    if (focusId && res?.data[0]?.id === focusId) setSelected(res.data[0])
+  }, [focusId, res])
 
   const handleCreate = async (data: {
     source_ingredient_id: string
@@ -84,6 +89,7 @@ export function ProcessingPage() {
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
 
+      {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => { setSelected(null); setParams({ id: undefined }) }} />}
       <WinDataGrid searchable
         columns={columns}
         data={res?.data ?? []}

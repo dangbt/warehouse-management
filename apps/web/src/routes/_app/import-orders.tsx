@@ -16,6 +16,8 @@ const searchSchema = z.object({
   status: z.string().default(defaultSearch.status),
   orderBy: z.string().default(defaultSearch.orderBy),
   sort: z.enum(['asc', 'desc']).default(defaultSearch.sort as 'desc'),
+  /** Mở đúng một chứng từ (từ Thẻ kho). */
+  id: z.string().optional(),
 })
 
 export type ImportOrdersSearchParams = z.infer<typeof searchSchema>
