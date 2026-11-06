@@ -81,6 +81,7 @@ export function useApproveImportOrder() {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) =>
         old ? { ...old, data: old.data.map((o) => (o.id === id ? { ...o, status: 'COMPLETED' } : o)) } : old,
       )
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.purchaseOrders })
       useToastStore.getState().success('Đã duyệt phiếu nhập')
     },
     onError: (e: Error) => {

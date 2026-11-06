@@ -10,18 +10,6 @@ const PO_PREFIX = 'DMH';
 export class PurchaseOrdersService {
   constructor(private prisma: PrismaService) {}
 
-  private async nextCode(): Promise<string> {
-    const rows = await this.prisma.purchaseOrder.findMany({ where: { code: { startsWith: PO_PREFIX } }, select: { code: true } });
-    return formatVoucherNo(
-      PO_PREFIX,
-      maxSequence(
-        PO_PREFIX,
-        rows.map((r) => r.code),
-      ) + 1,
-      5,
-    );
-  }
-
   async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
