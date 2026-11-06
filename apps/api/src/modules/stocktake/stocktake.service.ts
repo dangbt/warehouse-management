@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -8,6 +10,8 @@ export class StocktakeService {
   constructor(
     private prisma: PrismaService,
     private vouchers: VoucherService,
+    private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string }) {
@@ -43,6 +47,7 @@ export class StocktakeService {
     });
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('STOCKTAKE', body.voucher_no);
 
     return this.prisma.stocktakeSession
@@ -71,6 +76,7 @@ export class StocktakeService {
     const session = await this.prisma.stocktakeSession.findUnique({ where: { id } });
     if (!session) throw new NotFoundException('Không tìm thấy phiên kiểm kho');
     if (session.status !== 'DRAFT') throw new BadRequestException('Chỉ cập nhật phiên ở trạng thái DRAFT');
+    await this.periodLock.assertOpen(session.voucherDate);
 
     for (const item of body.items) {
       const existing = await this.prisma.stocktakeItem.findFirst({
@@ -95,11 +101,19 @@ export class StocktakeService {
     });
     if (!session) throw new NotFoundException('Không tìm thấy phiên kiểm kho');
     if (session.status !== 'DRAFT') throw new BadRequestException('Phiên đã hoàn thành');
+    await this.periodLock.assertOpen(session.voucherDate);
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of session.items) {
         const diff = Number(item.difference);
         if (diff === 0) continue;
+
+        // Giá vốn điều chỉnh: giảm → giá xuất theo phương pháp; tăng → nhập theo giá vốn hiện hành của NL
+        const absDiff = Math.abs(diff);
+        const cost =
+          diff < 0
+            ? await this.costing.costOutbound(tx, item.ingredientId, absDiff)
+            : await this.costing.currentCost(tx, item.ingredientId, absDiff);
 
         await tx.ingredient.update({
           where: { id: item.ingredientId },
@@ -111,6 +125,8 @@ export class StocktakeService {
             ingredientId: item.ingredientId,
             type: 'STOCKTAKE_ADJUST',
             quantity: item.difference,
+            unitCost: cost.unitCost,
+            totalCost: cost.totalCost,
             referenceId: session.id,
             createdById: userId,
             voucherDate: session.voucherDate,

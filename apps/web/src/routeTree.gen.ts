@@ -26,11 +26,14 @@ import { Route as AppPurchaseOrdersRouteImport } from './routes/_app/purchase-or
 import { Route as AppProcessingRouteImport } from './routes/_app/processing'
 import { Route as AppMenuRouteImport } from './routes/_app/menu'
 import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
+import { Route as AppInventorySummaryRouteImport } from './routes/_app/inventory-summary'
+import { Route as AppInventoryPeriodRouteImport } from './routes/_app/inventory-period'
 import { Route as AppIngredientsRouteImport } from './routes/_app/ingredients'
 import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient-usage'
 import { Route as AppIngredientGroupsRouteImport } from './routes/_app/ingredient-groups'
 import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppCostingRouteImport } from './routes/_app/costing'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
 import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
@@ -124,6 +127,16 @@ const AppKiotvietRoute = AppKiotvietRouteImport.update({
   path: '/kiotviet',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInventorySummaryRoute = AppInventorySummaryRouteImport.update({
+  id: '/inventory-summary',
+  path: '/inventory-summary',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryPeriodRoute = AppInventoryPeriodRouteImport.update({
+  id: '/inventory-period',
+  path: '/inventory-period',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppIngredientsRoute = AppIngredientsRouteImport.update({
   id: '/ingredients',
   path: '/ingredients',
@@ -147,6 +160,11 @@ const AppImportOrdersRoute = AppImportOrdersRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCostingRoute = AppCostingRouteImport.update({
+  id: '/costing',
+  path: '/costing',
   getParentRoute: () => AppRoute,
 } as any)
 const AppConsumptionVarianceRoute = AppConsumptionVarianceRouteImport.update({
@@ -196,11 +214,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/audit-logs': typeof AppAuditLogsRoute
   '/consumption-variance': typeof AppConsumptionVarianceRoute
+  '/costing': typeof AppCostingRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
   '/ingredient-groups': typeof AppIngredientGroupsRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
+  '/inventory-period': typeof AppInventoryPeriodRoute
+  '/inventory-summary': typeof AppInventorySummaryRoute
   '/kiotviet': typeof AppKiotvietRoute
   '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
@@ -227,11 +248,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/audit-logs': typeof AppAuditLogsRoute
   '/consumption-variance': typeof AppConsumptionVarianceRoute
+  '/costing': typeof AppCostingRoute
   '/dashboard': typeof AppDashboardRoute
   '/import-orders': typeof AppImportOrdersRoute
   '/ingredient-groups': typeof AppIngredientGroupsRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
+  '/inventory-period': typeof AppInventoryPeriodRoute
+  '/inventory-summary': typeof AppInventorySummaryRoute
   '/kiotviet': typeof AppKiotvietRoute
   '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
@@ -260,11 +284,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/audit-logs': typeof AppAuditLogsRoute
   '/_app/consumption-variance': typeof AppConsumptionVarianceRoute
+  '/_app/costing': typeof AppCostingRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/import-orders': typeof AppImportOrdersRoute
   '/_app/ingredient-groups': typeof AppIngredientGroupsRoute
   '/_app/ingredient-usage': typeof AppIngredientUsageRoute
   '/_app/ingredients': typeof AppIngredientsRoute
+  '/_app/inventory-period': typeof AppInventoryPeriodRoute
+  '/_app/inventory-summary': typeof AppInventorySummaryRoute
   '/_app/kiotviet': typeof AppKiotvietRoute
   '/_app/menu': typeof AppMenuRoute
   '/_app/processing': typeof AppProcessingRoute
@@ -293,11 +320,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/audit-logs'
     | '/consumption-variance'
+    | '/costing'
     | '/dashboard'
     | '/import-orders'
     | '/ingredient-groups'
     | '/ingredient-usage'
     | '/ingredients'
+    | '/inventory-period'
+    | '/inventory-summary'
     | '/kiotviet'
     | '/menu'
     | '/processing'
@@ -324,11 +354,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/audit-logs'
     | '/consumption-variance'
+    | '/costing'
     | '/dashboard'
     | '/import-orders'
     | '/ingredient-groups'
     | '/ingredient-usage'
     | '/ingredients'
+    | '/inventory-period'
+    | '/inventory-summary'
     | '/kiotviet'
     | '/menu'
     | '/processing'
@@ -356,11 +389,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/audit-logs'
     | '/_app/consumption-variance'
+    | '/_app/costing'
     | '/_app/dashboard'
     | '/_app/import-orders'
     | '/_app/ingredient-groups'
     | '/_app/ingredient-usage'
     | '/_app/ingredients'
+    | '/_app/inventory-period'
+    | '/_app/inventory-summary'
     | '/_app/kiotviet'
     | '/_app/menu'
     | '/_app/processing'
@@ -510,6 +546,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppKiotvietRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/inventory-summary': {
+      id: '/_app/inventory-summary'
+      path: '/inventory-summary'
+      fullPath: '/inventory-summary'
+      preLoaderRoute: typeof AppInventorySummaryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inventory-period': {
+      id: '/_app/inventory-period'
+      path: '/inventory-period'
+      fullPath: '/inventory-period'
+      preLoaderRoute: typeof AppInventoryPeriodRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ingredients': {
       id: '/_app/ingredients'
       path: '/ingredients'
@@ -543,6 +593,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/costing': {
+      id: '/_app/costing'
+      path: '/costing'
+      fullPath: '/costing'
+      preLoaderRoute: typeof AppCostingRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/consumption-variance': {
@@ -607,11 +664,14 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAuditLogsRoute: typeof AppAuditLogsRoute
   AppConsumptionVarianceRoute: typeof AppConsumptionVarianceRoute
+  AppCostingRoute: typeof AppCostingRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppImportOrdersRoute: typeof AppImportOrdersRoute
   AppIngredientGroupsRoute: typeof AppIngredientGroupsRoute
   AppIngredientUsageRoute: typeof AppIngredientUsageRoute
   AppIngredientsRoute: typeof AppIngredientsRoute
+  AppInventoryPeriodRoute: typeof AppInventoryPeriodRoute
+  AppInventorySummaryRoute: typeof AppInventorySummaryRoute
   AppKiotvietRoute: typeof AppKiotvietRoute
   AppMenuRoute: typeof AppMenuRoute
   AppProcessingRoute: typeof AppProcessingRoute
@@ -637,11 +697,14 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAuditLogsRoute: AppAuditLogsRoute,
   AppConsumptionVarianceRoute: AppConsumptionVarianceRoute,
+  AppCostingRoute: AppCostingRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppImportOrdersRoute: AppImportOrdersRoute,
   AppIngredientGroupsRoute: AppIngredientGroupsRoute,
   AppIngredientUsageRoute: AppIngredientUsageRoute,
   AppIngredientsRoute: AppIngredientsRoute,
+  AppInventoryPeriodRoute: AppInventoryPeriodRoute,
+  AppInventorySummaryRoute: AppInventorySummaryRoute,
   AppKiotvietRoute: AppKiotvietRoute,
   AppMenuRoute: AppMenuRoute,
   AppProcessingRoute: AppProcessingRoute,

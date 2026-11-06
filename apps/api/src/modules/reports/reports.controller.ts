@@ -1,12 +1,29 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { resolveReportRange } from './report-range';
+import { InventorySummaryRepository } from './inventory-summary.repository';
+import { buildInventorySummary } from './inventory-summary';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
 export class ReportsController {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private inventorySummaryRepo: InventorySummaryRepository,
+  ) {}
+
+  /** Tổng hợp Nhập – Xuất – Tồn theo kỳ (ngày chứng từ), lọc theo nhóm NL. */
+  @Get('inventory-summary')
+  async inventorySummary(@Query() q: { from?: string; to?: string; group_id?: string }) {
+    if (!q.from || !q.to) throw new BadRequestException('Thiếu from/to');
+    const { from, to } = resolveReportRange({ from: q.from, to: q.to });
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
+      throw new BadRequestException('Khoảng thời gian không hợp lệ');
+    }
+    const raw = await this.inventorySummaryRepo.aggregate(from, to, q.group_id || undefined);
+    return buildInventorySummary(raw, q.from, q.to);
+  }
 
   @Get('stock-summary')
   async stockSummary() {
