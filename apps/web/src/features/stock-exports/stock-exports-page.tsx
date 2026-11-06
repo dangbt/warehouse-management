@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Plus, RefreshCw } from 'lucide-react'
-import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
+import { Ban, Plus, RefreshCw } from 'lucide-react'
+import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './stock-export-form'
-import { useStockExports, useCreateStockExport } from '@/data'
+import { useStockExports, useCreateStockExport, useCancelStockExport } from '@/data'
+import { useAuthStore } from '@/stores/auth.store'
 import { formatDate, formatNumber } from '@wms/shared'
 import { Route } from '@/routes/_app/stock-exports'
 
@@ -16,7 +17,7 @@ interface StockExport {
   createdBy: { fullName: string }
   createdAt: string
   voucherDate: string
-  export?: { voucherNo: string } | null
+  export?: { id: string; voucherNo: string; status: string } | null
 }
 
 const columns: Column<StockExport>[] = [
@@ -38,6 +39,7 @@ const columns: Column<StockExport>[] = [
     const label = reasons[parts[0]] ?? parts[0]
     return parts.length > 1 ? `${label}: ${parts.slice(1).join(': ')}` : label
   }},
+  { key: 'status', header: 'Trạng thái', width: 100, align: 'center', render: (r) => (r.export?.status === 'CANCELLED' ? 'Đã huỷ' : 'Đã ghi sổ') },
   { key: 'createdBy', header: 'Người xuất', width: 120, render: (r) => r.createdBy?.fullName },
 ]
 
@@ -53,11 +55,22 @@ export function StockExportsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const { data: res, isLoading, refetch } = useStockExports({ page, orderBy, sort })
   const createMutation = useCreateStockExport()
+  const cancelMutation = useCancelStockExport()
+  const hasPermission = useAuthStore((s) => s.hasPermission)
+  const [selected, setSelected] = useState<StockExport | null>(null)
+  const [confirmCancel, setConfirmCancel] = useState(false)
 
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button
+          icon={<Ban size={14} />}
+          label="Huỷ phiếu"
+          danger
+          disabled={!selected?.export || selected.export.status !== 'POSTED' || !hasPermission('stock_exports:create')}
+          onClick={() => setConfirmCancel(true)}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
@@ -68,7 +81,20 @@ export function StockExportsPage() {
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
         onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
+        onRowClick={setSelected}
         storageKey="stock-exports"
+      />
+      <WinMessageBox
+        type="question"
+        title="Xác nhận"
+        message={`Huỷ phiếu xuất ${selected?.export?.voucherNo}? Tồn kho và lô đã trừ sẽ được trả lại.`}
+        open={confirmCancel}
+        buttons="yes_no"
+        onResult={(r) => {
+          if (r === 'yes' && selected?.export) cancelMutation.mutate(selected.export.id)
+          setConfirmCancel(false)
+          setSelected(null)
+        }}
       />
       <StockExportForm
         open={formOpen}

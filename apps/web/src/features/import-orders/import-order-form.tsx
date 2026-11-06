@@ -2,7 +2,7 @@ import { FileText, TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 import { VoucherFields } from '@/components/voucher-fields'
 import { useVoucherFields } from '@/data/use-vouchers'
 import type { VoucherPayload } from '@/data/use-vouchers'
@@ -10,6 +10,7 @@ import { WinDialog } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { formatCurrency, formatNumber } from '@wms/shared'
 import { computeVatTotals } from './vat'
+import { orderToFormValues, orderIngredientOptions, localDay, type EditableImportOrder } from './import-order-edit'
 import { ImportOrderItemsTable, type IngredientOption } from './import-order-items-table'
 
 const itemSchema = z.object({
@@ -51,6 +52,8 @@ interface Props {
   open: boolean
   onClose: () => void
   onSave?: (data: FormData & VoucherPayload) => void
+  /** Có phiếu ⇒ chế độ sửa (phiếu PENDING): nạp sẵn dữ liệu, lưu = cập nhật. */
+  order?: EditableImportOrder | null
 }
 
 interface SupplierInfo {
@@ -110,7 +113,7 @@ function Section({ step, title, children }: { step: number; title: string; child
  * Phiếu nhập kho — bố cục theo luồng nhập hàng kiểu MISA:
  * ① Nhà cung cấp → ② Chứng từ (hoá đơn, thanh toán) → ③ Hàng tiền → Tổng cộng → Lưu.
  */
-export function ImportOrderForm({ open, onClose, onSave }: Props) {
+export function ImportOrderForm({ open, onClose, onSave, order }: Props) {
   const {
     register,
     control,
@@ -136,7 +139,8 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
   const [unitMap, setUnitMap] = useState<Record<string, string>>({})
   const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const voucher = useVoucherFields('IMPORT', open)
+  const initialVoucher = useMemo(() => (order ? { date: localDay(order.voucherDate), no: order.voucherNo } : null), [order])
+  const voucher = useVoucherFields('IMPORT', open, initialVoucher)
 
   // Tìm NL phía server (giống develop): giới hạn kết quả, cộng dồn ĐVT để cột ĐVT không mất khi đổi từ khoá.
   const fetchIngredients = useCallback((q: string) => {
@@ -145,11 +149,13 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       .get(`/ingredients?limit=20&search=${encodeURIComponent(q)}`)
       .then((res) => {
         const list = res.data as { id: string; name: string; unit: string }[]
-        setIngredients(list.map((x) => ({ value: x.id, label: x.name, unit: x.unit })))
-        setUnitMap((m) => ({ ...m, ...Object.fromEntries(list.map((x) => [x.id, x.unit])) }))
+        const found = list.map((x) => ({ value: x.id, label: x.name, unit: x.unit }))
+        const extra = orderIngredientOptions(order).filter((e) => !found.some((f) => f.value === e.value))
+        setIngredients([...extra, ...found])
+        setUnitMap((m) => ({ ...m, ...Object.fromEntries([...extra, ...found].map((x) => [x.value, x.unit])) }))
       })
       .finally(() => setIngLoading(false))
-  }, [])
+  }, [order])
 
   const supplier = supplierId ? supplierMap[supplierId] : undefined
   // Người bán cá nhân không có hoá đơn ⇒ hiện field "Địa chỉ mua hàng".
@@ -157,7 +163,8 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   useEffect(() => {
     if (!open) return
-    reset(EMPTY_FORM)
+    const initial = order ? orderToFormValues(order) : EMPTY_FORM
+    reset(initial)
     setSubmitError('')
     api.get('/suppliers?limit=1000').then((s) => {
       const supplierList = s.data as {
@@ -169,6 +176,8 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
         phone?: string | null
       }[]
       setSuppliers(supplierList.map((x) => ({ value: x.id, label: x.name })))
+      // Select NCC cần có option trước khi nhận giá trị ⇒ nạp lại dữ liệu sửa sau khi tải danh sách.
+      if (order) reset(initial)
       setSupplierMap(
         Object.fromEntries(
           supplierList.map((x) => [
@@ -180,7 +189,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     })
     fetchIngredients('')
     setTimeout(() => setFocus('supplier_id'), 0)
-  }, [open, reset, setFocus, fetchIngredients])
+  }, [open, order, reset, setFocus, fetchIngredients])
 
   const addRow = useCallback(() => {
     append({ ...DEFAULT_ITEM })
@@ -229,7 +238,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title="Tạo Phiếu Nhập Kho"
+      title={order ? `Sửa Phiếu Nhập Kho ${order.voucherNo}` : 'Tạo Phiếu Nhập Kho'}
       icon={<FileText size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
