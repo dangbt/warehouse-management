@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useState, useEffect, useCallback } from 'react'
 import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
+import { useTerm } from '@/data/use-features'
 
 const schema = z.object({
   ingredient_id: z.string().min(1, 'Chọn nguyên liệu'),
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export function StockExportForm({ open, onClose, onSave }: Props) {
+  const t = useTerm()
   const {
     register,
     control,
@@ -107,7 +109,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
             control={control}
             render={({ field }) => (
               <WinSearchSelect
-                label="Nguyên liệu"
+                label={t('item')}
                 name={field.name}
                 value={field.value}
                 onChange={field.onChange}

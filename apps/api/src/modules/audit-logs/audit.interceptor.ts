@@ -9,8 +9,8 @@ const ACTION_MAP: Record<string, string> = {
   DELETE: 'DELETE',
 };
 
-// Skip these paths from audit logging
-const SKIP_PATHS = ['/api/v1/auth/login', '/api/v1/audit-logs'];
+// Skip these paths from audit logging (settings/features tự ghi audit kèm oldValues)
+const SKIP_PATHS = ['/api/v1/auth/login', '/api/v1/audit-logs', '/api/v1/settings/features'];
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {

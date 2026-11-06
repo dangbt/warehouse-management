@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Body, Param, UseGuards } from '@nestjs/comm
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { MenuService } from './menu.service';
+import { FeatureGuard, RequireFeature } from '../settings/feature.guard';
 
 type MenuBody = {
   name?: string;
@@ -14,7 +15,8 @@ type MenuBody = {
   is_active?: boolean;
 };
 
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, FeatureGuard)
+@RequireFeature('menu')
 @Controller('menu-items')
 export class MenuController {
   constructor(private svc: MenuService) {}

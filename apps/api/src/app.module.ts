@@ -22,6 +22,7 @@ import { IngredientGroupsModule } from './modules/ingredient-groups/ingredient-g
 import { ProcessingModule } from './modules/processing/processing.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { SupportModule } from './modules/support/support.module';
+import { SettingsModule } from './modules/settings/settings.module';
 import { TaxModule } from './modules/tax/tax.module';
 
 @Module({
@@ -47,6 +48,7 @@ import { TaxModule } from './modules/tax/tax.module';
     MenuModule,
     SupportModule,
     TaxModule,
+    SettingsModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],

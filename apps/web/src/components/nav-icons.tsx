@@ -4,6 +4,7 @@ import {
   ArrowUpFromLine,
   BarChart3,
   BookOpen,
+  Briefcase,
   Building2,
   ChefHat,
   ClipboardCheck,
@@ -65,6 +66,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   '/users': Users,
   '/roles': KeyRound,
   '/audit-logs': ScrollText,
+  '/settings-business': Briefcase,
 }
 
 export function NavIcon({ id, size = 16, className }: { id: string; size?: number; className?: string }) {
