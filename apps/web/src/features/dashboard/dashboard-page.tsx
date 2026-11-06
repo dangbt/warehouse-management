@@ -14,15 +14,17 @@ import {
 import { WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement, useImportOrders, useExpiringBatches } from '@/data'
 import { formatDateTime, formatDate, formatNumber } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
 export function DashboardPage() {
+  const t = useTerm()
   const { data: summary, refetch: refetchSummary } = useStockSummary()
   const { data: movements } = useStockMovement()
   const { data: pendingOrders } = useImportOrders({ status: 'PENDING' })
   const { data: expiringBatches } = useExpiringBatches(7)
 
   const cards = [
-    { label: 'Nguyên liệu', value: summary?.total ?? 0, icon: <Package size={24} />, color: 'text-win-active-title' },
+    { label: t('item'), value: summary?.total ?? 0, icon: <Package size={24} />, color: 'text-win-active-title' },
     {
       label: 'Phiếu chờ duyệt',
       value: pendingOrders?.meta.total ?? 0,
@@ -129,7 +131,7 @@ export function DashboardPage() {
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">Mã lô</th>
-                  <th className="text-left p-1">Nguyên liệu</th>
+                  <th className="text-left p-1">{t('item')}</th>
                   <th className="p-1">Số lượng</th>
                   <th className="p-1">HSD</th>
                   <th className="p-1">Còn</th>

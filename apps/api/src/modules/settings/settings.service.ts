@@ -20,10 +20,12 @@ export class SettingsService {
   /** Profile trong DB; chưa có thì lấy từ env BUSINESS_PROFILE (mặc định FNB). */
   async getFeatures(): Promise<FeaturesState> {
     // Bảng chưa migrate / DB lỗi → dùng mặc định theo env, không làm sập các module bị gate.
-    const rows = await this.prisma.appSetting.findMany({ where: { key: { in: [PROFILE_KEY, OVERRIDES_KEY] } } }).catch((e: Error) => {
-      this.logger.warn(`Không đọc được app_settings, dùng mặc định theo env: ${e.message.split('\n').pop()}`);
-      return [];
-    });
+    const rows: { key: string; value: unknown }[] = await this.prisma.appSetting
+      .findMany({ where: { key: { in: [PROFILE_KEY, OVERRIDES_KEY] } } })
+      .catch((e: Error) => {
+        this.logger.warn(`Không đọc được app_settings, dùng mặc định theo env: ${e.message.split('\n').pop()}`);
+        return [];
+      });
     const profileRow = rows.find((r) => r.key === PROFILE_KEY)?.value;
     const profile: BusinessProfile = isBusinessProfile(profileRow) ? profileRow : profileFromEnv(process.env.BUSINESS_PROFILE);
     const overrides = sanitizeOverrides(rows.find((r) => r.key === OVERRIDES_KEY)?.value);

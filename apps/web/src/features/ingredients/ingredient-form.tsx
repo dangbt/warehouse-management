@@ -145,13 +145,13 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
       } as FormData)
       onClose()
     } catch (e: unknown) {
-      setSubmitError(e instanceof Error ? e.message : 'Lỗi lưu nguyên liệu')
+      setSubmitError(e instanceof Error ? e.message : `Lỗi lưu ${t('item_lower')}`)
     }
   }
 
   return (
     <WinDialog
-      title={mode === 'add' ? 'Thêm Nguyên Liệu' : 'Sửa Nguyên Liệu'}
+      title={mode === 'add' ? t('item_add') : t('item_edit')}
       icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}

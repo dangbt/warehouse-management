@@ -2,19 +2,19 @@ import { ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { useTerm } from '@/data/use-features'
 
-const schema = z.object({
-  ingredient_id: z.string().min(1, 'Chọn nguyên liệu'),
+const makeSchema = (itemLower: string) => z.object({
+  ingredient_id: z.string().min(1, `Chọn ${itemLower}`),
   quantity: z.coerce.number().min(0.01, 'Phải > 0'),
   reason: z.string().min(1, 'Chọn lý do'),
   note: z.string().optional(),
 })
 
-type FormData = z.infer<typeof schema>
+type FormData = z.infer<ReturnType<typeof makeSchema>>
 
 const reasons = [
   { value: 'DAMAGED', label: 'Hỏng' },
@@ -32,6 +32,7 @@ interface Props {
 
 export function StockExportForm({ open, onClose, onSave }: Props) {
   const t = useTerm()
+  const schema = useMemo(() => makeSchema(t('item_lower')), [t])
   const {
     register,
     control,

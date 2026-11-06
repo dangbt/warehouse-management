@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 import { splitLineTax, allocateDiscount, VAT_RATES, type VatRate } from '../tax/vat';
 import { parsePeriod } from '../tax/period';
+import { SettingsService } from '../settings/settings.service';
 
 interface KiotVietOrderInput {
   id: string;
@@ -33,6 +34,7 @@ export class KiotVietService {
   constructor(
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
+    private settings: SettingsService,
   ) {}
 
   private normalize(s: string) {
@@ -115,6 +117,8 @@ export class KiotVietService {
 
   async syncOrders(orders: KiotVietOrderInput[], userId: string) {
     const results = { synced: 0, skipped: 0, deducted: 0, unconfigured: [] as string[], errors: [] as string[] };
+    // Tắt kiotviet_recipe_deduct → chỉ đồng bộ đơn, không tự trừ kho theo công thức.
+    const autoDeduct = (await this.settings.getFeatures()).flags.kiotviet_recipe_deduct;
 
     // Cấu hình thuế đầu ra dùng chung cho cả lần đồng bộ.
     const setting = await this.getTaxDefaults();
@@ -171,6 +175,7 @@ export class KiotVietService {
       });
       results.synced++;
 
+      if (!autoDeduct) continue;
       // Tự động trừ kho ngay sau khi sync (best-effort: 1 order lỗi không chặn các order khác)
       try {
         const r = await this.deductOrder(created.id, userId);
