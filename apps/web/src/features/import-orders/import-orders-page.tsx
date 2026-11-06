@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Check, ClipboardList, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
+import { Check, ClipboardList, FileSpreadsheet, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
+import { ExcelImportDialog } from './excel-import/excel-import-dialog'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
@@ -87,6 +88,7 @@ const columns: Column<ImportOrder>[] = [
 export function ImportOrdersPage() {
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [excelOpen, setExcelOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -106,6 +108,7 @@ export function ImportOrdersPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button icon={<FileSpreadsheet size={16} />} label="Nhập Excel" onClick={() => setExcelOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Check size={16} />}
@@ -224,6 +227,13 @@ export function ImportOrdersPage() {
           refetch()
         }}
         onSave={(data) => createMutation.mutateAsync(data)}
+      />
+      <ExcelImportDialog
+        open={excelOpen}
+        onClose={() => {
+          setExcelOpen(false)
+          refetch()
+        }}
       />
       <WinMessageBox
         type="question"
