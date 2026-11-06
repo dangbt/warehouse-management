@@ -7,7 +7,7 @@ export function vnStartOfDay(now: Date): Date {
   return new Date(Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth(), vn.getUTCDate()) - VN_OFFSET_MS);
 }
 
-function parseBound(v: string, endOfDay: boolean): Date {
+export function parseBound(v: string, endOfDay: boolean): Date {
   // Chuỗi chỉ-ngày (YYYY-MM-DD) hiểu là ngày lịch VN; ISO đầy đủ là biên UTC do client gửi.
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
     const start = new Date(`${v}T00:00:00.000Z`).getTime() - VN_OFFSET_MS;

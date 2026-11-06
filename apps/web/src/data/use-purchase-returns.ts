@@ -30,7 +30,7 @@ export interface PurchaseReturnItem {
 
 interface ListResponse {
   data: PurchaseReturn[]
-  meta: { page: number; limit: number; total: number }
+  meta: { page: number; limit: number; total: number; totals?: { subtotal: number; vatAmount: number; totalAmount: number } }
 }
 
 /** Dòng nguyên liệu trong phiếu nhập gốc (để suy ra thuế suất mặc định khi trả). */
@@ -58,10 +58,13 @@ interface ImportOrderListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function usePurchaseReturns() {
+export function usePurchaseReturns(params?: { from?: string; to?: string }) {
+  const query = new URLSearchParams({ limit: '50' })
+  if (params?.from) query.set('from', params.from)
+  if (params?.to) query.set('to', params.to)
   return useQuery<ListResponse>({
-    queryKey: QUERY_KEYS.purchaseReturnsList(),
-    queryFn: () => api.get('/purchase-returns?limit=50'),
+    queryKey: [...QUERY_KEYS.purchaseReturnsList(), Object.fromEntries(query)],
+    queryFn: () => api.get(`/purchase-returns?${query}`),
   })
 }
 

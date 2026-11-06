@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
+import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
@@ -44,15 +45,25 @@ export class ImportOrdersService {
     private vouchers: VoucherService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string }) {
+  async findAll(q: {
+    page?: string;
+    limit?: string;
+    status?: string;
+    supplier_id?: string;
+    has_invoice?: string;
+    from?: string;
+    to?: string;
+  }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { status?: string; supplierId?: string; hasInvoice?: boolean } = {};
+    const where: { status?: string; supplierId?: string; hasInvoice?: boolean; voucherDate?: { gte?: Date; lte?: Date } } = {};
+    const dateRange = voucherDateFilter(q);
+    if (dateRange) where.voucherDate = dateRange;
     if (q.status) where.status = q.status;
     if (q.supplier_id) where.supplierId = q.supplier_id;
     if (q.has_invoice === 'true') where.hasInvoice = true;
     else if (q.has_invoice === 'false') where.hasInvoice = false;
-    const [data, total] = await Promise.all([
+    const [data, total, agg] = await Promise.all([
       this.prisma.importOrder.findMany({
         where,
         skip: (page - 1) * limit,
@@ -61,8 +72,10 @@ export class ImportOrdersService {
         include: { supplier: true, items: { include: { ingredient: true } } },
       }),
       this.prisma.importOrder.count({ where }),
+      this.prisma.importOrder.aggregate({ where, _sum: { subtotal: true, vatAmount: true, totalAmount: true } }),
     ]);
-    return { data, meta: { page, limit, total } };
+    const totals = { subtotal: toNum(agg._sum.subtotal), vatAmount: toNum(agg._sum.vatAmount), totalAmount: toNum(agg._sum.totalAmount) };
+    return { data, meta: { page, limit, total, totals } };
   }
 
   async create(userId: string, body: CreateImportOrderInput) {

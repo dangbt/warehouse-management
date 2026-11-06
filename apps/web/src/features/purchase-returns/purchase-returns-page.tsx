@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -7,6 +8,9 @@ import { VoucherFields } from '@/components/voucher-fields'
 import { formatDate, formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
+import { PeriodFilter } from '@/components/period-filter'
+import { resolvePeriod } from '@/utils/period'
+import { Route } from '@/routes/_app/purchase-returns'
 import { lineTotalPrice, computeLineVat, computeVatTotals } from '../import-orders/vat'
 
 const columns: Column<PurchaseReturn>[] = [
@@ -36,7 +40,10 @@ const EMPTY_ITEM: ReturnItem = { ingredientId: '', quantity: 0, unitPrice: 0, va
 
 export function PurchaseReturnsPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const { data: res, isLoading, refetch } = usePurchaseReturns()
+  const { period, from, to } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+  const setParams = (updates: Record<string, unknown>) => navigate({ search: (prev) => ({ ...prev, ...updates }) })
+  const { data: res, isLoading, refetch } = usePurchaseReturns(resolvePeriod(period, from, to))
   const createMutation = useCreatePurchaseReturn()
   const { data: suppliersRes } = useSuppliers()
   const { data: ingredientsRes } = useIngredients()
@@ -139,8 +146,21 @@ export function PurchaseReturnsPage() {
         <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu trả" onClick={() => setDialogOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Separator />
+        <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams(v)} />
       </WinToolbar>
-      <WinDataGrid searchable columns={columns} data={res?.data ?? []} loading={isLoading} storageKey="purchase-returns" />
+      <WinDataGrid
+        searchable
+        columns={columns}
+        data={res?.data ?? []}
+        loading={isLoading}
+        footer={
+          res?.meta.totals
+            ? { vatAmount: formatCurrency(res.meta.totals.vatAmount), totalAmount: formatCurrency(res.meta.totals.totalAmount) }
+            : undefined
+        }
+        storageKey="purchase-returns"
+      />
 
       <WinDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Tạo phiếu trả hàng" width={hasInvoice ? 760 : 600}>
         <div className="space-y-3 p-3">
