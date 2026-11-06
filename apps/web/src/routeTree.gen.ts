@@ -31,6 +31,7 @@ import { Route as AppImportOrdersRouteImport } from './routes/_app/import-orders
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppConsumptionVarianceRouteImport } from './routes/_app/consumption-variance'
 import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
+import { Route as PrintImportOrdersIdRouteImport } from './routes/print.import-orders.$id'
 import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
 import { Route as AppTaxOutputRevenueRouteImport } from './routes/_app/tax/output-revenue'
 import { Route as AppTaxNoInvoicePurchasesRouteImport } from './routes/_app/tax/no-invoice-purchases'
@@ -147,6 +148,11 @@ const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
   path: '/audit-logs',
   getParentRoute: () => AppRoute,
 } as any)
+const PrintImportOrdersIdRoute = PrintImportOrdersIdRouteImport.update({
+  id: '/print/import-orders/$id',
+  path: '/print/import-orders/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppTaxSummaryRoute = AppTaxSummaryRouteImport.update({
   id: '/tax/summary',
   path: '/tax/summary',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/tax/summary': typeof AppTaxSummaryRoute
+  '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/tax/summary': typeof AppTaxSummaryRoute
+  '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/_app/tax/no-invoice-purchases': typeof AppTaxNoInvoicePurchasesRoute
   '/_app/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/_app/tax/summary': typeof AppTaxSummaryRoute
+  '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/tax/no-invoice-purchases'
     | '/tax/output-revenue'
     | '/tax/summary'
+    | '/print/import-orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/tax/no-invoice-purchases'
     | '/tax/output-revenue'
     | '/tax/summary'
+    | '/print/import-orders/$id'
   id:
     | '__root__'
     | '/'
@@ -357,12 +368,14 @@ export interface FileRouteTypes {
     | '/_app/tax/no-invoice-purchases'
     | '/_app/tax/output-revenue'
     | '/_app/tax/summary'
+    | '/print/import-orders/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PrintImportOrdersIdRoute: typeof PrintImportOrdersIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -521,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditLogsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/print/import-orders/$id': {
+      id: '/print/import-orders/$id'
+      path: '/print/import-orders/$id'
+      fullPath: '/print/import-orders/$id'
+      preLoaderRoute: typeof PrintImportOrdersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/tax/summary': {
       id: '/_app/tax/summary'
       path: '/tax/summary'
@@ -628,6 +648,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  PrintImportOrdersIdRoute: PrintImportOrdersIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

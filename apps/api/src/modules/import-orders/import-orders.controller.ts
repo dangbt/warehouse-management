@@ -15,6 +15,12 @@ export class ImportOrdersController {
     return this.svc.findAll(q);
   }
 
+  @Get(':id')
+  @RequirePermissions('import_orders:read')
+  findOne(@Param('id') id: string) {
+    return this.svc.findOne(id);
+  }
+
   @Post()
   @RequirePermissions('import_orders:create')
   create(@Req() req, @Body() body: CreateImportOrderInput) {

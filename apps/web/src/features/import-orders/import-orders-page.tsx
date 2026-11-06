@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Check, ClipboardList, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
+import { Check, ClipboardList, Plus, Printer, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
+import { openImportOrderPrint } from './print/voucher-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
@@ -121,6 +122,12 @@ export function ImportOrdersPage() {
           onClick={() => setConfirmAction('reject')}
         />
         <WinToolbar.Separator />
+        <WinToolbar.Button
+          icon={<Printer size={16} />}
+          label="In"
+          disabled={!selected}
+          onClick={() => selected && openImportOrderPrint(selected.id)}
+        />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <select
@@ -159,6 +166,14 @@ export function ImportOrdersPage() {
             <span className={`px-2 py-0.5 text-[12px] rounded ${statusColors[selected.status] || ''}`}>
               {statusLabels[selected.status] || selected.status}
             </span>
+            <button
+              type="button"
+              data-testid="detail-print-button"
+              onClick={() => openImportOrderPrint(selected.id)}
+              className="inline-flex items-center gap-1 px-2 py-0.5 border border-win-grid-border bg-white cursor-pointer hover:bg-win-menu-hover"
+            >
+              <Printer size={14} strokeWidth={1.75} /> In phiếu
+            </button>
           </div>
           {selected.hasInvoice && (
             <div className="mb-2">

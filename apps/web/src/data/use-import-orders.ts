@@ -38,6 +38,25 @@ export function useImportOrders(params?: { status?: string; page?: number; order
   })
 }
 
+export interface ImportOrderDetail extends Omit<ImportOrder, 'items'> {
+  note?: string | null
+  items: {
+    id: string
+    ingredient: { name: string; unit: string }
+    quantity: string
+    unitPrice: string
+    totalPrice: string
+  }[]
+}
+
+/** Chi tiết 1 phiếu nhập (dùng cho trang in). Key riêng để không lẫn với cache danh sách. */
+export function useImportOrderDetail(id: string) {
+  return useQuery<ImportOrderDetail>({
+    queryKey: ['import-order-detail', id],
+    queryFn: () => api.get(`/import-orders/${id}`),
+  })
+}
+
 export function useCreateImportOrder() {
   return useMutation({
     mutationFn: (data: {
