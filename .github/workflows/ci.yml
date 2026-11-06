@@ -2,13 +2,13 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [master]
   workflow_dispatch:
 
 env:
-  TURBO_API: ${{ github.base_ref == 'develop' && 'http://127.0.0.1:8585' || '' }}
-  TURBO_TEAM: ${{ github.base_ref == 'develop' && 'warehouse-management' || '' }}
-  TURBO_TOKEN: ${{ github.base_ref == 'develop' && secrets.TURBO_TOKEN || '' }}
+  TURBO_API: ${{ github.base_ref == 'master' && 'http://127.0.0.1:8585' || '' }}
+  TURBO_TEAM: ${{ github.base_ref == 'master' && 'warehouse-management' || '' }}
+  TURBO_TOKEN: ${{ github.base_ref == 'master' && secrets.TURBO_TOKEN || '' }}
 
 jobs:
   lint-and-test:
@@ -22,7 +22,7 @@ jobs:
           cache: npm
 
       - name: Turborepo Remote Cache
-        if: github.base_ref == 'develop'
+        if: github.base_ref == 'master'
         uses: brunojppb/turbo-cache-server@4.0.3
         env:
           PORT: "8585"
