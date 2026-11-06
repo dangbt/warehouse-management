@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@wms/ui-winforms/styles';
+@import './print.css';
 /* Tailwind v4 không tự quét workspace package trong node_modules → khai báo để có class của ui-winforms (vd px-2.5 nút toolbar). */
 @source '../../../../packages/ui-winforms/src';
 

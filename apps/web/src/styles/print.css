@@ -1,0 +1,35 @@
+/* Hạ tầng in chứng từ A4 dọc (PrintLayout). */
+.print-root { background: #e5e7eb; height: 100vh; overflow: auto; font-family: 'Times New Roman', Times, serif; color: #000; }
+.print-toolbar { display: flex; gap: 12px; align-items: center; padding: 8px 16px; background: #fff; border-bottom: 1px solid #ccc; position: sticky; top: 0; font-family: sans-serif; font-size: 13px; }
+.print-config-warning { margin: 8px auto 0; width: 210mm; padding: 8px 12px; background: #fff7e0; border: 1px solid #e0b000; font-family: sans-serif; font-size: 13px; }
+.print-config-warning a { color: #d4451a; text-decoration: underline; }
+.print-page { width: 210mm; min-height: 297mm; margin: 8px auto; padding: 15mm 15mm 15mm 20mm; background: #fff; box-sizing: border-box; font-size: 13px; line-height: 1.35; }
+.print-header { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.print-org { max-width: 60%; }
+.print-org-name { font-weight: bold; text-transform: uppercase; }
+.print-form-note { text-align: center; font-size: 12px; }
+.print-title { text-align: center; font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 6px 0 2px; }
+.print-subtitle { text-align: center; font-style: italic; margin-bottom: 8px; }
+.print-meta { margin: 8px 0; }
+.print-meta div { margin: 2px 0; }
+.print-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.print-table th, .print-table td { border: 1px solid #000; padding: 2px 4px; vertical-align: top; }
+.print-table th { text-align: center; font-weight: bold; }
+.print-table thead { display: table-header-group; }
+.print-table tr { break-inside: avoid; page-break-inside: avoid; }
+.print-table .num { text-align: right; white-space: nowrap; }
+.print-table .ctr { text-align: center; }
+.print-table .total-row td { font-weight: bold; }
+.print-signatures { display: flex; justify-content: space-between; margin-top: 16px; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+.print-signature { flex: 1; min-height: 80px; }
+.print-signature-role { font-weight: bold; }
+.print-signature-hint { font-style: italic; font-size: 11px; }
+.print-date-line { text-align: right; font-style: italic; margin-top: 8px; }
+
+@page { size: A4 portrait; margin: 10mm; }
+@media print {
+  html, body, #root { height: auto !important; overflow: visible !important; background: #fff !important; }
+  .no-print { display: none !important; }
+  .print-root { background: #fff; height: auto; overflow: visible; }
+  .print-page { margin: 0; width: auto; min-height: 0; padding: 0; box-shadow: none; }
+}

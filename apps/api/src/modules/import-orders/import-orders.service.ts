@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
@@ -63,6 +63,15 @@ export class ImportOrdersService {
       this.prisma.importOrder.count({ where }),
     ]);
     return { data, meta: { page, limit, total } };
+  }
+
+  async findOne(id: string) {
+    const order = await this.prisma.importOrder.findUnique({
+      where: { id },
+      include: { supplier: true, items: { include: { ingredient: true } } },
+    });
+    if (!order) throw new NotFoundException('Không tìm thấy phiếu nhập');
+    return order;
   }
 
   async create(userId: string, body: CreateImportOrderInput) {
