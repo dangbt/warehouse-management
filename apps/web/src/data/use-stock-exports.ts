@@ -46,8 +46,5 @@ export function useCreateStockExport() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
       useToastStore.getState().success('Xuất kho thành công')
     },
-    onError: (e: Error) => {
-      useToastStore.getState().error(e.message)
-    },
   })
 }
