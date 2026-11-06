@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { PeriodLockService } from '../common/period-lock.service';
 
-/** Huỷ chứng từ xuất kho: trả lại lô + tồn đã trừ, xoá bút toán kho, đánh dấu CANCELLED (giữ bản ghi). */
+/** Huỷ chứng từ xuất kho: trả lại lô + tồn đã trừ, giữ dòng giao dịch (SL=0), đánh dấu CANCELLED (giữ bản ghi). */
 @Injectable()
 export class StockExportCancelService {
   constructor(
@@ -25,7 +25,13 @@ export class StockExportCancelService {
           await tx.ingredientBatch.updateMany({ where: { id: t.referenceId }, data: { quantity: { increment: qty }, status: 'ACTIVE' } });
         }
       }
-      await tx.stockTransaction.deleteMany({ where: { exportId: id } });
+      // Giữ dòng giao dịch để phiếu vẫn hiện trong danh sách; về 0 nên không ảnh hưởng báo cáo tồn/giá vốn.
+      for (const t of voucher.transactions) {
+        await tx.stockTransaction.update({
+          where: { id: t.id },
+          data: { quantity: 0, totalCost: 0, note: `[ĐÃ HUỶ - SL gốc ${Math.abs(Number(t.quantity))}] ${t.note ?? ''}`.trim() },
+        });
+      }
       await tx.stockExport.update({ where: { id }, data: { status: 'CANCELLED' } });
       return { message: 'Đã huỷ phiếu xuất', id, status: 'CANCELLED' };
     });

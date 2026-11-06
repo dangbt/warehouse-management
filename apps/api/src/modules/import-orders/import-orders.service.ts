@@ -158,6 +158,7 @@ export class ImportOrdersService {
           where: { id },
           data: {
             voucherNo,
+            code: voucherNo,
             voucherDate,
             supplierId: body.supplier_id,
             hasInvoice,
