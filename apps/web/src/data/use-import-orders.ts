@@ -50,6 +50,20 @@ export interface ImportOrderDetail extends Omit<ImportOrder, 'items'> {
 }
 
 /** Chi tiết 1 phiếu nhập (dùng cho trang in). Key riêng để không lẫn với cache danh sách. */
+export interface PrintHeader {
+  companyName: string | null
+  address: string | null
+  taxCode: string | null
+}
+
+/** Header đơn vị để in (quyền import_orders:read, không cần tax:read). */
+export function usePrintHeader() {
+  return useQuery<PrintHeader>({
+    queryKey: ['import-orders', 'print-header'],
+    queryFn: () => api.get('/import-orders/print-header'),
+  })
+}
+
 export function useImportOrderDetail(id: string) {
   return useQuery<ImportOrderDetail>({
     queryKey: ['import-order-detail', id],

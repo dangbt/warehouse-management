@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
+import { useAuthStore } from '@/stores/auth.store'
 
 export interface PrintOrg {
   companyName?: string | null
@@ -21,6 +22,7 @@ interface PrintLayoutProps {
  * CSS @media print ẩn mọi thứ có class `no-print`. Nội dung chứng từ truyền qua children.
  */
 export function PrintLayout({ org, formNote, toolbar, children }: PrintLayoutProps) {
+  const canConfigure = useAuthStore((s) => s.hasPermission)('tax:manage')
   const missing = !org?.companyName || !org?.address || !org?.taxCode
   return (
     <div className="print-root">
@@ -28,7 +30,11 @@ export function PrintLayout({ org, formNote, toolbar, children }: PrintLayoutPro
       {missing && (
         <div className="no-print print-config-warning" data-testid="print-config-warning">
           Chưa đủ thông tin đơn vị (tên, địa chỉ, MST) — header phiếu sẽ bị trống.{' '}
-          <Link to="/tax-settings">Mở cấu hình thông tin doanh nghiệp</Link>
+          {canConfigure ? (
+            <Link to="/tax-settings">Mở cấu hình thông tin doanh nghiệp</Link>
+          ) : (
+            'Liên hệ quản trị viên để bổ sung.'
+          )}
         </div>
       )}
       <article className="print-page">

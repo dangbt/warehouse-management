@@ -1,5 +1,4 @@
 const DIGITS = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín']
-const UNITS = ['', 'nghìn', 'triệu', 'tỷ']
 
 /** Đọc nhóm 3 chữ số (0-999). `full` = có đứng sau nhóm khác (đọc "không trăm", "lẻ"). */
 function readTriple(n: number, full: boolean): string {
@@ -19,23 +18,27 @@ function readTriple(n: number, full: boolean): string {
   return parts.join(' ')
 }
 
+/** Đọc số < 1 tỷ. `full` = đứng sau phần tỷ nên nhóm đầu cũng đọc "không trăm"/"lẻ". */
+function readBelowBillion(n: number, full: boolean): string {
+  const groups = [Math.floor(n / 1_000_000), Math.floor(n / 1000) % 1000, n % 1000]
+  const units = ['triệu', 'nghìn', '']
+  const parts: string[] = []
+  let started = full
+  groups.forEach((g, i) => {
+    if (g === 0) return
+    parts.push([readTriple(g, started), units[i]].filter(Boolean).join(' '))
+    started = true
+  })
+  return parts.join(' ')
+}
+
 function readInteger(n: number): string {
   if (n === 0) return DIGITS[0]
-  const groups: number[] = []
-  let rest = n
-  while (rest > 0) {
-    groups.push(rest % 1000)
-    rest = Math.floor(rest / 1000)
-  }
-  const parts: string[] = []
-  for (let i = groups.length - 1; i >= 0; i--) {
-    const g = groups[i]
-    if (g === 0) continue
-    const full = i < groups.length - 1
-    const unit = UNITS[i % 4] + (i >= 4 ? ' tỷ'.repeat(Math.floor(i / 4)) : '')
-    parts.push([readTriple(g, full), unit.trim()].filter(Boolean).join(' '))
-  }
-  return parts.join(' ')
+  const billions = Math.floor(n / 1_000_000_000)
+  const rest = n % 1_000_000_000
+  const head = billions > 0 ? `${readInteger(billions)} tỷ` : ''
+  const tail = rest > 0 ? readBelowBillion(rest, billions > 0) : ''
+  return [head, tail].filter(Boolean).join(' ')
 }
 
 /**
