@@ -1,6 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 
 @Injectable()
@@ -9,6 +11,8 @@ export class ProcessingService {
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
     private vouchers: VoucherService,
+    private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
@@ -79,6 +83,7 @@ export class ProcessingService {
     if (outputQty <= 0) throw new BadRequestException('Lượng thành phẩm thực thu phải > 0');
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('PROCESSING', body.voucher_no);
 
     return this.prisma.processingOrder
@@ -103,6 +108,7 @@ export class ProcessingService {
     const order = await this.prisma.processingOrder.findUnique({ where: { id } });
     if (!order) throw new NotFoundException('Không tìm thấy phiếu chế biến');
     if (order.status !== 'DRAFT') throw new BadRequestException('Chỉ hoàn thành phiếu ở trạng thái DRAFT');
+    await this.periodLock.assertOpen(order.voucherDate);
 
     const source = await this.prisma.ingredient.findUnique({ where: { id: order.sourceIngredientId } });
     if (!source) throw new BadRequestException('Nguyên liệu nguồn không tồn tại');
@@ -110,13 +116,10 @@ export class ProcessingService {
     const outputQty = Number(order.outputQty);
     if (Number(source.currentStock) < sourceQty) throw new BadRequestException('Không đủ tồn nguyên liệu nguồn');
 
-    // Giá vốn chuyển sang thành phẩm: hao hụt tự đẩy giá vốn/đơn vị lên
-    const sourceCost = Number(source.costPerUnit);
-    const movedValue = +(sourceQty * sourceCost).toFixed(2);
-    const outputCost = +(movedValue / outputQty).toFixed(2);
-
+    let outputCost = 0;
     await this.prisma.$transaction(async (tx) => {
-      // 1. Trừ nguồn theo lô (FIFO) + trừ tồn
+      // 1. Giá vốn NL nguồn xuất theo phương pháp tính giá; trừ nguồn theo lô + trừ tồn
+      const sourceCost = await this.costing.costOutbound(tx, order.sourceIngredientId, sourceQty);
       await this.batchDeduction.deductFromBatches(tx, order.sourceIngredientId, sourceQty);
       await tx.ingredient.update({
         where: { id: order.sourceIngredientId },
@@ -127,8 +130,10 @@ export class ProcessingService {
           ingredientId: order.sourceIngredientId,
           type: 'PROCESS_OUT',
           quantity: -sourceQty,
-          unitPrice: sourceCost,
-          totalPrice: -movedValue,
+          unitPrice: sourceCost.unitCost,
+          totalPrice: -sourceCost.totalCost,
+          unitCost: sourceCost.unitCost,
+          totalCost: sourceCost.totalCost,
           referenceId: order.code,
           createdById: userId,
           voucherDate: order.voucherDate,
@@ -136,7 +141,9 @@ export class ProcessingService {
         },
       });
 
-      // 2. Cộng thành phẩm + cập nhật giá vốn theo mẻ này
+      // 2. Giá BTP = tổng giá vốn NL nguồn xuất ra; hao hụt tự đẩy giá vốn/đơn vị lên
+      const movedValue = sourceCost.totalCost;
+      outputCost = +(movedValue / outputQty).toFixed(2);
       await tx.ingredient.update({
         where: { id: order.outputIngredientId },
         data: { currentStock: { increment: outputQty }, costPerUnit: outputCost },
@@ -148,6 +155,8 @@ export class ProcessingService {
           quantity: outputQty,
           unitPrice: outputCost,
           totalPrice: movedValue,
+          unitCost: +(movedValue / outputQty).toFixed(4),
+          totalCost: movedValue,
           referenceId: order.code,
           createdById: userId,
           voucherDate: order.voucherDate,

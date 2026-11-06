@@ -12,6 +12,8 @@ export interface KiotVietOrder {
   items: { productName: string; quantity: number }[]
   orderDate: string
   deducted: boolean
+  /** Mã lỗi lần trừ kho gần nhất (vd PERIOD_LOCKED). */
+  deductError?: string | null
 }
 
 interface KiotVietOrdersResponse {
