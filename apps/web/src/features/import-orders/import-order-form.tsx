@@ -1,3 +1,4 @@
+import { itemLabel } from '@/utils/item-label'
 import { FileText, TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -140,8 +141,8 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     api
       .get(`/ingredients?limit=20&search=${encodeURIComponent(q)}`)
       .then((res) => {
-        const list = res.data as { id: string; name: string; unit: string }[]
-        setIngredients(list.map((x) => ({ value: x.id, label: x.name, unit: x.unit })))
+        const list = res.data as { id: string; name: string; sku?: string | null; unit: string }[]
+        setIngredients(list.map((x) => ({ value: x.id, label: itemLabel(x), unit: x.unit })))
         setUnitMap((m) => ({ ...m, ...Object.fromEntries(list.map((x) => [x.id, x.unit])) }))
       })
       .finally(() => setIngLoading(false))

@@ -2,6 +2,7 @@ import { ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { itemLabel } from '@/utils/item-label'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
@@ -50,9 +51,9 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
       .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}`)
       .then((res) => {
         setIngredients(
-          (res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({
+          (res.data as { id: string; name: string; sku?: string | null; currentStock: string; unit: string }[]).map((i) => ({
             value: i.id,
-            label: `${i.name} (tồn: ${i.currentStock} ${i.unit})`,
+            label: `${itemLabel(i)} (tồn: ${i.currentStock} ${i.unit})`,
           })),
         )
       })
