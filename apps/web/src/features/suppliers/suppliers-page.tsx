@@ -7,6 +7,7 @@ import { SupplierForm } from './supplier-form'
 import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '@/data'
 import { useSupplierPayments, useCreateSupplierPayment } from '@/data'
 import { formatDateTime, formatCurrency } from '@wms/shared'
+import { openPrint } from '@/components/print/print-utils'
 
 interface SupplierWithDebt extends Supplier {
   totalDebt?: string
@@ -128,6 +129,7 @@ export function SuppliersPage() {
                   <th className="p-1">PT</th>
                   <th className="text-left p-1">Người tạo</th>
                   <th className="text-left p-1">Ghi chú</th>
+                  <th className="p-1" />
                 </tr>
               </thead>
               <tbody>
@@ -138,6 +140,13 @@ export function SuppliersPage() {
                     <td className="p-1 text-center">{p.method}</td>
                     <td className="p-1">{p.createdBy.fullName}</td>
                     <td className="p-1">{p.note ?? '-'}</td>
+                    <td className="p-1 text-center">
+                      {p.method === 'CASH' && (
+                        <button type="button" data-testid="payment-print-button" onClick={() => openPrint('supplier-payments', p.id)}>
+                          In phiếu chi
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

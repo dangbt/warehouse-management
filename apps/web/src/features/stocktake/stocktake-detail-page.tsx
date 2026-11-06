@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Save, CheckCircle, ArrowLeft } from 'lucide-react'
+import { Save, CheckCircle, ArrowLeft, Printer } from 'lucide-react'
+import { openPrint } from '@/components/print/print-utils'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStocktakeDetail, useUpdateStocktakeItems, useCompleteStocktake } from '@/data'
@@ -92,6 +93,7 @@ export function StocktakeDetailPage() {
           disabled={isCompleted}
           onClick={handleComplete}
         />
+        <WinToolbar.Button icon={<Printer size={16} />} label="In biên bản" onClick={() => openPrint('stocktake', id)} />
         <WinToolbar.Separator />
         <span className="text-win-base px-2">
           Phiên: <strong>{detail?.code}</strong> — {isCompleted ? 'Đã hoàn thành' : 'Đang kiểm'}

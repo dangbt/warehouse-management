@@ -37,3 +37,5 @@
 .print-root .print-toolbar, .print-root .print-toolbar *, .print-root .print-config-warning, .print-root .print-config-warning * { font-family: sans-serif; }
 .print-meta .print-meta-row { display: flex; justify-content: space-between; }
 .print-debit-credit { display: inline-flex; gap: 24px; }
+.print-table-dense { font-size: 10px; }
+.print-table-dense th, .print-table-dense td { padding: 1px 2px; }
