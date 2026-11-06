@@ -119,6 +119,20 @@ function buildMenuTree(isHousehold: boolean): TreeNode[] {
           permission: 'ingredients:read',
         },
         {
+          id: 'purchase-requests',
+          label: 'Đề nghị mua hàng',
+          icon: <NavIcon id="/purchase-requests" size={15} />,
+          route: '/purchase-requests',
+          permission: 'purchase_requests:read',
+        },
+        {
+          id: 'purchase-orders',
+          label: 'Đơn mua hàng',
+          icon: <NavIcon id="/purchase-orders" size={15} />,
+          route: '/purchase-orders',
+          permission: 'purchase_orders:read',
+        },
+        {
           id: 'returns',
           label: 'Trả hàng',
           icon: <NavIcon id="/purchase-returns" size={15} />,
@@ -249,6 +263,8 @@ export function AppLayout() {
               ...(hasPermission('processing:read') ? [{ label: 'Chế biến', route: '/processing' }] : []),
               ...(hasPermission('suppliers:read') ? [{ label: 'Nhà cung cấp', route: '/suppliers' }] : []),
               { label: 'Kiểm kê', route: '/stocktake' },
+              ...(hasPermission('purchase_requests:read') ? [{ label: 'Đề nghị mua hàng', route: '/purchase-requests' }] : []),
+              ...(hasPermission('purchase_orders:read') ? [{ label: 'Đơn mua hàng', route: '/purchase-orders' }] : []),
               ...(hasPermission('purchase_returns:read') ? [{ label: 'Trả hàng', route: '/purchase-returns' }] : []),
             ]}
             onNav={(r) => navigate({ to: r })}

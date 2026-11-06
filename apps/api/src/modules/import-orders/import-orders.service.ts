@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { assertPoReceivable, applyReceiptToPo } from '../purchasing/purchase-receipt';
 import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
 // Re-export để giữ tương thích với các import cũ từ module này (vd spec).
@@ -33,6 +34,8 @@ export interface CreateImportOrderInput {
   invoice_date?: string;
   // Địa chỉ nơi mua (áp dụng khi không có hoá đơn). Bỏ trống ⇒ mặc định lấy từ địa chỉ NCC.
   purchase_address?: string;
+  // Liên kết đơn mua hàng (PO) — duyệt phiếu sẽ cập nhật SL đã nhận của PO.
+  purchase_order_id?: string;
   items: ImportOrderItemInput[];
 }
 
@@ -104,6 +107,8 @@ export class ImportOrdersService {
       }
     }
 
+    if (body.purchase_order_id) await assertPoReceivable(this.prisma, body.purchase_order_id, body.supplier_id);
+
     // Quy đổi về đơn vị tồn: baseQty = quantity × factor.
     const lines = body.items.map((i) => {
       const baseQty = i.quantity * (i.factor ?? 1);
@@ -155,6 +160,7 @@ export class ImportOrdersService {
           invoiceSymbol,
           invoiceDate,
           purchaseAddress,
+          purchaseOrderId: body.purchase_order_id || null,
           subtotal,
           vatAmount,
           totalAmount,
@@ -231,6 +237,7 @@ export class ImportOrdersService {
           },
         });
       }
+      if (order.purchaseOrderId) await applyReceiptToPo(tx, order.purchaseOrderId, order.items);
       return { message: 'Đã duyệt phiếu nhập' };
     });
   }

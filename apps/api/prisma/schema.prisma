@@ -40,6 +40,8 @@ model User {
   supplierPayments   SupplierPayment[] @relation("PaymentCreatedBy")
   processingOrders   ProcessingOrder[] @relation("ProcessingCreatedBy")
   taxPeriodCloses    TaxPeriodClose[] @relation("TaxPeriodClosedBy")
+  purchaseRequests  PurchaseRequest[]  @relation("PurchaseRequestCreatedBy")
+  purchaseOrders    PurchaseOrder[]    @relation("PurchaseOrderCreatedBy")
 
   @@map("users")
 }
@@ -101,6 +103,8 @@ model Ingredient {
   lossRatio    Decimal? @map("loss_ratio") @db.Decimal(5, 4)
 
   importOrderItems ImportOrderItem[]
+  purchaseRequestItems PurchaseRequestItem[]
+  purchaseOrderItems   PurchaseOrderItem[]
   stockTransactions StockTransaction[]
   recipeIngredients RecipeIngredient[]
   batches      IngredientBatch[]
@@ -129,6 +133,8 @@ model Supplier {
   importOrders    ImportOrder[]
   purchaseReturns PurchaseReturn[]
   payments        SupplierPayment[]
+  purchaseRequestItems PurchaseRequestItem[]
+  purchaseOrders       PurchaseOrder[]
 
   @@map("suppliers")
 }
@@ -159,7 +165,11 @@ model ImportOrder {
   createdAt   DateTime @default(now()) @map("created_at")
   items       ImportOrderItem[]
   purchaseReturns PurchaseReturn[]
+  // Đơn mua hàng (PO) mà phiếu nhập này nhận hàng theo
+  purchaseOrderId String?           @map("purchase_order_id")
+  purchaseOrder   PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id])
 
+  @@index([purchaseOrderId])
   @@map("import_orders")
 }
 
@@ -322,8 +332,6 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-
-
 model StocktakeSession {
   id          String    @id @default(uuid())
   code        String    @unique
@@ -353,8 +361,6 @@ model StocktakeItem {
 
   @@map("stocktake_items")
 }
-
-
 
 model PurchaseReturn {
   id          String   @id @default(uuid())
@@ -506,4 +512,72 @@ model VoucherConfig {
   digits Int    @default(5)
 
   @@map("voucher_configs")
+}
+
+// Đề nghị mua hàng. status: DRAFT | APPROVED | REJECTED | CONVERTED (đã tách thành PO)
+model PurchaseRequest {
+  id           String                @id @default(uuid())
+  code         String                @unique
+  status       String                @default("DRAFT")
+  note         String?
+  createdById  String                @map("created_by")
+  createdBy    User                  @relation("PurchaseRequestCreatedBy", fields: [createdById], references: [id])
+  approvedById String?               @map("approved_by")
+  createdAt    DateTime              @default(now()) @map("created_at")
+  items        PurchaseRequestItem[]
+  orders       PurchaseOrder[]
+
+  @@map("purchase_requests")
+}
+
+model PurchaseRequestItem {
+  id           String          @id @default(uuid())
+  requestId    String          @map("request_id")
+  request      PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  ingredientId String          @map("ingredient_id")
+  ingredient   Ingredient      @relation(fields: [ingredientId], references: [id])
+  // Số lượng theo đơn vị tồn (đã làm tròn lên bội số ĐVT mua)
+  quantity     Decimal         @db.Decimal(10, 3)
+  buyUnit      String?         @map("buy_unit")
+  buyFactor    Decimal         @default(1) @map("buy_factor") @db.Decimal(12, 4)
+  supplierId   String?         @map("supplier_id")
+  supplier     Supplier?       @relation(fields: [supplierId], references: [id])
+  unitPrice    Decimal         @default(0) @map("unit_price") @db.Decimal(12, 2)
+
+  @@map("purchase_request_items")
+}
+
+// Đơn mua hàng gửi NCC. code dạng DMH00001. status: UNRECEIVED | PARTIAL | RECEIVED | CANCELLED
+model PurchaseOrder {
+  id           String              @id @default(uuid())
+  code         String              @unique
+  status       String              @default("UNRECEIVED")
+  supplierId   String              @map("supplier_id")
+  supplier     Supplier            @relation(fields: [supplierId], references: [id])
+  requestId    String?             @map("request_id")
+  request      PurchaseRequest?    @relation(fields: [requestId], references: [id])
+  note         String?
+  totalAmount  Decimal             @default(0) @map("total_amount") @db.Decimal(14, 2)
+  createdById  String              @map("created_by")
+  createdBy    User                @relation("PurchaseOrderCreatedBy", fields: [createdById], references: [id])
+  createdAt    DateTime            @default(now()) @map("created_at")
+  items        PurchaseOrderItem[]
+  importOrders ImportOrder[]
+
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id           String        @id @default(uuid())
+  orderId      String        @map("order_id")
+  order        PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ingredientId String        @map("ingredient_id")
+  ingredient   Ingredient    @relation(fields: [ingredientId], references: [id])
+  quantity     Decimal       @db.Decimal(10, 3)
+  receivedQty  Decimal       @default(0) @map("received_qty") @db.Decimal(10, 3)
+  buyUnit      String?       @map("buy_unit")
+  buyFactor    Decimal       @default(1) @map("buy_factor") @db.Decimal(12, 4)
+  unitPrice    Decimal       @default(0) @map("unit_price") @db.Decimal(12, 2)
+
+  @@map("purchase_order_items")
 }
