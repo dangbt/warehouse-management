@@ -96,6 +96,7 @@ export function validateRows(rows: ParsedRow[], catalog: Catalog, ingredientMap:
     if (r.unitPrice == null) errs.push('Thiếu đơn giá')
     else if (r.unitPrice < 0) errs.push('Đơn giá không được âm')
     if (r.factor != null && !(r.factor > 0)) errs.push('Hệ số phải > 0')
+    if (!r.invoiceNo && (r.invoiceSymbol || r.invoiceDate)) errs.push('Có Ký hiệu/Ngày HĐ thì phải có Số HĐ')
     if (r.invoiceNo) {
       if (!r.invoiceDate) errs.push('Có Số HĐ thì phải có Ngày HĐ')
       if (!(VAT_RATES as readonly string[]).includes(r.vatRate)) errs.push(`Thuế suất phải thuộc: ${VAT_RATES.join(', ')}`)
@@ -113,6 +114,8 @@ export function validateRows(rows: ParsedRow[], catalog: Catalog, ingredientMap:
     }
     if (r.supplierId && head.supplierId && r.supplierId !== head.supplierId) r.allErrors.push(`NCC khác dòng ${head.rowNo} cùng Số CT`)
     if (r.invoiceNo !== head.invoiceNo) r.allErrors.push(`Số HĐ khác dòng ${head.rowNo} cùng Số CT`)
+    if (r.invoiceSymbol !== head.invoiceSymbol) r.allErrors.push(`Ký hiệu HĐ khác dòng ${head.rowNo} cùng Số CT`)
+    if (r.invoiceDate !== head.invoiceDate) r.allErrors.push(`Ngày HĐ khác dòng ${head.rowNo} cùng Số CT`)
     if (r.voucherDate !== head.voucherDate) r.allErrors.push(`Ngày CT khác dòng ${head.rowNo} cùng Số CT`)
   }
   return out
