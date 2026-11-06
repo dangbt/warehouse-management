@@ -7,6 +7,7 @@ import { StockExportForm } from './stock-export-form'
 import { useStockExports, useCreateStockExport } from '@/data'
 import { formatDate, formatNumber } from '@wms/shared'
 import { Route } from '@/routes/_app/stock-exports'
+import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
 
 interface StockExport {
   id: string
@@ -42,7 +43,7 @@ const columns: Column<StockExport>[] = [
 ]
 
 export function StockExportsPage() {
-  const { page, orderBy, sort } = Route.useSearch()
+  const { page, orderBy, sort, id: focusId } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
 
   const setParams = (updates: Record<string, unknown>) => {
@@ -51,7 +52,7 @@ export function StockExportsPage() {
   const setPage = (p: number) => setParams({ page: p })
 
   const [formOpen, setFormOpen] = useState(false)
-  const { data: res, isLoading, refetch } = useStockExports({ page, orderBy, sort })
+  const { data: res, isLoading, refetch } = useStockExports({ id: focusId, page, orderBy, sort })
   const createMutation = useCreateStockExport()
 
   return (
@@ -61,6 +62,7 @@ export function StockExportsPage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
+      {focusId && <FocusedVoucherBanner label={res?.data[0]?.export?.voucherNo} onClear={() => setParams({ id: undefined })} />}
       <WinDataGrid searchable
         columns={columns}
         data={res?.data ?? []}

@@ -18,7 +18,8 @@ export function StockCardPage() {
   const initial = search.from && search.to ? { from: search.from, to: search.to } : undefined
   const period = usePeriod(initial)
   const { range, valid } = period
-  const [ingredientId, setIngredientId] = useState(search.ingredientId ?? '')
+  const ingredientId = search.ingredientId ?? ''
+  const setIngredientId = (v: string) => navigate({ search: (p) => ({ ...p, ingredientId: v || undefined }) })
   const mode = search.mode
   const { data: ingRes } = useIngredients({ limit: 1000, orderBy: 'name', sort: 'asc' })
   const { data, isLoading, refetch } = useStockCard({ ingredientId, ...range }, valid)

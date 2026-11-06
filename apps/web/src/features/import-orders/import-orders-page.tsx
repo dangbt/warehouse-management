@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Check, ClipboardList, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -6,6 +7,8 @@ import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
+import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
+import { Route } from '@/routes/_app/import-orders'
 
 interface ImportOrderItem {
   id: string
@@ -85,15 +88,22 @@ const columns: Column<ImportOrder>[] = [
 ]
 
 export function ImportOrdersPage() {
+  const { id: focusId } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
 
-  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined })
+  const { data: res, isLoading, refetch } = useImportOrders({ id: focusId, status: statusFilter || undefined })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
+
+  // Mở từ Thẻ kho: tự chọn phiếu để hiện chi tiết.
+  useEffect(() => {
+    if (focusId && res?.data[0]?.id === focusId) setSelected(res.data[0] as ImportOrder)
+  }, [focusId, res])
 
   const handleAction = (action: 'approve' | 'reject') => {
     if (!selected) return
@@ -135,6 +145,7 @@ export function ImportOrdersPage() {
         </select>
       </WinToolbar>
 
+      {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => { setSelected(null); navigate({ search: (p) => ({ ...p, id: undefined }) }) }} />}
       <WinDataGrid
         searchable
         columns={columns}

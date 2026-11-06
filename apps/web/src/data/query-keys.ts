@@ -41,7 +41,7 @@ export const QUERY_KEYS = {
   stocktakeDetail: (id: string) => ['stocktake', 'detail', id] as const,
 
   purchaseReturns: ['purchase-returns'] as const,
-  purchaseReturnsList: () => ['purchase-returns', 'list'] as const,
+  purchaseReturnsList: (params?: Record<string, string>) => ['purchase-returns', 'list', params] as const,
 
   supplierPayments: ['supplier-payments'] as const,
   supplierPaymentsList: (supplierId: string) => ['supplier-payments', 'list', supplierId] as const,
