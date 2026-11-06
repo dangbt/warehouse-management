@@ -7,6 +7,7 @@ import { formatDateTime, formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABEL
 import type { VatRate } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
 import { lineTotalPrice, computeLineVat, computeVatTotals } from '../import-orders/vat'
+import { useTerm } from '@/data/use-features'
 
 const columns: Column<PurchaseReturn>[] = [
   { key: 'code', header: 'Mã phiếu', width: 120 },
@@ -33,6 +34,7 @@ interface ReturnItem {
 const EMPTY_ITEM: ReturnItem = { ingredientId: '', quantity: 0, unitPrice: 0, vatRate: '' }
 
 export function PurchaseReturnsPage() {
+  const t = useTerm()
   const [dialogOpen, setDialogOpen] = useState(false)
   const { data: res, isLoading, refetch } = usePurchaseReturns()
   const createMutation = useCreatePurchaseReturn()
@@ -187,7 +189,7 @@ export function PurchaseReturnsPage() {
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
-                  <th className="text-left p-1">Nguyên liệu</th>
+                  <th className="text-left p-1">{t('item')}</th>
                   <th className="p-1 w-20">SL</th>
                   <th className="p-1 w-24">Đơn giá</th>
                   {hasInvoice && <th className="p-1 w-24">Thuế suất</th>}

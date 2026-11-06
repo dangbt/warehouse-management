@@ -74,6 +74,12 @@ export function useTerm() {
   return (key: TermKey) => getTerm(profile, key)
 }
 
+/** Cho code ngoài component (toast...): đọc profile hiện có trong cache, mặc định FNB. */
+export function currentTerm(key: TermKey): string {
+  const cached = queryClient.getQueryData<FeaturesState>(FEATURES_KEY)
+  return getTerm(cached?.profile ?? 'FNB', key)
+}
+
 export function useUpdateFeatures() {
   return useMutation({
     mutationFn: (data: UpdateFeaturesInput) => api.put('/settings/features', data),

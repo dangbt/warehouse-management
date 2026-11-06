@@ -11,11 +11,17 @@ class Guarded {
   open(this: void) {}
 }
 
+@RequireFeature('sales_channels')
+class Channel {
+  @RequireFeature('kiotviet_recipe_deduct')
+  deduct(this: void) {}
+}
+
 function makeGuard(profile: BusinessProfile, overrides = {}) {
   const settings = { getFeatures: () => Promise.resolve(resolveFeatures(profile, overrides)) } as unknown as SettingsService;
   return new FeatureGuard(new Reflector(), settings);
 }
-const ctx = (handler: () => void) => ({ getHandler: () => handler, getClass: () => Guarded }) as never;
+const ctx = (handler: () => void, cls: unknown = Guarded) => ({ getHandler: () => handler, getClass: () => cls }) as never;
 
 describe('FeatureGuard', () => {
   it('cho qua khi handler không gắn @RequireFeature', async () => {
@@ -33,5 +39,19 @@ describe('FeatureGuard', () => {
   });
   it('override bật lại flag trên profile tắt', async () => {
     await expect(makeGuard('FASHION', { recipes: true }).canActivate(ctx(Guarded.prototype.gated))).resolves.toBe(true);
+  });
+  it('class + handler: tắt sales_channels dù deduct bật → 404', async () => {
+    const guard = makeGuard('FNB', { sales_channels: false });
+    const err = await guard.canActivate(ctx(Channel.prototype.deduct, Channel)).catch((e) => e);
+    expect(err.getResponse()).toMatchObject({ code: FEATURE_DISABLED, feature: 'sales_channels' });
+  });
+  it('class + handler: tắt kiotviet_recipe_deduct → 404', async () => {
+    const err = await makeGuard('FNB', { kiotviet_recipe_deduct: false })
+      .canActivate(ctx(Channel.prototype.deduct, Channel))
+      .catch((e) => e);
+    expect(err.getResponse()).toMatchObject({ feature: 'kiotviet_recipe_deduct' });
+  });
+  it('class + handler: cả hai bật → cho qua', async () => {
+    await expect(makeGuard('FNB').canActivate(ctx(Channel.prototype.deduct, Channel))).resolves.toBe(true);
   });
 });

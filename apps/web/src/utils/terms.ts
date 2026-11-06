@@ -17,6 +17,8 @@ const FNB = {
   item_group_add: 'Thêm Nhóm Nguyên Liệu',
   item_usage_report: 'Báo cáo NL',
   item_short: 'NL',
+  item_add: 'Thêm Nguyên Liệu',
+  item_edit: 'Sửa Nguyên Liệu',
 }
 
 export type TermKey = keyof typeof FNB
@@ -34,6 +36,8 @@ const FASHION: Dict = {
   item_group_add: 'Thêm Danh Mục',
   item_usage_report: 'Báo cáo SP',
   item_short: 'SP',
+  item_add: 'Thêm Sản Phẩm',
+  item_edit: 'Sửa Sản Phẩm',
 }
 
 const RETAIL: Dict = {
@@ -48,6 +52,8 @@ const RETAIL: Dict = {
   item_group_add: 'Thêm Nhóm Hàng',
   item_usage_report: 'Báo cáo hàng hoá',
   item_short: 'HH',
+  item_add: 'Thêm Hàng Hoá',
+  item_edit: 'Sửa Hàng Hoá',
 }
 
 export const TERMS: Record<BusinessProfile, Dict> = { FNB, FASHION, RETAIL }

@@ -7,7 +7,7 @@ export const FEATURE_KEY = 'required_feature';
 export const FEATURE_DISABLED = 'FEATURE_DISABLED';
 
 /** Đánh dấu controller/handler chỉ hoạt động khi feature flag bật. Dùng cùng FeatureGuard. */
-export const RequireFeature = (feature: FeatureKey) => SetMetadata(FEATURE_KEY, feature);
+export const RequireFeature = (...features: FeatureKey[]) => SetMetadata(FEATURE_KEY, features);
 
 @Injectable()
 export class FeatureGuard implements CanActivate {
@@ -17,10 +17,12 @@ export class FeatureGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const feature = this.reflector.getAllAndOverride<FeatureKey | undefined>(FEATURE_KEY, [context.getHandler(), context.getClass()]);
-    if (!feature) return true;
+    // Gộp flag của class + handler: phải bật TẤT CẢ mới cho qua.
+    const required = this.reflector.getAllAndMerge<FeatureKey[]>(FEATURE_KEY, [context.getHandler(), context.getClass()]) ?? [];
+    if (required.length === 0) return true;
     const { flags } = await this.settings.getFeatures();
-    if (!flags[feature]) {
+    const feature = required.find((f) => !flags[f]);
+    if (feature) {
       throw new NotFoundException({
         statusCode: 404,
         code: FEATURE_DISABLED,
