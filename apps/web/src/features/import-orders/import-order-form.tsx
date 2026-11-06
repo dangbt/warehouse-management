@@ -47,10 +47,18 @@ const schema = z
 
 type FormData = z.infer<typeof schema>
 
+/** Dữ liệu điền sẵn khi lập phiếu nhập từ đơn mua hàng (PO). */
+export interface ImportOrderInitial {
+  supplierId: string
+  note?: string
+  items: { ingredientId: string; quantity: number; unitPrice: number }[]
+}
+
 interface Props {
   open: boolean
   onClose: () => void
   onSave?: (data: FormData & VoucherPayload) => void
+  initial?: ImportOrderInitial
 }
 
 interface SupplierInfo {
@@ -72,6 +80,15 @@ const EMPTY_FORM: FormData = {
   invoice_date: '',
   purchase_address: '',
   items: [{ ...DEFAULT_ITEM }],
+}
+
+function initialToForm(init: ImportOrderInitial): FormData {
+  return {
+    ...EMPTY_FORM,
+    supplier_id: init.supplierId,
+    note: init.note ?? '',
+    items: init.items.map((i) => ({ ...DEFAULT_ITEM, ingredient_id: i.ingredientId, quantity: i.quantity, unit_price: i.unitPrice })),
+  }
 }
 
 const input = 'w-full h-10 border px-3 text-[14px] bg-white outline-none focus:border-win-input-focus disabled:bg-win-control'
@@ -110,7 +127,7 @@ function Section({ step, title, children }: { step: number; title: string; child
  * Phiếu nhập kho — bố cục theo luồng nhập hàng kiểu MISA:
  * ① Nhà cung cấp → ② Chứng từ (hoá đơn, thanh toán) → ③ Hàng tiền → Tổng cộng → Lưu.
  */
-export function ImportOrderForm({ open, onClose, onSave }: Props) {
+export function ImportOrderForm({ open, onClose, onSave, initial }: Props) {
   const {
     register,
     control,
@@ -157,7 +174,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   useEffect(() => {
     if (!open) return
-    reset(EMPTY_FORM)
+    reset(initial ? initialToForm(initial) : EMPTY_FORM)
     setSubmitError('')
     api.get('/suppliers?limit=1000').then((s) => {
       const supplierList = s.data as {
@@ -179,8 +196,18 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
       )
     })
     fetchIngredients('')
+    if (initial?.items.length) {
+      // Nạp tên NL của các dòng điền sẵn để ô chọn NL hiển thị đúng.
+      void api.get(`/ingredients?limit=100`).then((res) => {
+        const list = res.data as { id: string; name: string; unit: string }[]
+        const ids = new Set(initial.items.map((i) => i.ingredientId))
+        const picked = list.filter((x) => ids.has(x.id))
+        setIngredients((cur) => [...picked.map((x) => ({ value: x.id, label: x.name, unit: x.unit })), ...cur.filter((c) => !ids.has(c.value))])
+        setUnitMap((m) => ({ ...m, ...Object.fromEntries(picked.map((x) => [x.id, x.unit])) }))
+      })
+    }
     setTimeout(() => setFocus('supplier_id'), 0)
-  }, [open, reset, setFocus, fetchIngredients])
+  }, [open, reset, setFocus, fetchIngredients, initial])
 
   const addRow = useCallback(() => {
     append({ ...DEFAULT_ITEM })

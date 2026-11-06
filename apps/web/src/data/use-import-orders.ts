@@ -51,6 +51,7 @@ export function useCreateImportOrder() {
       invoice_symbol?: string
       invoice_date?: string
       purchase_address?: string
+      purchase_order_id?: string
       items: {
         ingredient_id: string
         quantity: number
