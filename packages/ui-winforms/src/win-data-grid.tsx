@@ -33,6 +33,8 @@ interface Props<T> {
   storageKey?: string
   searchable?: boolean
   onSearch?: (query: string) => void
+  /** true: onSearch chỉ chạy khi Enter / bấm nút Tìm (không gọi mỗi lần gõ). Mặc định false = hành vi cũ. */
+  searchOnSubmit?: boolean
   /** Dòng tổng cuối lưới: giá trị theo key cột (cột không có key để trống). `footerLabel` hiện ở cột đầu tiên. */
   footer?: Record<string, React.ReactNode>
   footerLabel?: React.ReactNode
@@ -61,6 +63,7 @@ export function WinDataGrid<T extends { id?: string }>({
   storageKey,
   searchable,
   onSearch,
+  searchOnSubmit,
   footer,
   footerLabel = 'Tổng cộng',
   tableOptions,
@@ -147,15 +150,17 @@ export function WinDataGrid<T extends { id?: string }>({
             type="text"
             value={globalFilter}
             data-testid="grid-search-input"
-            onChange={(e) => setGlobalFilter(e.target.value)}
+            onChange={(e) => {
+              setGlobalFilter(e.target.value)
+              if (!searchOnSubmit) onSearch?.(e.target.value)
+            }}
             onKeyDown={(e) => {
-              // Có onSearch (lọc phía server): chỉ tìm khi Enter hoặc bấm nút Tìm, không debounce.
-              if (e.key === 'Enter' && onSearch) onSearch(globalFilter)
+              if (e.key === 'Enter' && searchOnSubmit && onSearch) onSearch(globalFilter)
             }}
             placeholder="Tìm kiếm..."
             className="flex-1 border border-win-input-border h-8 px-2 text-win-base outline-none focus:border-win-input-focus bg-white"
           />
-          {onSearch && (
+          {onSearch && searchOnSubmit && (
             <button
               type="button"
               data-testid="grid-search-button"
