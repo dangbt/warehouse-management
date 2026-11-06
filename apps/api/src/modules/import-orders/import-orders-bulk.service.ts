@@ -1,4 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
+import { Injectable, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { assertValidItems, buildOrderLines, sumLines } from './import-order-lines';
@@ -6,6 +8,21 @@ import type { CreateImportOrderInput } from './import-orders.service';
 
 /** Giới hạn dòng hàng mỗi lần nhập hàng loạt (khớp giới hạn file Excel phía client). */
 export const BULK_MAX_ITEMS = 2000;
+
+/** Timeout transaction cho lô lớn (mặc định Prisma chỉ 5s). */
+export const BULK_TX_TIMEOUT_MS = 60_000;
+
+/** Chặn giá trị vượt cột Decimal bằng lỗi rõ ràng thay vì lỗi DB thô. */
+export function assertDecimalRange(
+  lines: { quantity: number; unitPrice: number; totalPrice: number; vatAmount: number }[],
+  idx: number,
+): void {
+  for (const l of lines) {
+    if (l.quantity >= 1e7 || l.unitPrice >= 1e10 || l.totalPrice >= 1e12 || l.vatAmount >= 1e12) {
+      throw new BadRequestException(`Phiếu #${idx + 1}: số lượng hoặc đơn giá vượt giới hạn cho phép`);
+    }
+  }
+}
 
 export interface BulkImportInput {
   orders: CreateImportOrderInput[];
@@ -65,61 +82,97 @@ export class ImportOrdersBulkService {
     await this.assertReferences(body);
     const voucherNos = await this.resolveVoucherNos(body);
 
+    const prepared = body.orders.map((o, idx) => {
+      const hasInvoice = o.has_invoice ?? false;
+      const lines = buildOrderLines(o.items, hasInvoice);
+      assertDecimalRange(lines, idx);
+      return { o, idx, hasInvoice, lines, sums: sumLines(lines), id: randomUUID(), voucherNo: voucherNos[idx] };
+    });
+    const supplierAddress = await this.supplierAddresses(
+      prepared.filter((p) => !p.hasInvoice && !p.o.purchase_address?.trim()).map((p) => p.o.supplier_id),
+    );
+
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        const orders: BulkImportReport['orders'] = [];
-        for (const [idx, o] of body.orders.entries()) {
-          const hasInvoice = o.has_invoice ?? false;
-          const invoiceNo = hasInvoice ? o.invoice_no!.trim() : null;
-          const invoiceSymbol = hasInvoice ? o.invoice_symbol?.trim() || null : null;
-          if (hasInvoice) {
-            const dup = await tx.importOrder.findFirst({
-              where: { supplierId: o.supplier_id, invoiceSymbol, invoiceNo, status: { not: 'REJECTED' } },
-              select: { code: true },
-            });
-            if (dup) throw new BadRequestException(`Phiếu #${idx + 1}: hoá đơn đã được nhập ở phiếu ${dup.code}`);
-          }
-          const lines = buildOrderLines(o.items, hasInvoice);
-          const sums = sumLines(lines);
-          const voucherNo = voucherNos[idx];
-          const created = await tx.importOrder.create({
-            data: {
-              code: voucherNo,
-              voucherNo,
-              voucherDate: parseVoucherDate(o.voucher_date),
-              supplierId: o.supplier_id,
-              hasInvoice,
-              invoiceNo,
-              invoiceSymbol,
-              invoiceDate: hasInvoice ? new Date(o.invoice_date!) : null,
-              purchaseAddress: hasInvoice ? null : o.purchase_address?.trim() || null,
-              ...sums,
-              paid: o.paid ?? false,
-              note: o.note,
+      // Không còn round trip riêng từng phiếu: 1 query kiểm hoá đơn + 2 createMany (phiếu, dòng hàng).
+      return await this.prisma.$transaction(
+        async (tx) => {
+          await this.assertInvoicesNew(tx, prepared);
+          await tx.importOrder.createMany({
+            data: prepared.map((p) => ({
+              id: p.id,
+              code: p.voucherNo,
+              voucherNo: p.voucherNo,
+              voucherDate: parseVoucherDate(p.o.voucher_date),
+              supplierId: p.o.supplier_id,
+              hasInvoice: p.hasInvoice,
+              invoiceNo: p.hasInvoice ? p.o.invoice_no!.trim() : null,
+              invoiceSymbol: p.hasInvoice ? p.o.invoice_symbol?.trim() || null : null,
+              invoiceDate: p.hasInvoice ? new Date(p.o.invoice_date!) : null,
+              purchaseAddress: p.hasInvoice ? null : p.o.purchase_address?.trim() || supplierAddress.get(p.o.supplier_id)?.trim() || null,
+              ...p.sums,
+              paid: p.o.paid ?? false,
+              note: p.o.note,
               createdById: userId,
-              items: { create: lines },
-            },
-            select: { id: true },
+            })),
           });
-          orders.push({
-            id: created.id,
-            code: voucherNo,
-            voucherNo,
-            supplierId: o.supplier_id,
-            itemCount: lines.length,
-            totalAmount: sums.totalAmount,
+          await tx.importOrderItem.createMany({
+            data: prepared.flatMap((p) => p.lines.map((l) => ({ ...l, importOrderId: p.id }))),
           });
-        }
-        return {
-          created: orders.length,
-          itemCount: orders.reduce((s, x) => s + x.itemCount, 0),
-          totalAmount: orders.reduce((s, x) => s + x.totalAmount, 0),
-          orders,
-        };
-      });
+          const orders = prepared.map((p) => ({
+            id: p.id,
+            code: p.voucherNo,
+            voucherNo: p.voucherNo,
+            supplierId: p.o.supplier_id,
+            itemCount: p.lines.length,
+            totalAmount: p.sums.totalAmount,
+          }));
+          return {
+            created: orders.length,
+            itemCount: orders.reduce((s, x) => s + x.itemCount, 0),
+            totalAmount: orders.reduce((s, x) => s + x.totalAmount, 0),
+            orders,
+          };
+        },
+        { maxWait: 10_000, timeout: BULK_TX_TIMEOUT_MS },
+      );
     } catch (e) {
+      if ((e as { code?: string })?.code === 'P2028') {
+        throw new ServiceUnavailableException(
+          'Nhập hàng loạt quá thời gian xử lý, chưa có phiếu nào được tạo. Hãy chia nhỏ file rồi thử lại.',
+        );
+      }
       // Race số chứng từ (unique) → 409 có code chuẩn.
       this.vouchers.rethrowUnique(e, '(tạo hàng loạt)');
+    }
+  }
+
+  private async supplierAddresses(ids: string[]): Promise<Map<string, string | null>> {
+    const uniq = [...new Set(ids)];
+    if (!uniq.length) return new Map();
+    const rows = await this.prisma.supplier.findMany({ where: { id: { in: uniq } }, select: { id: true, address: true } });
+    return new Map(rows.map((r) => [r.id, r.address]));
+  }
+
+  /** Kiểm tra trùng hoá đơn với DB bằng 1 query cho cả lô. */
+  private async assertInvoicesNew(
+    tx: Prisma.TransactionClient,
+    prepared: { o: CreateImportOrderInput; idx: number; hasInvoice: boolean }[],
+  ) {
+    const inv = prepared.filter((p) => p.hasInvoice);
+    if (!inv.length) return;
+    const norm = (p: (typeof inv)[number]) => ({
+      supplierId: p.o.supplier_id,
+      invoiceSymbol: p.o.invoice_symbol?.trim() || null,
+      invoiceNo: p.o.invoice_no!.trim(),
+    });
+    const found = await tx.importOrder.findMany({
+      where: { status: { not: 'REJECTED' }, OR: inv.map(norm) },
+      select: { code: true, supplierId: true, invoiceSymbol: true, invoiceNo: true },
+    });
+    for (const p of inv) {
+      const k = norm(p);
+      const dup = found.find((f) => f.supplierId === k.supplierId && f.invoiceSymbol === k.invoiceSymbol && f.invoiceNo === k.invoiceNo);
+      if (dup) throw new BadRequestException(`Phiếu #${p.idx + 1}: hoá đơn đã được nhập ở phiếu ${dup.code}`);
     }
   }
 
@@ -144,7 +197,11 @@ export class ImportOrdersBulkService {
       }
     }
     const autoCount = manual.filter((n) => !n).length;
-    const auto = autoCount ? await this.vouchers.nextNos('IMPORT', autoCount) : [];
+    // Lấy dư số để tránh trùng với số nhập tay trong cùng file.
+    const taken = new Set(manual.filter(Boolean));
+    const auto = autoCount
+      ? (await this.vouchers.nextNos('IMPORT', autoCount + taken.size)).filter((n) => !taken.has(n)).slice(0, autoCount)
+      : [];
     let k = 0;
     return manual.map((n) => n || auto[k++]);
   }

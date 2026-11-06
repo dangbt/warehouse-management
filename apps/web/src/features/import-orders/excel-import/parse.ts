@@ -67,7 +67,7 @@ export function parseDateCell(v: unknown): string | null {
   return null
 }
 
-/** Ô số → number. Trả về undefined nếu trống, NaN nếu sai. Hiểu "1.234,5" và "1,234.5". */
+/** Ô số → number. Trả về undefined nếu trống, NaN nếu sai. Hiểu "1.234,5", "1,234.5", "1.234.567"; dạng một dấu phân cách + đúng 3 chữ số ("250.000", "1,500") là mơ hồ → NaN (báo lỗi, yêu cầu nhập ô kiểu số). */
 export function parseNumberCell(v: unknown): number | undefined {
   if (v == null || v === '') return undefined
   if (typeof v === 'number') return v
@@ -80,9 +80,11 @@ export function parseNumberCell(v: unknown): number | undefined {
     const thou = dec === '.' ? ',' : '.'
     s = s.split(thou).join('').replace(dec, '.')
   } else if (lastComma >= 0) {
-    s = /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.')
-  } else if ((s.match(/\./g) ?? []).length > 1) {
-    s = s.replace(/\./g, '')
+    if (/^-?\d{1,3},\d{3}$/.test(s)) return NaN // "1,500": nghìn hay thập phân? → báo lỗi dòng
+    s = /^-?\d{1,3}(,\d{3}){2,}$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.')
+  } else if (lastDot >= 0) {
+    if (/^-?\d{1,3}\.\d{3}$/.test(s)) return NaN // "250.000": mơ hồ (250 hay 250000) → báo lỗi dòng
+    if ((s.match(/\./g) ?? []).length > 1) s = s.replace(/\./g, '')
   }
   return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : NaN
 }
@@ -132,7 +134,7 @@ export function parseRows(matrix: unknown[][]): ParseResult {
     const num = (key: ColumnKey, label: string) => {
       const n = parseNumberCell(get(line, key))
       if (n !== undefined && Number.isNaN(n)) {
-        errors.push(`${label} không phải số`)
+        errors.push(`${label} không phải số hoặc mơ hồ (hãy nhập ô kiểu số)`)
         return null
       }
       return n ?? null
