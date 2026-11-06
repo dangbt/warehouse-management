@@ -3,6 +3,8 @@ import { X } from 'lucide-react'
 
 interface Props {
   title: string
+  /** Icon hiển thị trước tiêu đề (lucide). */
+  icon?: ReactNode
   open: boolean
   onClose: () => void
   width?: number
@@ -10,7 +12,7 @@ interface Props {
   children: ReactNode
 }
 
-export function WinDialog({ title, open, onClose, width = 480, footer, children }: Props) {
+export function WinDialog({ title, icon, open, onClose, width = 480, footer, children }: Props) {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
@@ -21,7 +23,10 @@ export function WinDialog({ title, open, onClose, width = 480, footer, children 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="h-11 flex items-center justify-between px-3 bg-white border-b border-win-grid-border shrink-0">
-          <span className="text-win-lg font-semibold">{title}</span>
+          <span className="flex items-center gap-2 text-win-lg font-semibold">
+            {icon && <span className="flex items-center text-win-active-title">{icon}</span>}
+            {title}
+          </span>
           <button onClick={onClose} className="p-0.5 hover:bg-win-menu-hover">
             <X size={16} />
           </button>

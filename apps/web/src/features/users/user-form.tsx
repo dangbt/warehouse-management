@@ -1,3 +1,4 @@
+import { Pencil, Plus, TriangleAlert } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -78,7 +79,8 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title={mode === 'add' ? '🆕 Thêm User' : '✏️ Sửa User'}
+      title={mode === 'add' ? 'Thêm User' : 'Sửa User'}
+      icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={440}
@@ -105,17 +107,15 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
           <WinInput label="Họ tên" {...register('full_name')} error={errors.full_name?.message} />
           <WinInput label="Email" type="email" {...register('email')} error={errors.email?.message} />
           <WinInput label="Điện thoại" {...register('phone')} />
-          <WinSelect
-            label="Bộ phận"
-            {...register('department_id')}
-            options={departments}
-            error={errors.department_id?.message}
-          />
+          <WinSelect label="Bộ phận" {...register('department_id')} options={departments} error={errors.department_id?.message} />
           <WinSelect label="Role" {...register('role_id')} options={roles} error={errors.role_id?.message} />
-          {mode === 'add' && (
-            <WinInput label="Mật khẩu" type="password" {...register('password')} placeholder="Mặc định: 123456" />
+          {mode === 'add' && <WinInput label="Mật khẩu" type="password" {...register('password')} placeholder="Mặc định: 123456" />}
+          {submitError && (
+            <p className="text-win-base text-win-error font-semibold mt-2">
+              <TriangleAlert size={14} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+              {submitError}
+            </p>
           )}
-          {submitError && <p className="text-win-base text-win-error font-semibold mt-2">⚠️ {submitError}</p>}
         </div>
       </WinGroupBox>
     </WinDialog>

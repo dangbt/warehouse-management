@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Plus, Settings, RefreshCw } from 'lucide-react'
+import { CircleCheck, Lightbulb, Plus, RefreshCw, Settings, Settings2, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useMenuList, useCreateMenuItem, useUpdateMenuItem, useIngredients } from '@/data'
@@ -22,14 +22,12 @@ const modeLabels: Record<string, { label: string; color: string }> = {
 
 // Trạng thái cấu hình trừ tồn của 1 món
 function configStatus(m: MenuItemFull): { text: string; warn: boolean } {
-  if (!m.inventoryMode) return { text: '❌ Chưa cấu hình', warn: true }
+  if (!m.inventoryMode) return { text: 'Chưa cấu hình', warn: true }
   if (m.inventoryMode === 'NONE') return { text: 'Không trừ tồn', warn: false }
   if (m.inventoryMode === 'RECIPE')
-    return m.recipe
-      ? { text: `✅ Công thức (${m.recipe._count.ingredients} NL)`, warn: false }
-      : { text: '⚠️ Chưa có công thức', warn: true }
+    return m.recipe ? { text: `Công thức (${m.recipe._count.ingredients} NL)`, warn: false } : { text: 'Chưa có công thức', warn: true }
   // DIRECT
-  return m.directIngredient ? { text: `✅ ${m.directIngredient.name}`, warn: false } : { text: '⚠️ Chưa chọn NL', warn: true }
+  return m.directIngredient ? { text: m.directIngredient.name, warn: false } : { text: 'Chưa chọn NL', warn: true }
 }
 
 const columns: Column<MenuItemFull>[] = [
@@ -51,7 +49,9 @@ const columns: Column<MenuItemFull>[] = [
     align: 'center',
     render: (r) =>
       r.inventoryMode ? (
-        <span className={`px-2 py-0.5 text-win-xs rounded ${modeLabels[r.inventoryMode]?.color ?? ''}`}>{modeLabels[r.inventoryMode]?.label}</span>
+        <span className={`px-2 py-0.5 text-win-xs rounded ${modeLabels[r.inventoryMode]?.color ?? ''}`}>
+          {modeLabels[r.inventoryMode]?.label}
+        </span>
       ) : (
         <span className="text-win-xs text-win-error">— chưa đặt —</span>
       ),
@@ -62,7 +62,12 @@ const columns: Column<MenuItemFull>[] = [
     width: 160,
     render: (r) => {
       const s = configStatus(r)
-      return <span className={s.warn ? 'text-win-error font-medium' : ''}>{s.text}</span>
+      return (
+        <span className={`inline-flex items-center gap-1 ${s.warn ? 'text-win-error font-medium' : ''}`}>
+          {s.warn ? <TriangleAlert size={13} /> : <CircleCheck size={13} className="text-green-600" />}
+          {s.text}
+        </span>
+      )
     },
   },
 ]
@@ -135,7 +140,8 @@ export function MenuPage() {
         </span>
       </WinToolbar>
 
-      <WinDataGrid searchable
+      <WinDataGrid
+        searchable
         columns={columns}
         data={(menu ?? []).slice((page - 1) * limit, page * limit)}
         loading={isLoading}
@@ -152,16 +158,23 @@ export function MenuPage() {
 
       {/* Thêm món */}
       <WinDialog
-        title="🆕 Thêm Món"
+        title="Thêm Món"
+        icon={<Plus size={16} strokeWidth={1.75} />}
         open={addOpen}
         onClose={() => setAddOpen(false)}
         width={400}
         footer={
           <>
-            <button onClick={addForm.handleSubmit(onAdd)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer">
+            <button
+              onClick={addForm.handleSubmit(onAdd)}
+              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer"
+            >
               OK
             </button>
-            <button onClick={() => setAddOpen(false)} className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover">
+            <button
+              onClick={() => setAddOpen(false)}
+              className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+            >
               Cancel
             </button>
           </>
@@ -178,16 +191,23 @@ export function MenuPage() {
 
       {/* Cấu hình trừ tồn */}
       <WinDialog
-        title={`⚙️ Cấu hình trừ tồn — ${selected?.name ?? ''}`}
+        title={`Cấu hình trừ tồn — ${selected?.name ?? ''}`}
+        icon={<Settings2 size={16} strokeWidth={1.75} />}
         open={cfgOpen}
         onClose={() => setCfgOpen(false)}
         width={440}
         footer={
           <>
-            <button onClick={cfgForm.handleSubmit(onConfig)} className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer">
+            <button
+              onClick={cfgForm.handleSubmit(onConfig)}
+              className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer"
+            >
               Lưu
             </button>
-            <button onClick={() => setCfgOpen(false)} className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover">
+            <button
+              onClick={() => setCfgOpen(false)}
+              className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+            >
               Huỷ
             </button>
           </>
@@ -210,7 +230,8 @@ export function MenuPage() {
             )}
             {cfgMode === 'RECIPE' && (
               <p className="text-win-base text-win-info">
-                💡 Vào trang <b>Công thức</b> để gán nguyên liệu + định lượng cho món này.
+                <Lightbulb size={14} strokeWidth={1.75} className="inline -mt-0.5 mr-1 text-amber-500" />
+                Vào trang <b>Công thức</b> để gán nguyên liệu + định lượng cho món này.
                 {selected?.recipe ? ` Hiện có ${selected.recipe._count.ingredients} NL.` : ' Hiện chưa có công thức.'}
               </p>
             )}

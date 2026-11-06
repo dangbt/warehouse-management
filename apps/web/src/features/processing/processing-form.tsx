@@ -1,3 +1,4 @@
+import { ChefHat, Lightbulb, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -47,9 +48,12 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
   const [sourceLoading, setSourceLoading] = useState(false)
   const fetchSource = useCallback((q: string) => {
     setSourceLoading(true)
-    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
-      setSourceOptions((res.data as Ing[]).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
-    }).finally(() => setSourceLoading(false))
+    api
+      .get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`)
+      .then((res) => {
+        setSourceOptions((res.data as Ing[]).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
+      })
+      .finally(() => setSourceLoading(false))
   }, [])
 
   // Search BTP (chỉ NL có sourceIngredientId)
@@ -58,13 +62,16 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
   const [allOutputs, setAllOutputs] = useState<Ing[]>([])
   const fetchOutput = useCallback((q: string) => {
     setOutputLoading(true)
-    api.get(`/ingredients?limit=50&search=${encodeURIComponent(q)}`).then((res) => {
-      const data = res.data as Ing[]
-      const btp = data.filter((i) => i.sourceIngredientId)
-      const list = btp.length ? btp : data
-      setAllOutputs(list)
-      setOutputOptions(list.map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
-    }).finally(() => setOutputLoading(false))
+    api
+      .get(`/ingredients?limit=50&search=${encodeURIComponent(q)}`)
+      .then((res) => {
+        const data = res.data as Ing[]
+        const btp = data.filter((i) => i.sourceIngredientId)
+        const list = btp.length ? btp : data
+        setAllOutputs(list)
+        setOutputOptions(list.map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
+      })
+      .finally(() => setOutputLoading(false))
   }, [])
 
   useEffect(() => {
@@ -94,7 +101,8 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title="🍳 Tạo Phiếu Chế Biến"
+      title="Tạo Phiếu Chế Biến"
+      icon={<ChefHat size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={440}
@@ -162,11 +170,17 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
           />
           {suggested != null && (
             <p className="text-win-base text-win-info">
-              💡 Định mức: {sourceQty} × {yieldRatio} = <b>{suggested}</b> {output?.unit}. Sửa lại nếu hao hụt khác.
+              <Lightbulb size={14} strokeWidth={1.75} className="inline -mt-0.5 mr-1 text-amber-500" />
+              Định mức: {sourceQty} × {yieldRatio} = <b>{suggested}</b> {output?.unit}. Sửa lại nếu hao hụt khác.
             </p>
           )}
           <WinInput label="Ghi chú" {...register('note')} />
-          {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
+          {submitError && (
+            <p className="text-win-base text-win-error font-semibold">
+              <TriangleAlert size={14} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+              {submitError}
+            </p>
+          )}
         </div>
       </WinGroupBox>
     </WinDialog>

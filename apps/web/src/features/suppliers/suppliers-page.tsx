@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, RefreshCw, Banknote } from 'lucide-react'
+import { Banknote, Pencil, Plus, RefreshCw, Trash2, Wallet } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinDialog, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import type { Supplier } from '@/types'
@@ -18,10 +18,16 @@ const columns: Column<SupplierWithDebt>[] = [
   { key: 'phone', header: 'Điện thoại', width: 120 },
   { key: 'taxCode', header: 'MST', width: 130, render: (r) => r.taxCode || '—' },
   { key: 'address', header: 'Địa chỉ', width: 200 },
-  { key: 'totalDebt', header: 'Nợ', width: 120, align: 'right', render: (r) => {
-    const debt = Number(r.totalDebt ?? 0)
-    return debt > 0 ? <span className="text-win-error font-bold">{formatCurrency(debt)}</span> : '0₫'
-  }},
+  {
+    key: 'totalDebt',
+    header: 'Nợ',
+    width: 120,
+    align: 'right',
+    render: (r) => {
+      const debt = Number(r.totalDebt ?? 0)
+      return debt > 0 ? <span className="text-win-error font-bold">{formatCurrency(debt)}</span> : '0₫'
+    },
+  },
   { key: 'note', header: 'Ghi chú', width: 150 },
 ]
 
@@ -42,7 +48,15 @@ export function SuppliersPage() {
   const { data: payments } = useSupplierPayments(selected?.id)
   const paymentMutation = useCreateSupplierPayment()
 
-  const handleSave = async (formData: { name: string; phone: string; address: string; tax_code?: string; note?: string; is_individual?: boolean; id_number?: string }) => {
+  const handleSave = async (formData: {
+    name: string
+    phone: string
+    address: string
+    tax_code?: string
+    note?: string
+    is_individual?: boolean
+    id_number?: string
+  }) => {
     if (formMode === 'add') {
       await createMutation.mutateAsync(formData)
     } else if (selected) {
@@ -84,20 +98,9 @@ export function SuppliersPage() {
             setFormOpen(true)
           }}
         />
-        <WinToolbar.Button
-          icon={<Trash2 size={16} />}
-          label="Xoá"
-          danger
-          disabled={!selected}
-          onClick={() => setConfirmDelete(true)}
-        />
+        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button
-          icon={<Banknote size={16} />}
-          label="Thanh toán"
-          disabled={!selected}
-          onClick={() => setPaymentOpen(true)}
-        />
+        <WinToolbar.Button icon={<Banknote size={16} />} label="Thanh toán" disabled={!selected} onClick={() => setPaymentOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
@@ -116,7 +119,7 @@ export function SuppliersPage() {
 
       {selected && payments && payments.length > 0 && (
         <div className="border-t border-win-grid-border max-h-[180px] overflow-auto">
-          <WinGroupBox title={`💰 Lịch sử thanh toán - ${selected.name}`}>
+          <WinGroupBox title={`Lịch sử thanh toán - ${selected.name}`} icon={<Wallet size={16} strokeWidth={1.75} />}>
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
@@ -143,13 +146,7 @@ export function SuppliersPage() {
         </div>
       )}
 
-      <SupplierForm
-        open={formOpen}
-        mode={formMode}
-        data={selected}
-        onClose={() => setFormOpen(false)}
-        onSave={handleSave}
-      />
+      <SupplierForm open={formOpen} mode={formMode} data={selected} onClose={() => setFormOpen(false)} onSave={handleSave} />
       <WinMessageBox
         type="question"
         title="Xác nhận"
@@ -167,8 +164,12 @@ export function SuppliersPage() {
 
       <WinDialog open={paymentOpen} onClose={() => setPaymentOpen(false)} title="Thanh toán cho NCC" width={400}>
         <div className="space-y-3 p-3">
-          <div className="text-win-base">NCC: <strong>{selected?.name}</strong></div>
-          <div className="text-win-base">Nợ hiện tại: <strong className="text-win-error">{formatCurrency(selected?.totalDebt)}</strong></div>
+          <div className="text-win-base">
+            NCC: <strong>{selected?.name}</strong>
+          </div>
+          <div className="text-win-base">
+            Nợ hiện tại: <strong className="text-win-error">{formatCurrency(selected?.totalDebt)}</strong>
+          </div>
           <div>
             <label className="text-win-base block mb-0.5">Số tiền thanh toán</label>
             <div className="flex gap-1">
@@ -208,8 +209,15 @@ export function SuppliersPage() {
             />
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-win-grid-border">
-            <button onClick={() => setPaymentOpen(false)} className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
-            <button onClick={handlePayment} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">Thanh toán</button>
+            <button
+              onClick={() => setPaymentOpen(false)}
+              className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover"
+            >
+              Huỷ
+            </button>
+            <button onClick={handlePayment} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">
+              Thanh toán
+            </button>
           </div>
         </div>
       </WinDialog>

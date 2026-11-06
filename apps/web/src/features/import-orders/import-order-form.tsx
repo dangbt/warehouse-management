@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -70,8 +71,7 @@ const EMPTY_FORM: FormData = {
   items: [{ ...DEFAULT_ITEM }],
 }
 
-const input =
-  'w-full h-10 border px-3 text-[14px] bg-white outline-none focus:border-win-input-focus disabled:bg-win-control'
+const input = 'w-full h-10 border px-3 text-[14px] bg-white outline-none focus:border-win-input-focus disabled:bg-win-control'
 
 /** Một dòng "nhãn: ô nhập" cỡ lớn, nhãn bên trái như chứng từ MISA. */
 function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: ReactNode }) {
@@ -253,7 +253,10 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     >
       <div className="space-y-3">
         {submitError && (
-          <div className="px-3 py-2 border border-win-error bg-red-50 text-[14px] text-win-error font-semibold">⚠️ {submitError}</div>
+          <div className="px-3 py-2 border border-win-error bg-red-50 text-[14px] text-win-error font-semibold">
+            <TriangleAlert size={14} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+            {submitError}
+          </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
@@ -330,7 +333,9 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
               <label className="flex items-center gap-2 h-10 text-[14px] cursor-pointer select-none border-t border-win-grid-border pt-2">
                 <input type="checkbox" {...register('paid')} className="w-4 h-4" />
                 Đã thanh toán cho NCC
-                <span className={`ml-auto text-[12px] px-2 py-0.5 rounded ${paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                <span
+                  className={`ml-auto text-[12px] px-2 py-0.5 rounded ${paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}
+                >
                   {paid ? 'Đã trả tiền' : 'Ghi công nợ'}
                 </span>
               </label>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, RefreshCw, Download } from 'lucide-react'
+import { Check, Download, Package, Pencil, Plus, RefreshCw, Trash2, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
@@ -39,7 +39,13 @@ const columns: Column<IngredientRow>[] = [
     render: (r) => formatCurrency(r.costPerUnit),
   },
   { key: 'category', header: 'Phân loại', width: 80, align: 'center' },
-  { key: 'trackStock', header: 'Quản tồn', width: 70, align: 'center', render: (r) => r.trackStock ? '✓' : '—' },
+  {
+    key: 'trackStock',
+    header: 'Quản tồn',
+    width: 70,
+    align: 'center',
+    render: (r) => (r.trackStock ? <Check size={14} className="inline text-green-600" /> : '—'),
+  },
 ]
 
 export function IngredientsPage() {
@@ -135,8 +141,12 @@ export function IngredientsPage() {
         </select>
       </WinToolbar>
 
-      <WinDataGrid searchable
-        onSearch={(q) => { setSearch(q); setPage(1) }}
+      <WinDataGrid
+        searchable
+        onSearch={(q) => {
+          setSearch(q)
+          setPage(1)
+        }}
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
@@ -189,7 +199,7 @@ const batchColumns: Column<Batch>[] = [
       r.expiryDate ? (
         <span className={isExpiringSoon(r.expiryDate) ? 'text-win-error font-bold' : ''}>
           {formatDate(r.expiryDate)}
-          {isExpiringSoon(r.expiryDate) ? ' ⚠️' : ''}
+          {isExpiringSoon(r.expiryDate) ? <TriangleAlert size={13} className="inline ml-1 -mt-0.5 text-amber-500" /> : ''}
         </span>
       ) : (
         '-'
@@ -217,7 +227,7 @@ function BatchesPanel({ ingredientId }: { ingredientId: string }) {
 
   return (
     <div className="border-t border-win-grid-border max-h-[200px] overflow-auto">
-      <WinGroupBox title="📦 Lô hàng">
+      <WinGroupBox title="Lô hàng" icon={<Package size={16} strokeWidth={1.75} />}>
         <WinDataGrid columns={batchColumns} data={batches ?? []} loading={isLoading} storageKey="ingredient-batches" />
       </WinGroupBox>
     </div>

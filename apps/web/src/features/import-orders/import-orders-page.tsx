@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Check, X, RefreshCw } from 'lucide-react'
+import { Check, ClipboardList, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
@@ -132,7 +132,8 @@ export function ImportOrdersPage() {
         </select>
       </WinToolbar>
 
-      <WinDataGrid searchable
+      <WinDataGrid
+        searchable
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
@@ -145,8 +146,12 @@ export function ImportOrdersPage() {
       {selected?.items && selected.items.length > 0 && (
         <div className="border-t-2 border-win-grid-border bg-win-control p-3 max-h-80 overflow-auto shrink-0 text-[14px]">
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-2">
-            <span className="text-[15px] font-semibold">📋 Phiếu {selected.code}</span>
-            <span>NCC: <strong>{selected.supplier?.name}</strong></span>
+            <span className="text-[15px] font-semibold inline-flex items-center gap-1.5">
+              <ClipboardList size={16} strokeWidth={1.75} className="text-win-active-title" /> Phiếu {selected.code}
+            </span>
+            <span>
+              NCC: <strong>{selected.supplier?.name}</strong>
+            </span>
             <span>Ngày: {formatDate(selected.createdAt)}</span>
             <span className={`px-2 py-0.5 text-[12px] rounded ${statusColors[selected.status] || ''}`}>
               {statusLabels[selected.status] || selected.status}
@@ -154,7 +159,8 @@ export function ImportOrdersPage() {
           </div>
           {selected.hasInvoice && (
             <div className="mb-2">
-              🧾 HĐ: <strong>{[selected.invoiceSymbol, selected.invoiceNo].filter(Boolean).join('/') || '—'}</strong>
+              <ReceiptText size={14} strokeWidth={1.75} className="inline -mt-0.5 mr-1 text-win-active-title" />
+              HĐ: <strong>{[selected.invoiceSymbol, selected.invoiceNo].filter(Boolean).join('/') || '—'}</strong>
               {selected.invoiceDate ? ` · Ngày ${formatDate(selected.invoiceDate)}` : ''}
               {selected.vatAmount ? ` · Tiền thuế ${formatCurrency(selected.vatAmount)}` : ''}
             </div>
@@ -182,9 +188,7 @@ export function ImportOrdersPage() {
                   <td className="p-1.5 text-right">{formatCurrency(item.unitPrice)}</td>
                   <td className="p-1.5 text-right">{formatCurrency(item.totalPrice)}</td>
                   {selected.hasInvoice && (
-                    <td className="p-1.5 text-center">
-                      {item.vatRate ? VAT_RATE_LABELS[item.vatRate as VatRate] ?? item.vatRate : '—'}
-                    </td>
+                    <td className="p-1.5 text-center">{item.vatRate ? (VAT_RATE_LABELS[item.vatRate as VatRate] ?? item.vatRate) : '—'}</td>
                   )}
                   {selected.hasInvoice && <td className="p-1.5 text-right">{formatCurrency(item.vatAmount)}</td>}
                 </tr>
@@ -192,8 +196,16 @@ export function ImportOrdersPage() {
             </tbody>
           </table>
           <div className="flex flex-wrap justify-end gap-x-6 mt-2">
-            {selected.hasInvoice && selected.subtotal && <span>Tiền hàng: <strong>{formatCurrency(selected.subtotal)}</strong></span>}
-            {selected.hasInvoice && <span>Thuế GTGT: <strong>{formatCurrency(selected.vatAmount)}</strong></span>}
+            {selected.hasInvoice && selected.subtotal && (
+              <span>
+                Tiền hàng: <strong>{formatCurrency(selected.subtotal)}</strong>
+              </span>
+            )}
+            {selected.hasInvoice && (
+              <span>
+                Thuế GTGT: <strong>{formatCurrency(selected.vatAmount)}</strong>
+              </span>
+            )}
             <span>
               Tổng thanh toán: <strong className="text-[16px] text-win-active-title">{formatCurrency(selected.totalAmount)}</strong>
             </span>

@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -117,16 +118,15 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
               />
             )}
           />
-          <WinInput
-            label="Số lượng"
-            type="number"
-            step="0.01"
-            {...register('quantity')}
-            error={errors.quantity?.message}
-          />
+          <WinInput label="Số lượng" type="number" step="0.01" {...register('quantity')} error={errors.quantity?.message} />
           <WinSelect label="Lý do" {...register('reason')} options={reasons} error={errors.reason?.message} />
           <WinInput label="Ghi chú" {...register('note')} />
-          {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
+          {submitError && (
+            <p className="text-win-base text-win-error font-semibold">
+              <TriangleAlert size={14} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+              {submitError}
+            </p>
+          )}
         </div>
       </WinGroupBox>
     </WinDialog>

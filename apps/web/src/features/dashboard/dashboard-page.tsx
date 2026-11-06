@@ -1,4 +1,16 @@
-import { Package, FileText, AlertTriangle, DollarSign, RefreshCw } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  CircleCheck,
+  Clock,
+  DollarSign,
+  FileText,
+  LayoutDashboard,
+  Package,
+  RefreshCw,
+  TriangleAlert,
+} from 'lucide-react'
 import { WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement, useImportOrders, useExpiringBatches } from '@/data'
 import { formatDateTime, formatDate, formatNumber } from '@wms/shared'
@@ -34,7 +46,9 @@ export function DashboardPage() {
   return (
     <div className="p-4 overflow-auto">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold">📊 Dashboard</h2>
+        <h2 className="text-sm font-semibold inline-flex items-center gap-1.5">
+          <LayoutDashboard size={16} strokeWidth={1.75} className="text-win-active-title" /> Dashboard
+        </h2>
         <button
           onClick={() => refetchSummary()}
           className="flex items-center gap-1 text-win-base text-win-active-title hover:underline cursor-pointer"
@@ -45,10 +59,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         {cards.map((s) => (
-          <div
-            key={s.label}
-            className="border border-win-grid-border bg-win-control p-3 flex items-center gap-3"
-          >
+          <div key={s.label} className="border border-win-grid-border bg-win-control p-3 flex items-center gap-3">
             <div className={s.color}>{s.icon}</div>
             <div>
               <div className="text-lg font-bold">{s.value}</div>
@@ -59,7 +70,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <WinGroupBox title="⚠️ Tồn kho thấp">
+        <WinGroupBox title="Tồn kho thấp" icon={<TriangleAlert size={16} strokeWidth={1.75} />}>
           {summary?.lowStock.length ? (
             <table className="w-full text-win-base">
               <thead>
@@ -84,18 +95,25 @@ export function DashboardPage() {
               </tbody>
             </table>
           ) : (
-            <p className="text-win-base text-win-success">✓ Tất cả đủ stock</p>
+            <p className="text-win-base text-win-success inline-flex items-center gap-1.5">
+              <CircleCheck size={14} /> Tất cả đủ stock
+            </p>
           )}
         </WinGroupBox>
 
-        <WinGroupBox title="🕒 Hoạt động gần đây">
+        <WinGroupBox title="Hoạt động gần đây" icon={<Clock size={16} strokeWidth={1.75} />}>
           <div className="space-y-1">
             {(movements ?? []).slice(0, 8).map((t: any) => (
               <div key={t.id} className="flex gap-2 text-win-base">
                 <span className="text-win-text-secondary w-[110px] shrink-0">{formatDateTime(t.createdAt)}</span>
                 <span>
-                  {t.createdBy.fullName} {t.type === 'IMPORT' ? '📥' : '📤'} {formatNumber(Math.abs(Number(t.quantity)))}{' '}
-                  {t.ingredient.unit} {t.ingredient.name}
+                  {t.createdBy.fullName}{' '}
+                  {t.type === 'IMPORT' ? (
+                    <ArrowDownToLine size={13} className="inline text-green-600" />
+                  ) : (
+                    <ArrowUpFromLine size={13} className="inline text-red-600" />
+                  )}{' '}
+                  {formatNumber(Math.abs(Number(t.quantity)))} {t.ingredient.unit} {t.ingredient.name}
                 </span>
               </div>
             ))}
@@ -122,7 +140,9 @@ export function DashboardPage() {
                   <tr key={b.id} className="border-b border-win-grid-border text-win-error">
                     <td className="p-1">{b.batchCode}</td>
                     <td className="p-1">{b.ingredient.name}</td>
-                    <td className="p-1 text-center">{b.quantity} {b.ingredient.unit}</td>
+                    <td className="p-1 text-center">
+                      {b.quantity} {b.ingredient.unit}
+                    </td>
                     <td className="p-1 text-center">{formatDate(b.expiryDate)}</td>
                     <td className="p-1 text-center font-bold">{b.daysUntilExpiry} ngày</td>
                   </tr>
@@ -130,7 +150,9 @@ export function DashboardPage() {
               </tbody>
             </table>
           ) : (
-            <p className="text-win-base text-win-success">✓ Không có lô sắp hết hạn</p>
+            <p className="text-win-base text-win-success inline-flex items-center gap-1.5">
+              <CircleCheck size={14} /> Không có lô sắp hết hạn
+            </p>
           )}
         </WinGroupBox>
       </div>

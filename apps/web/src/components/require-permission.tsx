@@ -1,3 +1,4 @@
+import { ShieldOff } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useAuthStore } from '@/stores/auth.store'
 
@@ -8,7 +9,9 @@ export function RequirePermission({ permission, children }: { permission: string
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center p-8 border border-win-grid-border bg-win-control">
-          <div className="text-2xl mb-2">🚫</div>
+          <div className="mb-2 flex justify-center text-win-error">
+            <ShieldOff size={36} strokeWidth={1.5} />
+          </div>
           <h2 className="text-sm font-bold mb-1">Không có quyền truy cập</h2>
           <p className="text-win-base text-win-text-secondary">Bạn không có quyền xem trang này. Vui lòng liên hệ quản trị viên.</p>
         </div>
