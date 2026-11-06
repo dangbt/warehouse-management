@@ -17,6 +17,7 @@ import { Route as AppTaxSettingsRouteImport } from './routes/_app/tax-settings'
 import { Route as AppSuppliersRouteImport } from './routes/_app/suppliers'
 import { Route as AppStocktakeRouteImport } from './routes/_app/stocktake'
 import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports'
+import { Route as AppStockCardRouteImport } from './routes/_app/stock-card'
 import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
@@ -76,6 +77,11 @@ const AppStocktakeRoute = AppStocktakeRouteImport.update({
 const AppStockExportsRoute = AppStockExportsRouteImport.update({
   id: '/stock-exports',
   path: '/stock-exports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockCardRoute = AppStockCardRouteImport.update({
+  id: '/stock-card',
+  path: '/stock-card',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRolesRoute = AppRolesRouteImport.update({
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
+  '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
+  '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/roles': typeof AppRolesRoute
+  '/_app/stock-card': typeof AppStockCardRoute
   '/_app/stock-exports': typeof AppStockExportsRoute
   '/_app/stocktake': typeof AppStocktakeRoute
   '/_app/suppliers': typeof AppSuppliersRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/recipes'
     | '/reports'
     | '/roles'
+    | '/stock-card'
     | '/stock-exports'
     | '/stocktake'
     | '/suppliers'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/recipes'
     | '/reports'
     | '/roles'
+    | '/stock-card'
     | '/stock-exports'
     | '/stocktake'
     | '/suppliers'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/_app/recipes'
     | '/_app/reports'
     | '/_app/roles'
+    | '/_app/stock-card'
     | '/_app/stock-exports'
     | '/_app/stocktake'
     | '/_app/suppliers'
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/stock-exports'
       fullPath: '/stock-exports'
       preLoaderRoute: typeof AppStockExportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/stock-card': {
+      id: '/_app/stock-card'
+      path: '/stock-card'
+      fullPath: '/stock-card'
+      preLoaderRoute: typeof AppStockCardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/roles': {
@@ -601,6 +620,7 @@ interface AppRouteChildren {
   AppRecipesRoute: typeof AppRecipesRoute
   AppReportsRoute: typeof AppReportsRoute
   AppRolesRoute: typeof AppRolesRoute
+  AppStockCardRoute: typeof AppStockCardRoute
   AppStockExportsRoute: typeof AppStockExportsRoute
   AppStocktakeRoute: typeof AppStocktakeRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
@@ -630,6 +650,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRecipesRoute: AppRecipesRoute,
   AppReportsRoute: AppReportsRoute,
   AppRolesRoute: AppRolesRoute,
+  AppStockCardRoute: AppStockCardRoute,
   AppStockExportsRoute: AppStockExportsRoute,
   AppStocktakeRoute: AppStocktakeRoute,
   AppSuppliersRoute: AppSuppliersRoute,

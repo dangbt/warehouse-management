@@ -28,7 +28,7 @@ function Cells({ t, bold }: { t: InventoryTotals; bold?: boolean }) {
   )
 }
 
-export function InventorySummaryTable({ report }: { report: InventorySummaryReport }) {
+export function InventorySummaryTable({ report, onRowOpen }: { report: InventorySummaryReport; onRowOpen?: (ingredientId: string) => void }) {
   return (
     <table className="text-win-base border-collapse w-full min-w-[1100px]">
       <thead className="sticky top-0 bg-win-surface">
@@ -54,7 +54,12 @@ export function InventorySummaryTable({ report }: { report: InventorySummaryRepo
               <td colSpan={11} className="px-2 py-0.5">{g.groupName}</td>
             </tr>
             {g.rows.map((r) => (
-              <tr key={r.ingredientId} className="border-b border-win-border/40">
+              <tr
+                key={r.ingredientId}
+                className="border-b border-win-border/40 cursor-pointer hover:bg-win-surface"
+                title="Nhấp đúp để xem Thẻ kho"
+                onDoubleClick={() => onRowOpen?.(r.ingredientId)}
+              >
                 <td className="px-2 py-0.5">{r.code}</td>
                 <td className="px-2 py-0.5">{r.name}</td>
                 <td className="px-2 py-0.5 text-center">{r.unit}</td>

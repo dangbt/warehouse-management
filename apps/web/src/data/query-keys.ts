@@ -67,6 +67,7 @@ export const QUERY_KEYS = {
     stockSummary: ['reports', 'stock-summary'] as const,
     stockMovement: ['reports', 'stock-movement'] as const,
     consumptionVariance: (params?: Record<string, string | undefined>) => ['reports', 'consumption-variance', params] as const,
+    stockCard: (params?: { ingredientId: string; from: string; to: string }) => ['reports', 'stock-card', params] as const,
     inventorySummary: (params?: { from: string; to: string; groupId?: string }) => ['reports', 'inventory-summary', params] as const,
     expiring: (days: number) => ['reports', 'expiring', days] as const,
   },
