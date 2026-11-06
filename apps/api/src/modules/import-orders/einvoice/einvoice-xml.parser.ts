@@ -41,7 +41,8 @@ export function normalizeVatRate(raw: string): string | null {
 
 function normalizeDate(raw: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
-  if (!m || isNaN(new Date(`${m[1]}-${m[2]}-${m[3]}`).getTime())) throw new EinvoiceError('EINVOICE_INVALID_FORMAT', `Ngày hoá đơn không hợp lệ: "${raw}"`);
+  if (!m || isNaN(new Date(`${m[1]}-${m[2]}-${m[3]}`).getTime()))
+    throw new EinvoiceError('EINVOICE_INVALID_FORMAT', `Ngày hoá đơn không hợp lệ: "${raw}"`);
   return `${m[1]}-${m[2]}-${m[3]}`;
 }
 
@@ -55,7 +56,7 @@ export function assertNoDtd(xml: string): void {
 /** Đọc 1 file XML hoá đơn điện tử theo TT78/2021 (HDon/DLHDon/NDHDon). */
 export function parseEinvoiceXml(buf: Buffer): ParsedEinvoice {
   if (buf.length > EINVOICE_MAX_FILE_BYTES) throw new EinvoiceError('EINVOICE_FILE_TOO_LARGE', 'File vượt quá 5MB');
-  const xml = buf.toString('utf8').replace(/^﻿/, '');
+  const xml = buf.toString('utf8').replace(/^\uFEFF/, '');
   assertNoDtd(xml);
   let root: Node;
   try {
