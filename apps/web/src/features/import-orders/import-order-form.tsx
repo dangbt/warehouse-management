@@ -160,6 +160,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
   useEffect(() => {
     if (!open) return
     reset(EMPTY_FORM)
+    setGroupMap({})
     setSubmitError('')
     api.get('/suppliers?limit=1000').then((s) => {
       const supplierList = s.data as {

@@ -8,7 +8,7 @@ import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@w
 import { api } from '@/services/api'
 import { useTerm } from '@/data/use-features'
 import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
-import { mergeLines, type MatrixLine } from '@/components/matrix-picker/matrix-logic'
+import { mergeExportLines, type MatrixLine } from '@/components/matrix-picker/matrix-logic'
 
 const makeSchema = (itemLower: string) => z.object({
   ingredient_id: z.string().min(1, `Chọn ${itemLower}`),
@@ -90,13 +90,29 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
     if (!reason) return setSubmitError('Chọn lý do')
     try {
       setSubmitError('')
-      for (const l of lines) await onSave?.({ ingredient_id: l.itemId, quantity: l.quantity, reason, note })
-      setLines([])
+      // Bỏ từng dòng khỏi `lines` ngay khi lưu xong: lỗi giữa chừng thì bấm Lưu lại không xuất trùng dòng đã lưu.
+      for (const l of lines) {
+        await onSave?.({ ingredient_id: l.itemId, quantity: l.quantity, reason, note })
+        setLines((cur) => cur.filter((x) => x.itemId !== l.itemId))
+      }
       reset()
       onClose()
     } catch (e: unknown) {
-      setSubmitError(e instanceof Error ? e.message : 'Lỗi xuất kho')
+      const msg = e instanceof Error ? e.message : 'Lỗi xuất kho'
+      setSubmitError(`${msg} — các dòng đã xuất thành công đã được bỏ khỏi danh sách, dòng còn lại chưa xuất.`)
     }
+  }
+
+  /** Gộp dòng từ ma trận rồi kiểm lại tồn trên tổng sau gộp (mở popup nhiều lần cho cùng biến thể). */
+  const addMatrixLines = (incoming: MatrixLine[]) => {
+    const res = mergeExportLines(lines, incoming)
+    const bad = Object.keys(res.errors)
+    if (bad.length > 0) {
+      const names = incoming.filter((l) => res.errors[l.itemId]).map((l) => `${l.productName} · ${l.variantLabel} (${res.errors[l.itemId]})`)
+      return setSubmitError(`Tổng sau khi gộp vượt tồn: ${names.join('; ')}`)
+    }
+    setSubmitError('')
+    setLines(res.lines)
   }
 
   return (
@@ -144,7 +160,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
             )}
           />
           <div className="flex items-center gap-2">
-            <MatrixAddButton mode="export" onConfirm={(ls) => setLines((cur) => mergeLines(cur, ls))} />
+            <MatrixAddButton mode="export" onConfirm={addMatrixLines} />
             <span className="text-[12px] text-win-text-secondary">Xuất nhiều biến thể cùng lúc</span>
           </div>
           {lines.length > 0 && (
