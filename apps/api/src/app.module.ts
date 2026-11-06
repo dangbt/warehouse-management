@@ -23,6 +23,7 @@ import { ProcessingModule } from './modules/processing/processing.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { SupportModule } from './modules/support/support.module';
 import { TaxModule } from './modules/tax/tax.module';
+import { CostingModule } from './modules/costing/costing.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { TaxModule } from './modules/tax/tax.module';
     MenuModule,
     SupportModule,
     TaxModule,
+    CostingModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],
