@@ -1,8 +1,8 @@
-import type { KeyboardEvent } from 'react'
 import { Controller, type Control, type FieldArrayWithId, type UseFormRegister } from 'react-hook-form'
 import { WinSearchSelect } from '@wms/ui-winforms'
 import { Plus, Trash2 } from 'lucide-react'
 import { formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
+import { useGridEnterNav } from '@/hooks/use-grid-enter-nav'
 import { lineTotalPrice, computeLineVat, type VatLineInput } from './vat'
 
 export interface IngredientOption {
@@ -44,7 +44,7 @@ const selectAll = (e: React.FocusEvent<HTMLInputElement>) => e.target.select()
 /**
  * Bảng "Hàng tiền" của phiếu nhập — thứ tự cột theo luồng nhập liệu kiểu MISA:
  * Nguyên liệu → ĐVT → Số lượng → Hệ số → Đơn giá → Thành tiền → (Thuế) → HSD.
- * Enter ở ô Hạn sử dụng của dòng cuối sẽ tự thêm dòng mới.
+ * Enter nhảy ô kế tiếp; hết ô cuối của dòng cuối sẽ tự thêm dòng mới.
  */
 export function ImportOrderItemsTable({
   register,
@@ -62,16 +62,11 @@ export function ImportOrderItemsTable({
 }: Props) {
   const unitOf = (id?: string) => (id ? (unitMap[id] ?? '') : '')
 
-  const onLastCellKeyDown = (i: number) => (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && i === fields.length - 1) {
-      e.preventDefault()
-      onAdd()
-    }
-  }
+  const onGridKeyDown = useGridEnterNav(onAdd)
 
   return (
     <div>
-      <div className="overflow-x-auto border border-win-grid-border bg-white">
+      <div className="overflow-x-auto border border-win-grid-border bg-white" onKeyDown={onGridKeyDown}>
         <table className="w-full text-[14px] border-collapse">
           <thead>
             <tr className="bg-win-grid-header border-b border-win-grid-border">
@@ -173,7 +168,6 @@ export function ImportOrderItemsTable({
                       type="date"
                       data-testid={`item-${i}-expiry`}
                       {...register(`items.${i}.expiry_date`)}
-                      onKeyDown={onLastCellKeyDown(i)}
                       className={cell}
                     />
                   </td>
@@ -204,7 +198,7 @@ export function ImportOrderItemsTable({
         >
           <Plus size={16} /> Thêm dòng
         </button>
-        <span className="text-[12px] text-win-text-secondary">Nhấn Enter ở ô Hạn sử dụng của dòng cuối để thêm dòng</span>
+        <span className="text-[12px] text-win-text-secondary">Enter: sang ô kế tiếp, hết dòng cuối thì thêm dòng · Ctrl+Insert: thêm dòng · Ctrl+Delete: xoá dòng</span>
         {rootError && <span className="text-[13px] text-win-error ml-auto">{rootError}</span>}
       </div>
     </div>

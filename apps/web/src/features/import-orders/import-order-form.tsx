@@ -9,6 +9,7 @@ import type { VoucherPayload } from '@/data/use-vouchers'
 import { WinDialog } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { formatCurrency, formatNumber } from '@wms/shared'
+import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
 import { computeVatTotals } from './vat'
 import { ImportOrderItemsTable, type IngredientOption } from './import-order-items-table'
 
@@ -128,7 +129,7 @@ export function ImportOrderForm({ open, onClose, onSave, seed }: Props) {
     watch,
     reset,
     setFocus,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: EMPTY_FORM,
@@ -224,7 +225,7 @@ export function ImportOrderForm({ open, onClose, onSave, seed }: Props) {
     setTimeout(() => setFocus(`items.${fields.length}.quantity`), 0)
   }, [append, setFocus, fields.length])
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormData, keepOpen = false) => {
     try {
       setSubmitError('')
       // Khi không có hoá đơn: gửi has_invoice=false và bỏ thuế suất từng dòng.
@@ -238,26 +239,27 @@ export function ImportOrderForm({ open, onClose, onSave, seed }: Props) {
             items: data.items.map((i) => ({ ...i, vat_rate: undefined })),
           }
       await onSave?.({ ...payload, ...voucher.payload() })
-      reset()
-      onClose()
+      reset(EMPTY_FORM)
+      if (keepOpen) setTimeout(() => setFocus('supplier_id'), 0)
+      else onClose()
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : 'Lỗi tạo phiếu')
     }
   }
 
-  // Phím tắt: Ctrl/Cmd+S lưu, Esc đóng.
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault()
-        void handleSubmit(onSubmit)()
-      } else if (e.key === 'Escape') {
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+  // Phím tắt: Ctrl+S lưu · Ctrl+Shift+S lưu & thêm mới · Esc đóng (hỏi nếu dirty) · Ctrl+Insert/Delete thêm/xoá dòng.
+  const { requestClose, guard } = useFormHotkeys({
+    open,
+    isDirty,
+    onClose,
+    onSave: () => void handleSubmit(onSubmit)(),
+    onSaveNew: () => void handleSubmit((d) => onSubmit(d, true))(),
+    onAddRow: addRow,
+    onRemoveRow: () => {
+      // Xoá dòng đang focus (theo data-testid item-N-*), không có thì xoá dòng cuối.
+      const m = /^item-(\d+)-/.exec(document.activeElement?.getAttribute('data-testid') ?? '')
+      if (fields.length > 1) remove(m ? Number(m[1]) : fields.length - 1)
+    },
   })
 
   if (!open) return null
@@ -269,22 +271,22 @@ export function ImportOrderForm({ open, onClose, onSave, seed }: Props) {
       title="Tạo Phiếu Nhập Kho"
       icon={<FileText size={16} strokeWidth={1.75} />}
       open={open}
-      onClose={onClose}
+      onClose={requestClose}
       width={Math.min(1180, typeof window !== 'undefined' ? window.innerWidth * 0.96 : 1180)}
       footer={
         <>
           <span className="text-[16px] font-bold">Tổng: {formatCurrency(totals.totalAmount)}</span>
-          <span className="mr-auto ml-4 text-[12px] text-win-text-secondary">Ctrl+S: Lưu · Esc: Đóng</span>
+          <span className="mr-auto ml-4 text-[12px] text-win-text-secondary">Ctrl+S: Lưu · Ctrl+Shift+S: Lưu và thêm mới · Esc: Đóng</span>
           <button
             type="button"
-            onClick={onClose}
+            onClick={requestClose}
             className="h-10 px-5 text-[14px] bg-win-button border border-win-button-border min-w-[100px] cursor-pointer hover:bg-win-button-hover"
           >
             Huỷ
           </button>
           <button
             type="button"
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => void handleSubmit((d) => onSubmit(d))()}
             disabled={isSubmitting}
             className="h-10 px-6 text-[14px] font-semibold bg-win-active-title text-white border border-win-active-title min-w-[120px] cursor-pointer disabled:opacity-50"
           >
@@ -439,6 +441,7 @@ export function ImportOrderForm({ open, onClose, onSave, seed }: Props) {
           </div>
         </Section>
       </div>
+      {guard}
     </WinDialog>
   )
 }

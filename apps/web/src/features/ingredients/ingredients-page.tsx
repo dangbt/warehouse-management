@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useListHotkeys } from '@/hooks/use-list-hotkeys'
 import { Check, Download, Package, Pencil, Plus, RefreshCw, Trash2, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -88,34 +89,47 @@ export function IngredientsPage() {
     }
   }
 
+  const openAdd = () => {
+    setFormMode('add')
+    setSelected(null)
+    setFormOpen(true)
+  }
+  const openEdit = () => {
+    if (!selected) return
+    setFormMode('edit')
+    setFormOpen(true)
+  }
+  useListHotkeys({
+    onAdd: openAdd,
+    onEdit: openEdit,
+    onDelete: selected ? () => setConfirmDelete(true) : undefined,
+    enabled: !formOpen && !confirmDelete,
+  })
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
           icon={<Plus size={16} />}
           label="Thêm"
-          onClick={() => {
-            setFormMode('add')
-            setSelected(null)
-            setFormOpen(true)
-          }}
+          shortcut="F2"
+          onClick={openAdd}
         />
         <WinToolbar.Button
           icon={<Pencil size={16} />}
           label="Sửa"
+          shortcut="F4"
           disabled={!selected}
-          onClick={() => {
-            setFormMode('edit')
-            setFormOpen(true)
-          }}
+          onClick={openEdit}
         />
-        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" shortcut="Delete" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={16} />} label="Export" />
         <WinToolbar.Separator />
         <input
           type="text"
+          data-hotkey-search
           placeholder="Tìm kiếm..."
           value={search}
           onChange={(e) => {
