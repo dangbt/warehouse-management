@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class StocktakeService {
     private prisma: PrismaService,
     private vouchers: VoucherService,
     private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string }) {
@@ -45,6 +47,7 @@ export class StocktakeService {
     });
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('STOCKTAKE', body.voucher_no);
 
     return this.prisma.stocktakeSession
@@ -73,6 +76,7 @@ export class StocktakeService {
     const session = await this.prisma.stocktakeSession.findUnique({ where: { id } });
     if (!session) throw new NotFoundException('Không tìm thấy phiên kiểm kho');
     if (session.status !== 'DRAFT') throw new BadRequestException('Chỉ cập nhật phiên ở trạng thái DRAFT');
+    await this.periodLock.assertOpen(session.voucherDate);
 
     for (const item of body.items) {
       const existing = await this.prisma.stocktakeItem.findFirst({
@@ -97,6 +101,7 @@ export class StocktakeService {
     });
     if (!session) throw new NotFoundException('Không tìm thấy phiên kiểm kho');
     if (session.status !== 'DRAFT') throw new BadRequestException('Phiên đã hoàn thành');
+    await this.periodLock.assertOpen(session.voucherDate);
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of session.items) {

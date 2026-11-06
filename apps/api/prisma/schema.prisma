@@ -282,6 +282,8 @@ model KiotVietOrder {
   vatAmount       Decimal @default(0) @map("vat_amount") @db.Decimal(14, 2)
   status        String   @default("SYNCED")
   deducted      Boolean  @default(false)
+  /// Mã lỗi lần trừ kho gần nhất (vd PERIOD_LOCKED); null khi không lỗi / đã trừ thành công.
+  deductError   String?  @map("deduct_error")
   orderDate     DateTime @map("order_date")
   syncedAt      DateTime @default(now()) @map("synced_at")
   items         KiotVietOrderItem[]
@@ -517,6 +519,8 @@ model InventorySetting {
   id            String   @id @default("default")
   // AVG_PERIOD = bình quân cuối kỳ (mặc định), AVG_MOVING = bình quân tức thời, FIFO
   costingMethod String   @default("AVG_PERIOD") @map("costing_method")
+  /// Khoá sổ kho: mọi chứng từ có ngày CT (lịch VN) <= ngày này bị chặn tạo/sửa/duyệt. null = chưa khoá.
+  lockedUntil   DateTime? @map("locked_until") @db.Date
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("inventory_settings")

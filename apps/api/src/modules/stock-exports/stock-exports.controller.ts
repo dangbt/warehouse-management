@@ -5,6 +5,7 @@ import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.gua
 import { BatchDeductionService } from '../common/batch-deduction.service';
 import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('stock-exports')
@@ -14,6 +15,7 @@ export class StockExportsController {
     private batchDeduction: BatchDeductionService,
     private vouchers: VoucherService,
     private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   @Get()
@@ -64,6 +66,7 @@ export class StockExportsController {
     if (Number(ingredient.currentStock) < body.quantity) throw new BadRequestException('Không đủ tồn kho');
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('EXPORT', body.voucher_no);
 
     await this.prisma
