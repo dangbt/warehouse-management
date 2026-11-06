@@ -1,4 +1,4 @@
-import { TriangleAlert } from 'lucide-react'
+import { ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -77,7 +77,8 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title="📤 Xuất Kho"
+      title="Xuất Kho"
+      icon={<ArrowUpFromLine size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={420}

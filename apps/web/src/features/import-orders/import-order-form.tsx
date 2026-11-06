@@ -1,4 +1,4 @@
-import { TriangleAlert } from 'lucide-react'
+import { FileText, TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -225,7 +225,8 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title="📄 Tạo Phiếu Nhập Kho"
+      title="Tạo Phiếu Nhập Kho"
+      icon={<FileText size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={Math.min(1180, typeof window !== 'undefined' ? window.innerWidth * 0.96 : 1180)}

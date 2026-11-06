@@ -1,4 +1,4 @@
-import { TriangleAlert } from 'lucide-react'
+import { Pencil, Plus, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -149,7 +149,8 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title={mode === 'add' ? '🆕 Thêm Nguyên Liệu' : '✏️ Sửa Nguyên Liệu'}
+      title={mode === 'add' ? 'Thêm Nguyên Liệu' : 'Sửa Nguyên Liệu'}
+      icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={440}

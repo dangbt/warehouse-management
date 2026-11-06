@@ -25,7 +25,7 @@ describe('IngredientForm', () => {
 
   it('shows add title in add mode', () => {
     render(<IngredientForm open={true} mode="add" data={null} onClose={() => {}} />)
-    expect(screen.getByText('🆕 Thêm Nguyên Liệu')).toBeInTheDocument()
+    expect(screen.getByText('Thêm Nguyên Liệu')).toBeInTheDocument()
   })
 
   it('shows edit title in edit mode', () => {
@@ -37,7 +37,7 @@ describe('IngredientForm', () => {
         onClose={() => {}}
       />,
     )
-    expect(screen.getByText('✏️ Sửa Nguyên Liệu')).toBeInTheDocument()
+    expect(screen.getByText('Sửa Nguyên Liệu')).toBeInTheDocument()
   })
 
   it('pre-fills data in edit mode', () => {
