@@ -24,6 +24,8 @@ export {
 export { usePurchaseReturns, useCreatePurchaseReturn, useCompletedImportOrders } from './use-purchase-returns'
 export { useSupplierPayments, useCreateSupplierPayment } from './use-supplier-payments'
 export { useConsumptionVariance } from './use-variance'
+export { useInventorySummary } from './use-inventory-summary'
+export type { InventorySummaryReport, InventorySummaryGroup, InventorySummaryRow, InventoryTotals } from './use-inventory-summary'
 export { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup } from './use-ingredient-groups'
 export type { IngredientGroup } from './use-ingredient-groups'
 export { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from './use-processing'
