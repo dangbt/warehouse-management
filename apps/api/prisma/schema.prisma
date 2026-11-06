@@ -101,6 +101,7 @@ model Ingredient {
   lossRatio    Decimal? @map("loss_ratio") @db.Decimal(5, 4)
 
   importOrderItems ImportOrderItem[]
+  supplierItemMappings SupplierItemMapping[]
   stockTransactions StockTransaction[]
   recipeIngredients RecipeIngredient[]
   batches      IngredientBatch[]
@@ -129,6 +130,7 @@ model Supplier {
   importOrders    ImportOrder[]
   purchaseReturns PurchaseReturn[]
   payments        SupplierPayment[]
+  itemMappings    SupplierItemMapping[]
 
   @@map("suppliers")
 }
@@ -506,4 +508,23 @@ model VoucherConfig {
   digits Int    @default(5)
 
   @@map("voucher_configs")
+}
+
+// Nhớ cách map "tên hàng trên hoá đơn điện tử" của 1 NCC → nguyên liệu + hệ số quy đổi (ĐVT hoá đơn → ĐVT tồn).
+model SupplierItemMapping {
+  id           String     @id @default(uuid())
+  supplierId   String     @map("supplier_id")
+  supplier     Supplier   @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  // Khoá đã chuẩn hoá (bỏ dấu, hạ chữ, gọn khoảng trắng) của tên hàng và ĐVT trên hoá đơn.
+  itemKey      String     @map("item_key")
+  unitKey      String     @default("") @map("unit_key")
+  itemName     String     @map("item_name")
+  unit         String     @default("")
+  ingredientId String     @map("ingredient_id")
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  factor       Decimal    @default(1) @db.Decimal(12, 4)
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@unique([supplierId, itemKey, unitKey])
+  @@map("supplier_item_mappings")
 }

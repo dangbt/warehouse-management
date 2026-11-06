@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Check, ClipboardList, FileSpreadsheet, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
+import { Check, ClipboardList, FileCode2, FileSpreadsheet, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
 import { ExcelImportDialog } from './excel-import/excel-import-dialog'
+import { EinvoiceImportDialog } from './einvoice-import/einvoice-import-dialog'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
@@ -89,6 +90,7 @@ export function ImportOrdersPage() {
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [excelOpen, setExcelOpen] = useState(false)
+  const [xmlOpen, setXmlOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -109,6 +111,7 @@ export function ImportOrdersPage() {
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
         <WinToolbar.Button icon={<FileSpreadsheet size={16} />} label="Nhập Excel" onClick={() => setExcelOpen(true)} />
+        <WinToolbar.Button icon={<FileCode2 size={16} />} label="Nhập HĐ XML" onClick={() => setXmlOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Check size={16} />}
@@ -232,6 +235,13 @@ export function ImportOrdersPage() {
         open={excelOpen}
         onClose={() => {
           setExcelOpen(false)
+          refetch()
+        }}
+      />
+      <EinvoiceImportDialog
+        open={xmlOpen}
+        onClose={() => {
+          setXmlOpen(false)
           refetch()
         }}
       />
