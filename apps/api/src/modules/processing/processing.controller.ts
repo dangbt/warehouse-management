@@ -2,8 +2,10 @@ import { Controller, Get, Post, Param, Body, Query, UseGuards, Req } from '@nest
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { ProcessingService } from './processing.service';
+import { FeatureGuard, RequireFeature } from '../settings/feature.guard';
 
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, FeatureGuard)
+@RequireFeature('processing')
 @Controller('processing')
 export class ProcessingController {
   constructor(private svc: ProcessingService) {}

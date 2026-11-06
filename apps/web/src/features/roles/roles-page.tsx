@@ -30,6 +30,7 @@ const RESOURCES = [
   'reports',
   'roles',
   'departments',
+  'settings',
 ]
 const ACTIONS = ['create', 'read', 'update', 'delete', 'approve']
 const RESOURCE_LABELS: Record<string, string> = {
@@ -43,6 +44,7 @@ const RESOURCE_LABELS: Record<string, string> = {
   reports: 'Báo cáo',
   roles: 'Roles',
   departments: 'Bộ phận',
+  settings: 'Cài đặt ngành nghề',
 }
 const ACTION_LABELS: Record<string, string> = {
   create: 'Tạo',

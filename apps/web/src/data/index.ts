@@ -42,3 +42,4 @@ export { useTaxSummary, useCloseTaxPeriod, useReopenTaxPeriod } from './use-tax-
 export type { TaxSummaryResult, VatDeductionSummaryResult, HouseholdSummaryResult, SummarySide } from './use-tax-reports'
 export { useRevenueBook, useMaterialsBook } from './use-tax-reports'
 export type { RevenueBookReport, RevenueBookRow, MaterialsBookReport, MaterialsBookEntry, MaterialsBookRow } from './use-tax-reports'
+export { useFeatures, useTerm, useUpdateFeatures } from './use-features'

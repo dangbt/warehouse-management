@@ -4,6 +4,7 @@ import { WinSearchSelect } from '@wms/ui-winforms'
 import { Plus, Trash2 } from 'lucide-react'
 import { formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
 import { lineTotalPrice, computeLineVat, type VatLineInput } from './vat'
+import { useTerm } from '@/data/use-features'
 
 export interface IngredientOption {
   value: string
@@ -60,6 +61,7 @@ export function ImportOrderItemsTable({
   onRemove,
   rootError,
 }: Props) {
+  const t = useTerm()
   const unitOf = (id?: string) => (id ? (unitMap[id] ?? '') : '')
 
   const onLastCellKeyDown = (i: number) => (e: KeyboardEvent<HTMLInputElement>) => {
@@ -76,7 +78,7 @@ export function ImportOrderItemsTable({
           <thead>
             <tr className="bg-win-grid-header border-b border-win-grid-border">
               <th className={`${th} w-[44px] text-center`}>#</th>
-              <th className={`${th} text-left min-w-[220px]`}>Nguyên liệu</th>
+              <th className={`${th} text-left min-w-[220px]`}>{t('item')}</th>
               <th className={`${th} w-[70px] text-center`}>ĐVT</th>
               <th className={`${th} w-[100px] text-right`}>Số lượng</th>
               <th className={`${th} w-[90px] text-right`} title="1 ĐVT nhập = ? ĐVT tồn (vd 1 thùng = 24 chai)">
@@ -111,7 +113,7 @@ export function ImportOrderItemsTable({
                           options={ingredients}
                           onSearch={onSearchIngredients}
                           loading={ingredientsLoading}
-                          placeholder="-- Chọn nguyên liệu --"
+                          placeholder={t('item_choose_placeholder')}
                           triggerClassName="h-10 px-2 text-[14px]"
                         />
                       )}

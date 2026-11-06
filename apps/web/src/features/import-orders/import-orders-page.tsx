@@ -6,6 +6,7 @@ import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
 interface ImportOrderItem {
   id: string
@@ -82,6 +83,7 @@ const columns: Column<ImportOrder>[] = [
 ]
 
 export function ImportOrdersPage() {
+  const t = useTerm()
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
@@ -169,7 +171,7 @@ export function ImportOrdersPage() {
             <thead>
               <tr className="bg-win-grid-header">
                 <th className="text-center p-1.5 w-[44px]">#</th>
-                <th className="text-left p-1.5">Nguyên liệu</th>
+                <th className="text-left p-1.5">{t('item')}</th>
                 <th className="text-center p-1.5">ĐVT</th>
                 <th className="text-right p-1.5">SL</th>
                 <th className="text-right p-1.5">Đơn giá</th>

@@ -5,8 +5,10 @@ import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './stock-export-form'
 import { useStockExports, useCreateStockExport } from '@/data'
+import type { TermKey } from '@/utils/terms'
 import { formatDate, formatNumber } from '@wms/shared'
 import { Route } from '@/routes/_app/stock-exports'
+import { useTerm } from '@/data/use-features'
 
 interface StockExport {
   id: string
@@ -17,8 +19,8 @@ interface StockExport {
   createdAt: string
 }
 
-const columns: Column<StockExport>[] = [
-  { key: 'ingredient', header: 'Nguyên liệu', width: 150, render: (r) => r.ingredient?.name },
+const makeColumns = (t: (k: TermKey) => string): Column<StockExport>[] => [
+  { key: 'ingredient', header: t('item'), width: 150, render: (r) => r.ingredient?.name },
   {
     key: 'quantity',
     header: 'Số lượng',
@@ -39,6 +41,8 @@ const columns: Column<StockExport>[] = [
 ]
 
 export function StockExportsPage() {
+  const t = useTerm()
+  const columns = makeColumns(t)
   const { page, orderBy, sort } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
 

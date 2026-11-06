@@ -7,6 +7,7 @@ import { WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@w
 import { UNIT_OPTIONS } from '@wms/shared'
 import { useIngredientGroups } from '@/data'
 import { api } from '@/services/api'
+import { useTerm } from '@/data/use-features'
 
 const optionalNumber = z.preprocess((v) => (v === '' || v == null ? null : Number(v)), z.number().nullable())
 
@@ -62,6 +63,7 @@ interface Props {
 }
 
 export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
+  const t = useTerm()
   const {
     register,
     control,
@@ -173,7 +175,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
       }
     >
       <div className="space-y-2">
-        <WinGroupBox title="Thông tin nguyên liệu">
+        <WinGroupBox title={t('item_info')}>
           <div className="space-y-2.5">
             <WinInput label="Tên" {...register('name')} error={errors.name?.message} />
             <WinSelect label="Đơn vị" {...register('unit')} options={units} error={errors.unit?.message} />

@@ -4,8 +4,10 @@ import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-win
 import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
 import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient, useIngredientBatches } from '@/data'
+import type { TermKey } from '@/utils/terms'
 import type { Batch } from '@/data/use-batches'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
 interface IngredientRow {
   id: string
@@ -18,8 +20,8 @@ interface IngredientRow {
   trackStock: boolean
 }
 
-const columns: Column<IngredientRow>[] = [
-  { key: 'name', header: 'Tên nguyên liệu', width: 180 },
+const makeColumns = (t: (k: TermKey) => string): Column<IngredientRow>[] => [
+  { key: 'name', header: t('item_name'), width: 180 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
   {
     key: 'currentStock',
@@ -49,6 +51,8 @@ const columns: Column<IngredientRow>[] = [
 ]
 
 export function IngredientsPage() {
+  const t = useTerm()
+  const columns = makeColumns(t)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')

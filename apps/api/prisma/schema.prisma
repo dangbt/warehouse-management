@@ -475,3 +475,12 @@ model TaxPeriodClose {
 
   @@map("tax_period_closes")
 }
+
+/// Cấu hình key-value của deploy (business profile, feature flag override...).
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
