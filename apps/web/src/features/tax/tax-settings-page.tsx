@@ -1,13 +1,7 @@
+import { ReceiptText } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
-import {
-  TAX_REGIMES,
-  TAX_REGIME_LABELS,
-  TAX_PERIOD_TYPES,
-  TAX_PERIOD_TYPE_LABELS,
-  VAT_RATES,
-  VAT_RATE_LABELS,
-} from '@wms/shared'
+import { TAX_REGIMES, TAX_REGIME_LABELS, TAX_PERIOD_TYPES, TAX_PERIOD_TYPE_LABELS, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
 import type { TaxRegime, TaxPeriodType, VatRate } from '@wms/shared'
 import { useTaxSettings, useUpdateTaxSettings } from '@/data'
 
@@ -86,13 +80,20 @@ export function TaxSettingsPage() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-4">
-      <h1 className="text-base font-semibold text-win-text mb-2">🧾 Cấu hình thuế</h1>
+      <h1 className="text-base font-semibold text-win-text mb-2 flex items-center gap-2">
+        <ReceiptText size={18} strokeWidth={1.75} className="text-win-active-title" /> Cấu hình thuế
+      </h1>
 
       <div className="max-w-[560px] space-y-2">
         <WinGroupBox title="Thông tin người nộp thuế">
           <div className="space-y-2.5">
             <WinInput label="Tên đơn vị" value={form.companyName} onChange={(e) => set('companyName', e.target.value)} />
-            <WinInput label="Mã số thuế" value={form.taxCode} onChange={(e) => set('taxCode', e.target.value)} placeholder="10 hoặc 13 chữ số" />
+            <WinInput
+              label="Mã số thuế"
+              value={form.taxCode}
+              onChange={(e) => set('taxCode', e.target.value)}
+              placeholder="10 hoặc 13 chữ số"
+            />
             <WinInput label="Địa chỉ" value={form.address} onChange={(e) => set('address', e.target.value)} />
           </div>
         </WinGroupBox>

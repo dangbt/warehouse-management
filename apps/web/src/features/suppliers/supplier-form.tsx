@@ -1,3 +1,4 @@
+import { Pencil, Plus, TriangleAlert } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -77,7 +78,8 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title={mode === 'add' ? '🆕 Thêm Nhà Cung Cấp' : '✏️ Sửa Nhà Cung Cấp'}
+      title={mode === 'add' ? 'Thêm Nhà Cung Cấp' : 'Sửa Nhà Cung Cấp'}
+      icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={440}
@@ -110,15 +112,15 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
             Người bán cá nhân (không có HĐ)
           </label>
           {isIndividual && (
-            <WinInput
-              label="Số CCCD/CMND"
-              {...register('id_number')}
-              error={errors.id_number?.message}
-              placeholder="9 hoặc 12 chữ số"
-            />
+            <WinInput label="Số CCCD/CMND" {...register('id_number')} error={errors.id_number?.message} placeholder="9 hoặc 12 chữ số" />
           )}
           <WinInput label="Ghi chú" {...register('note')} />
-          {submitError && <p className="text-win-base text-win-error font-semibold">⚠️ {submitError}</p>}
+          {submitError && (
+            <p className="text-win-base text-win-error font-semibold">
+              <TriangleAlert size={14} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+              {submitError}
+            </p>
+          )}
         </div>
       </WinGroupBox>
     </WinDialog>

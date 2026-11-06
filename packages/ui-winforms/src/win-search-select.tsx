@@ -19,7 +19,10 @@ interface Props {
 }
 
 export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
-  ({ label, error, options, onSearch, loading, name, value, onChange, onBlur, debounce = 300, placeholder, className, triggerClassName }, ref) => {
+  (
+    { label, error, options, onSearch, loading, name, value, onChange, onBlur, debounce = 300, placeholder, className, triggerClassName },
+    ref,
+  ) => {
     const [open, setOpen] = useState(false)
     const [search, setSearch] = useState('')
     const [selectedLabel, setSelectedLabel] = useState('')
@@ -105,9 +108,7 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
             {/* Options list */}
             <div className="max-h-[260px] overflow-y-auto">
               {loading && <div className="px-2 py-1.5 text-win-base text-gray-400">Đang tìm...</div>}
-              {!loading && options.length === 0 && (
-                <div className="px-2 py-1.5 text-win-base text-gray-400">Không tìm thấy</div>
-              )}
+              {!loading && options.length === 0 && <div className="px-2 py-1.5 text-win-base text-gray-400">Không tìm thấy</div>}
               {options.map((opt) => (
                 <div
                   key={opt.value}

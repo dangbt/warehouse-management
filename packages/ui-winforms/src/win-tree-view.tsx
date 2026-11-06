@@ -36,7 +36,7 @@ function TreeItem({
     <>
       <div
         data-testid={`sidebar-${node.id}`}
-        className={`flex items-center gap-1 py-1.5 cursor-pointer hover:bg-win-menu-hover ${activeId === node.id ? 'bg-win-grid-selected font-semibold' : ''}`}
+        className={`flex items-center gap-1.5 py-1.5 cursor-pointer hover:bg-win-menu-hover ${activeId === node.id ? 'bg-win-grid-selected font-semibold' : ''}`}
         style={{ paddingLeft: depth * 16 + 8 }}
         onClick={() => {
           if (hasChildren) setExpanded(!expanded)
@@ -44,14 +44,12 @@ function TreeItem({
         }}
       >
         {hasChildren ? expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} /> : <span className="w-3" />}
-        {node.icon && <span>{node.icon}</span>}
+        {node.icon && <span className="flex items-center">{node.icon}</span>}
         <span>{node.label}</span>
       </div>
       {hasChildren &&
         expanded &&
-        node.children!.map((child) => (
-          <TreeItem key={child.id} node={child} depth={depth + 1} activeId={activeId} onSelect={onSelect} />
-        ))}
+        node.children!.map((child) => <TreeItem key={child.id} node={child} depth={depth + 1} activeId={activeId} onSelect={onSelect} />)}
     </>
   )
 }

@@ -2,7 +2,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState, useEffect } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { ChefHat, Pencil, Plus, Trash2, TriangleAlert } from 'lucide-react'
 import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { UNIT_OPTIONS } from '@wms/shared'
@@ -99,7 +99,8 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title={editData ? '✏️ Sửa Công Thức' : '🍳 Tạo Công Thức'}
+      title={editData ? 'Sửa Công Thức' : 'Tạo Công Thức'}
+      icon={editData ? <Pencil size={16} strokeWidth={1.75} /> : <ChefHat size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
       width={580}
@@ -125,12 +126,7 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
         <div className="space-y-2">
           <WinSelect label="Món ăn" {...register('menu_item')} options={menuItems} error={errors.menu_item?.message} />
           <WinInput label="Tên CT" {...register('name')} error={errors.name?.message} />
-          <WinInput
-            label="Serving size"
-            type="number"
-            {...register('serving_size')}
-            error={errors.serving_size?.message}
-          />
+          <WinInput label="Serving size" type="number" {...register('serving_size')} error={errors.serving_size?.message} />
         </div>
       </WinGroupBox>
 
@@ -142,10 +138,13 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
         >
           <Plus size={14} /> Thêm NL
         </button>
-        {errors.ingredients?.root && (
-          <p className="text-win-xs text-win-error mb-1">{errors.ingredients.root.message}</p>
+        {errors.ingredients?.root && <p className="text-win-xs text-win-error mb-1">{errors.ingredients.root.message}</p>}
+        {submitError && (
+          <p className="text-win-base text-win-error font-semibold mb-1">
+            <TriangleAlert size={14} strokeWidth={2} className="inline -mt-0.5 mr-1" />
+            {submitError}
+          </p>
         )}
-        {submitError && <p className="text-win-base text-win-error font-semibold mb-1">⚠️ {submitError}</p>}
 
         <table className="w-full text-win-base border border-win-grid-border">
           <thead>

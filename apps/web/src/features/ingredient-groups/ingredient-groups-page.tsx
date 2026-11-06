@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Plus, Pencil, RefreshCw } from 'lucide-react'
+import { Package, Pencil, Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup, useIngredients } from '@/data'
@@ -25,7 +25,10 @@ function GroupMembersPanel({ group }: { group: IngredientGroup }) {
 
   return (
     <div className="border-t border-win-grid-border max-h-[240px] overflow-auto">
-      <WinGroupBox title={`📦 Chi tiết nhóm "${group.name}" — ${members.length} NL · tổng quy đổi ${formatNumber(totalBase)} ${group.baseUnit}`}>
+      <WinGroupBox
+        title={`Chi tiết nhóm "${group.name}" — ${members.length} NL · tổng quy đổi ${formatNumber(totalBase)} ${group.baseUnit}`}
+        icon={<Package size={16} strokeWidth={1.75} />}
+      >
         <table className="w-full text-win-base">
           <thead>
             <tr className="bg-win-grid-header">
@@ -171,7 +174,8 @@ export function IngredientGroupsPage() {
       {selected && <GroupMembersPanel group={selected} />}
 
       <WinDialog
-        title={mode === 'add' ? '🆕 Thêm Nhóm Nguyên Liệu' : '✏️ Sửa Nhóm'}
+        title={mode === 'add' ? 'Thêm Nhóm Nguyên Liệu' : 'Sửa Nhóm'}
+      icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         width={400}

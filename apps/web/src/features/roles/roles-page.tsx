@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, RefreshCw, Shield } from 'lucide-react'
+import { KeyRound, Plus, RefreshCw, Shield } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useRoles, useCreateRole, useUpdateRolePermissions } from '@/data'
@@ -33,16 +33,16 @@ const RESOURCES = [
 ]
 const ACTIONS = ['create', 'read', 'update', 'delete', 'approve']
 const RESOURCE_LABELS: Record<string, string> = {
-  ingredients: '📦 Nguyên liệu',
-  import_orders: '📥 Nhập kho',
-  stock_exports: '📤 Xuất kho',
-  recipes: '🍳 Công thức',
-  suppliers: '🏢 Nhà cung cấp',
-  users: '👥 Người dùng',
-  audit_logs: '📋 Audit Logs',
-  reports: '📊 Báo cáo',
-  roles: '🔑 Roles',
-  departments: '🏗️ Bộ phận',
+  ingredients: 'Nguyên liệu',
+  import_orders: 'Nhập kho',
+  stock_exports: 'Xuất kho',
+  recipes: 'Công thức',
+  suppliers: 'Nhà cung cấp',
+  users: 'Người dùng',
+  audit_logs: 'Audit Logs',
+  reports: 'Báo cáo',
+  roles: 'Roles',
+  departments: 'Bộ phận',
 }
 const ACTION_LABELS: Record<string, string> = {
   create: 'Tạo',
@@ -119,7 +119,8 @@ export function RolesPage() {
 
       {/* Create Role */}
       <WinDialog
-        title="🆕 Thêm Role"
+        title="Thêm Role"
+        icon={<Plus size={16} strokeWidth={1.75} />}
         open={formOpen}
         onClose={() => setFormOpen(false)}
         width={400}
@@ -169,7 +170,8 @@ export function RolesPage() {
 
       {/* Permissions */}
       <WinDialog
-        title={`🔑 Phân quyền: ${selected?.name}`}
+        title={`Phân quyền: ${selected?.name}`}
+        icon={<KeyRound size={16} strokeWidth={1.75} />}
         open={permOpen}
         onClose={() => setPermOpen(false)}
         width={600}

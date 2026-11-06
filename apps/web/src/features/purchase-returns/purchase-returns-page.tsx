@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Plus, RefreshCw } from 'lucide-react'
+import { Plus, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { usePurchaseReturns, useCreatePurchaseReturn, useSuppliers, useIngredients, useCompletedImportOrders } from '@/data'
@@ -45,10 +45,7 @@ export function PurchaseReturnsPage() {
   const [items, setItems] = useState<ReturnItem[]>([{ ...EMPTY_ITEM }])
 
   const { data: importOrders } = useCompletedImportOrders(supplierId)
-  const selectedImportOrder = useMemo(
-    () => importOrders?.find((o) => o.id === importOrderId),
-    [importOrders, importOrderId],
-  )
+  const selectedImportOrder = useMemo(() => importOrders?.find((o) => o.id === importOrderId), [importOrders, importOrderId])
 
   // Có gắn phiếu nhập gốc ⇒ hiển thị cột thuế; tổng gồm VAT.
   const hasInvoice = !!importOrderId
@@ -88,7 +85,7 @@ export function PurchaseReturnsPage() {
     setItems((prev) =>
       prev.map((i) => ({
         ...i,
-        vatRate: i.ingredientId ? order?.items.find((x) => x.ingredientId === i.ingredientId)?.vatRate ?? '' : '',
+        vatRate: i.ingredientId ? (order?.items.find((x) => x.ingredientId === i.ingredientId)?.vatRate ?? '') : '',
       })),
     )
   }
@@ -138,12 +135,7 @@ export function PurchaseReturnsPage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
-      <WinDataGrid searchable
-        columns={columns}
-        data={res?.data ?? []}
-        loading={isLoading}
-        storageKey="purchase-returns"
-      />
+      <WinDataGrid searchable columns={columns} data={res?.data ?? []} loading={isLoading} storageKey="purchase-returns" />
 
       <WinDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Tạo phiếu trả hàng" width={hasInvoice ? 760 : 600}>
         <div className="space-y-3 p-3">
@@ -156,7 +148,9 @@ export function PurchaseReturnsPage() {
             >
               <option value="">Chọn NCC</option>
               {suppliersRes?.data.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
             </select>
           </div>
@@ -214,7 +208,9 @@ export function PurchaseReturnsPage() {
                         >
                           <option value="">Chọn NL</option>
                           {ingredientsRes?.data.map((ing) => (
-                            <option key={ing.id} value={ing.id}>{ing.name}</option>
+                            <option key={ing.id} value={ing.id}>
+                              {ing.name}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -243,19 +239,25 @@ export function PurchaseReturnsPage() {
                           >
                             <option value="">—</option>
                             {vatRateOptions.map((o) => (
-                              <option key={o.value} value={o.value}>{o.label}</option>
+                              <option key={o.value} value={o.value}>
+                                {o.label}
+                              </option>
                             ))}
                           </select>
                         </td>
                       )}
                       {hasInvoice && (
-                        <td className="p-1 text-right pr-2">
-                          {formatNumber(computeLineVat(total, (item.vatRate as VatRate) || null))}
-                        </td>
+                        <td className="p-1 text-right pr-2">{formatNumber(computeLineVat(total, (item.vatRate as VatRate) || null))}</td>
                       )}
                       <td className="p-1">
                         {items.length > 1 && (
-                          <button onClick={() => removeItem(idx)} className="text-win-error text-win-base">✕</button>
+                          <button
+                            onClick={() => removeItem(idx)}
+                            className="text-win-error text-win-base p-1 hover:bg-red-50 rounded"
+                            title="Xoá dòng"
+                          >
+                            <X size={14} />
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -263,7 +265,9 @@ export function PurchaseReturnsPage() {
                 })}
               </tbody>
             </table>
-            <button onClick={addItem} className="mt-1 text-win-base text-win-active-title hover:underline">+ Thêm dòng</button>
+            <button onClick={addItem} className="mt-1 text-win-base text-win-active-title hover:underline">
+              + Thêm dòng
+            </button>
           </div>
           <div className="flex flex-col items-end gap-0.5 pt-2 border-t border-win-grid-border text-win-base">
             <div className="flex gap-4">
@@ -282,8 +286,15 @@ export function PurchaseReturnsPage() {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={() => setDialogOpen(false)} className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover">Huỷ</button>
-            <button onClick={handleSubmit} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">Tạo phiếu</button>
+            <button
+              onClick={() => setDialogOpen(false)}
+              className="px-3 py-1 text-win-base border border-win-grid-border hover:bg-win-menu-hover"
+            >
+              Huỷ
+            </button>
+            <button onClick={handleSubmit} className="px-3 py-1 text-win-base bg-win-active-title text-white hover:opacity-90">
+              Tạo phiếu
+            </button>
           </div>
         </div>
       </WinDialog>

@@ -75,12 +75,16 @@ export function WinDataGrid<T extends { id?: string }>({
         const hidden: string[] = JSON.parse(saved)
         setColumnVisibility(Object.fromEntries(hidden.map((k) => [k, false])))
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [storageKey])
 
   const persistVisibility = (updated: VisibilityState) => {
     if (!storageKey) return
-    const hidden = Object.entries(updated).filter(([, v]) => !v).map(([k]) => k)
+    const hidden = Object.entries(updated)
+      .filter(([, v]) => !v)
+      .map(([k]) => k)
     localStorage.setItem(getStorageKey(storageKey), JSON.stringify(hidden))
   }
 
@@ -99,9 +103,7 @@ export function WinDataGrid<T extends { id?: string }>({
         id: String(col.key),
         accessorFn: (row: T) => (row as Record<string, unknown>)[col.key as string],
         header: col.header,
-        cell: col.render
-          ? ({ row }) => col.render!(row.original)
-          : ({ getValue }) => String(getValue() ?? ''),
+        cell: col.render ? ({ row }) => col.render!(row.original) : ({ getValue }) => String(getValue() ?? ''),
         enableSorting: col.sortable !== false,
         size: col.width,
         meta: { align: col.align },
@@ -124,7 +126,9 @@ export function WinDataGrid<T extends { id?: string }>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     ...tableOptions,
-    ...(tableOptions?.state ? { state: { sorting, columnVisibility, globalFilter: onSearch ? '' : globalFilter, ...tableOptions.state } } : {}),
+    ...(tableOptions?.state
+      ? { state: { sorting, columnVisibility, globalFilter: onSearch ? '' : globalFilter, ...tableOptions.state } }
+      : {}),
   })
 
   const totalPages = pagination ? Math.ceil(pagination.total / pagination.limit) : 1
@@ -176,10 +180,21 @@ export function WinDataGrid<T extends { id?: string }>({
                     <Columns3 size={16} />
                   </button>
                   {showColMenu && (
-                    <div ref={menuRef} className="absolute right-0 top-full mt-1 bg-white border border-win-grid-border shadow-md z-50 p-1 min-w-[140px]">
+                    <div
+                      ref={menuRef}
+                      className="absolute right-0 top-full mt-1 bg-white border border-win-grid-border shadow-md z-50 p-1 min-w-[140px]"
+                    >
                       {table.getAllColumns().map((col) => (
-                        <label key={col.id} className="flex items-center gap-1.5 px-2 py-0.5 text-win-xs cursor-pointer hover:bg-win-menu-hover">
-                          <input type="checkbox" checked={col.getIsVisible()} onChange={col.getToggleVisibilityHandler()} className="w-3 h-3" />
+                        <label
+                          key={col.id}
+                          className="flex items-center gap-1.5 px-2 py-0.5 text-win-xs cursor-pointer hover:bg-win-menu-hover"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={col.getIsVisible()}
+                            onChange={col.getToggleVisibilityHandler()}
+                            className="w-3 h-3"
+                          />
                           {String(col.columnDef.header)}
                         </label>
                       ))}
@@ -192,13 +207,19 @@ export function WinDataGrid<T extends { id?: string }>({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={table.getVisibleLeafColumns().length + (storageKey ? 1 : 0)} className="text-center py-8 text-win-text-secondary">
+                <td
+                  colSpan={table.getVisibleLeafColumns().length + (storageKey ? 1 : 0)}
+                  className="text-center py-8 text-win-text-secondary"
+                >
                   Đang tải...
                 </td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={table.getVisibleLeafColumns().length + (storageKey ? 1 : 0)} className="text-center py-8 text-win-text-secondary">
+                <td
+                  colSpan={table.getVisibleLeafColumns().length + (storageKey ? 1 : 0)}
+                  className="text-center py-8 text-win-text-secondary"
+                >
                   Không có dữ liệu
                 </td>
               </tr>
@@ -241,15 +262,25 @@ export function WinDataGrid<T extends { id?: string }>({
       {pagination && (
         <div className="h-9 border-t border-win-grid-border bg-win-menu flex items-center justify-between px-2 text-win-base shrink-0">
           <span>
-            Hiển thị {(pagination.page - 1) * pagination.limit + 1}-
-            {Math.min(pagination.page * pagination.limit, pagination.total)} / {pagination.total}
+            Hiển thị {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} /{' '}
+            {pagination.total}
           </span>
           <div className="flex items-center gap-1">
-            <button onClick={() => onPageChange?.(pagination.page - 1)} disabled={pagination.page <= 1} className="p-0.5 disabled:opacity-30">
+            <button
+              onClick={() => onPageChange?.(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              className="p-0.5 disabled:opacity-30"
+            >
               <ChevronLeft size={16} />
             </button>
-            <span>Trang {pagination.page}/{totalPages}</span>
-            <button onClick={() => onPageChange?.(pagination.page + 1)} disabled={pagination.page >= totalPages} className="p-0.5 disabled:opacity-30">
+            <span>
+              Trang {pagination.page}/{totalPages}
+            </span>
+            <button
+              onClick={() => onPageChange?.(pagination.page + 1)}
+              disabled={pagination.page >= totalPages}
+              className="p-0.5 disabled:opacity-30"
+            >
               <ChevronRight size={16} />
             </button>
           </div>

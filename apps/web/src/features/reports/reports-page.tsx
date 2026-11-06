@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RefreshCw, ChevronRight, ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronRight, Package, RefreshCw, TrendingUp, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement } from '@/data'
 import type { StockGroup } from '@/data/use-reports'
@@ -9,7 +9,10 @@ function GroupRow({ g }: { g: StockGroup }) {
   const [open, setOpen] = useState(false)
   return (
     <>
-      <tr className={`border-b border-win-grid-border cursor-pointer hover:bg-win-menu-hover ${g.isLow ? 'text-win-error' : ''}`} onClick={() => setOpen((o) => !o)}>
+      <tr
+        className={`border-b border-win-grid-border cursor-pointer hover:bg-win-menu-hover ${g.isLow ? 'text-win-error' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+      >
         <td className="p-1">
           <span className="inline-flex items-center gap-1 font-semibold">
             {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -18,7 +21,7 @@ function GroupRow({ g }: { g: StockGroup }) {
         </td>
         <td className="p-1 text-right font-bold">
           {formatNumber(g.totalStock)} {g.baseUnit}
-          {g.isLow ? ' ⚠️' : ''}
+          {g.isLow ? <TriangleAlert size={13} className="inline ml-1 -mt-0.5 text-amber-500" /> : ''}
         </td>
         <td className="p-1 text-center">{g.minStock != null ? `${formatNumber(g.minStock)} ${g.baseUnit}` : '-'}</td>
         <td className="p-1 text-right">{formatCurrency(g.totalValue)}</td>
@@ -27,7 +30,10 @@ function GroupRow({ g }: { g: StockGroup }) {
         g.items.map((m) => (
           <tr key={m.id} className="border-b border-win-grid-border bg-win-grid-row-alt text-win-text-secondary">
             <td className="p-1 pl-6">
-              {m.name} <span className="opacity-60">({formatNumber(m.currentStock)} {m.unit} × {m.baseFactor})</span>
+              {m.name}{' '}
+              <span className="opacity-60">
+                ({formatNumber(m.currentStock)} {m.unit} × {m.baseFactor})
+              </span>
             </td>
             <td className="p-1 text-right">
               {formatNumber(m.baseQty)} {g.baseUnit}
@@ -68,7 +74,7 @@ export function ReportsPage() {
         </div>
 
         {summary && summary.groups?.length > 0 && (
-          <WinGroupBox title="📦 Tồn kho theo nhóm (tự quy đổi về đơn vị gốc)">
+          <WinGroupBox title="Tồn kho theo nhóm (tự quy đổi về đơn vị gốc)" icon={<Package size={16} strokeWidth={1.75} />}>
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
@@ -88,7 +94,7 @@ export function ReportsPage() {
         )}
 
         {summary && summary.lowStock.length > 0 && (
-          <WinGroupBox title="⚠️ Cảnh báo tồn kho thấp">
+          <WinGroupBox title="Cảnh báo tồn kho thấp" icon={<TriangleAlert size={16} strokeWidth={1.75} />}>
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
@@ -118,7 +124,7 @@ export function ReportsPage() {
           </WinGroupBox>
         )}
 
-        <WinGroupBox title="📈 Biến động kho gần đây">
+        <WinGroupBox title="Biến động kho gần đây" icon={<TrendingUp size={16} strokeWidth={1.75} />}>
           <table className="w-full text-win-base">
             <thead>
               <tr className="bg-win-grid-header">
@@ -132,14 +138,14 @@ export function ReportsPage() {
             <tbody>
               {(Array.isArray(movements) ? movements : []).map((t) => {
                 const typeMap: Record<string, { label: string; color: string }> = {
-                  IMPORT: { label: '📥 Nhập', color: 'text-green-700 bg-green-50' },
-                  EXPORT: { label: '📤 Xuất', color: 'text-red-700 bg-red-50' },
-                  ORDER_DEDUCT: { label: '🍳 Trừ kho', color: 'text-orange-700 bg-orange-50' },
+                  IMPORT: { label: 'Nhập', color: 'text-green-700 bg-green-50' },
+                  EXPORT: { label: 'Xuất', color: 'text-red-700 bg-red-50' },
+                  ORDER_DEDUCT: { label: 'Trừ kho', color: 'text-orange-700 bg-orange-50' },
                   ORDER_RESTORE: { label: '↩️ Hoàn', color: 'text-blue-700 bg-blue-50' },
-                  PROCESS_OUT: { label: '🔪 Chế biến (trừ)', color: 'text-orange-700 bg-orange-50' },
-                  PROCESS_IN: { label: '🍲 Chế biến (thu)', color: 'text-green-700 bg-green-50' },
+                  PROCESS_OUT: { label: 'Chế biến (trừ)', color: 'text-orange-700 bg-orange-50' },
+                  PROCESS_IN: { label: 'Chế biến (thu)', color: 'text-green-700 bg-green-50' },
                   RETURN: { label: '↩️ Trả NCC', color: 'text-red-700 bg-red-50' },
-                  STOCKTAKE_ADJUST: { label: '📋 Kiểm kê', color: 'text-purple-700 bg-purple-50' },
+                  STOCKTAKE_ADJUST: { label: 'Kiểm kê', color: 'text-purple-700 bg-purple-50' },
                 }
                 const typeInfo = typeMap[t.type] ?? { label: t.type, color: '' }
                 return (
@@ -147,9 +153,7 @@ export function ReportsPage() {
                     <td className="p-1">{formatDateTime(t.createdAt)}</td>
                     <td className="p-1">{t.ingredient.name}</td>
                     <td className="p-1 text-center">
-                      <span className={`px-1.5 py-0.5 rounded text-win-xs font-medium ${typeInfo.color}`}>
-                        {typeInfo.label}
-                      </span>
+                      <span className={`px-1.5 py-0.5 rounded text-win-xs font-medium ${typeInfo.color}`}>{typeInfo.label}</span>
                     </td>
                     <td className="p-1 text-right font-mono">
                       {Number(t.quantity) > 0 ? '+' : ''}

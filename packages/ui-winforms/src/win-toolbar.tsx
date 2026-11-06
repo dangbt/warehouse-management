@@ -28,11 +28,7 @@ function Separator() {
 }
 
 export function WinToolbar({ children }: { children: ReactNode }) {
-  return (
-    <div className="h-11 bg-win-menu border-b border-win-grid-border flex items-center px-1 gap-0.5 shrink-0">
-      {children}
-    </div>
-  )
+  return <div className="h-11 bg-win-menu border-b border-win-grid-border flex items-center px-1 gap-0.5 shrink-0">{children}</div>
 }
 
 WinToolbar.Button = Button
