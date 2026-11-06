@@ -134,7 +134,10 @@ export function ImportOrdersPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => { setSeed(null); setFormOpen(true) }} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => {
+            setSeed(null)
+            setFormOpen(true)
+          }} />
         <WinToolbar.Button icon={<Copy size={16} />} label="Nhân bản" disabled={!selected?.items?.length} onClick={handleClone} />
         <WinToolbar.Separator />
         <WinToolbar.Button

@@ -97,11 +97,8 @@ export function ProcessingPage() {
         onPageChange={setPage}
         onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
-        footer={
-          res?.meta.totals
-            ? { sourceQty: formatNumber(res.meta.totals.sourceQty), outputQty: formatNumber(res.meta.totals.outputQty) }
-            : undefined
-        }
+        footer={res ? {} : undefined}
+        footerLabel={`Tổng cộng: ${res?.meta.total ?? 0} phiếu`}
         storageKey="processing"
       />
 

@@ -84,7 +84,10 @@ export function StockExportsPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" onClick={() => { setSeed(null); setFormOpen(true) }} />
+        <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" onClick={() => {
+            setSeed(null)
+            setFormOpen(true)
+          }} />
         <WinToolbar.Button icon={<Copy size={14} />} label="Nhân bản" disabled={!selected} onClick={() => selected && handleClone(selected)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
