@@ -11,6 +11,11 @@ type ExtraFields = {
   yield_ratio?: number | null;
   loss_ratio?: number | null;
   units?: UnitInput[];
+  sku?: string | null;
+  barcode?: string | null;
+  sale_price?: number | null;
+  product_id?: string | null;
+  is_active?: boolean;
 };
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -28,6 +33,8 @@ export class IngredientsController {
       category?: string;
       low_stock?: string;
       search?: string;
+      product_id?: string;
+      include_inactive?: string;
     },
   ) {
     return this.svc.findAll(query);

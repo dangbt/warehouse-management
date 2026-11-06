@@ -1,5 +1,7 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { mapUniqueError } from '../products/unique-conflict';
 
 type UnitInput = { unit_name: string; factor: number; is_default_buy?: boolean };
 
@@ -16,19 +18,43 @@ type IngredientBody = {
   yield_ratio?: number | null;
   loss_ratio?: number | null;
   units?: UnitInput[];
+  sku?: string | null;
+  barcode?: string | null;
+  sale_price?: number | null;
+  product_id?: string | null;
+  is_active?: boolean;
 };
 
 @Injectable()
 export class IngredientsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: { page?: string; limit?: string; category?: string; low_stock?: string; search?: string; orderBy?: string; sort?: string }) {
+  async findAll(query: {
+    page?: string;
+    limit?: string;
+    category?: string;
+    low_stock?: string;
+    search?: string;
+    orderBy?: string;
+    sort?: string;
+    product_id?: string;
+    include_inactive?: string;
+  }) {
     const page = Math.max(1, +(query.page || 1));
     // Cho phép limit lớn để form/dropdown lấy toàn bộ NL (vd chọn nguồn cho BTP)
     const limit = Math.min(1000, Math.max(1, +(query.limit || 20)));
-    const where: Record<string, unknown> = {};
+    const where: Prisma.IngredientWhereInput = {};
     if (query.category) where.category = query.category;
-    if (query.search) where.name = { contains: query.search, mode: 'insensitive' };
+    if (query.product_id) where.productId = query.product_id;
+    // Biến thể đã ngừng (inactive) mặc định ẩn khỏi danh sách; dữ liệu F&B cũ luôn active
+    if (query.include_inactive !== 'true') where.isActive = true;
+    if (query.search) {
+      where.OR = [
+        { name: { contains: query.search, mode: 'insensitive' } },
+        { sku: { contains: query.search, mode: 'insensitive' } },
+        { barcode: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
 
     const sortField = query.orderBy || 'name';
     const sortDir = query.sort === 'desc' ? 'desc' : 'asc';
@@ -58,31 +84,37 @@ export class IngredientsService {
       where: { name: body.name },
     });
     if (exists) throw new ConflictException('Nguyên liệu đã tồn tại');
-    return this.prisma.ingredient.create({
-      data: {
-        name: body.name,
-        unit: body.unit,
-        category: body.category,
-        costPerUnit: body.cost_per_unit,
-        minStock: body.min_stock,
-        trackStock: body.track_stock ?? true,
-        groupId: body.group_id ?? null,
-        baseFactor: body.base_factor ?? null,
-        sourceIngredientId: body.source_ingredient_id ?? null,
-        yieldRatio: body.yield_ratio ?? null,
-        lossRatio: body.loss_ratio ?? null,
-        units: body.units?.length
-          ? {
-              create: body.units.map((u) => ({
-                unitName: u.unit_name,
-                factor: u.factor,
-                isDefaultBuy: u.is_default_buy ?? false,
-              })),
-            }
-          : undefined,
-      },
-      include: { group: true, units: true },
-    });
+    return this.prisma.ingredient
+      .create({
+        data: {
+          sku: body.sku || null,
+          barcode: body.barcode || null,
+          salePrice: body.sale_price ?? null,
+          productId: body.product_id ?? null,
+          name: body.name,
+          unit: body.unit,
+          category: body.category,
+          costPerUnit: body.cost_per_unit,
+          minStock: body.min_stock,
+          trackStock: body.track_stock ?? true,
+          groupId: body.group_id ?? null,
+          baseFactor: body.base_factor ?? null,
+          sourceIngredientId: body.source_ingredient_id ?? null,
+          yieldRatio: body.yield_ratio ?? null,
+          lossRatio: body.loss_ratio ?? null,
+          units: body.units?.length
+            ? {
+                create: body.units.map((u) => ({
+                  unitName: u.unit_name,
+                  factor: u.factor,
+                  isDefaultBuy: u.is_default_buy ?? false,
+                })),
+              }
+            : undefined,
+        },
+        include: { group: true, units: true },
+      })
+      .catch(mapUniqueError);
   }
 
   async update(id: string, body: IngredientBody) {
@@ -104,23 +136,30 @@ export class IngredientsService {
       }
     }
 
-    return this.prisma.ingredient.update({
-      where: { id },
-      data: {
-        name: body.name,
-        unit: body.unit,
-        category: body.category,
-        costPerUnit: body.cost_per_unit,
-        minStock: body.min_stock,
-        trackStock: body.track_stock,
-        groupId: body.group_id,
-        baseFactor: body.base_factor,
-        sourceIngredientId: body.source_ingredient_id,
-        yieldRatio: body.yield_ratio,
-        lossRatio: body.loss_ratio,
-      },
-      include: { group: true, units: true },
-    });
+    return this.prisma.ingredient
+      .update({
+        where: { id },
+        data: {
+          sku: body.sku === undefined ? undefined : body.sku || null,
+          barcode: body.barcode === undefined ? undefined : body.barcode || null,
+          salePrice: body.sale_price,
+          productId: body.product_id,
+          isActive: body.is_active,
+          name: body.name,
+          unit: body.unit,
+          category: body.category,
+          costPerUnit: body.cost_per_unit,
+          minStock: body.min_stock,
+          trackStock: body.track_stock,
+          groupId: body.group_id,
+          baseFactor: body.base_factor,
+          sourceIngredientId: body.source_ingredient_id,
+          yieldRatio: body.yield_ratio,
+          lossRatio: body.loss_ratio,
+        },
+        include: { group: true, units: true },
+      })
+      .catch(mapUniqueError);
   }
 
   async remove(id: string) {
