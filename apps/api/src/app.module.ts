@@ -23,6 +23,7 @@ import { ProcessingModule } from './modules/processing/processing.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { SupportModule } from './modules/support/support.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { ProductsModule } from './modules/products/products.module';
 import { TaxModule } from './modules/tax/tax.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { TaxModule } from './modules/tax/tax.module';
     PrismaModule,
     AuthModule,
     IngredientsModule,
+    ProductsModule,
     SuppliersModule,
     ImportOrdersModule,
     StockExportsModule,
