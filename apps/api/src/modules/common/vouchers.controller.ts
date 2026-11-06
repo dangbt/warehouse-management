@@ -1,8 +1,9 @@
 import { Controller, Get, Put, Param, Query, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { VoucherService } from './voucher.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('vouchers')
 export class VouchersController {
   constructor(private vouchers: VoucherService) {}
@@ -20,6 +21,7 @@ export class VouchersController {
   }
 
   @Put('config/:type')
+  @RequirePermissions('tax:manage')
   updateConfig(@Param('type') type: string, @Body() body: { prefix?: string; digits?: number }) {
     return this.vouchers.updateConfig(type, body);
   }

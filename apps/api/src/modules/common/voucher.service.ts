@@ -54,7 +54,7 @@ export class VoucherService {
     });
   }
 
-  async updateConfig(type: string, body: { prefix?: string; digits?: number }) {
+  updateConfig(type: string, body: { prefix?: string; digits?: number }) {
     if (!this.isValidType(type)) throw new BadRequestException('Loại chứng từ không hợp lệ');
     const prefix = (body.prefix ?? '').trim().toUpperCase();
     if (!/^[A-Z0-9_-]{1,10}$/.test(prefix)) throw new BadRequestException('Tiền tố không hợp lệ (1-10 ký tự A-Z, 0-9)');

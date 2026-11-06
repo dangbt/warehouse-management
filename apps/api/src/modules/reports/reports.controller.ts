@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { resolveReportRange } from './report-range';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
@@ -84,22 +85,10 @@ export class ReportsController {
 
   @Get('ingredient-usage')
   async ingredientUsage(@Query() q: { period?: string; from?: string; to?: string }) {
-    const now = new Date();
-    let from: Date;
-    let to: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-
-    if (q.from && q.to) {
-      from = new Date(q.from);
-      to = new Date(q.to);
-    } else if (q.period === 'month') {
-      from = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else {
-      const day = now.getDay() || 7;
-      from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
-    }
+    const { from, to } = resolveReportRange(q);
 
     const transactions = await this.prisma.stockTransaction.findMany({
-      where: { createdAt: { gte: from, lte: to } },
+      where: { voucherDate: { gte: from, lte: to } },
       include: { ingredient: { select: { id: true, name: true, unit: true, currentStock: true } } },
     });
 
@@ -133,8 +122,7 @@ export class ReportsController {
 
   @Get('consumption-variance')
   async consumptionVariance(@Query() q: { from?: string; to?: string }) {
-    const from = q.from ? new Date(q.from) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const to = q.to ? new Date(q.to) : new Date();
+    const { from, to } = resolveReportRange({ from: q.from, to: q.to, period: 'month' });
 
     // Theoretical usage from KiotViet orders matched to recipes
     const orders = await this.prisma.kiotVietOrder.findMany({
@@ -157,7 +145,7 @@ export class ReportsController {
     // Actual usage from stock transactions
     const transactions = await this.prisma.stockTransaction.findMany({
       where: {
-        createdAt: { gte: from, lte: to },
+        voucherDate: { gte: from, lte: to },
         type: { in: ['ORDER_DEDUCT', 'EXPORT'] },
       },
     });

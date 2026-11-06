@@ -16,3 +16,31 @@ describe('voucher numbering', () => {
     expect(() => parseVoucherDate('abc')).toThrow();
   });
 });
+
+import { VoucherService, VOUCHER_NO_DUPLICATE } from './voucher.service';
+
+describe('VoucherService.resolveNo', () => {
+  const make = (count: number) => {
+    const prisma = {
+      importOrder: { count: jest.fn().mockResolvedValue(count) },
+      voucherConfig: { findMany: jest.fn().mockResolvedValue([]) },
+    };
+
+    return new VoucherService(prisma as any);
+  };
+
+  it('số nhập tay bị trùng ⇒ 409 kèm code VOUCHER_NO_DUPLICATE', async () => {
+    await expect(make(1).resolveNo('IMPORT', 'NK00001')).rejects.toMatchObject({
+      status: 409,
+      response: expect.objectContaining({ code: VOUCHER_NO_DUPLICATE }),
+    });
+  });
+
+  it('số nhập tay chưa tồn tại ⇒ dùng nguyên số đó', async () => {
+    await expect(make(0).resolveNo('IMPORT', ' ABC-1 ')).resolves.toBe('ABC-1');
+  });
+
+  it('rethrowUnique: P2002 ⇒ 409 có code', () => {
+    expect(() => make(0).rethrowUnique({ code: 'P2002' }, 'NK1')).toThrow(expect.objectContaining({ status: 409 }));
+  });
+});
