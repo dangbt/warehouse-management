@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 
 @Injectable()
@@ -7,6 +8,7 @@ export class ProcessingService {
   constructor(
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
+    private vouchers: VoucherService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
@@ -14,7 +16,7 @@ export class ProcessingService {
     const limit = +(q.limit || 20);
     const where: { status?: string } = q.status ? { status: q.status } : {};
 
-    const sortField = q.orderBy || 'createdAt';
+    const sortField = q.orderBy || 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
     const [data, total] = await Promise.all([
@@ -49,7 +51,15 @@ export class ProcessingService {
 
   async create(
     userId: string,
-    body: { source_ingredient_id: string; source_qty: number; output_ingredient_id: string; output_qty?: number; note?: string },
+    body: {
+      source_ingredient_id: string;
+      source_qty: number;
+      output_ingredient_id: string;
+      output_qty?: number;
+      note?: string;
+      voucher_date?: string;
+      voucher_no?: string;
+    },
   ) {
     if (!body.source_ingredient_id || !body.output_ingredient_id) throw new BadRequestException('Thiếu nguyên liệu nguồn hoặc thành phẩm');
     if (body.source_ingredient_id === body.output_ingredient_id) throw new BadRequestException('Nguồn và thành phẩm phải khác nhau');
@@ -68,22 +78,25 @@ export class ProcessingService {
     const outputQty = body.output_qty != null ? body.output_qty : expectedQty;
     if (outputQty <= 0) throw new BadRequestException('Lượng thành phẩm thực thu phải > 0');
 
-    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const count = await this.prisma.processingOrder.count({ where: { code: { startsWith: `CB-${today}` } } });
-    const code = `CB-${today}-${String(count + 1).padStart(3, '0')}`;
+    const voucherDate = parseVoucherDate(body.voucher_date);
+    const voucherNo = await this.vouchers.resolveNo('PROCESSING', body.voucher_no);
 
-    return this.prisma.processingOrder.create({
-      data: {
-        code,
-        sourceIngredientId: body.source_ingredient_id,
-        sourceQty: body.source_qty,
-        outputIngredientId: body.output_ingredient_id,
-        expectedQty,
-        outputQty,
-        note: body.note,
-        createdById: userId,
-      },
-    });
+    return this.prisma.processingOrder
+      .create({
+        data: {
+          code: voucherNo,
+          voucherNo,
+          voucherDate,
+          sourceIngredientId: body.source_ingredient_id,
+          sourceQty: body.source_qty,
+          outputIngredientId: body.output_ingredient_id,
+          expectedQty,
+          outputQty,
+          note: body.note,
+          createdById: userId,
+        },
+      })
+      .catch((e) => this.vouchers.rethrowUnique(e, voucherNo));
   }
 
   async complete(id: string, userId: string) {
@@ -118,6 +131,7 @@ export class ProcessingService {
           totalPrice: -movedValue,
           referenceId: order.code,
           createdById: userId,
+          voucherDate: order.voucherDate,
           note: `Chế biến: ${order.code}`,
         },
       });
@@ -136,6 +150,7 @@ export class ProcessingService {
           totalPrice: movedValue,
           referenceId: order.code,
           createdById: userId,
+          voucherDate: order.voucherDate,
           note: `Chế biến: ${order.code}`,
         },
       });

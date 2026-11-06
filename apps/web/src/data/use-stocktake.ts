@@ -10,6 +10,8 @@ export interface StocktakeSession {
   status: string
   _count?: { items: number }
   createdAt: string
+  voucherDate: string
+  voucherNo: string
   completedAt: string | null
 }
 
@@ -53,7 +55,7 @@ export function useStocktakeDetail(id: string) {
 
 export function useCreateStocktake() {
   return useMutation({
-    mutationFn: () => api.post('/stocktake', {}),
+    mutationFn: (data: { voucher_date?: string; voucher_no?: string } = {}) => api.post('/stocktake', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<SessionListResponse>({ queryKey: QUERY_KEYS.stocktake }, (old) =>
         old ? { ...old, data: [newItem, ...old.data] } : old,

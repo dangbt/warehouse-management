@@ -15,9 +15,13 @@ interface StockExport {
   note: string
   createdBy: { fullName: string }
   createdAt: string
+  voucherDate: string
+  export?: { voucherNo: string } | null
 }
 
 const columns: Column<StockExport>[] = [
+  { key: 'voucherDate', header: 'Ngày CT', width: 100, align: 'center', render: (r) => formatDate(r.voucherDate) },
+  { key: 'voucherNo', header: 'Số CT', width: 140, render: (r) => r.export?.voucherNo ?? '' },
   { key: 'ingredient', header: 'Nguyên liệu', width: 150, render: (r) => r.ingredient?.name },
   {
     key: 'quantity',
@@ -35,7 +39,6 @@ const columns: Column<StockExport>[] = [
     return parts.length > 1 ? `${label}: ${parts.slice(1).join(': ')}` : label
   }},
   { key: 'createdBy', header: 'Người xuất', width: 120, render: (r) => r.createdBy?.fullName },
-  { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },
 ]
 
 export function StockExportsPage() {

@@ -3,6 +3,9 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect, useState, useCallback } from 'react'
+import { VoucherFields } from '@/components/voucher-fields'
+import { useVoucherFields } from '@/data/use-vouchers'
+import type { VoucherPayload } from '@/data/use-vouchers'
 import { WinDialog, WinGroupBox, WinInput, WinSearchSelect } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 
@@ -21,7 +24,7 @@ type FormData = z.infer<typeof schema>
 interface Props {
   open: boolean
   onClose: () => void
-  onSave?: (data: FormData) => Promise<void> | void
+  onSave?: (data: FormData & VoucherPayload) => Promise<void> | void
 }
 
 interface Ing {
@@ -83,6 +86,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
     }
   }, [open, reset, fetchSource, fetchOutput])
 
+  const voucher = useVoucherFields('PROCESSING', open)
   const outputId = watch('output_ingredient_id')
   const sourceQty = watch('source_qty')
   const output = allOutputs.find((i) => i.id === outputId)
@@ -92,7 +96,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
   const onSubmit = async (formData: FormData) => {
     try {
       setSubmitError('')
-      await onSave?.(formData)
+      await onSave?.({ ...formData, ...voucher.payload() })
       onClose()
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : 'Lỗi tạo phiếu chế biến')
@@ -126,6 +130,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
     >
       <WinGroupBox title="Nguyên liệu sống → Bán thành phẩm">
         <div className="space-y-2.5">
+          <VoucherFields {...voucher} />
           <Controller
             name="source_ingredient_id"
             control={control}

@@ -1,10 +1,14 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class StocktakeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private vouchers: VoucherService,
+  ) {}
 
   async findAll(q: { page?: string; limit?: string }) {
     const page = +(q.page || 1),
@@ -13,7 +17,7 @@ export class StocktakeService {
       this.prisma.stocktakeSession.findMany({
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ voucherDate: 'desc' }, { createdAt: 'desc' }],
         include: { createdBy: { select: { id: true, fullName: true } }, _count: { select: { items: true } } },
       }),
       this.prisma.stocktakeSession.count(),
@@ -33,33 +37,34 @@ export class StocktakeService {
     return session;
   }
 
-  async create(userId: string, body: { note?: string }) {
+  async create(userId: string, body: { note?: string; voucher_date?: string; voucher_no?: string }) {
     const ingredients = await this.prisma.ingredient.findMany({
       select: { id: true, currentStock: true },
     });
 
-    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const count = await this.prisma.stocktakeSession.count({
-      where: { code: { startsWith: `ST-${today}` } },
-    });
-    const code = `ST-${today}-${String(count + 1).padStart(3, '0')}`;
+    const voucherDate = parseVoucherDate(body.voucher_date);
+    const voucherNo = await this.vouchers.resolveNo('STOCKTAKE', body.voucher_no);
 
-    return this.prisma.stocktakeSession.create({
-      data: {
-        code,
-        note: body.note,
-        createdById: userId,
-        items: {
-          create: ingredients.map((ing) => ({
-            ingredientId: ing.id,
-            systemQty: ing.currentStock,
-            actualQty: ing.currentStock,
-            difference: 0,
-          })),
+    return this.prisma.stocktakeSession
+      .create({
+        data: {
+          code: voucherNo,
+          voucherNo,
+          voucherDate,
+          note: body.note,
+          createdById: userId,
+          items: {
+            create: ingredients.map((ing) => ({
+              ingredientId: ing.id,
+              systemQty: ing.currentStock,
+              actualQty: ing.currentStock,
+              difference: 0,
+            })),
+          },
         },
-      },
-      include: { items: true },
-    });
+        include: { items: true },
+      })
+      .catch((e) => this.vouchers.rethrowUnique(e, voucherNo));
   }
 
   async updateItems(id: string, body: { items: { ingredientId: string; actualQty: number; note?: string }[] }) {
@@ -108,6 +113,7 @@ export class StocktakeService {
             quantity: item.difference,
             referenceId: session.id,
             createdById: userId,
+            voucherDate: session.voucherDate,
             note: `Kiểm kho: ${session.code}`,
           },
         });

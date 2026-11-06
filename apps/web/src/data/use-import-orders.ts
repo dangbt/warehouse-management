@@ -11,6 +11,8 @@ interface ImportOrder {
   totalAmount: string
   status: string
   createdAt: string
+  voucherDate: string
+  voucherNo: string
   hasInvoice?: boolean
   invoiceNo?: string | null
   invoiceSymbol?: string | null
@@ -39,6 +41,8 @@ export function useImportOrders(params?: { status?: string; page?: number; order
 export function useCreateImportOrder() {
   return useMutation({
     mutationFn: (data: {
+      voucher_date?: string
+      voucher_no?: string
       supplier_id: string
       note?: string
       paid?: boolean

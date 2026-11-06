@@ -11,6 +11,8 @@ interface StockExport {
   note: string
   createdBy: { fullName: string }
   createdAt: string
+  voucherDate: string
+  export?: { voucherNo: string; voucherDate: string } | null
 }
 interface ListResponse {
   data: StockExport[]
@@ -30,7 +32,14 @@ export function useStockExports(params?: { page?: number; orderBy?: string; sort
 
 export function useCreateStockExport() {
   return useMutation({
-    mutationFn: (data: { ingredient_id: string; quantity: number; reason: string; note?: string }) =>
+    mutationFn: (data: {
+      ingredient_id: string
+      quantity: number
+      reason: string
+      note?: string
+      voucher_date?: string
+      voucher_no?: string
+    }) =>
       api.post('/stock-exports', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.stockExports })

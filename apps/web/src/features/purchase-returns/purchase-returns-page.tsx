@@ -2,13 +2,16 @@ import { useState, useMemo } from 'react'
 import { Plus, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { usePurchaseReturns, useCreatePurchaseReturn, useSuppliers, useIngredients, useCompletedImportOrders } from '@/data'
-import { formatDateTime, formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
+import { usePurchaseReturns, useCreatePurchaseReturn, useSuppliers, useIngredients, useCompletedImportOrders, useVoucherFields } from '@/data'
+import { VoucherFields } from '@/components/voucher-fields'
+import { formatDate, formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
 import { lineTotalPrice, computeLineVat, computeVatTotals } from '../import-orders/vat'
 
 const columns: Column<PurchaseReturn>[] = [
+  { key: 'voucherDate', header: 'Ngày CT', width: 100, align: 'center', render: (r) => formatDate(r.voucherDate) },
+  { key: 'voucherNo', header: 'Số CT', width: 130 },
   { key: 'code', header: 'Mã phiếu', width: 120 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier.name },
   {
@@ -20,7 +23,6 @@ const columns: Column<PurchaseReturn>[] = [
   },
   { key: 'totalAmount', header: 'Tổng tiền', width: 120, align: 'right', render: (r) => formatCurrency(r.totalAmount) },
   { key: 'reason', header: 'Lý do', width: 200 },
-  { key: 'createdAt', header: 'Ngày tạo', width: 150, render: (r) => formatDateTime(r.createdAt) },
 ]
 
 interface ReturnItem {
@@ -42,6 +44,7 @@ export function PurchaseReturnsPage() {
   const [supplierId, setSupplierId] = useState('')
   const [importOrderId, setImportOrderId] = useState('')
   const [reason, setReason] = useState('')
+  const voucher = useVoucherFields('RETURN', dialogOpen)
   const [items, setItems] = useState<ReturnItem[]>([{ ...EMPTY_ITEM }])
 
   const { data: importOrders } = useCompletedImportOrders(supplierId)
@@ -114,6 +117,8 @@ export function PurchaseReturnsPage() {
     await createMutation.mutateAsync({
       supplierId,
       reason,
+      voucherDate: voucher.payload().voucher_date,
+      voucherNo: voucher.payload().voucher_no,
       importOrderId: importOrderId || undefined,
       items: validItems.map((i) => ({
         ingredientId: i.ingredientId,
@@ -139,6 +144,9 @@ export function PurchaseReturnsPage() {
 
       <WinDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Tạo phiếu trả hàng" width={hasInvoice ? 760 : 600}>
         <div className="space-y-3 p-3">
+          <div className="space-y-2.5">
+            <VoucherFields {...voucher} />
+          </div>
           <div>
             <label className="text-win-base block mb-0.5">Nhà cung cấp</label>
             <select

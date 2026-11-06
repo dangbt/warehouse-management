@@ -16,6 +16,8 @@ const statusColors: Record<string, string> = {
 }
 
 const columns: Column<ProcessingOrder>[] = [
+  { key: 'voucherDate', header: 'Ngày CT', width: 100, align: 'center', render: (r) => formatDate(r.voucherDate) },
+  { key: 'voucherNo', header: 'Số CT', width: 130 },
   { key: 'code', header: 'Mã phiếu', width: 160 },
   { key: 'source', header: 'Nguồn', width: 150, render: (r) => `${r.source?.name}` },
   { key: 'sourceQty', header: 'Lượng nguồn', width: 90, align: 'right', render: (r) => `${formatNumber(r.sourceQty)} ${r.source?.unit}` },
@@ -30,7 +32,6 @@ const columns: Column<ProcessingOrder>[] = [
       <span className={`px-2 py-0.5 text-win-xs rounded ${statusColors[r.status] ?? ''}`}>{statusLabels[r.status] ?? r.status}</span>
     ),
   },
-  { key: 'createdAt', header: 'Ngày tạo', width: 110, render: (r) => formatDate(r.createdAt) },
 ]
 
 export function ProcessingPage() {
@@ -56,6 +57,8 @@ export function ProcessingPage() {
     output_ingredient_id: string
     output_qty?: number
     note?: string
+    voucher_date?: string
+    voucher_no?: string
   }) => {
     await createMutation.mutateAsync(data)
   }
