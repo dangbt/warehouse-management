@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -20,6 +20,16 @@ export class SupplierPaymentsService {
       this.prisma.supplierPayment.count({ where }),
     ]);
     return { data, meta: { page, limit, total } };
+  }
+
+  /** Một khoản thanh toán kèm NCC + người lập, dùng để in phiếu chi. */
+  async findOne(id: string) {
+    const payment = await this.prisma.supplierPayment.findUnique({
+      where: { id },
+      include: { supplier: true, createdBy: { select: { id: true, fullName: true } } },
+    });
+    if (!payment) throw new NotFoundException('Không tìm thấy khoản thanh toán');
+    return payment;
   }
 
   async create(userId: string, body: { supplier_id: string; amount: number; method: string; note?: string }) {

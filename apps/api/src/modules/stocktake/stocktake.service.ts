@@ -30,7 +30,7 @@ export class StocktakeService {
       where: { id },
       include: {
         createdBy: { select: { id: true, fullName: true } },
-        items: { include: { ingredient: { select: { id: true, name: true, unit: true } } } },
+        items: { include: { ingredient: { select: { id: true, name: true, unit: true, costPerUnit: true } } } },
       },
     });
     if (!session) throw new NotFoundException('Không tìm thấy phiên kiểm kho');

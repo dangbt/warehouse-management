@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Plus, RefreshCw } from 'lucide-react'
+import { Plus, Printer, RefreshCw } from 'lucide-react'
+import { openPrint } from '@/components/print/print-utils'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { StockExportForm } from './stock-export-form'
@@ -16,7 +17,7 @@ interface StockExport {
   createdBy: { fullName: string }
   createdAt: string
   voucherDate: string
-  export?: { voucherNo: string } | null
+  export?: { id: string; voucherNo: string } | null
 }
 
 const columns: Column<StockExport>[] = [
@@ -51,6 +52,7 @@ export function StockExportsPage() {
   const setPage = (p: number) => setParams({ page: p })
 
   const [formOpen, setFormOpen] = useState(false)
+  const [selected, setSelected] = useState<StockExport | null>(null)
   const { data: res, isLoading, refetch } = useStockExports({ page, orderBy, sort })
   const createMutation = useCreateStockExport()
 
@@ -58,6 +60,12 @@ export function StockExportsPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button icon={<Plus size={14} />} label="Xuất kho" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button
+          icon={<Printer size={14} />}
+          label="In phiếu"
+          disabled={!selected?.export?.id}
+          onClick={() => selected?.export?.id && openPrint('stock-exports', selected.export.id)}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
@@ -67,6 +75,7 @@ export function StockExportsPage() {
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
+        onRowClick={(r) => setSelected(r)}
         onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         storageKey="stock-exports"
       />

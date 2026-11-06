@@ -12,7 +12,7 @@ interface StockExport {
   createdBy: { fullName: string }
   createdAt: string
   voucherDate: string
-  export?: { voucherNo: string; voucherDate: string } | null
+  export?: { id: string; voucherNo: string; voucherDate: string } | null
 }
 interface ListResponse {
   data: StockExport[]
@@ -46,5 +46,28 @@ export function useCreateStockExport() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
       useToastStore.getState().success('Xuất kho thành công')
     },
+  })
+}
+
+export interface StockExportVoucher {
+  id: string
+  voucherNo: string
+  voucherDate: string
+  lines: {
+    id: string
+    ingredient: { name: string; unit: string }
+    quantity: number
+    unitCost: number
+    totalCost: number
+    note: string | null
+    createdBy: string | null
+  }[]
+}
+
+export function useStockExportVoucher(id: string) {
+  return useQuery<StockExportVoucher>({
+    queryKey: ['stock-export-voucher', id],
+    queryFn: () => api.get(`/stock-exports/vouchers/${id}`),
+    enabled: !!id,
   })
 }

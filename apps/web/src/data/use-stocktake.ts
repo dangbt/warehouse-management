@@ -17,7 +17,7 @@ export interface StocktakeSession {
 
 export interface StocktakeItem {
   id: string
-  ingredient: { id: string; name: string; unit: string }
+  ingredient: { id: string; name: string; unit: string; costPerUnit?: string }
   systemQty: string
   actualQty: string | null
   difference: string | null
@@ -27,7 +27,10 @@ export interface StocktakeItem {
 export interface StocktakeDetail {
   id: string
   code: string
+  voucherNo?: string
+  voucherDate?: string
   status: string
+  createdBy?: { id: string; fullName: string }
   items: StocktakeItem[]
   createdAt: string
   completedAt: string | null

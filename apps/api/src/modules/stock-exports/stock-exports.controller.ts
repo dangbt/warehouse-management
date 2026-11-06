@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, UseGuards, Req, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
@@ -30,11 +30,48 @@ export class StockExportsController {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortField]: sortDir },
-        include: { ingredient: true, createdBy: true, export: { select: { voucherNo: true, voucherDate: true } } },
+        include: { ingredient: true, createdBy: true, export: { select: { id: true, voucherNo: true, voucherDate: true } } },
       }),
       this.prisma.stockTransaction.count({ where: { type: 'EXPORT' } }),
     ]);
     return { data, meta: { page, limit, total } };
+  }
+
+  /** Chứng từ xuất kho để in 02-VT: mỗi dòng gắn giá vốn lấy từ lô đã trừ (referenceId = batchId). */
+  @Get('vouchers/:id')
+  @RequirePermissions('stock_exports:read')
+  async findVoucher(@Param('id') id: string) {
+    const voucher = await this.prisma.stockExport.findUnique({
+      where: { id },
+      include: {
+        transactions: { include: { ingredient: true, createdBy: { select: { fullName: true } } }, orderBy: { createdAt: 'asc' } },
+      },
+    });
+    if (!voucher) throw new NotFoundException('Không tìm thấy phiếu xuất kho');
+    const batchIds = voucher.transactions.map((t) => t.referenceId).filter((x): x is string => !!x);
+    const batches = await this.prisma.ingredientBatch.findMany({
+      where: { id: { in: batchIds } },
+      select: { id: true, costPerUnit: true },
+    });
+    const cost = new Map(batches.map((b) => [b.id, Number(b.costPerUnit)]));
+    return {
+      id: voucher.id,
+      voucherNo: voucher.voucherNo,
+      voucherDate: voucher.voucherDate,
+      lines: voucher.transactions.map((t) => {
+        const unitCost = (t.referenceId && cost.get(t.referenceId)) || Number(t.ingredient.costPerUnit);
+        const quantity = Math.abs(Number(t.quantity));
+        return {
+          id: t.id,
+          ingredient: { name: t.ingredient.name, unit: t.ingredient.unit },
+          quantity,
+          unitCost,
+          totalCost: Math.round(quantity * unitCost),
+          note: t.note,
+          createdBy: t.createdBy?.fullName ?? null,
+        };
+      }),
+    };
   }
 
   @Post()

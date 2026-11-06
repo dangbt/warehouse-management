@@ -36,3 +36,15 @@ export function useCreateSupplierPayment() {
     },
   })
 }
+
+export interface SupplierPaymentDetail extends SupplierPayment {
+  supplier: { id: string; name: string; address: string | null; phone: string | null }
+}
+
+export function useSupplierPaymentDetail(id: string) {
+  return useQuery<SupplierPaymentDetail>({
+    queryKey: ['supplier-payment-detail', id],
+    queryFn: () => api.get(`/supplier-payments/${id}`),
+    enabled: !!id,
+  })
+}
