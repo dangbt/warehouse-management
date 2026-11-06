@@ -143,46 +143,62 @@ export function ImportOrdersPage() {
       />
 
       {selected?.items && selected.items.length > 0 && (
-        <div className="border-t border-win-grid-border bg-win-control p-2 max-h-40 overflow-auto shrink-0">
-          <div className="text-win-base font-semibold mb-1">📋 Chi tiết phiếu {selected.code}:</div>
+        <div className="border-t-2 border-win-grid-border bg-win-control p-3 max-h-80 overflow-auto shrink-0 text-[14px]">
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-2">
+            <span className="text-[15px] font-semibold">📋 Phiếu {selected.code}</span>
+            <span>NCC: <strong>{selected.supplier?.name}</strong></span>
+            <span>Ngày: {formatDate(selected.createdAt)}</span>
+            <span className={`px-2 py-0.5 text-[12px] rounded ${statusColors[selected.status] || ''}`}>
+              {statusLabels[selected.status] || selected.status}
+            </span>
+          </div>
           {selected.hasInvoice && (
-            <div className="text-win-base mb-1">
+            <div className="mb-2">
               🧾 HĐ: <strong>{[selected.invoiceSymbol, selected.invoiceNo].filter(Boolean).join('/') || '—'}</strong>
               {selected.invoiceDate ? ` · Ngày ${formatDate(selected.invoiceDate)}` : ''}
               {selected.vatAmount ? ` · Tiền thuế ${formatCurrency(selected.vatAmount)}` : ''}
             </div>
           )}
-          <table className="w-full text-win-base">
+          <table className="w-full text-[14px] bg-white border border-win-grid-border">
             <thead>
               <tr className="bg-win-grid-header">
-                <th className="text-left p-1">Nguyên liệu</th>
-                <th className="text-center p-1">ĐVT</th>
-                <th className="text-right p-1">SL</th>
-                <th className="text-right p-1">Đơn giá</th>
-                <th className="text-right p-1">Thành tiền</th>
-                {selected.hasInvoice && <th className="text-center p-1">Thuế suất</th>}
-                {selected.hasInvoice && <th className="text-right p-1">Tiền thuế</th>}
+                <th className="text-center p-1.5 w-[44px]">#</th>
+                <th className="text-left p-1.5">Nguyên liệu</th>
+                <th className="text-center p-1.5">ĐVT</th>
+                <th className="text-right p-1.5">SL</th>
+                <th className="text-right p-1.5">Đơn giá</th>
+                <th className="text-right p-1.5">Thành tiền</th>
+                {selected.hasInvoice && <th className="text-center p-1.5">Thuế suất</th>}
+                {selected.hasInvoice && <th className="text-right p-1.5">Tiền thuế</th>}
               </tr>
             </thead>
             <tbody>
-              {selected.items.map((item) => (
+              {selected.items.map((item, idx) => (
                 <tr key={item.id} className="border-b border-win-grid-border">
-                  <td className="p-1">{item.ingredient?.name}</td>
-                  <td className="p-1 text-center">{item.ingredient?.unit}</td>
-                  <td className="p-1 text-right">{formatNumber(item.quantity)}</td>
-                  <td className="p-1 text-right">{formatCurrency(item.unitPrice)}</td>
-                  <td className="p-1 text-right">{formatCurrency(item.totalPrice)}</td>
+                  <td className="p-1.5 text-center text-win-text-secondary">{idx + 1}</td>
+                  <td className="p-1.5">{item.ingredient?.name}</td>
+                  <td className="p-1.5 text-center">{item.ingredient?.unit}</td>
+                  <td className="p-1.5 text-right">{formatNumber(item.quantity)}</td>
+                  <td className="p-1.5 text-right">{formatCurrency(item.unitPrice)}</td>
+                  <td className="p-1.5 text-right">{formatCurrency(item.totalPrice)}</td>
                   {selected.hasInvoice && (
-                    <td className="p-1 text-center">
+                    <td className="p-1.5 text-center">
                       {item.vatRate ? VAT_RATE_LABELS[item.vatRate as VatRate] ?? item.vatRate : '—'}
                     </td>
                   )}
-                  {selected.hasInvoice && <td className="p-1 text-right">{formatCurrency(item.vatAmount)}</td>}
+                  {selected.hasInvoice && <td className="p-1.5 text-right">{formatCurrency(item.vatAmount)}</td>}
                 </tr>
               ))}
             </tbody>
           </table>
-          {selected.note && <div className="text-win-xs text-win-text-secondary mt-1">Ghi chú: {selected.note}</div>}
+          <div className="flex flex-wrap justify-end gap-x-6 mt-2">
+            {selected.hasInvoice && selected.subtotal && <span>Tiền hàng: <strong>{formatCurrency(selected.subtotal)}</strong></span>}
+            {selected.hasInvoice && <span>Thuế GTGT: <strong>{formatCurrency(selected.vatAmount)}</strong></span>}
+            <span>
+              Tổng thanh toán: <strong className="text-[16px] text-win-active-title">{formatCurrency(selected.totalAmount)}</strong>
+            </span>
+          </div>
+          {selected.note && <div className="text-[13px] text-win-text-secondary mt-1">Diễn giải: {selected.note}</div>}
         </div>
       )}
 

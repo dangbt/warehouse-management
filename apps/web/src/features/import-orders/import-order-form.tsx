@@ -1,12 +1,12 @@
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
-import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { WinDialog } from '@wms/ui-winforms'
 import { api } from '@/services/api'
-import { formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
-import { lineTotalPrice, computeLineVat, computeVatTotals } from './vat'
+import { formatCurrency, formatNumber } from '@wms/shared'
+import { computeVatTotals } from './vat'
+import { ImportOrderItemsTable, type IngredientOption } from './import-order-items-table'
 
 const itemSchema = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
@@ -49,8 +49,64 @@ interface Props {
   onSave?: (data: FormData) => void
 }
 
+interface SupplierInfo {
+  isIndividual: boolean
+  address: string | null
+  taxCode: string | null
+  phone: string | null
+}
+
 const DEFAULT_ITEM = { ingredient_id: '', quantity: 0, factor: 1, unit_price: 0, vat_rate: '8', expiry_date: '' }
 
+const EMPTY_FORM: FormData = {
+  supplier_id: '',
+  note: '',
+  paid: false,
+  has_invoice: false,
+  invoice_symbol: '',
+  invoice_no: '',
+  invoice_date: '',
+  purchase_address: '',
+  items: [{ ...DEFAULT_ITEM }],
+}
+
+const input =
+  'w-full h-10 border px-3 text-[14px] bg-white outline-none focus:border-win-input-focus disabled:bg-win-control'
+
+/** Một dòng "nhãn: ô nhập" cỡ lớn, nhãn bên trái như chứng từ MISA. */
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-3">
+      <label className="w-[120px] shrink-0 pt-2.5 text-[14px] text-right">
+        {label}
+        {required && <span className="text-win-error"> *</span>}
+      </label>
+      <div className="flex-1 min-w-0">
+        {children}
+        {error && <p className="text-[12px] text-win-error mt-0.5">{error}</p>}
+      </div>
+    </div>
+  )
+}
+
+function Section({ step, title, children }: { step: number; title: string; children: ReactNode }) {
+  return (
+    <section className="border border-win-grid-border bg-white">
+      <header className="flex items-center gap-2 px-3 h-10 border-b border-win-grid-border bg-win-grid-header">
+        <span className="w-6 h-6 rounded-full bg-win-active-title text-white text-[13px] font-semibold flex items-center justify-center">
+          {step}
+        </span>
+        <span className="text-[15px] font-semibold">{title}</span>
+      </header>
+      <div className="p-3">{children}</div>
+    </section>
+  )
+}
+
+/**
+ * Phiếu nhập kho — bố cục theo luồng nhập hàng kiểu MISA:
+ * ① Nhà cung cấp → ② Chứng từ (hoá đơn, thanh toán) → ③ Hàng tiền → Tổng cộng → Lưu.
+ */
 export function ImportOrderForm({ open, onClose, onSave }: Props) {
   const {
     register,
@@ -58,69 +114,68 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     handleSubmit,
     watch,
     reset,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      supplier_id: '',
-      note: '',
-      paid: false,
-      has_invoice: false,
-      invoice_symbol: '',
-      invoice_no: '',
-      invoice_date: '',
-      purchase_address: '',
-      items: [{ ...DEFAULT_ITEM }],
-    },
+    defaultValues: EMPTY_FORM,
   })
   const { fields, append, remove } = useFieldArray({ control, name: 'items' })
   const items = watch('items')
   const hasInvoice = watch('has_invoice')
+  const paid = watch('paid')
   const supplierId = watch('supplier_id')
   const totals = computeVatTotals(items ?? [], hasInvoice)
 
   const [suppliers, setSuppliers] = useState<{ value: string; label: string }[]>([])
-  const [supplierMap, setSupplierMap] = useState<Record<string, { isIndividual: boolean; address: string | null }>>({})
-  const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
+  const [supplierMap, setSupplierMap] = useState<Record<string, SupplierInfo>>({})
+  const [ingredients, setIngredients] = useState<IngredientOption[]>([])
   const [submitError, setSubmitError] = useState('')
 
+  const supplier = supplierId ? supplierMap[supplierId] : undefined
   // Người bán cá nhân không có hoá đơn ⇒ hiện field "Địa chỉ mua hàng".
-  const showPurchaseAddress = !hasInvoice && !!supplierId && !!supplierMap[supplierId]?.isIndividual
+  const showPurchaseAddress = !hasInvoice && !!supplier?.isIndividual
 
   useEffect(() => {
-    if (open) {
-      reset({
-        supplier_id: '',
-        note: '',
-        paid: false,
-        has_invoice: false,
-        invoice_symbol: '',
-        invoice_no: '',
-        invoice_date: '',
-        purchase_address: '',
-        items: [{ ...DEFAULT_ITEM }],
-      })
-      setSubmitError('')
-      Promise.all([api.get('/suppliers?limit=1000'), api.get('/ingredients?limit=1000')]).then(([s, i]) => {
-        const supplierList = s.data as { id: string; name: string; isIndividual?: boolean; address?: string | null }[]
-        setSuppliers(supplierList.map((x) => ({ value: x.id, label: x.name })))
-        setSupplierMap(
-          Object.fromEntries(supplierList.map((x) => [x.id, { isIndividual: !!x.isIndividual, address: x.address ?? null }])),
-        )
-        setIngredients((i.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
-      })
-    }
-  }, [open, reset])
+    if (!open) return
+    reset(EMPTY_FORM)
+    setSubmitError('')
+    Promise.all([api.get('/suppliers?limit=1000'), api.get('/ingredients?limit=1000')]).then(([s, i]) => {
+      const supplierList = s.data as {
+        id: string
+        name: string
+        isIndividual?: boolean
+        address?: string | null
+        taxCode?: string | null
+        phone?: string | null
+      }[]
+      setSuppliers(supplierList.map((x) => ({ value: x.id, label: x.name })))
+      setSupplierMap(
+        Object.fromEntries(
+          supplierList.map((x) => [
+            x.id,
+            { isIndividual: !!x.isIndividual, address: x.address ?? null, taxCode: x.taxCode ?? null, phone: x.phone ?? null },
+          ]),
+        ),
+      )
+      setIngredients(
+        (i.data as { id: string; name: string; unit: string }[]).map((x) => ({ value: x.id, label: x.name, unit: x.unit })),
+      )
+    })
+    setTimeout(() => setFocus('supplier_id'), 0)
+  }, [open, reset, setFocus])
+
+  const addRow = useCallback(() => {
+    append({ ...DEFAULT_ITEM })
+    setTimeout(() => setFocus(`items.${fields.length}.ingredient_id`), 0)
+  }, [append, setFocus, fields.length])
 
   const onSubmit = async (data: FormData) => {
     try {
       setSubmitError('')
       // Khi không có hoá đơn: gửi has_invoice=false và bỏ thuế suất từng dòng.
       const payload: FormData = data.has_invoice
-        ? {
-            ...data,
-            purchase_address: undefined,
-          }
+        ? { ...data, purchase_address: undefined }
         : {
             ...data,
             invoice_symbol: undefined,
@@ -136,208 +191,172 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
     }
   }
 
+  // Phím tắt: Ctrl/Cmd+S lưu, Esc đóng.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        void handleSubmit(onSubmit)()
+      } else if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
   if (!open) return null
 
-  const vatRateOptions = VAT_RATES.map((r) => ({ value: r, label: VAT_RATE_LABELS[r] }))
+  const border = (err?: unknown) => (err ? 'border-win-error' : 'border-win-input-border')
 
   return (
     <WinDialog
       title="📄 Tạo Phiếu Nhập Kho"
       open={open}
       onClose={onClose}
-      width={hasInvoice ? 880 : 760}
+      width={Math.min(1180, typeof window !== 'undefined' ? window.innerWidth * 0.96 : 1180)}
       footer={
         <>
-          <span className="text-win-base mr-auto font-semibold">Tổng: {formatCurrency(totals.totalAmount)}</span>
+          <span className="text-[16px] font-bold">Tổng: {formatCurrency(totals.totalAmount)}</span>
+          <span className="mr-auto ml-4 text-[12px] text-win-text-secondary">Ctrl+S: Lưu · Esc: Đóng</span>
           <button
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? 'Đang lưu...' : 'Lưu'}
-          </button>
-          <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
+            className="h-10 px-5 text-[14px] bg-win-button border border-win-button-border min-w-[100px] cursor-pointer hover:bg-win-button-hover"
           >
             Huỷ
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+            className="h-10 px-6 text-[14px] font-semibold bg-win-active-title text-white border border-win-active-title min-w-[120px] cursor-pointer disabled:opacity-50"
+          >
+            {isSubmitting ? 'Đang lưu...' : 'Lưu'}
           </button>
         </>
       }
     >
-      <WinGroupBox title="Thông tin chung">
-        <div className="space-y-2">
-          <WinSelect
-            label="Nhà cung cấp"
-            {...register('supplier_id')}
-            options={suppliers}
-            error={errors.supplier_id?.message}
-          />
-          <WinInput label="Ghi chú" {...register('note')} />
-          <label className="flex items-center gap-2 text-win-base mt-1">
-            <input type="checkbox" {...register('paid')} className="w-3 h-3" />
-            Đã thanh toán cho NCC
-          </label>
-          <label className="flex items-center gap-2 text-win-base">
-            <input type="checkbox" {...register('has_invoice')} className="w-3 h-3" />
-            Có hoá đơn GTGT
-          </label>
-          {showPurchaseAddress && (
-            <WinInput
-              label="Địa chỉ mua hàng"
-              {...register('purchase_address')}
-              placeholder={supplierMap[supplierId]?.address ?? 'Địa chỉ nơi mua (mặc định lấy từ NCC)'}
-            />
-          )}
-        </div>
-      </WinGroupBox>
+      <div className="space-y-3">
+        {submitError && (
+          <div className="px-3 py-2 border border-win-error bg-red-50 text-[14px] text-win-error font-semibold">⚠️ {submitError}</div>
+        )}
 
-      {hasInvoice && (
-        <WinGroupBox title="Hoá đơn">
-          <div className="space-y-2">
-            <WinInput label="Ký hiệu" {...register('invoice_symbol')} placeholder="VD: 1C25MGT" />
-            <WinInput label="Số HĐ" {...register('invoice_no')} error={errors.invoice_no?.message} />
-            <WinInput label="Ngày HĐ" type="date" {...register('invoice_date')} error={errors.invoice_date?.message} />
-          </div>
-        </WinGroupBox>
-      )}
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
+          <Section step={1} title="Nhà cung cấp">
+            <div className="space-y-2.5">
+              <Field label="Nhà cung cấp" required error={errors.supplier_id?.message}>
+                <select data-testid="select-Nhà cung cấp" {...register('supplier_id')} className={`${input} ${border(errors.supplier_id)}`}>
+                  <option value="">-- Chọn nhà cung cấp --</option>
+                  {suppliers.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {supplier && (
+                <div className="ml-[132px] text-[13px] text-win-text-secondary space-y-0.5">
+                  {supplier.taxCode && <div>MST: {supplier.taxCode}</div>}
+                  {supplier.address && <div>Địa chỉ: {supplier.address}</div>}
+                  {supplier.phone && <div>ĐT: {supplier.phone}</div>}
+                  {supplier.isIndividual && <div className="italic">Người bán cá nhân / hộ không có hoá đơn</div>}
+                </div>
+              )}
+              {showPurchaseAddress && (
+                <Field label="Địa chỉ mua hàng">
+                  <input
+                    data-testid="input-Địa chỉ mua hàng"
+                    {...register('purchase_address')}
+                    placeholder={supplier?.address ?? 'Địa chỉ nơi mua (mặc định lấy từ NCC)'}
+                    className={`${input} ${border()}`}
+                  />
+                </Field>
+              )}
+              <Field label="Diễn giải">
+                <input
+                  data-testid="input-Ghi chú"
+                  {...register('note')}
+                  placeholder="VD: Nhập rau củ sáng 06/11"
+                  className={`${input} ${border()}`}
+                />
+              </Field>
+            </div>
+          </Section>
 
-      <WinGroupBox title="Chi tiết nguyên liệu">
-        <button
-          type="button"
-          onClick={() => append({ ...DEFAULT_ITEM })}
-          className="flex items-center gap-1 text-win-base text-win-active-title hover:underline cursor-pointer mb-2"
-        >
-          <Plus size={14} /> Thêm dòng
-        </button>
-        {errors.items?.root && <p className="text-win-xs text-win-error mb-1">{errors.items.root.message}</p>}
-        {submitError && <p className="text-win-base text-win-error font-semibold mb-1">⚠️ {submitError}</p>}
-
-        <table className="w-full text-win-base border border-win-grid-border">
-          <thead>
-            <tr className="bg-win-grid-header">
-              <th className="p-1 text-left w-[170px]">Nguyên liệu</th>
-              <th className="p-1 w-[60px]">Số lượng</th>
-              <th className="p-1 w-[60px]" title="1 ĐVT nhập = ? ĐVT tồn (vd 1 thùng = 24 chai)">
-                Hệ số
-              </th>
-              <th className="p-1 w-[100px]">Đơn giá (ĐVT tồn)</th>
-              <th className="p-1 w-[90px]">Thành tiền</th>
-              {hasInvoice && <th className="p-1 w-[90px]">Thuế suất</th>}
-              {hasInvoice && <th className="p-1 w-[90px]">Tiền thuế</th>}
-              <th className="p-1 w-[100px]">HSD</th>
-              <th className="p-1 w-[30px]"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {fields.map((field, i) => {
-              const row = items?.[i] || {}
-              const total = lineTotalPrice(row)
-              return (
-                <tr key={field.id} className="border-t border-win-grid-border">
-                  <td className="p-0.5">
-                    <select
-                      data-testid={`item-${i}-ingredient`}
-                      {...register(`items.${i}.ingredient_id`)}
-                      className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
-                    >
-                      <option value="">--</option>
-                      {ingredients.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="p-0.5">
+          <Section step={2} title="Chứng từ">
+            <div className="space-y-2.5">
+              <label className="flex items-center gap-2 h-10 text-[14px] cursor-pointer select-none">
+                <input type="checkbox" {...register('has_invoice')} className="w-4 h-4" />
+                Có hoá đơn GTGT
+              </label>
+              {hasInvoice && (
+                <>
+                  <Field label="Ký hiệu">
                     <input
-                      type="number"
-                      step="0.01"
-                      data-testid={`item-${i}-quantity`}
-                      {...register(`items.${i}.quantity`)}
-                      className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
+                      data-testid="input-Ký hiệu"
+                      {...register('invoice_symbol')}
+                      placeholder="VD: 1C25MGT"
+                      className={`${input} ${border()}`}
                     />
-                  </td>
-                  <td className="p-0.5">
-                    <input
-                      type="number"
-                      step="0.0001"
-                      data-testid={`item-${i}-factor`}
-                      {...register(`items.${i}.factor`)}
-                      className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
-                    />
-                  </td>
-                  <td className="p-0.5">
-                    <input
-                      type="number"
-                      data-testid={`item-${i}-price`}
-                      {...register(`items.${i}.unit_price`)}
-                      className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
-                    />
-                  </td>
-                  <td className="p-0.5 text-right pr-2">{formatNumber(total)}</td>
-                  {hasInvoice && (
-                    <td className="p-0.5">
-                      <select
-                        data-testid={`item-${i}-vat-rate`}
-                        {...register(`items.${i}.vat_rate`)}
-                        className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
-                      >
-                        {vatRateOptions.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  )}
-                  {hasInvoice && (
-                    <td className="p-0.5 text-right pr-2" data-testid={`item-${i}-vat-amount`}>
-                      {formatNumber(computeLineVat(total, (row.vat_rate as never) ?? null))}
-                    </td>
-                  )}
-                  <td className="p-0.5">
+                  </Field>
+                  <Field label="Số HĐ" required error={errors.invoice_no?.message}>
+                    <input data-testid="input-Số HĐ" {...register('invoice_no')} className={`${input} ${border(errors.invoice_no)}`} />
+                  </Field>
+                  <Field label="Ngày HĐ" required error={errors.invoice_date?.message}>
                     <input
                       type="date"
-                      data-testid={`item-${i}-expiry`}
-                      {...register(`items.${i}.expiry_date`)}
-                      className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
+                      data-testid="input-Ngày HĐ"
+                      {...register('invoice_date')}
+                      className={`${input} ${border(errors.invoice_date)}`}
                     />
-                  </td>
-                  <td className="p-0.5 text-center">
-                    {fields.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => remove(i)}
-                        className="text-win-error hover:opacity-70 cursor-pointer"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-
-        <div className="flex flex-col items-end gap-0.5 mt-2 text-win-base">
-          <div className="flex gap-4">
-            <span className="text-win-text-secondary">Tiền hàng:</span>
-            <span className="font-semibold w-32 text-right">{formatNumber(totals.subtotal)}</span>
-          </div>
-          {hasInvoice && (
-            <div className="flex gap-4">
-              <span className="text-win-text-secondary">Tiền thuế GTGT:</span>
-              <span className="font-semibold w-32 text-right">{formatNumber(totals.vatAmount)}</span>
+                  </Field>
+                </>
+              )}
+              <label className="flex items-center gap-2 h-10 text-[14px] cursor-pointer select-none border-t border-win-grid-border pt-2">
+                <input type="checkbox" {...register('paid')} className="w-4 h-4" />
+                Đã thanh toán cho NCC
+                <span className={`ml-auto text-[12px] px-2 py-0.5 rounded ${paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  {paid ? 'Đã trả tiền' : 'Ghi công nợ'}
+                </span>
+              </label>
             </div>
-          )}
-          <div className="flex gap-4">
-            <span className="text-win-text-secondary">Tổng thanh toán:</span>
-            <span className="font-bold w-32 text-right">{formatCurrency(totals.totalAmount)}</span>
-          </div>
+          </Section>
         </div>
-      </WinGroupBox>
+
+        <Section step={3} title="Hàng tiền">
+          <ImportOrderItemsTable
+            register={register}
+            fields={fields}
+            rows={items ?? []}
+            ingredients={ingredients}
+            hasInvoice={hasInvoice}
+            onAdd={addRow}
+            onRemove={remove}
+            rootError={errors.items?.root?.message ?? errors.items?.message}
+          />
+
+          <div className="flex justify-end mt-3">
+            <div className="w-full max-w-[360px] border border-win-grid-border text-[14px]">
+              <div className="flex justify-between px-3 py-2">
+                <span className="text-win-text-secondary">Tiền hàng</span>
+                <span className="font-semibold">{formatNumber(totals.subtotal)}</span>
+              </div>
+              {hasInvoice && (
+                <div className="flex justify-between px-3 py-2 border-t border-win-grid-border">
+                  <span className="text-win-text-secondary">Tiền thuế GTGT</span>
+                  <span className="font-semibold">{formatNumber(totals.vatAmount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center px-3 py-2.5 border-t border-win-grid-border bg-win-grid-header">
+                <span className="font-semibold">Tổng thanh toán</span>
+                <span className="text-[18px] font-bold text-win-active-title">{formatCurrency(totals.totalAmount)}</span>
+              </div>
+            </div>
+          </div>
+        </Section>
+      </div>
     </WinDialog>
   )
 }
