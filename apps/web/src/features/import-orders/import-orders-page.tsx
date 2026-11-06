@@ -24,6 +24,8 @@ interface ImportOrder {
   totalAmount: string
   status: string
   createdAt: string
+  voucherDate: string
+  voucherNo: string
   hasInvoice?: boolean
   invoiceNo?: string | null
   invoiceSymbol?: string | null
@@ -47,6 +49,8 @@ const statusLabels: Record<string, string> = {
 }
 
 const columns: Column<ImportOrder>[] = [
+  { key: 'voucherDate', header: 'Ngày CT', width: 100, align: 'center', render: (r) => formatDate(r.voucherDate) },
+  { key: 'voucherNo', header: 'Số CT', width: 130 },
   { key: 'code', header: 'Mã phiếu', width: 170 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier?.name },
   {
@@ -78,7 +82,6 @@ const columns: Column<ImportOrder>[] = [
       <span className={`px-2 py-0.5 text-win-xs rounded ${statusColors[r.status] || ''}`}>{statusLabels[r.status] || r.status}</span>
     ),
   },
-  { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },
 ]
 
 export function ImportOrdersPage() {
@@ -152,7 +155,7 @@ export function ImportOrdersPage() {
             <span>
               NCC: <strong>{selected.supplier?.name}</strong>
             </span>
-            <span>Ngày: {formatDate(selected.createdAt)}</span>
+            <span>Ngày CT: {formatDate(selected.voucherDate)}</span>
             <span className={`px-2 py-0.5 text-[12px] rounded ${statusColors[selected.status] || ''}`}>
               {statusLabels[selected.status] || selected.status}
             </span>

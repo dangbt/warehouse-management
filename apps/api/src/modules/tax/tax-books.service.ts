@@ -108,7 +108,7 @@ export class TaxBooksService {
    * Sổ vật liệu, hàng hoá: với mỗi nguyên liệu, tính tồn đầu kỳ (SL + giá trị),
    * liệt kê phát sinh nhập/xuất trong kỳ, và tồn cuối kỳ = tồn đầu + nhập − xuất.
    *
-   * Tồn đầu kỳ = Σ phát sinh (theo chiều IN/OUT) của mọi giao dịch `createdAt < from`.
+   * Tồn đầu kỳ = Σ phát sinh (theo chiều IN/OUT) của mọi giao dịch `voucherDate < from` (ngày chứng từ).
    * Giá trị phát sinh không có `totalPrice` (vd EXPORT) suy ra bằng SL × giá vốn bình
    * quân của nguyên liệu (`Ingredient.costPerUnit`) — xem `normalizeMovement`.
    *
@@ -135,13 +135,13 @@ export class TaxBooksService {
       // Phát sinh trước kỳ (để tính tồn đầu) và trong kỳ (để lập dòng sổ).
       const [before, during] = await Promise.all([
         this.prisma.stockTransaction.findMany({
-          where: { ingredientId: ing.id, createdAt: { lt: period.from } },
-          select: { type: true, quantity: true, totalPrice: true, note: true, referenceId: true, createdAt: true },
+          where: { ingredientId: ing.id, voucherDate: { lt: period.from } },
+          select: { type: true, quantity: true, totalPrice: true, note: true, referenceId: true, voucherDate: true },
         }),
         this.prisma.stockTransaction.findMany({
-          where: { ingredientId: ing.id, createdAt: { gte: period.from, lte: period.to } },
-          select: { type: true, quantity: true, totalPrice: true, note: true, referenceId: true, createdAt: true },
-          orderBy: { createdAt: 'asc' },
+          where: { ingredientId: ing.id, voucherDate: { gte: period.from, lte: period.to } },
+          select: { type: true, quantity: true, totalPrice: true, note: true, referenceId: true, voucherDate: true },
+          orderBy: { voucherDate: 'asc' },
         }),
       ]);
 
@@ -183,7 +183,7 @@ export class TaxBooksService {
     totalPrice: unknown;
     note: string | null;
     referenceId: string | null;
-    createdAt: Date;
+    voucherDate: Date;
   }): { type: string; quantity: number; totalPrice: number | null; note: string | null; referenceId: string | null; createdAt: string } {
     return {
       type: tx.type,
@@ -191,7 +191,7 @@ export class TaxBooksService {
       totalPrice: tx.totalPrice == null ? null : Number(tx.totalPrice),
       note: tx.note,
       referenceId: tx.referenceId,
-      createdAt: tx.createdAt.toISOString(),
+      createdAt: tx.voucherDate.toISOString(),
     };
   }
 

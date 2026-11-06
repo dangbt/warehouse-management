@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { BatchDeductionService } from '../common/batch-deduction.service';
+import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('stock-exports')
@@ -10,6 +11,7 @@ export class StockExportsController {
   constructor(
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
+    private vouchers: VoucherService,
   ) {}
 
   @Get()
@@ -18,7 +20,8 @@ export class StockExportsController {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
 
-    const sortField = q.orderBy || 'createdAt';
+    // Mặc định sort theo ngày chứng từ; chỉ cho phép các cột hợp lệ.
+    const sortField = q.orderBy && ['voucherDate', 'createdAt', 'quantity'].includes(q.orderBy) ? q.orderBy : 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
     const [data, total] = await Promise.all([
@@ -27,7 +30,7 @@ export class StockExportsController {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortField]: sortDir },
-        include: { ingredient: true, createdBy: true },
+        include: { ingredient: true, createdBy: true, export: { select: { voucherNo: true, voucherDate: true } } },
       }),
       this.prisma.stockTransaction.count({ where: { type: 'EXPORT' } }),
     ]);
@@ -44,6 +47,8 @@ export class StockExportsController {
       quantity: number;
       reason: string;
       note?: string;
+      voucher_date?: string;
+      voucher_no?: string;
     },
   ) {
     if (!body.ingredient_id || !body.quantity || body.quantity <= 0 || !body.reason) {
@@ -56,27 +61,35 @@ export class StockExportsController {
     if (!ingredient) throw new BadRequestException('Nguyên liệu không tồn tại');
     if (Number(ingredient.currentStock) < body.quantity) throw new BadRequestException('Không đủ tồn kho');
 
-    await this.prisma.$transaction(async (tx) => {
-      const deducted = await this.batchDeduction.deductFromBatches(tx, body.ingredient_id, body.quantity);
+    const voucherDate = parseVoucherDate(body.voucher_date);
+    const voucherNo = await this.vouchers.resolveNo('EXPORT', body.voucher_no);
 
-      await tx.ingredient.update({
-        where: { id: body.ingredient_id },
-        data: { currentStock: { decrement: body.quantity } },
-      });
+    await this.prisma
+      .$transaction(async (tx) => {
+        const voucher = await tx.stockExport.create({ data: { voucherNo, voucherDate } });
+        const deducted = await this.batchDeduction.deductFromBatches(tx, body.ingredient_id, body.quantity);
 
-      for (const d of deducted) {
-        await tx.stockTransaction.create({
-          data: {
-            ingredientId: body.ingredient_id,
-            type: 'EXPORT',
-            quantity: d.qty,
-            referenceId: d.batchId,
-            note: `${body.reason}${body.note ? ': ' + body.note : ''}`,
-            createdById: req.user.id,
-          },
+        await tx.ingredient.update({
+          where: { id: body.ingredient_id },
+          data: { currentStock: { decrement: body.quantity } },
         });
-      }
-    });
-    return { message: 'Xuất kho thành công' };
+
+        for (const d of deducted) {
+          await tx.stockTransaction.create({
+            data: {
+              ingredientId: body.ingredient_id,
+              type: 'EXPORT',
+              quantity: d.qty,
+              referenceId: d.batchId,
+              note: `${body.reason}${body.note ? ': ' + body.note : ''}`,
+              createdById: req.user.id,
+              voucherDate,
+              exportId: voucher.id,
+            },
+          });
+        }
+      })
+      .catch((e) => this.vouchers.rethrowUnique(e, voucherNo));
+    return { message: 'Xuất kho thành công', voucher_no: voucherNo };
   }
 }

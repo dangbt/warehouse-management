@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PurchaseReturnsController } from './purchase-returns.controller';
 import { PurchaseReturnsService } from './purchase-returns.service';
+import { CommonModule } from '../common/common.module';
 
 @Module({
+  imports: [CommonModule],
   controllers: [PurchaseReturnsController],
   providers: [PurchaseReturnsService],
 })

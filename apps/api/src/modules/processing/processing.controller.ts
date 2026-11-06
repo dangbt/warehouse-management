@@ -18,7 +18,16 @@ export class ProcessingController {
   @RequirePermissions('processing:create')
   create(
     @Req() req,
-    @Body() body: { source_ingredient_id: string; source_qty: number; output_ingredient_id: string; output_qty?: number; note?: string },
+    @Body()
+    body: {
+      source_ingredient_id: string;
+      source_qty: number;
+      output_ingredient_id: string;
+      output_qty?: number;
+      note?: string;
+      voucher_date?: string;
+      voucher_no?: string;
+    },
   ) {
     return this.svc.create(req.user.id, body);
   }

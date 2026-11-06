@@ -6,7 +6,7 @@ import { ProcessingPage } from '@/features/processing/processing-page'
 const defaultSearch = {
   page: 1,
   status: '',
-  orderBy: 'createdAt',
+  orderBy: 'voucherDate',
   sort: 'desc',
 }
 

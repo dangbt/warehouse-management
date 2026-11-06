@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { VAT_RATES, VatRate, computeLineVat } from '../tax/vat';
 
 export interface PurchaseReturnItemInput {
@@ -14,6 +15,9 @@ export interface CreatePurchaseReturnInput {
   supplier_id: string;
   reason: string;
   note?: string;
+  // Ngày chứng từ (ISO, mặc định hôm nay) + số chứng từ (bỏ trống ⇒ tự sinh).
+  voucher_date?: string;
+  voucher_no?: string;
   // Phiếu nhập gốc (tuỳ chọn). Có ⇒ ràng buộc NCC/COMPLETED + giới hạn số lượng trả.
   import_order_id?: string;
   items: PurchaseReturnItemInput[];
@@ -32,7 +36,10 @@ export function remainingReturnableQty(importedQty: number, alreadyReturnedQty: 
 
 @Injectable()
 export class PurchaseReturnsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private vouchers: VoucherService,
+  ) {}
 
   async findAll(q: { page?: string; limit?: string; supplierId?: string }) {
     const page = +(q.page || 1),
@@ -43,7 +50,7 @@ export class PurchaseReturnsService {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ voucherDate: 'desc' }, { createdAt: 'desc' }],
         include: { supplier: true, createdBy: { select: { id: true, fullName: true } }, items: { include: { ingredient: true } } },
       }),
       this.prisma.purchaseReturn.count({ where }),
@@ -112,7 +119,9 @@ export class PurchaseReturnsService {
       }
     }
 
-    const code = `PTH-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-4)}`;
+    const voucherDate = parseVoucherDate(body.voucher_date);
+    const voucherNo = await this.vouchers.resolveNo('RETURN', body.voucher_no);
+    const code = voucherNo;
 
     // Tính từng dòng: thành tiền + tiền thuế (làm tròn về đồng theo từng dòng).
     const lines = body.items.map((i) => {
@@ -133,58 +142,63 @@ export class PurchaseReturnsService {
     const vatAmount = lines.reduce((s, l) => s + l.vatAmount, 0);
     const totalAmount = subtotal + vatAmount;
 
-    return await this.prisma.$transaction(async (tx) => {
-      const purchaseReturn = await tx.purchaseReturn.create({
-        data: {
-          code,
-          supplierId: body.supplier_id,
-          importOrderId: body.import_order_id ?? null,
-          subtotal,
-          vatAmount,
-          totalAmount,
-          reason: body.reason,
-          note: body.note,
-          createdById: userId,
-          items: {
-            create: lines.map((l) => ({
-              ingredientId: l.ingredientId,
-              quantity: l.quantity,
-              unitPrice: l.unitPrice,
-              totalPrice: l.totalPrice,
-              vatRate: l.vatRate,
-              vatAmount: l.vatAmount,
-            })),
-          },
-        },
-        include: { items: true },
-      });
-
-      for (const line of lines) {
-        await tx.ingredient.update({
-          where: { id: line.ingredientId },
-          data: { currentStock: { decrement: line.quantity } },
-        });
-        await tx.stockTransaction.create({
+    return await this.prisma
+      .$transaction(async (tx) => {
+        const purchaseReturn = await tx.purchaseReturn.create({
           data: {
-            ingredientId: line.ingredientId,
-            type: 'RETURN',
-            quantity: -line.quantity,
-            unitPrice: line.unitPrice,
-            totalPrice: line.totalPrice,
-            referenceId: purchaseReturn.id,
+            code,
+            voucherNo,
+            voucherDate,
+            supplierId: body.supplier_id,
+            importOrderId: body.import_order_id ?? null,
+            subtotal,
+            vatAmount,
+            totalAmount,
+            reason: body.reason,
+            note: body.note,
             createdById: userId,
-            note: `Trả hàng NCC: ${code}`,
+            items: {
+              create: lines.map((l) => ({
+                ingredientId: l.ingredientId,
+                quantity: l.quantity,
+                unitPrice: l.unitPrice,
+                totalPrice: l.totalPrice,
+                vatRate: l.vatRate,
+                vatAmount: l.vatAmount,
+              })),
+            },
           },
+          include: { items: true },
         });
-      }
 
-      // Công nợ NCC giảm theo tổng thanh toán (đã gồm VAT được hoàn/khấu trừ lại).
-      await tx.supplier.update({
-        where: { id: body.supplier_id },
-        data: { totalDebt: { decrement: totalAmount } },
-      });
+        for (const line of lines) {
+          await tx.ingredient.update({
+            where: { id: line.ingredientId },
+            data: { currentStock: { decrement: line.quantity } },
+          });
+          await tx.stockTransaction.create({
+            data: {
+              ingredientId: line.ingredientId,
+              type: 'RETURN',
+              quantity: -line.quantity,
+              unitPrice: line.unitPrice,
+              totalPrice: line.totalPrice,
+              referenceId: purchaseReturn.id,
+              createdById: userId,
+              voucherDate,
+              note: `Trả hàng NCC: ${code}`,
+            },
+          });
+        }
 
-      return purchaseReturn;
-    });
+        // Công nợ NCC giảm theo tổng thanh toán (đã gồm VAT được hoàn/khấu trừ lại).
+        await tx.supplier.update({
+          where: { id: body.supplier_id },
+          data: { totalDebt: { decrement: totalAmount } },
+        });
+
+        return purchaseReturn;
+      })
+      .catch((e) => this.vouchers.rethrowUnique(e, voucherNo));
   }
 }

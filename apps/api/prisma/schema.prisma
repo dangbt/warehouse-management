@@ -136,6 +136,8 @@ model Supplier {
 model ImportOrder {
   id          String   @id @default(uuid())
   code        String   @unique
+  voucherDate DateTime @default(now()) @map("voucher_date")
+  voucherNo   String   @unique @map("voucher_no")
   supplierId  String   @map("supplier_id")
   supplier    Supplier @relation(fields: [supplierId], references: [id])
   hasInvoice    Boolean   @default(false) @map("has_invoice")
@@ -210,8 +212,12 @@ model StockTransaction {
   createdById  String   @map("created_by")
   createdBy    User     @relation(fields: [createdById], references: [id])
   createdAt    DateTime @default(now()) @map("created_at")
+  voucherDate  DateTime @default(now()) @map("voucher_date")
+  exportId     String?  @map("export_id")
+  export       StockExport? @relation(fields: [exportId], references: [id])
 
   @@index([ingredientId, createdAt])
+  @@index([ingredientId, voucherDate])
   @@index([referenceId, type])
   @@map("stock_transactions")
 }
@@ -321,6 +327,8 @@ model AuditLog {
 model StocktakeSession {
   id          String    @id @default(uuid())
   code        String    @unique
+  voucherDate DateTime @default(now()) @map("voucher_date")
+  voucherNo   String   @unique @map("voucher_no")
   status      String    @default("DRAFT")
   note        String?
   createdById String    @map("created_by")
@@ -351,6 +359,8 @@ model StocktakeItem {
 model PurchaseReturn {
   id          String   @id @default(uuid())
   code        String   @unique
+  voucherDate DateTime @default(now()) @map("voucher_date")
+  voucherNo   String   @unique @map("voucher_no")
   supplierId  String   @map("supplier_id")
   supplier    Supplier @relation(fields: [supplierId], references: [id])
   importOrderId String?    @map("import_order_id")
@@ -423,6 +433,8 @@ model IngredientUnit {
 model ProcessingOrder {
   id                 String     @id @default(uuid())
   code               String     @unique
+  voucherDate DateTime @default(now()) @map("voucher_date")
+  voucherNo   String   @unique @map("voucher_no")
   sourceIngredientId String     @map("source_ingredient_id")
   source             Ingredient @relation("ProcSource", fields: [sourceIngredientId], references: [id])
   sourceQty          Decimal    @map("source_qty") @db.Decimal(10, 3)
@@ -474,4 +486,24 @@ model TaxPeriodClose {
   closedAt         DateTime @default(now()) @map("closed_at")
 
   @@map("tax_period_closes")
+}
+
+// Chứng từ xuất kho (gom các dòng StockTransaction EXPORT theo lô FIFO của 1 lần xuất).
+model StockExport {
+  id          String   @id @default(uuid())
+  voucherDate DateTime @default(now()) @map("voucher_date")
+  voucherNo   String   @unique @map("voucher_no")
+  createdAt   DateTime @default(now()) @map("created_at")
+  transactions StockTransaction[]
+
+  @@map("stock_exports")
+}
+
+// Cấu hình tiền tố + số chữ số của số chứng từ theo loại (IMPORT, EXPORT, RETURN, STOCKTAKE, PROCESSING).
+model VoucherConfig {
+  type   String @id
+  prefix String
+  digits Int    @default(5)
+
+  @@map("voucher_configs")
 }

@@ -16,7 +16,7 @@ export class StocktakeController {
 
   @Post()
   @RequirePermissions('stocktake:create')
-  create(@Req() req, @Body() body: { note?: string }) {
+  create(@Req() req, @Body() body: { note?: string; voucher_date?: string; voucher_no?: string }) {
     return this.service.create(req.user.id, body);
   }
 

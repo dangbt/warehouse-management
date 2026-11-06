@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
+import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
 // Re-export để giữ tương thích với các import cũ từ module này (vd spec).
@@ -22,6 +23,9 @@ export interface ImportOrderItemInput {
 export interface CreateImportOrderInput {
   supplier_id: string;
   note?: string;
+  // Ngày chứng từ (ISO, mặc định hôm nay) + số chứng từ (bỏ trống ⇒ tự sinh theo tiền tố).
+  voucher_date?: string;
+  voucher_no?: string;
   paid?: boolean;
   has_invoice?: boolean;
   invoice_no?: string;
@@ -37,6 +41,7 @@ export class ImportOrdersService {
   constructor(
     private prisma: PrismaService,
     private tax: TaxService,
+    private vouchers: VoucherService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string }) {
@@ -52,7 +57,7 @@ export class ImportOrdersService {
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ voucherDate: 'desc' }, { createdAt: 'desc' }],
         include: { supplier: true, items: { include: { ingredient: true } } },
       }),
       this.prisma.importOrder.count({ where }),
@@ -115,7 +120,9 @@ export class ImportOrdersService {
       };
     });
 
-    const code = `PN-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Date.now()).slice(-4)}`;
+    const voucherDate = parseVoucherDate(body.voucher_date);
+    const voucherNo = await this.vouchers.resolveNo('IMPORT', body.voucher_no);
+    const code = voucherNo;
     const subtotal = lines.reduce((s, l) => s + l.totalPrice, 0);
     const vatAmount = lines.reduce((s, l) => s + l.vatAmount, 0);
     const totalAmount = subtotal + vatAmount;
@@ -136,25 +143,31 @@ export class ImportOrdersService {
       }
     }
 
-    return await this.prisma.importOrder.create({
-      data: {
-        code,
-        supplierId: body.supplier_id,
-        hasInvoice,
-        invoiceNo,
-        invoiceSymbol,
-        invoiceDate,
-        purchaseAddress,
-        subtotal,
-        vatAmount,
-        totalAmount,
-        paid: body.paid ?? false,
-        note: body.note,
-        createdById: userId,
-        items: { create: lines },
-      },
-      include: { items: true },
-    });
+    try {
+      return await this.prisma.importOrder.create({
+        data: {
+          code,
+          voucherNo,
+          voucherDate,
+          supplierId: body.supplier_id,
+          hasInvoice,
+          invoiceNo,
+          invoiceSymbol,
+          invoiceDate,
+          purchaseAddress,
+          subtotal,
+          vatAmount,
+          totalAmount,
+          paid: body.paid ?? false,
+          note: body.note,
+          createdById: userId,
+          items: { create: lines },
+        },
+        include: { items: true },
+      });
+    } catch (e) {
+      this.vouchers.rethrowUnique(e, voucherNo);
+    }
   }
 
   async approve(id: string, approvedById: string) {
@@ -202,6 +215,7 @@ export class ImportOrdersService {
             totalPrice: lineTotal,
             referenceId: order.id,
             createdById: approvedById,
+            voucherDate: order.voucherDate,
             note: `Nhập kho: ${order.code}`,
           },
         });

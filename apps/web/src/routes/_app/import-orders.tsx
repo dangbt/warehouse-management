@@ -7,7 +7,7 @@ import { RequirePermission } from '@/components/require-permission'
 const defaultSearch = {
   page: 1,
   status: '',
-  orderBy: 'createdAt',
+  orderBy: 'voucherDate',
   sort: 'desc',
 }
 

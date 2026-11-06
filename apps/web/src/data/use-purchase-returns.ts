@@ -14,6 +14,8 @@ export interface PurchaseReturn {
   totalAmount: string
   reason: string
   createdAt: string
+  voucherDate: string
+  voucherNo: string
   items: PurchaseReturnItem[]
 }
 
@@ -92,6 +94,8 @@ export function useCreatePurchaseReturn() {
       supplierId: string
       reason: string
       note?: string
+      voucherDate?: string
+      voucherNo?: string
       importOrderId?: string
       items: { ingredientId: string; quantity: number; unitPrice: number; vatRate?: string }[]
     }) =>
@@ -99,6 +103,8 @@ export function useCreatePurchaseReturn() {
         supplier_id: data.supplierId,
         reason: data.reason,
         note: data.note,
+        voucher_date: data.voucherDate,
+        voucher_no: data.voucherNo,
         import_order_id: data.importOrderId || undefined,
         items: data.items.map((i) => ({
           ingredient_id: i.ingredientId,

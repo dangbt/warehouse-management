@@ -86,7 +86,7 @@ export class TaxReportsService {
    * Nguồn dữ liệu:
    * - `ImportOrder` status `COMPLETED`, `hasInvoice = true`, `invoiceDate` trong kỳ ⇒ dòng dương.
    * - `PurchaseReturn` có `importOrderId` trỏ tới phiếu nhập có hoá đơn (`hasInvoice = true`),
-   *   `createdAt` trong kỳ ⇒ dòng âm (giảm trừ), ghi chú "Trả hàng {code}".
+   *   `voucherDate` (ngày chứng từ) trong kỳ ⇒ dòng âm (giảm trừ), ghi chú "Trả hàng {code}".
    *
    * Gộp theo thuế suất; mỗi hoá đơn/phiếu trả tách thành nhiều dòng nếu có nhiều thuế suất.
    * Tiền thuế làm tròn về đồng theo từng dòng, rồi mới cộng tổng.
@@ -109,11 +109,11 @@ export class TaxReportsService {
       }),
       this.prisma.purchaseReturn.findMany({
         where: {
-          createdAt: { gte: period.from, lte: period.to },
+          voucherDate: { gte: period.from, lte: period.to },
           importOrder: { is: { hasInvoice: true } },
         },
         include: { supplier: true, importOrder: true, items: true },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { voucherDate: 'asc' },
       }),
     ]);
 
@@ -149,7 +149,7 @@ export class TaxReportsService {
         pushRow(vatRate, {
           invoiceSymbol: ret.importOrder?.invoiceSymbol ?? null,
           invoiceNo: ret.importOrder?.invoiceNo ?? null,
-          invoiceDate: ret.createdAt.toISOString(),
+          invoiceDate: ret.voucherDate.toISOString(),
           supplierName: ret.supplier.name,
           supplierTaxCode: ret.supplier.taxCode,
           subtotal: -agg.subtotal,
@@ -187,7 +187,7 @@ export class TaxReportsService {
    * Bảng kê thu mua hàng hoá, dịch vụ mua vào không có hoá đơn (mẫu 01/TNDN).
    *
    * Nguồn dữ liệu: `ImportOrder` status `COMPLETED`, `hasInvoice = false`, của NCC
-   * là cá nhân (`isIndividual = true`), `createdAt` trong kỳ (cột timestamp ⇒ from/to).
+   * là cá nhân (`isIndividual = true`), `voucherDate` (ngày chứng từ) trong kỳ (cột timestamp ⇒ from/to).
    * Mỗi dòng hàng (`ImportOrderItem`) là một dòng bảng kê.
    *
    * Thiếu CCCD vẫn liệt kê nhưng đánh dấu `missingIdNumber = true` để cảnh báo.
@@ -202,12 +202,12 @@ export class TaxReportsService {
         where: {
           status: 'COMPLETED',
           hasInvoice: false,
-          // `createdAt` là cột timestamp ⇒ dùng from/to (ranh giới ngày theo giờ VN).
-          createdAt: { gte: period.from, lte: period.to },
+          // `voucherDate` là cột timestamp ⇒ dùng from/to (ranh giới ngày theo giờ VN).
+          voucherDate: { gte: period.from, lte: period.to },
           supplier: { is: { isIndividual: true } },
         },
         include: { supplier: true, items: { include: { ingredient: true } } },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { voucherDate: 'asc' },
       }),
     ]);
 
@@ -219,7 +219,7 @@ export class TaxReportsService {
       for (const item of order.items) {
         rows.push({
           stt: 0,
-          date: order.createdAt.toISOString(),
+          date: order.voucherDate.toISOString(),
           sellerName: order.supplier.name,
           sellerAddress,
           sellerIdNumber,

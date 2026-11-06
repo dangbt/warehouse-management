@@ -14,6 +14,8 @@ export interface ProcessingOrder {
   note: string | null
   completedAt: string | null
   createdAt: string
+  voucherDate: string
+  voucherNo: string
   source: { id: string; name: string; unit: string }
   output: { id: string; name: string; unit: string }
   createdBy?: { id: string; fullName: string }
@@ -44,6 +46,8 @@ export function useCreateProcessing() {
       output_ingredient_id: string
       output_qty?: number
       note?: string
+      voucher_date?: string
+      voucher_no?: string
     }) => api.post('/processing', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.processing })

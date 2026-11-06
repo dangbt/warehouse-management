@@ -3,6 +3,9 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { VoucherFields } from '@/components/voucher-fields'
+import { useVoucherFields } from '@/data/use-vouchers'
+import type { VoucherPayload } from '@/data/use-vouchers'
 import { WinDialog } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { formatCurrency, formatNumber } from '@wms/shared'
@@ -47,7 +50,7 @@ type FormData = z.infer<typeof schema>
 interface Props {
   open: boolean
   onClose: () => void
-  onSave?: (data: FormData) => void
+  onSave?: (data: FormData & VoucherPayload) => void
 }
 
 interface SupplierInfo {
@@ -133,6 +136,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
   const [unitMap, setUnitMap] = useState<Record<string, string>>({})
   const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const voucher = useVoucherFields('IMPORT', open)
 
   // Tìm NL phía server (giống develop): giới hạn kết quả, cộng dồn ĐVT để cột ĐVT không mất khi đổi từ khoá.
   const fetchIngredients = useCallback((q: string) => {
@@ -196,7 +200,7 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
             invoice_date: undefined,
             items: data.items.map((i) => ({ ...i, vat_rate: undefined })),
           }
-      await onSave?.(payload)
+      await onSave?.({ ...payload, ...voucher.payload() })
       reset()
       onClose()
     } catch (e: unknown) {
@@ -263,6 +267,24 @@ export function ImportOrderForm({ open, onClose, onSave }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3">
           <Section step={1} title="Nhà cung cấp">
             <div className="space-y-2.5">
+              <Field label="Ngày chứng từ">
+                <input
+                  data-testid="input-Ngày chứng từ"
+                  type="date"
+                  value={voucher.date}
+                  onChange={(e) => voucher.setDate(e.target.value)}
+                  className={`${input} ${border()}`}
+                />
+              </Field>
+              <Field label="Số chứng từ">
+                <input
+                  data-testid="input-Số chứng từ"
+                  value={voucher.no}
+                  onChange={(e) => voucher.setNo(e.target.value)}
+                  placeholder="Tự động"
+                  className={`${input} ${border()}`}
+                />
+              </Field>
               <Field label="Nhà cung cấp" required error={errors.supplier_id?.message}>
                 <select data-testid="select-Nhà cung cấp" {...register('supplier_id')} className={`${input} ${border(errors.supplier_id)}`}>
                   <option value="">-- Chọn nhà cung cấp --</option>

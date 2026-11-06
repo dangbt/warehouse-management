@@ -5,6 +5,9 @@ import { z } from 'zod'
 import { useState, useEffect, useCallback } from 'react'
 import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
+import { VoucherFields } from '@/components/voucher-fields'
+import { useVoucherFields } from '@/data/use-vouchers'
+import type { VoucherPayload } from '@/data/use-vouchers'
 
 const schema = z.object({
   ingredient_id: z.string().min(1, 'Chọn nguyên liệu'),
@@ -26,7 +29,7 @@ const reasons = [
 interface Props {
   open: boolean
   onClose: () => void
-  onSave?: (data: FormData) => void
+  onSave?: (data: FormData & VoucherPayload) => void
 }
 
 export function StockExportForm({ open, onClose, onSave }: Props) {
@@ -40,6 +43,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
   const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const voucher = useVoucherFields('EXPORT', open)
 
   const fetchIngredients = useCallback((search: string) => {
     setIngLoading(true)
@@ -67,7 +71,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
   const onSubmit = async (data: FormData) => {
     try {
       setSubmitError('')
-      await onSave?.(data)
+      await onSave?.({ ...data, ...voucher.payload() })
       reset()
       onClose()
     } catch (e: unknown) {
@@ -81,7 +85,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
       icon={<ArrowUpFromLine size={16} strokeWidth={1.75} />}
       open={open}
       onClose={onClose}
-      width={420}
+      width={440}
       footer={
         <>
           <button
@@ -102,6 +106,7 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
     >
       <WinGroupBox title="Thông tin xuất kho">
         <div className="space-y-2.5">
+          <VoucherFields {...voucher} />
           <Controller
             name="ingredient_id"
             control={control}
