@@ -1,15 +1,19 @@
 import { useState } from 'react'
-import { Check, ClipboardList, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { Check, ClipboardList, Copy, Plus, ReceiptText, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { ImportOrderForm } from './import-order-form'
+import { ImportOrderForm, type ImportOrderSeed } from './import-order-form'
+import { PeriodFilter } from '@/components/period-filter'
+import { resolvePeriod } from '@/utils/period'
+import { Route } from '@/routes/_app/import-orders'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
 
 interface ImportOrderItem {
   id: string
-  ingredient: { name: string; unit: string }
+  ingredient: { id: string; name: string; unit: string }
   quantity: string
   unitPrice: string
   totalPrice: string
@@ -20,6 +24,7 @@ interface ImportOrderItem {
 interface ImportOrder {
   id: string
   code: string
+  supplierId?: string
   supplier: { name: string }
   totalAmount: string
   status: string
@@ -88,9 +93,16 @@ export function ImportOrdersPage() {
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
-  const [statusFilter, setStatusFilter] = useState('')
+  const [seed, setSeed] = useState<ImportOrderSeed | null>(null)
+  const { page, status: statusFilter, period, from, to } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+  const setParams = (updates: Record<string, unknown>) => navigate({ search: (prev) => ({ ...prev, ...updates }) })
 
-  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined })
+  const { data: res, isLoading, refetch } = useImportOrders({
+    status: statusFilter || undefined,
+    page,
+    ...resolvePeriod(period, from, to),
+  })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
@@ -102,10 +114,28 @@ export function ImportOrdersPage() {
     setSelected(null)
   }
 
+  /** Nhân bản: mở form tạo mới điền sẵn NCC + dòng hàng + thuế suất của phiếu đang chọn (ngày/số CT/HĐ để mới). */
+  const handleClone = () => {
+    if (!selected?.items?.length) return
+    setSeed({
+      supplierId: selected.supplierId ?? '',
+      hasInvoice: !!selected.hasInvoice,
+      note: selected.note,
+      items: selected.items.map((i) => ({
+        ingredient: i.ingredient,
+        quantity: Number(i.quantity),
+        unitPrice: Number(i.unitPrice),
+        vatRate: i.vatRate,
+      })),
+    })
+    setFormOpen(true)
+  }
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => { setSeed(null); setFormOpen(true) }} />
+        <WinToolbar.Button icon={<Copy size={16} />} label="Nhân bản" disabled={!selected?.items?.length} onClick={handleClone} />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Check size={16} />}
@@ -125,7 +155,7 @@ export function ImportOrdersPage() {
         <WinToolbar.Separator />
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => setParams({ status: e.target.value, page: 1 })}
           className="border border-win-input-border h-8 px-2 text-win-base outline-none"
         >
           <option value="">Tất cả</option>
@@ -133,6 +163,7 @@ export function ImportOrdersPage() {
           <option value="COMPLETED">Đã duyệt</option>
           <option value="REJECTED">Từ chối</option>
         </select>
+        <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams({ ...v, page: 1 })} />
       </WinToolbar>
 
       <WinDataGrid
@@ -140,7 +171,13 @@ export function ImportOrdersPage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
+        pagination={{ page, limit: 50, total: res?.meta.total ?? 0 }}
+        onPageChange={(p) => setParams({ page: p })}
+        footer={
+          res?.meta.totals
+            ? { vatAmount: formatCurrency(res.meta.totals.vatAmount), totalAmount: formatCurrency(res.meta.totals.totalAmount) }
+            : undefined
+        }
         onRowClick={setSelected}
         onRowDoubleClick={setSelected}
         storageKey="import-orders"
@@ -219,8 +256,10 @@ export function ImportOrdersPage() {
 
       <ImportOrderForm
         open={formOpen}
+        seed={seed}
         onClose={() => {
           setFormOpen(false)
+          setSeed(null)
           refetch()
         }}
         onSave={(data) => createMutation.mutateAsync(data)}

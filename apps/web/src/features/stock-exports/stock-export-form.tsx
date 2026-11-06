@@ -26,13 +26,22 @@ const reasons = [
   { value: 'OTHER', label: 'Khác' },
 ]
 
+/** Dữ liệu điền sẵn khi nhân bản phiếu xuất (ngày/số CT luôn để mới). */
+export interface StockExportSeed {
+  ingredient: { id: string; name: string; unit: string; currentStock?: string }
+  quantity: number
+  reason: string
+  note?: string
+}
+
 interface Props {
   open: boolean
   onClose: () => void
   onSave?: (data: FormData & VoucherPayload) => void
+  seed?: StockExportSeed | null
 }
 
-export function StockExportForm({ open, onClose, onSave }: Props) {
+export function StockExportForm({ open, onClose, onSave, seed }: Props) {
   const {
     register,
     control,
@@ -50,23 +59,26 @@ export function StockExportForm({ open, onClose, onSave }: Props) {
     api
       .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}`)
       .then((res) => {
-        setIngredients(
-          (res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({
-            value: i.id,
-            label: `${i.name} (tồn: ${i.currentStock} ${i.unit})`,
-          })),
-        )
+        const list = (res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({
+          value: i.id,
+          label: `${i.name} (tồn: ${i.currentStock} ${i.unit})`,
+        }))
+        // Nhân bản: NL của phiếu gốc luôn có trong danh sách chọn.
+        if (seed && !list.some((o) => o.value === seed.ingredient.id)) {
+          list.unshift({ value: seed.ingredient.id, label: seed.ingredient.name })
+        }
+        setIngredients(list)
       })
       .finally(() => setIngLoading(false))
-  }, [])
+  }, [seed])
 
   useEffect(() => {
     if (open) {
-      reset()
+      reset(seed ? { ingredient_id: seed.ingredient.id, quantity: seed.quantity, reason: seed.reason, note: seed.note ?? '' } : undefined)
       setSubmitError('')
       fetchIngredients('')
     }
-  }, [open, reset, fetchIngredients])
+  }, [open, seed, reset, fetchIngredients])
 
   const onSubmit = async (data: FormData) => {
     try {

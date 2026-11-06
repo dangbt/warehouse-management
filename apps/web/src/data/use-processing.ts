@@ -23,15 +23,17 @@ export interface ProcessingOrder {
 
 interface ListResponse {
   data: ProcessingOrder[]
-  meta: { page: number; limit: number; total: number }
+  meta: { page: number; limit: number; total: number; totals?: { sourceQty: number; outputQty: number } }
 }
 
-export function useProcessingOrders(params?: { page?: number; status?: string; orderBy?: string; sort?: string }) {
+export function useProcessingOrders(params?: { page?: number; status?: string; orderBy?: string; sort?: string; from?: string; to?: string }) {
   const query = new URLSearchParams()
   if (params?.page) query.set('page', String(params.page))
   if (params?.status) query.set('status', params.status)
   if (params?.orderBy) query.set('orderBy', params.orderBy)
   if (params?.sort) query.set('sort', params.sort)
+  if (params?.from) query.set('from', params.from)
+  if (params?.to) query.set('to', params.to)
   return useQuery<ListResponse>({
     queryKey: QUERY_KEYS.processingList(Object.fromEntries(query)),
     queryFn: () => api.get(`/processing?${query}`),

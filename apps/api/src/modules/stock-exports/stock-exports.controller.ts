@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { BatchDeductionService } from '../common/batch-deduction.service';
+import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -16,7 +17,7 @@ export class StockExportsController {
 
   @Get()
   @RequirePermissions('stock_exports:read')
-  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string }) {
+  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string; from?: string; to?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
 
@@ -24,17 +25,24 @@ export class StockExportsController {
     const sortField = q.orderBy && ['voucherDate', 'createdAt', 'quantity'].includes(q.orderBy) ? q.orderBy : 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
-    const [data, total] = await Promise.all([
+    const where: { type: string; voucherDate?: { gte?: Date; lte?: Date } } = { type: 'EXPORT' };
+    const dateRange = voucherDateFilter(q);
+    if (dateRange) where.voucherDate = dateRange;
+
+    const [data, total, agg] = await Promise.all([
       this.prisma.stockTransaction.findMany({
-        where: { type: 'EXPORT' },
+        where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortField]: sortDir },
         include: { ingredient: true, createdBy: true, export: { select: { voucherNo: true, voucherDate: true } } },
       }),
-      this.prisma.stockTransaction.count({ where: { type: 'EXPORT' } }),
+      this.prisma.stockTransaction.count({ where }),
+      this.prisma.stockTransaction.aggregate({ where, _sum: { quantity: true, totalPrice: true } }),
     ]);
-    return { data, meta: { page, limit, total } };
+    // Phiếu xuất lưu quantity âm → tổng hiển thị theo trị tuyệt đối.
+    const totals = { quantity: Math.abs(toNum(agg._sum.quantity)), totalPrice: Math.abs(toNum(agg._sum.totalPrice)) };
+    return { data, meta: { page, limit, total, totals } };
   }
 
   @Post()
