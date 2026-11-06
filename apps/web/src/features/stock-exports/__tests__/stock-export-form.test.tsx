@@ -17,7 +17,7 @@ describe('StockExportForm', () => {
 
   it('renders dialog with title when open', () => {
     render(<StockExportForm {...defaultProps} />)
-    expect(screen.getByText('📤 Xuất Kho')).toBeInTheDocument()
+    expect(screen.getByText('Xuất Kho')).toBeInTheDocument()
   })
 
   it('renders nothing when closed', () => {

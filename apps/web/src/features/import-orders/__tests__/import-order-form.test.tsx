@@ -21,7 +21,7 @@ describe('ImportOrderForm', () => {
 
   it('renders dialog with title when open', () => {
     render(<ImportOrderForm {...defaultProps} />)
-    expect(screen.getByText('📄 Tạo Phiếu Nhập Kho')).toBeInTheDocument()
+    expect(screen.getByText('Tạo Phiếu Nhập Kho')).toBeInTheDocument()
   })
 
   it('renders nothing when closed', () => {
