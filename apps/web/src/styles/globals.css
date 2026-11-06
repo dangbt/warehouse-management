@@ -18,15 +18,9 @@
 body {
   margin: 0;
   background: var(--color-win-control);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-win-text);
   overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  body {
-    font-size: 13px;
-  }
 }
 
 @keyframes slideIn {

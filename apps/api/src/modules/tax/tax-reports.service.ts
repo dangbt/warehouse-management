@@ -1,0 +1,329 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { parsePeriod } from './period';
+import { roundVnd, VAT_RATES } from './vat';
+
+/** Một dòng trong bảng kê (một hoá đơn mua vào hoặc một phiếu trả hàng). */
+export interface InputInvoiceRow {
+  stt: number;
+  invoiceSymbol: string | null;
+  invoiceNo: string | null;
+  invoiceDate: string | null;
+  supplierName: string;
+  supplierTaxCode: string | null;
+  subtotal: number;
+  vatAmount: number;
+  importOrderCode: string;
+  note?: string;
+}
+
+/** Nhóm các dòng theo thuế suất, kèm tổng nhóm. */
+export interface InputInvoiceGroup {
+  vatRate: string;
+  rows: InputInvoiceRow[];
+  subtotal: number;
+  vatAmount: number;
+}
+
+export interface InputInvoiceReport {
+  period: { value: string; label: string; from: string; to: string };
+  settings: { companyName: string | null; taxCode: string | null };
+  groups: InputInvoiceGroup[];
+  total: { subtotal: number; vatAmount: number };
+}
+
+/** Một dòng trong bảng kê 01/TNDN (mỗi dòng hàng của phiếu nhập không hoá đơn). */
+export interface NoInvoicePurchaseRow {
+  stt: number;
+  date: string;
+  sellerName: string;
+  sellerAddress: string | null;
+  sellerIdNumber: string | null;
+  /** Cờ cảnh báo thiếu CCCD để UI/Excel tô vàng. */
+  missingIdNumber: boolean;
+  ingredientName: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  importOrderCode: string;
+}
+
+/** Bảng kê thu mua hàng hoá, dịch vụ mua vào không có hoá đơn (mẫu 01/TNDN). */
+export interface NoInvoicePurchaseReport {
+  period: { value: string; label: string; from: string; to: string };
+  settings: { companyName: string | null; taxCode: string | null; address: string | null };
+  rows: NoInvoicePurchaseRow[];
+  total: { totalPrice: number };
+}
+
+/** Nhóm doanh thu bán hàng theo một thuế suất VAT đầu ra. */
+export interface OutputRevenueGroup {
+  vatRate: string;
+  orderCount: number;
+  amountBeforeTax: number;
+  vatAmount: number;
+  gross: number;
+}
+
+/** Báo cáo doanh thu bán hàng theo thuế suất trong kỳ. */
+export interface OutputRevenueReport {
+  period: { value: string; label: string; from: string; to: string };
+  settings: { companyName: string | null; taxCode: string | null };
+  groups: OutputRevenueGroup[];
+  total: { orderCount: number; amountBeforeTax: number; vatAmount: number; gross: number };
+}
+
+/** Thứ tự hiển thị nhóm thuế suất trong báo cáo. */
+const VAT_RATE_ORDER = new Map<string, number>(VAT_RATES.map((r, i) => [r, i]));
+@Injectable()
+export class TaxReportsService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Bảng kê hoá đơn, chứng từ hàng hoá dịch vụ mua vào trong kỳ.
+   *
+   * Nguồn dữ liệu:
+   * - `ImportOrder` status `COMPLETED`, `hasInvoice = true`, `invoiceDate` trong kỳ ⇒ dòng dương.
+   * - `PurchaseReturn` có `importOrderId` trỏ tới phiếu nhập có hoá đơn (`hasInvoice = true`),
+   *   `createdAt` trong kỳ ⇒ dòng âm (giảm trừ), ghi chú "Trả hàng {code}".
+   *
+   * Gộp theo thuế suất; mỗi hoá đơn/phiếu trả tách thành nhiều dòng nếu có nhiều thuế suất.
+   * Tiền thuế làm tròn về đồng theo từng dòng, rồi mới cộng tổng.
+   */
+  async inputInvoiceRegister(periodValue: string | undefined): Promise<InputInvoiceReport> {
+    const period = parsePeriod(periodValue);
+
+    const [setting, orders, returns] = await Promise.all([
+      this.prisma.taxSetting.findUnique({ where: { id: 'default' } }),
+      this.prisma.importOrder.findMany({
+        where: {
+          status: 'COMPLETED',
+          hasInvoice: true,
+          // `invoiceDate` là cột `@db.Date` ⇒ so khớp bằng UTC-midnight của ngày lịch
+          // (fromDate/toDate) để tránh lệch biên do Prisma ép tham số về ngày UTC.
+          invoiceDate: { gte: period.fromDate, lte: period.toDate },
+        },
+        include: { supplier: true, items: true },
+        orderBy: { invoiceDate: 'asc' },
+      }),
+      this.prisma.purchaseReturn.findMany({
+        where: {
+          createdAt: { gte: period.from, lte: period.to },
+          importOrder: { is: { hasInvoice: true } },
+        },
+        include: { supplier: true, importOrder: true, items: true },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    // Gom các dòng theo thuế suất.
+    const groupMap = new Map<string, InputInvoiceRow[]>();
+    const pushRow = (vatRate: string, row: Omit<InputInvoiceRow, 'stt'>) => {
+      const list = groupMap.get(vatRate) ?? [];
+      list.push({ ...row, stt: 0 });
+      groupMap.set(vatRate, list);
+    };
+
+    // Hoá đơn mua vào (dòng dương).
+    for (const order of orders) {
+      const perRate = this.sumItemsByVatRate(order.items);
+      for (const [vatRate, agg] of perRate) {
+        pushRow(vatRate, {
+          invoiceSymbol: order.invoiceSymbol,
+          invoiceNo: order.invoiceNo,
+          invoiceDate: order.invoiceDate ? order.invoiceDate.toISOString() : null,
+          supplierName: order.supplier.name,
+          supplierTaxCode: order.supplier.taxCode,
+          subtotal: agg.subtotal,
+          vatAmount: agg.vatAmount,
+          importOrderCode: order.code,
+        });
+      }
+    }
+
+    // Phiếu trả hàng (dòng âm) — chỉ khi phiếu nhập gốc có hoá đơn.
+    for (const ret of returns) {
+      const perRate = this.sumItemsByVatRate(ret.items);
+      for (const [vatRate, agg] of perRate) {
+        pushRow(vatRate, {
+          invoiceSymbol: ret.importOrder?.invoiceSymbol ?? null,
+          invoiceNo: ret.importOrder?.invoiceNo ?? null,
+          invoiceDate: ret.createdAt.toISOString(),
+          supplierName: ret.supplier.name,
+          supplierTaxCode: ret.supplier.taxCode,
+          subtotal: -agg.subtotal,
+          vatAmount: -agg.vatAmount,
+          importOrderCode: ret.importOrder?.code ?? ret.code,
+          note: `Trả hàng ${ret.code}`,
+        });
+      }
+    }
+
+    // Sắp xếp nhóm theo thứ tự thuế suất, đánh STT và tính tổng nhóm.
+    const groups: InputInvoiceGroup[] = [...groupMap.entries()]
+      .sort((a, b) => (VAT_RATE_ORDER.get(a[0]) ?? 99) - (VAT_RATE_ORDER.get(b[0]) ?? 99))
+      .map(([vatRate, rows]) => {
+        rows.forEach((r, i) => (r.stt = i + 1));
+        const subtotal = rows.reduce((s, r) => s + r.subtotal, 0);
+        const vatAmount = rows.reduce((s, r) => s + r.vatAmount, 0);
+        return { vatRate, rows, subtotal, vatAmount };
+      });
+
+    const total = {
+      subtotal: groups.reduce((s, g) => s + g.subtotal, 0),
+      vatAmount: groups.reduce((s, g) => s + g.vatAmount, 0),
+    };
+
+    return {
+      period: { value: periodValue!, label: period.label, from: period.from.toISOString(), to: period.to.toISOString() },
+      settings: { companyName: setting?.companyName ?? null, taxCode: setting?.taxCode ?? null },
+      groups,
+      total,
+    };
+  }
+
+  /**
+   * Bảng kê thu mua hàng hoá, dịch vụ mua vào không có hoá đơn (mẫu 01/TNDN).
+   *
+   * Nguồn dữ liệu: `ImportOrder` status `COMPLETED`, `hasInvoice = false`, của NCC
+   * là cá nhân (`isIndividual = true`), `createdAt` trong kỳ (cột timestamp ⇒ from/to).
+   * Mỗi dòng hàng (`ImportOrderItem`) là một dòng bảng kê.
+   *
+   * Thiếu CCCD vẫn liệt kê nhưng đánh dấu `missingIdNumber = true` để cảnh báo.
+   * Tiền từng dòng làm tròn về đồng rồi mới cộng tổng.
+   */
+  async noInvoicePurchaseRegister(periodValue: string | undefined): Promise<NoInvoicePurchaseReport> {
+    const period = parsePeriod(periodValue);
+
+    const [setting, orders] = await Promise.all([
+      this.prisma.taxSetting.findUnique({ where: { id: 'default' } }),
+      this.prisma.importOrder.findMany({
+        where: {
+          status: 'COMPLETED',
+          hasInvoice: false,
+          // `createdAt` là cột timestamp ⇒ dùng from/to (ranh giới ngày theo giờ VN).
+          createdAt: { gte: period.from, lte: period.to },
+          supplier: { is: { isIndividual: true } },
+        },
+        include: { supplier: true, items: { include: { ingredient: true } } },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    const rows: NoInvoicePurchaseRow[] = [];
+    for (const order of orders) {
+      // Địa chỉ nơi mua ưu tiên purchaseAddress của phiếu, fallback địa chỉ NCC.
+      const sellerAddress = order.purchaseAddress ?? order.supplier.address ?? null;
+      const sellerIdNumber = order.supplier.idNumber ?? null;
+      for (const item of order.items) {
+        rows.push({
+          stt: 0,
+          date: order.createdAt.toISOString(),
+          sellerName: order.supplier.name,
+          sellerAddress,
+          sellerIdNumber,
+          missingIdNumber: !sellerIdNumber,
+          ingredientName: item.ingredient.name,
+          unit: item.ingredient.unit,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unitPrice),
+          totalPrice: roundVnd(Number(item.totalPrice)),
+          importOrderCode: order.code,
+        });
+      }
+    }
+
+    rows.forEach((r, i) => (r.stt = i + 1));
+    const total = { totalPrice: rows.reduce((s, r) => s + r.totalPrice, 0) };
+
+    return {
+      period: { value: periodValue!, label: period.label, from: period.from.toISOString(), to: period.to.toISOString() },
+      settings: {
+        companyName: setting?.companyName ?? null,
+        taxCode: setting?.taxCode ?? null,
+        address: setting?.address ?? null,
+      },
+      rows,
+      total,
+    };
+  }
+
+  /**
+   * Doanh thu bán hàng đồng bộ từ KiotViet, tách theo thuế suất VAT đầu ra trong kỳ.
+   *
+   * Nguồn dữ liệu: `KiotVietOrder` có `orderDate` (cột timestamp ⇒ from/to) trong kỳ,
+   * đọc snapshot đã lưu tại thời điểm đồng bộ (`KiotVietOrderItem.vatRate/amountBeforeTax/vatAmount`).
+   *
+   * Gộp theo thuế suất dòng; `orderCount` là số đơn phân biệt có phát sinh ở mỗi nhóm.
+   * Tổng `gross` (chưa thuế + thuế) khớp Σ `totalAmount` các đơn trong kỳ (snapshot bảo toàn tổng).
+   */
+  async outputRevenue(periodValue: string | undefined): Promise<OutputRevenueReport> {
+    const period = parsePeriod(periodValue);
+
+    const [setting, orders] = await Promise.all([
+      this.prisma.taxSetting.findUnique({ where: { id: 'default' } }),
+      this.prisma.kiotVietOrder.findMany({
+        where: { orderDate: { gte: period.from, lte: period.to } },
+        include: { items: true },
+        orderBy: { orderDate: 'asc' },
+      }),
+    ]);
+
+    // Gom theo thuế suất; theo dõi tập đơn phân biệt cho từng nhóm.
+    const map = new Map<string, { amountBeforeTax: number; vatAmount: number; orderIds: Set<string> }>();
+    for (const order of orders) {
+      for (const item of order.items) {
+        const rate = item.vatRate ?? 'KCT';
+        const entry = map.get(rate) ?? { amountBeforeTax: 0, vatAmount: 0, orderIds: new Set<string>() };
+        entry.amountBeforeTax += Number(item.amountBeforeTax);
+        entry.vatAmount += Number(item.vatAmount);
+        entry.orderIds.add(order.id);
+        map.set(rate, entry);
+      }
+    }
+
+    const groups: OutputRevenueGroup[] = [...map.entries()]
+      .sort((a, b) => (VAT_RATE_ORDER.get(a[0]) ?? 99) - (VAT_RATE_ORDER.get(b[0]) ?? 99))
+      .map(([vatRate, agg]) => ({
+        vatRate,
+        orderCount: agg.orderIds.size,
+        amountBeforeTax: agg.amountBeforeTax,
+        vatAmount: agg.vatAmount,
+        gross: agg.amountBeforeTax + agg.vatAmount,
+      }));
+
+    const total = {
+      orderCount: orders.length,
+      amountBeforeTax: groups.reduce((s, g) => s + g.amountBeforeTax, 0),
+      vatAmount: groups.reduce((s, g) => s + g.vatAmount, 0),
+      gross: groups.reduce((s, g) => s + g.gross, 0),
+    };
+
+    return {
+      period: { value: periodValue!, label: period.label, from: period.from.toISOString(), to: period.to.toISOString() },
+      settings: { companyName: setting?.companyName ?? null, taxCode: setting?.taxCode ?? null },
+      groups,
+      total,
+    };
+  }
+
+  /**
+   * Cộng dồn tiền hàng (chưa thuế) và tiền thuế theo từng thuế suất.
+   * Tiền thuế làm tròn về đồng cho từng dòng chi tiết rồi mới cộng.
+   * Dòng không có thuế suất (`vatRate` null) gộp vào mã "KCT" (không chịu thuế).
+   */
+  private sumItemsByVatRate(
+    items: { vatRate: string | null; totalPrice: unknown; vatAmount: unknown }[],
+  ): Map<string, { subtotal: number; vatAmount: number }> {
+    const map = new Map<string, { subtotal: number; vatAmount: number }>();
+    for (const item of items) {
+      const rate = item.vatRate ?? 'KCT';
+      const entry = map.get(rate) ?? { subtotal: 0, vatAmount: 0 };
+      entry.subtotal += Number(item.totalPrice);
+      entry.vatAmount += roundVnd(Number(item.vatAmount));
+      map.set(rate, entry);
+    }
+    return map;
+  }
+}

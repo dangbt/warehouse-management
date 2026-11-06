@@ -6,52 +6,76 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
 import { SupportWidget } from '@/components/support-widget'
 import { useHealth } from '@/data/use-health'
+import { useTaxSettings } from '@/data'
 import { now } from '@wms/shared'
 import type { TreeNode } from '@wms/ui-winforms'
 
-const menuTree: TreeNode[] = [
-  {
-    id: 'warehouse',
-    label: 'Kho',
-    icon: '📦',
-    permission: 'ingredients:read',
-    children: [
-      { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
-      { id: 'groups', label: 'Nhóm nguyên liệu', route: '/ingredient-groups', permission: 'ingredients:read' },
-      { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
-      { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
-      { id: 'processing', label: 'Chế biến', route: '/processing', permission: 'processing:read' },
-      { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
-      { id: 'stocktake', label: 'Kiểm kê', route: '/stocktake', permission: 'ingredients:read' },
-      { id: 'returns', label: 'Trả hàng', route: '/purchase-returns', permission: 'purchase_returns:read' },
-    ],
-  },
-  {
-    id: 'kitchen',
-    label: 'Bếp',
-    icon: '🍳',
-    permission: 'recipes:read',
-    children: [
-      { id: 'menu', label: 'Thực đơn', route: '/menu', permission: 'recipes:read' },
-      { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
-    ],
-  },
-  { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
-  { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
-  { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
-  { id: 'variance', label: 'Định mức', icon: '⚖️', route: '/consumption-variance', permission: 'reports:read' },
-  {
-    id: 'admin',
-    label: 'Quản trị',
-    icon: '⚙️',
-    permission: 'users:read',
-    children: [
-      { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
-      { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
-      { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
-    ],
-  },
-]
+/**
+ * Cây menu bên trái. `isHousehold` bật mục "Sổ hộ kinh doanh" (chỉ áp dụng cho
+ * hộ kinh doanh; ẩn khi chế độ VAT khấu trừ).
+ */
+function buildMenuTree(isHousehold: boolean): TreeNode[] {
+  const taxChildren: TreeNode[] = [
+    { id: 'tax-settings', label: 'Cấu hình thuế', route: '/tax-settings', permission: 'tax:read' },
+    { id: 'tax-input-invoices', label: 'Bảng kê mua vào', route: '/tax/input-invoices', permission: 'tax:read' },
+    { id: 'tax-no-invoice-purchases', label: 'Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases', permission: 'tax:read' },
+    { id: 'tax-output-revenue', label: 'Doanh thu theo thuế suất', route: '/tax/output-revenue', permission: 'tax:read' },
+    { id: 'tax-summary', label: 'Tổng hợp kỳ thuế', route: '/tax/summary', permission: 'tax:read' },
+  ]
+  if (isHousehold) {
+    taxChildren.push({ id: 'tax-books', label: 'Sổ hộ kinh doanh', route: '/tax/books', permission: 'tax:read' })
+  }
+  return [
+    {
+      id: 'warehouse',
+      label: 'Kho',
+      icon: '📦',
+      permission: 'ingredients:read',
+      children: [
+        { id: 'ingredients', label: 'Nguyên liệu', route: '/ingredients', permission: 'ingredients:read' },
+        { id: 'groups', label: 'Nhóm nguyên liệu', route: '/ingredient-groups', permission: 'ingredients:read' },
+        { id: 'imports', label: 'Nhập kho', route: '/import-orders', permission: 'import_orders:read' },
+        { id: 'exports', label: 'Xuất kho', route: '/stock-exports', permission: 'stock_exports:read' },
+        { id: 'processing', label: 'Chế biến', route: '/processing', permission: 'processing:read' },
+        { id: 'suppliers', label: 'Nhà cung cấp', route: '/suppliers', permission: 'suppliers:read' },
+        { id: 'stocktake', label: 'Kiểm kê', route: '/stocktake', permission: 'ingredients:read' },
+        { id: 'returns', label: 'Trả hàng', route: '/purchase-returns', permission: 'purchase_returns:read' },
+      ],
+    },
+    {
+      id: 'kitchen',
+      label: 'Bếp',
+      icon: '🍳',
+      permission: 'recipes:read',
+      children: [
+        { id: 'menu', label: 'Thực đơn', route: '/menu', permission: 'recipes:read' },
+        { id: 'recipes', label: 'Công thức', route: '/recipes', permission: 'recipes:read' },
+      ],
+    },
+    { id: 'kiotviet', label: 'KiotViet', icon: '🛒', route: '/kiotviet' },
+    {
+      id: 'tax',
+      label: 'Thuế',
+      icon: '🧾',
+      permission: 'tax:read',
+      children: taxChildren,
+    },
+    { id: 'reports', label: 'Báo cáo', icon: '📊', route: '/reports', permission: 'reports:read' },
+    { id: 'usage', label: 'Báo cáo NL', icon: '📉', route: '/ingredient-usage', permission: 'reports:read' },
+    { id: 'variance', label: 'Định mức', icon: '⚖️', route: '/consumption-variance', permission: 'reports:read' },
+    {
+      id: 'admin',
+      label: 'Quản trị',
+      icon: '⚙️',
+      permission: 'users:read',
+      children: [
+        { id: 'users', label: 'Users', route: '/users', permission: 'users:read' },
+        { id: 'roles', label: 'Roles & Permissions', route: '/roles', permission: 'users:read' },
+        { id: 'audit', label: 'Audit Logs', route: '/audit-logs', permission: 'audit_logs:read' },
+      ],
+    },
+  ]
+}
 
 export function AppLayout() {
   const navigate = useNavigate()
@@ -60,8 +84,11 @@ export function AppLayout() {
   const { sidebarExpanded, toggleSidebar } = useUIStore()
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const health = useHealth()
+  // Chỉ hộ kinh doanh mới có sổ kế toán hộ KD (S1/S2). Ẩn khi VAT khấu trừ.
+  const taxSettings = useTaxSettings({ enabled: hasPermission('tax:read') })
+  const isHousehold = taxSettings.data?.regime === 'HOUSEHOLD'
 
-  const filteredTree = filterTree(menuTree, hasPermission)
+  const filteredTree = filterTree(buildMenuTree(isHousehold), hasPermission)
   const activeNode = findActive(filteredTree, location.pathname)
 
   function findActive(nodes: TreeNode[], path: string): string | undefined {
@@ -87,8 +114,8 @@ export function AppLayout() {
   return (
     <div className="h-screen flex flex-col" data-testid="app-layout">
       {/* Title Bar */}
-      <div className="h-8 bg-win-active-title text-white flex items-center px-3 text-xs font-semibold shrink-0 select-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-5 w-5 mr-2 shrink-0">
+      <div className="h-9 bg-win-active-title text-white flex items-center px-3 text-[14px] font-semibold shrink-0 select-none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="h-6 w-6 mr-2 shrink-0">
           <circle cx="16" cy="16" r="14" fill="white" />
           <text x="16" y="21" fontFamily="serif" fontSize="13" fill="#D4451A" textAnchor="middle" fontWeight="bold">
             MV
@@ -99,7 +126,7 @@ export function AppLayout() {
       </div>
 
       {/* Menu Bar */}
-      <div className="h-7 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-[12px] shrink-0 relative z-30 overflow-visible">
+      <div className="h-9 bg-win-menu border-b border-win-grid-border flex items-center px-1 text-win-base shrink-0 relative z-30 overflow-visible">
         <MenuDrop
           label="Hệ thống"
           items={[
@@ -145,6 +172,19 @@ export function AppLayout() {
           items={[{ label: '🛒 KiotViet', route: '/kiotviet' }]}
           onNav={(r) => navigate({ to: r })}
         />
+        {hasPermission('tax:read') && (
+          <MenuDrop
+            label="Thuế"
+            items={[
+              { label: '🧾 Cấu hình thuế', route: '/tax-settings' },
+              { label: '📑 Bảng kê mua vào', route: '/tax/input-invoices' },
+              { label: '📄 Bảng kê 01/TNDN', route: '/tax/no-invoice-purchases' },
+              { label: '💰 Doanh thu theo thuế suất', route: '/tax/output-revenue' },
+              ...(isHousehold ? [{ label: '📚 Sổ hộ kinh doanh', route: '/tax/books' }] : []),
+            ]}
+            onNav={(r) => navigate({ to: r })}
+          />
+        )}
         {hasPermission('reports:read') && (
           <MenuDrop
             label="Báo cáo"
@@ -158,14 +198,14 @@ export function AppLayout() {
         )}
         <div className="flex-1" />
         <div className="flex items-center gap-2 pr-2 shrink-0">
-          <Bell size={14} className="cursor-pointer" />
-          <span className="text-[11px] hidden md:inline">👤 {user?.full_name ?? 'Guest'}</span>
+          <Bell size={16} className="cursor-pointer" />
+          <span className="text-win-base hidden md:inline">👤 {user?.full_name ?? 'Guest'}</span>
           <button
             onClick={() => {
               logout()
               navigate({ to: '/login' })
             }}
-            className="text-[11px] text-win-error hover:underline cursor-pointer"
+            className="text-win-base text-win-error hover:underline cursor-pointer"
           >
             Đăng xuất
           </button>
@@ -173,16 +213,16 @@ export function AppLayout() {
       </div>
 
       {/* Toolbar */}
-      <div className="h-9 bg-win-menu border-b border-win-grid-border flex items-center px-2 gap-1 shrink-0">
+      <div className="h-11 bg-win-menu border-b border-win-grid-border flex items-center px-2 gap-1 shrink-0">
         <button onClick={toggleSidebar} className="p-1 hover:bg-win-menu-hover">
           {sidebarExpanded ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
         </button>
         <div className="w-px h-5 bg-win-grid-border mx-1" />
-        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-[11px] hover:bg-win-menu-hover">
+        <button onClick={() => navigate({ to: '/dashboard' })} className="px-2 py-1 text-win-base hover:bg-win-menu-hover">
           🏠 Dashboard
         </button>
         <button onClick={() => window.location.reload()} className="p-1 hover:bg-win-menu-hover">
-          <RefreshCw size={14} />
+          <RefreshCw size={16} />
         </button>
       </div>
 
@@ -192,7 +232,7 @@ export function AppLayout() {
         {sidebarExpanded && (
           <>
             <div className="md:hidden fixed inset-0 bg-black/30 z-30" onClick={toggleSidebar} />
-            <div className="w-[200px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0 absolute md:relative z-40 h-full">
+            <div className="w-[240px] border-r border-win-grid-border bg-white overflow-y-auto shrink-0 absolute md:relative z-40 h-full">
               <WinTreeView
                 nodes={filteredTree}
                 activeId={activeNode}
@@ -241,12 +281,12 @@ function MenuDrop({ label, items, onNav }: { label: string; items: { label: stri
     <div className="relative" ref={ref}>
       <span
         onClick={() => setOpen(!open)}
-        className={`px-2.5 py-0.5 cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
+        className={`px-3 py-0.5 cursor-pointer ${open ? 'bg-win-grid-selected' : 'hover:bg-win-menu-hover'}`}
       >
         {label}
       </span>
       {open && (
-        <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md z-50 min-w-[160px] py-0.5">
+        <div className="absolute top-full left-0 mt-0.5 bg-white border border-win-grid-border shadow-md z-50 min-w-[200px] py-0.5">
           {items.map((item) => (
             <div
               key={item.route}
@@ -254,7 +294,7 @@ function MenuDrop({ label, items, onNav }: { label: string; items: { label: stri
                 onNav(item.route)
                 setOpen(false)
               }}
-              className="px-3 py-1 text-[11px] hover:bg-win-menu-hover cursor-pointer"
+              className="px-3 py-1.5 text-win-base hover:bg-win-menu-hover cursor-pointer"
             >
               {item.label}
             </div>

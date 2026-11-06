@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Query, UseGuards, Req } from '@nestjs/common';
 import { PurchaseReturnsService } from './purchase-returns.service';
+import type { CreatePurchaseReturnInput } from './purchase-returns.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
@@ -16,11 +17,7 @@ export class PurchaseReturnsController {
 
   @Post()
   @RequirePermissions('purchase_returns:create')
-  create(
-    @Req() req,
-    @Body()
-    body: { supplier_id: string; reason: string; note?: string; items: { ingredient_id: string; quantity: number; unit_price: number }[] },
-  ) {
+  create(@Req() req, @Body() body: CreatePurchaseReturnInput) {
     return this.svc.create(req.user.id, body);
   }
 }

@@ -12,7 +12,7 @@ function GroupRow({ g }: { g: StockGroup }) {
       <tr className={`border-b border-win-grid-border cursor-pointer hover:bg-win-menu-hover ${g.isLow ? 'text-win-error' : ''}`} onClick={() => setOpen((o) => !o)}>
         <td className="p-1">
           <span className="inline-flex items-center gap-1 font-semibold">
-            {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             {g.name}
           </span>
         </td>
@@ -55,21 +55,21 @@ export function ReportsPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold">{summary?.total}</div>
-            <div className="text-[11px] text-win-text-secondary">Nguyên liệu</div>
+            <div className="text-win-sm text-win-text-secondary">Nguyên liệu</div>
           </div>
           <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold text-win-error">{summary?.lowStock.length}</div>
-            <div className="text-[11px] text-win-text-secondary">Tồn kho thấp</div>
+            <div className="text-win-sm text-win-text-secondary">Tồn kho thấp</div>
           </div>
           <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold text-win-success">{formatCurrency(summary?.totalValue)}</div>
-            <div className="text-[11px] text-win-text-secondary">Giá trị kho</div>
+            <div className="text-win-sm text-win-text-secondary">Giá trị kho</div>
           </div>
         </div>
 
         {summary && summary.groups?.length > 0 && (
           <WinGroupBox title="📦 Tồn kho theo nhóm (tự quy đổi về đơn vị gốc)">
-            <table className="w-full text-[11px]">
+            <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">Nhóm / Nguyên liệu</th>
@@ -89,7 +89,7 @@ export function ReportsPage() {
 
         {summary && summary.lowStock.length > 0 && (
           <WinGroupBox title="⚠️ Cảnh báo tồn kho thấp">
-            <table className="w-full text-[11px]">
+            <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
                   <th className="text-left p-1">Nguyên liệu</th>
@@ -119,7 +119,7 @@ export function ReportsPage() {
         )}
 
         <WinGroupBox title="📈 Biến động kho gần đây">
-          <table className="w-full text-[11px]">
+          <table className="w-full text-win-base">
             <thead>
               <tr className="bg-win-grid-header">
                 <th className="text-left p-1">Thời gian</th>
@@ -147,7 +147,7 @@ export function ReportsPage() {
                     <td className="p-1">{formatDateTime(t.createdAt)}</td>
                     <td className="p-1">{t.ingredient.name}</td>
                     <td className="p-1 text-center">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${typeInfo.color}`}>
+                      <span className={`px-1.5 py-0.5 rounded text-win-xs font-medium ${typeInfo.color}`}>
                         {typeInfo.label}
                       </span>
                     </td>

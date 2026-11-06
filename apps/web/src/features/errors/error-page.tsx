@@ -8,7 +8,7 @@ export function ErrorPage({ error }: { error?: Error }) {
         <h1 className="text-2xl font-bold text-win-text mb-1">500</h1>
         <p className="text-sm text-win-text-secondary mb-2">Đã xảy ra lỗi hệ thống</p>
         {error && (
-          <pre className="text-[11px] text-left bg-win-grid-row-alt border border-win-grid-border p-3 mb-4 overflow-auto max-h-32">
+          <pre className="text-win-base text-left bg-win-grid-row-alt border border-win-grid-border p-3 mb-4 overflow-auto max-h-32">
             {error.message}
           </pre>
         )}

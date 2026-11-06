@@ -52,6 +52,17 @@ export const QUERY_KEYS = {
   processing: ['processing'] as const,
   processingList: (params?: Record<string, string>) => ['processing', 'list', params] as const,
 
+  taxSettings: ['tax-settings'] as const,
+
+  tax: {
+    inputInvoices: (period?: string) => ['tax', 'input-invoices', period] as const,
+    noInvoicePurchases: (period?: string) => ['tax', 'no-invoice-purchases', period] as const,
+    outputRevenue: (period?: string) => ['tax', 'output-revenue', period] as const,
+    summary: (period?: string, carriedForward?: number) => ['tax', 'summary', period, carriedForward] as const,
+    revenueBook: (period?: string) => ['tax', 'books', 'revenue', period] as const,
+    materialsBook: (period?: string, ingredientId?: string) => ['tax', 'books', 'materials', period, ingredientId] as const,
+  },
+
   reports: {
     stockSummary: ['reports', 'stock-summary'] as const,
     stockMovement: ['reports', 'stock-movement'] as const,

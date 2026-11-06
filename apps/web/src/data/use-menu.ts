@@ -11,6 +11,7 @@ export interface MenuItemFull {
   category: string
   isActive: boolean
   kiotvietProductId: string | null
+  vatRate: string | null
   inventoryMode: 'RECIPE' | 'DIRECT' | 'NONE' | null
   directIngredientId: string | null
   directIngredient: { id: string; name: string; unit: string } | null
@@ -21,6 +22,7 @@ type MenuPayload = {
   name?: string
   price?: number
   category?: string
+  vat_rate?: string | null
   inventory_mode?: 'RECIPE' | 'DIRECT' | 'NONE' | null
   direct_ingredient_id?: string | null
   is_active?: boolean

@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { Plus, Check, X, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
 import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
-import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
-import { Route } from '@/routes/_app/import-orders'
+import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
+import type { VatRate } from '@wms/shared'
 
 interface ImportOrderItem {
   id: string
@@ -14,6 +13,8 @@ interface ImportOrderItem {
   quantity: string
   unitPrice: string
   totalPrice: string
+  vatRate?: string | null
+  vatAmount?: string
 }
 
 interface ImportOrder {
@@ -23,6 +24,12 @@ interface ImportOrder {
   totalAmount: string
   status: string
   createdAt: string
+  hasInvoice?: boolean
+  invoiceNo?: string | null
+  invoiceSymbol?: string | null
+  invoiceDate?: string | null
+  subtotal?: string
+  vatAmount?: string
   items?: ImportOrderItem[]
   note?: string
 }
@@ -43,6 +50,19 @@ const columns: Column<ImportOrder>[] = [
   { key: 'code', header: 'Mã phiếu', width: 170 },
   { key: 'supplier', header: 'NCC', width: 150, render: (r) => r.supplier?.name },
   {
+    key: 'invoiceNo',
+    header: 'Số HĐ',
+    width: 110,
+    render: (r) => (r.hasInvoice ? [r.invoiceSymbol, r.invoiceNo].filter(Boolean).join('/') || '—' : '—'),
+  },
+  {
+    key: 'vatAmount',
+    header: 'Tiền thuế',
+    width: 110,
+    align: 'right',
+    render: (r) => (r.hasInvoice ? formatCurrency(r.vatAmount) : '—'),
+  },
+  {
     key: 'totalAmount',
     header: 'Tổng tiền',
     width: 120,
@@ -55,26 +75,19 @@ const columns: Column<ImportOrder>[] = [
     width: 100,
     align: 'center',
     render: (r) => (
-      <span className={`px-2 py-0.5 text-[10px] rounded ${statusColors[r.status] || ''}`}>{statusLabels[r.status] || r.status}</span>
+      <span className={`px-2 py-0.5 text-win-xs rounded ${statusColors[r.status] || ''}`}>{statusLabels[r.status] || r.status}</span>
     ),
   },
   { key: 'createdAt', header: 'Ngày', width: 100, align: 'center', render: (r) => formatDate(r.createdAt) },
 ]
 
 export function ImportOrdersPage() {
-  const { page, status, orderBy, sort } = Route.useSearch()
-  const navigate = useNavigate({ from: Route.fullPath })
-
-  const setParams = (updates: Record<string, unknown>) => {
-    navigate({ search: (prev) => ({ ...prev, ...updates }) })
-  }
-  const setPage = (p: number) => setParams({ page: p })
-
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
+  const [statusFilter, setStatusFilter] = useState('')
 
-  const { data: res, isLoading, refetch } = useImportOrders({ status: status || undefined, orderBy, sort, page })
+  const { data: res, isLoading, refetch } = useImportOrders({ status: statusFilter || undefined })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
@@ -89,28 +102,28 @@ export function ImportOrdersPage() {
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button
-          icon={<Check size={14} />}
+          icon={<Check size={16} />}
           label="Duyệt"
           disabled={selected?.status !== 'PENDING'}
           onClick={() => setConfirmAction('approve')}
         />
         <WinToolbar.Button
-          icon={<X size={14} />}
+          icon={<X size={16} />}
           label="Từ chối"
           danger
           disabled={selected?.status !== 'PENDING'}
           onClick={() => setConfirmAction('reject')}
         />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <select
-          value={status}
-          onChange={(e) => setParams({ status: e.target.value, page: 1 })}
-          className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border border-win-input-border h-8 px-2 text-win-base outline-none"
         >
           <option value="">Tất cả</option>
           <option value="PENDING">Chờ duyệt</option>
@@ -123,40 +136,69 @@ export function ImportOrdersPage() {
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
-        pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
-        onPageChange={setPage}
-        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
+        pagination={{ page: 1, limit: 20, total: res?.meta.total ?? 0 }}
         onRowClick={setSelected}
         onRowDoubleClick={setSelected}
         storageKey="import-orders"
       />
 
       {selected?.items && selected.items.length > 0 && (
-        <div className="border-t border-win-grid-border bg-win-control p-2 max-h-40 overflow-auto shrink-0">
-          <div className="text-[11px] font-semibold mb-1">📋 Chi tiết phiếu {selected.code}:</div>
-          <table className="w-full text-[11px]">
+        <div className="border-t-2 border-win-grid-border bg-win-control p-3 max-h-80 overflow-auto shrink-0 text-[14px]">
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-2">
+            <span className="text-[15px] font-semibold">📋 Phiếu {selected.code}</span>
+            <span>NCC: <strong>{selected.supplier?.name}</strong></span>
+            <span>Ngày: {formatDate(selected.createdAt)}</span>
+            <span className={`px-2 py-0.5 text-[12px] rounded ${statusColors[selected.status] || ''}`}>
+              {statusLabels[selected.status] || selected.status}
+            </span>
+          </div>
+          {selected.hasInvoice && (
+            <div className="mb-2">
+              🧾 HĐ: <strong>{[selected.invoiceSymbol, selected.invoiceNo].filter(Boolean).join('/') || '—'}</strong>
+              {selected.invoiceDate ? ` · Ngày ${formatDate(selected.invoiceDate)}` : ''}
+              {selected.vatAmount ? ` · Tiền thuế ${formatCurrency(selected.vatAmount)}` : ''}
+            </div>
+          )}
+          <table className="w-full text-[14px] bg-white border border-win-grid-border">
             <thead>
               <tr className="bg-win-grid-header">
-                <th className="text-left p-1">Nguyên liệu</th>
-                <th className="text-center p-1">ĐVT</th>
-                <th className="text-right p-1">SL</th>
-                <th className="text-right p-1">Đơn giá</th>
-                <th className="text-right p-1">Thành tiền</th>
+                <th className="text-center p-1.5 w-[44px]">#</th>
+                <th className="text-left p-1.5">Nguyên liệu</th>
+                <th className="text-center p-1.5">ĐVT</th>
+                <th className="text-right p-1.5">SL</th>
+                <th className="text-right p-1.5">Đơn giá</th>
+                <th className="text-right p-1.5">Thành tiền</th>
+                {selected.hasInvoice && <th className="text-center p-1.5">Thuế suất</th>}
+                {selected.hasInvoice && <th className="text-right p-1.5">Tiền thuế</th>}
               </tr>
             </thead>
             <tbody>
-              {selected.items.map((item) => (
+              {selected.items.map((item, idx) => (
                 <tr key={item.id} className="border-b border-win-grid-border">
-                  <td className="p-1">{item.ingredient?.name}</td>
-                  <td className="p-1 text-center">{item.ingredient?.unit}</td>
-                  <td className="p-1 text-right">{formatNumber(item.quantity)}</td>
-                  <td className="p-1 text-right">{formatCurrency(item.unitPrice)}</td>
-                  <td className="p-1 text-right">{formatCurrency(item.totalPrice)}</td>
+                  <td className="p-1.5 text-center text-win-text-secondary">{idx + 1}</td>
+                  <td className="p-1.5">{item.ingredient?.name}</td>
+                  <td className="p-1.5 text-center">{item.ingredient?.unit}</td>
+                  <td className="p-1.5 text-right">{formatNumber(item.quantity)}</td>
+                  <td className="p-1.5 text-right">{formatCurrency(item.unitPrice)}</td>
+                  <td className="p-1.5 text-right">{formatCurrency(item.totalPrice)}</td>
+                  {selected.hasInvoice && (
+                    <td className="p-1.5 text-center">
+                      {item.vatRate ? VAT_RATE_LABELS[item.vatRate as VatRate] ?? item.vatRate : '—'}
+                    </td>
+                  )}
+                  {selected.hasInvoice && <td className="p-1.5 text-right">{formatCurrency(item.vatAmount)}</td>}
                 </tr>
               ))}
             </tbody>
           </table>
-          {selected.note && <div className="text-[10px] text-win-text-secondary mt-1">Ghi chú: {selected.note}</div>}
+          <div className="flex flex-wrap justify-end gap-x-6 mt-2">
+            {selected.hasInvoice && selected.subtotal && <span>Tiền hàng: <strong>{formatCurrency(selected.subtotal)}</strong></span>}
+            {selected.hasInvoice && <span>Thuế GTGT: <strong>{formatCurrency(selected.vatAmount)}</strong></span>}
+            <span>
+              Tổng thanh toán: <strong className="text-[16px] text-win-active-title">{formatCurrency(selected.totalAmount)}</strong>
+            </span>
+          </div>
+          {selected.note && <div className="text-[13px] text-win-text-secondary mt-1">Diễn giải: {selected.note}</div>}
         </div>
       )}
 

@@ -20,14 +20,14 @@ export function WinDialog({ title, open, onClose, width = 480, footer, children 
         style={{ width }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-win-grid-border shrink-0">
-          <span className="text-[13px] font-semibold">{title}</span>
+        <div className="h-11 flex items-center justify-between px-3 bg-white border-b border-win-grid-border shrink-0">
+          <span className="text-win-lg font-semibold">{title}</span>
           <button onClick={onClose} className="p-0.5 hover:bg-win-menu-hover">
-            <X size={14} />
+            <X size={16} />
           </button>
         </div>
         <div className="p-4 overflow-y-auto flex-1">{children}</div>
-        {footer && <div className="flex justify-end gap-2 px-3 py-2 border-t border-win-grid-border shrink-0">{footer}</div>}
+        {footer && <div className="flex justify-end gap-2 px-3 py-3 border-t border-win-grid-border shrink-0">{footer}</div>}
       </div>
     </div>
   )

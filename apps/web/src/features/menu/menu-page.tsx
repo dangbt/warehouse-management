@@ -1,14 +1,18 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { useForm, Controller } from 'react-hook-form'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Plus, Settings, RefreshCw } from 'lucide-react'
-import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@wms/ui-winforms'
+import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
-import { useMenuList, useCreateMenuItem, useUpdateMenuItem } from '@/data'
+import { useMenuList, useCreateMenuItem, useUpdateMenuItem, useIngredients } from '@/data'
 import type { MenuItemFull } from '@/data'
-import { formatCurrency } from '@wms/shared'
-import { api } from '@/services/api'
-import { Route } from '@/routes/_app/menu'
+import { formatCurrency, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
+import type { VatRate } from '@wms/shared'
+
+/** Nhãn thuế suất VAT đầu ra của món; null = dùng mặc định cấu hình. */
+function vatRateLabel(rate: string | null): string {
+  if (rate == null) return 'Mặc định'
+  return VAT_RATE_LABELS[rate as VatRate] ?? rate
+}
 
 const modeLabels: Record<string, { label: string; color: string }> = {
   RECIPE: { label: 'Theo công thức', color: 'bg-blue-100 text-blue-800' },
@@ -34,15 +38,22 @@ const columns: Column<MenuItemFull>[] = [
   { key: 'price', header: 'Giá', width: 100, align: 'right', render: (r) => formatCurrency(r.price) },
   { key: 'kiotvietProductId', header: 'Mã KiotViet', width: 110, align: 'center', render: (r) => r.kiotvietProductId ?? '-' },
   {
+    key: 'vatRate',
+    header: 'Thuế suất',
+    width: 110,
+    align: 'center',
+    render: (r) => <span className={r.vatRate == null ? 'text-win-text-secondary' : ''}>{vatRateLabel(r.vatRate)}</span>,
+  },
+  {
     key: 'inventoryMode',
     header: 'Cách trừ tồn',
     width: 120,
     align: 'center',
     render: (r) =>
       r.inventoryMode ? (
-        <span className={`px-2 py-0.5 text-[10px] rounded ${modeLabels[r.inventoryMode]?.color ?? ''}`}>{modeLabels[r.inventoryMode]?.label}</span>
+        <span className={`px-2 py-0.5 text-win-xs rounded ${modeLabels[r.inventoryMode]?.color ?? ''}`}>{modeLabels[r.inventoryMode]?.label}</span>
       ) : (
-        <span className="text-[10px] text-win-error">— chưa đặt —</span>
+        <span className="text-win-xs text-win-error">— chưa đặt —</span>
       ),
   },
   {
@@ -59,35 +70,25 @@ const columns: Column<MenuItemFull>[] = [
 interface ConfigForm {
   inventory_mode: 'RECIPE' | 'DIRECT' | 'NONE' | ''
   direct_ingredient_id?: string
+  vat_rate?: string
 }
 
 export function MenuPage() {
-  const { page, search, orderBy, sort } = Route.useSearch()
-  const navigate = useNavigate({ from: Route.fullPath })
-
-  const setParams = (updates: Record<string, unknown>) => {
-    navigate({ search: (prev) => ({ ...prev, ...updates }) })
-  }
-  const setPage = (p: number) => setParams({ page: p })
-
   const [selected, setSelected] = useState<MenuItemFull | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [cfgOpen, setCfgOpen] = useState(false)
+  const [page, setPage] = useState(1)
   const limit = 20
 
   const { data: menu, isLoading, refetch } = useMenuList()
+  const { data: ingRes } = useIngredients({ limit: 1000 })
   const createMutation = useCreateMenuItem()
   const updateMutation = useUpdateMenuItem()
 
-  // Search nguyên liệu từ API
-  const [ingOptions, setIngOptions] = useState<{ value: string; label: string }[]>([])
-  const [ingLoading, setIngLoading] = useState(false)
-  const fetchIngredients = useCallback((q: string) => {
-    setIngLoading(true)
-    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
-      setIngOptions((res.data as { id: string; name: string; unit: string }[]).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })))
-    }).finally(() => setIngLoading(false))
-  }, [])
+  const ingredientOptions = [
+    { value: '', label: '— Chọn nguyên liệu —' },
+    ...(ingRes?.data ?? []).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })),
+  ]
 
   // form thêm món
   const addForm = useForm<{ name: string; price: number; category: string }>()
@@ -100,7 +101,11 @@ export function MenuPage() {
   }, [addOpen, addForm])
   useEffect(() => {
     if (cfgOpen && selected)
-      cfgForm.reset({ inventory_mode: selected.inventoryMode ?? '', direct_ingredient_id: selected.directIngredientId ?? '' })
+      cfgForm.reset({
+        inventory_mode: selected.inventoryMode ?? '',
+        direct_ingredient_id: selected.directIngredientId ?? '',
+        vat_rate: selected.vatRate ?? '',
+      })
   }, [cfgOpen, selected, cfgForm])
 
   const onAdd = async (d: { name: string; price: number; category: string }) => {
@@ -113,41 +118,29 @@ export function MenuPage() {
       id: selected.id,
       inventory_mode: d.inventory_mode || null,
       direct_ingredient_id: d.inventory_mode === 'DIRECT' ? d.direct_ingredient_id || null : null,
+      vat_rate: d.vat_rate ? d.vat_rate : null,
     })
     setCfgOpen(false)
   }
 
-  // Client-side filtering and sorting
-  const filtered = (menu ?? []).filter((m) => !search || m.name.toLowerCase().includes(search.toLowerCase()))
-  const sorted = [...filtered].sort((a, b) => {
-    const aVal = (a as Record<string, unknown>)[orderBy] as string | number ?? ''
-    const bVal = (b as Record<string, unknown>)[orderBy] as string | number ?? ''
-    if (aVal < bVal) return sort === 'asc' ? -1 : 1
-    if (aVal > bVal) return sort === 'asc' ? 1 : -1
-    return 0
-  })
-  const paginated = sorted.slice((page - 1) * limit, page * limit)
-
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={14} />} label="Thêm món" onClick={() => setAddOpen(true)} />
-        <WinToolbar.Button icon={<Settings size={14} />} label="Cấu hình trừ tồn" disabled={!selected} onClick={() => setCfgOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Thêm món" onClick={() => setAddOpen(true)} />
+        <WinToolbar.Button icon={<Settings size={16} />} label="Cấu hình trừ tồn" disabled={!selected} onClick={() => setCfgOpen(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
-        <span className="ml-2 text-[11px] text-win-text-secondary">
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
+        <span className="ml-2 text-win-base text-win-text-secondary">
           {menu ? `${menu.filter((m) => configStatus(m).warn).length} món chưa cấu hình` : ''}
         </span>
       </WinToolbar>
 
       <WinDataGrid searchable
         columns={columns}
-        data={paginated}
+        data={(menu ?? []).slice((page - 1) * limit, page * limit)}
         loading={isLoading}
-        pagination={{ page, limit, total: filtered.length }}
+        pagination={{ page, limit, total: menu?.length ?? 0 }}
         onPageChange={setPage}
-        onSearch={(v) => setParams({ search: v, page: 1 })}
-        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         onRowDoubleClick={(r) => {
           setSelected(r)
@@ -213,29 +206,29 @@ export function MenuPage() {
               ]}
             />
             {cfgMode === 'DIRECT' && (
-              <Controller
-                name="direct_ingredient_id"
-                control={cfgForm.control}
-                render={({ field }) => (
-                  <WinSearchSelect
-                    label="Nguyên liệu trừ"
-                    name={field.name}
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    options={ingOptions}
-                    onSearch={fetchIngredients}
-                    loading={ingLoading}
-                  />
-                )}
-              />
+              <WinSelect label="Nguyên liệu trừ" {...cfgForm.register('direct_ingredient_id')} options={ingredientOptions} />
             )}
             {cfgMode === 'RECIPE' && (
-              <p className="text-[11px] text-win-info">
+              <p className="text-win-base text-win-info">
                 💡 Vào trang <b>Công thức</b> để gán nguyên liệu + định lượng cho món này.
                 {selected?.recipe ? ` Hiện có ${selected.recipe._count.ingredients} NL.` : ' Hiện chưa có công thức.'}
               </p>
             )}
+          </div>
+        </WinGroupBox>
+        <WinGroupBox title="Thuế suất VAT đầu ra">
+          <div className="space-y-2.5">
+            <WinSelect
+              label="Thuế suất"
+              {...cfgForm.register('vat_rate')}
+              options={[
+                { value: '', label: 'Mặc định (theo cấu hình thuế)' },
+                ...VAT_RATES.map((r) => ({ value: r, label: VAT_RATE_LABELS[r] })),
+              ]}
+            />
+            <p className="text-win-base text-win-text-secondary">
+              Áp cho doanh thu bán món này khi đồng bộ từ KiotViet. Để "Mặc định" nếu dùng thuế suất mặc định của cấu hình thuế.
+            </p>
           </div>
         </WinGroupBox>
       </WinDialog>

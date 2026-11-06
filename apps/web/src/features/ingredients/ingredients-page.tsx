@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { Plus, Pencil, Trash2, RefreshCw, Download } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -7,7 +6,6 @@ import { IngredientForm } from './ingredient-form'
 import { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient, useIngredientBatches } from '@/data'
 import type { Batch } from '@/data/use-batches'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
-import { Route } from '@/routes/_app/ingredients'
 
 interface IngredientRow {
   id: string
@@ -45,20 +43,15 @@ const columns: Column<IngredientRow>[] = [
 ]
 
 export function IngredientsPage() {
-  const { page, search, category, orderBy, sort } = Route.useSearch()
-  const navigate = useNavigate({ from: Route.fullPath })
-
-  const setParams = (updates: Record<string, unknown>) => {
-    navigate({ search: (prev) => ({ ...prev, ...updates }) })
-  }
-  const setPage = (p: number) => setParams({ page: p })
-
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<IngredientRow | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined, orderBy, sort })
+  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined })
   const createMutation = useCreateIngredient()
   const updateMutation = useUpdateIngredient()
   const deleteMutation = useDeleteIngredient()
@@ -93,7 +86,7 @@ export function IngredientsPage() {
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
-          icon={<Plus size={14} />}
+          icon={<Plus size={16} />}
           label="Thêm"
           onClick={() => {
             setFormMode('add')
@@ -102,7 +95,7 @@ export function IngredientsPage() {
           }}
         />
         <WinToolbar.Button
-          icon={<Pencil size={14} />}
+          icon={<Pencil size={16} />}
           label="Sửa"
           disabled={!selected}
           onClick={() => {
@@ -110,22 +103,28 @@ export function IngredientsPage() {
             setFormOpen(true)
           }}
         />
-        <WinToolbar.Button icon={<Trash2 size={14} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
-        <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
-        <WinToolbar.Button icon={<Download size={14} />} label="Export" />
+        <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Button icon={<Download size={16} />} label="Export" />
         <WinToolbar.Separator />
         <input
           type="text"
           placeholder="Tìm kiếm..."
           value={search}
-          onChange={(e) => setParams({ search: e.target.value, page: 1 })}
-          className="border border-win-input-border px-2 py-0.5 text-[11px] w-32 outline-none focus:border-win-input-focus bg-white"
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
+          className="border border-win-input-border h-8 px-2 text-win-base w-32 outline-none focus:border-win-input-focus bg-white"
         />
         <select
           value={category}
-          onChange={(e) => setParams({ category: e.target.value, page: 1 })}
-          className="border border-win-input-border px-1 py-0.5 text-[11px] outline-none bg-white"
+          onChange={(e) => {
+            setCategory(e.target.value)
+            setPage(1)
+          }}
+          className="border border-win-input-border h-8 px-2 text-win-base outline-none bg-white"
         >
           <option value="">Tất cả loại</option>
           <option value="Thịt">Thịt</option>
@@ -137,13 +136,12 @@ export function IngredientsPage() {
       </WinToolbar>
 
       <WinDataGrid searchable
-        onSearch={(q) => setParams({ search: q, page: 1 })}
+        onSearch={(q) => { setSearch(q); setPage(1) }}
         columns={columns}
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
         onPageChange={setPage}
-        onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
         onRowDoubleClick={(row) => {
           setSelected(row)
@@ -209,7 +207,7 @@ const batchColumns: Column<Batch>[] = [
         DEPLETED: 'bg-gray-100 text-gray-600',
       }
       const labels: Record<string, string> = { ACTIVE: 'Còn hàng', EXPIRED: 'Hết hạn', DEPLETED: 'Đã hết' }
-      return <span className={`px-2 py-0.5 text-[10px] rounded ${colors[r.status] ?? ''}`}>{labels[r.status] ?? r.status}</span>
+      return <span className={`px-2 py-0.5 text-win-xs rounded ${colors[r.status] ?? ''}`}>{labels[r.status] ?? r.status}</span>
     },
   },
 ]
