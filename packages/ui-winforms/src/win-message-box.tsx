@@ -21,10 +21,10 @@ export function WinMessageBox({ type, title, message, open, onResult, buttons = 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
       <div className="bg-win-control border border-win-grid-border shadow-lg w-[360px]">
-        <div className="px-3 py-2 bg-white border-b border-win-grid-border text-[13px] font-semibold">{title}</div>
+        <div className="px-3 py-2 bg-white border-b border-win-grid-border text-win-lg font-semibold">{title}</div>
         <div className="flex gap-3 p-4 items-start">
           {icons[type]}
-          <p className="text-xs pt-1">{message}</p>
+          <p className="text-win-base pt-1">{message}</p>
         </div>
         <div className="flex justify-end gap-2 px-3 py-2 border-t border-win-grid-border">
           {buttons === 'ok' && <Btn label="OK" onClick={() => onResult('ok')} primary />}
@@ -50,7 +50,7 @@ function Btn({ label, onClick, primary }: { label: string; onClick: () => void; 
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-1 text-xs border min-w-[75px] cursor-pointer
+      className={`px-4 py-1 text-win-base border min-w-[75px] cursor-pointer
         ${primary ? 'bg-win-active-title text-white border-win-active-title' : 'bg-win-button border-win-button-border hover:bg-win-button-hover'}`}
     >
       {label}

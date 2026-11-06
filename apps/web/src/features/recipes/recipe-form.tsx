@@ -1,9 +1,9 @@
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
-import { WinDialog, WinGroupBox, WinSelect, WinInput, WinSearchSelect } from '@wms/ui-winforms'
+import { WinDialog, WinGroupBox, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { UNIT_OPTIONS } from '@wms/shared'
 
@@ -55,44 +55,36 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
 
   const [menuItems, setMenuItems] = useState<{ value: string; label: string }[]>([])
   const [ingredientOptions, setIngredientOptions] = useState<{ value: string; label: string }[]>([])
-  const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
-
-  const fetchIngredients = useCallback((q: string) => {
-    setIngLoading(true)
-    api.get(`/ingredients?limit=10&search=${encodeURIComponent(q)}`).then((res) => {
-      setIngredientOptions((res.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
-    }).finally(() => setIngLoading(false))
-  }, [])
 
   useEffect(() => {
     if (open) {
       setSubmitError('')
-      api.get('/menu-items').then((m) => {
+      Promise.all([api.get('/menu-items'), api.get('/ingredients?limit=1000')]).then(([m, i]) => {
         setMenuItems((m as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
+        setIngredientOptions((i.data as { id: string; name: string }[]).map((x) => ({ value: x.id, label: x.name })))
+        if (editData) {
+          reset({
+            menu_item: editData.menuItemId,
+            name: editData.name,
+            serving_size: editData.servingSize,
+            ingredients: editData.ingredients.map((i) => ({
+              ingredient_id: i.ingredientId,
+              quantity: Number(i.quantity),
+              unit: i.unit,
+            })),
+          })
+        } else {
+          reset({
+            menu_item: '',
+            name: '',
+            serving_size: 1,
+            ingredients: [{ ingredient_id: '', quantity: 0, unit: '' }],
+          })
+        }
       })
-      fetchIngredients('')
-      if (editData) {
-        reset({
-          menu_item: editData.menuItemId,
-          name: editData.name,
-          serving_size: editData.servingSize,
-          ingredients: editData.ingredients.map((i) => ({
-            ingredient_id: i.ingredientId,
-            quantity: Number(i.quantity),
-            unit: i.unit,
-          })),
-        })
-      } else {
-        reset({
-          menu_item: '',
-          name: '',
-          serving_size: 1,
-          ingredients: [{ ingredient_id: '', quantity: 0, unit: '' }],
-        })
-      }
     }
-  }, [open, editData, reset, fetchIngredients])
+  }, [open, editData, reset])
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -146,16 +138,16 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
         <button
           type="button"
           onClick={() => append({ ingredient_id: '', quantity: 0, unit: '' })}
-          className="flex items-center gap-1 text-[11px] text-win-active-title hover:underline cursor-pointer mb-2"
+          className="flex items-center gap-1 text-win-base text-win-active-title hover:underline cursor-pointer mb-2"
         >
-          <Plus size={12} /> Thêm NL
+          <Plus size={14} /> Thêm NL
         </button>
         {errors.ingredients?.root && (
-          <p className="text-[10px] text-win-error mb-1">{errors.ingredients.root.message}</p>
+          <p className="text-win-xs text-win-error mb-1">{errors.ingredients.root.message}</p>
         )}
-        {submitError && <p className="text-[11px] text-win-error font-semibold mb-1">⚠️ {submitError}</p>}
+        {submitError && <p className="text-win-base text-win-error font-semibold mb-1">⚠️ {submitError}</p>}
 
-        <table className="w-full text-[11px] border border-win-grid-border">
+        <table className="w-full text-win-base border border-win-grid-border">
           <thead>
             <tr className="bg-win-grid-header">
               <th className="p-1 text-left">Nguyên liệu</th>
@@ -168,35 +160,30 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
             {fields.map((field, i) => (
               <tr key={field.id} className="border-t border-win-grid-border">
                 <td className="p-0.5">
-                  <Controller
-                    name={`ingredients.${i}.ingredient_id`}
-                    control={control}
-                    render={({ field }) => (
-                      <WinSearchSelect
-                        name={field.name}
-                        value={field.value}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        options={ingredientOptions}
-                        onSearch={fetchIngredients}
-                        loading={ingLoading}
-                        placeholder="-- NL --"
-                      />
-                    )}
-                  />
+                  <select
+                    {...register(`ingredients.${i}.ingredient_id`)}
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
+                  >
+                    <option value="">--</option>
+                    {ingredientOptions.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
                 </td>
                 <td className="p-0.5">
                   <input
                     type="number"
                     step="0.001"
                     {...register(`ingredients.${i}.quantity`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] text-right bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base text-right bg-white"
                   />
                 </td>
                 <td className="p-0.5">
                   <select
                     {...register(`ingredients.${i}.unit`)}
-                    className="w-full border border-win-input-border px-1 py-0.5 text-[11px] bg-white"
+                    className="w-full border border-win-input-border h-8 px-2 text-win-base bg-white"
                   >
                     <option value="">--</option>
                     {UNIT_OPTIONS.map((o) => (
@@ -209,7 +196,7 @@ export function RecipeForm({ open, editData, onClose, onSave }: Props) {
                 <td className="p-0.5 text-center">
                   {fields.length > 1 && (
                     <button type="button" onClick={() => remove(i)} className="text-win-error cursor-pointer">
-                      <Trash2 size={12} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </td>

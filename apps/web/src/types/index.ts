@@ -31,7 +31,10 @@ export interface Supplier {
   name: string
   phone: string
   address: string
+  tax_code?: string
   note?: string
+  is_individual?: boolean
+  id_number?: string
 }
 
 export interface ImportOrder {

@@ -49,7 +49,7 @@ export function SupportWidget() {
         className="flex items-center gap-1 px-2 h-full text-white/90 hover:text-white cursor-pointer"
         title="Hỗ trợ kỹ thuật"
       >
-        <MessageCircle size={12} />
+        <MessageCircle size={14} />
         <span className="hidden md:inline">Hỗ trợ</span>
       </button>
       {open && (
@@ -66,11 +66,11 @@ export function SupportWidget() {
               {...register('issue', { required: 'Chọn vấn đề' })}
             />
             <div className="flex items-start gap-2">
-              <label className="text-[11px] w-24 text-right shrink-0 pt-1">Mô tả:</label>
+              <label className="text-win-base w-24 text-right shrink-0 pt-1">Mô tả:</label>
               <textarea
                 {...register('message')}
                 placeholder="Chi tiết thêm nếu có..."
-                className="flex-1 border border-win-input-border px-2 py-1 text-[11px] outline-none focus:border-win-input-focus bg-white resize-none h-16"
+                className="flex-1 border border-win-input-border px-2 py-1 text-win-base outline-none focus:border-win-input-focus bg-white resize-none h-16"
               />
             </div>
             <button
@@ -78,7 +78,7 @@ export function SupportWidget() {
               disabled={mutation.isPending}
               className="w-full flex items-center justify-center gap-1 px-3 py-1 text-xs bg-win-active-title text-white border border-win-active-title disabled:opacity-50 cursor-pointer"
             >
-              <Send size={12} />
+              <Send size={14} />
               {mutation.isPending ? 'Đang gửi...' : 'Gửi'}
             </button>
           </form>

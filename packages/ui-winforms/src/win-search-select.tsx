@@ -14,10 +14,12 @@ interface Props {
   debounce?: number
   placeholder?: string
   className?: string
+  /** Ghi đè class cho nút trigger (vd cỡ lớn trong bảng nhập liệu). */
+  triggerClassName?: string
 }
 
 export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
-  ({ label, error, options, onSearch, loading, name, value, onChange, onBlur, debounce = 300, placeholder, className }, ref) => {
+  ({ label, error, options, onSearch, loading, name, value, onChange, onBlur, debounce = 300, placeholder, className, triggerClassName }, ref) => {
     const [open, setOpen] = useState(false)
     const [search, setSearch] = useState('')
     const [selectedLabel, setSelectedLabel] = useState('')
@@ -77,10 +79,10 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
             setOpen(!open)
             if (!open) setSearch('')
           }}
-          className={`w-full border px-2 py-0.5 text-[11px] text-left bg-white flex items-center justify-between cursor-pointer ${error ? 'border-win-error' : 'border-win-input-border'} ${open ? 'border-win-input-focus' : ''}`}
+          className={`w-full border text-left bg-white flex items-center justify-between cursor-pointer ${triggerClassName ?? 'h-8 px-2 text-win-base'} ${error ? 'border-win-error' : 'border-win-input-border'} ${open ? 'border-win-input-focus' : ''}`}
         >
           <span className={`truncate ${selectedLabel ? '' : 'text-gray-400'}`}>{selectedLabel || placeholder || '-- Chọn --'}</span>
-          <ChevronDown size={10} className="shrink-0 ml-1" />
+          <ChevronDown size={14} className="shrink-0 ml-1" />
         </button>
 
         {/* Dropdown */}
@@ -88,7 +90,7 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
           <div className="absolute z-50 top-full left-0 min-w-full w-max mt-0.5 bg-white border border-win-grid-border shadow-md">
             {/* Search input inside dropdown */}
             <div className="flex items-center gap-1 px-1.5 py-1 border-b border-win-grid-border">
-              <Search size={11} className="text-gray-400 shrink-0" />
+              <Search size={14} className="text-gray-400 shrink-0" />
               <input
                 type="text"
                 data-testid={`search-${testId}`}
@@ -96,15 +98,15 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Gõ để tìm..."
                 autoFocus
-                className="flex-1 text-[11px] outline-none bg-transparent min-w-[120px]"
+                className="flex-1 text-win-base outline-none bg-transparent min-w-[160px] h-7"
               />
             </div>
 
             {/* Options list */}
-            <div className="max-h-[160px] overflow-y-auto">
-              {loading && <div className="px-2 py-1.5 text-[11px] text-gray-400">Đang tìm...</div>}
+            <div className="max-h-[260px] overflow-y-auto">
+              {loading && <div className="px-2 py-1.5 text-win-base text-gray-400">Đang tìm...</div>}
               {!loading && options.length === 0 && (
-                <div className="px-2 py-1.5 text-[11px] text-gray-400">Không tìm thấy</div>
+                <div className="px-2 py-1.5 text-win-base text-gray-400">Không tìm thấy</div>
               )}
               {options.map((opt) => (
                 <div
@@ -112,7 +114,7 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
                   data-testid={`option-${testId}`}
                   data-value={opt.value}
                   onClick={() => handleSelect(opt)}
-                  className={`px-2 py-1 text-[11px] cursor-pointer hover:bg-win-menu-hover whitespace-nowrap ${opt.value === value ? 'bg-win-grid-selected font-medium' : ''}`}
+                  className={`px-3 py-1.5 text-win-base cursor-pointer hover:bg-win-menu-hover whitespace-nowrap ${opt.value === value ? 'bg-win-grid-selected font-medium' : ''}`}
                 >
                   {opt.label}
                 </div>
@@ -121,7 +123,7 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
           </div>
         )}
 
-        {error && <p className="text-[10px] text-win-error mt-0.5">{error}</p>}
+        {error && <p className="text-win-xs text-win-error mt-0.5">{error}</p>}
       </div>
     )
 
@@ -129,7 +131,7 @@ export const WinSearchSelect = forwardRef<HTMLInputElement, Props>(
     if (label) {
       return (
         <div className="flex items-start gap-2">
-          <label className="text-[11px] w-24 text-right shrink-0 pt-1">{label}:</label>
+          <label className="text-win-base w-30 text-right shrink-0 pt-1.5">{label}:</label>
           <div className="flex-1">{selectContent}</div>
         </div>
       )
