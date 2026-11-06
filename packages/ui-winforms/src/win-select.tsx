@@ -1,18 +1,19 @@
 import { forwardRef } from 'react'
 
 interface Props extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  label: string
+  /** Bỏ trống để render select trơn (vd trong toolbar) — không chiếm cột nhãn. */
+  label?: string
   error?: string
   options: { value: string; label: string }[]
 }
 
 export const WinSelect = forwardRef<HTMLSelectElement, Props>(({ label, error, options, ...props }, ref) => (
   <div className="flex items-center gap-2">
-    <label className="text-win-base w-30 text-right shrink-0">{label}:</label>
-    <div className="flex-1">
+    {label && <label className="text-win-base w-30 text-right shrink-0">{label}:</label>}
+    <div className="flex-1 min-w-0">
       <select
         ref={ref}
-        data-testid={`select-${label}`}
+        data-testid={`select-${label ?? props.name ?? 'select'}`}
         {...props}
         className={`w-full h-8 border px-2 text-win-base outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
       >
