@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { CircleCheck, Lightbulb, Plus, RefreshCw, Settings, Settings2, TriangleAlert } from 'lucide-react'
-import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
+import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSearchSelect, WinSelect } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useMenuList, useCreateMenuItem, useUpdateMenuItem, useIngredients } from '@/data'
 import type { MenuItemFull } from '@/data'
@@ -83,6 +83,8 @@ export function MenuPage() {
   const [addOpen, setAddOpen] = useState(false)
   const [cfgOpen, setCfgOpen] = useState(false)
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [ingSearch, setIngSearch] = useState('')
   const limit = 20
 
   const { data: menu, isLoading, refetch } = useMenuList()
@@ -90,10 +92,16 @@ export function MenuPage() {
   const createMutation = useCreateMenuItem()
   const updateMutation = useUpdateMenuItem()
 
-  const ingredientOptions = [
-    { value: '', label: '— Chọn nguyên liệu —' },
-    ...(ingRes?.data ?? []).map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` })),
-  ]
+  const ingQ = ingSearch.trim().toLowerCase()
+  const ingredientOptions = (ingRes?.data ?? [])
+    .filter((i) => !ingQ || i.name.toLowerCase().includes(ingQ))
+    .map((i) => ({ value: i.id, label: `${i.name} (${i.unit})` }))
+
+  // Lọc trên toàn bộ danh sách (không chỉ trang hiện tại) rồi mới phân trang
+  const q = search.trim().toLowerCase()
+  const filtered = (menu ?? []).filter(
+    (m) => !q || m.name.toLowerCase().includes(q) || (m.category ?? '').toLowerCase().includes(q),
+  )
 
   // form thêm món
   const addForm = useForm<{ name: string; price: number; category: string }>()
@@ -143,10 +151,14 @@ export function MenuPage() {
       <WinDataGrid
         searchable
         columns={columns}
-        data={(menu ?? []).slice((page - 1) * limit, page * limit)}
+        data={filtered.slice((page - 1) * limit, page * limit)}
         loading={isLoading}
-        pagination={{ page, limit, total: menu?.length ?? 0 }}
+        pagination={{ page, limit, total: filtered.length }}
         onPageChange={setPage}
+        onSearch={(v) => {
+          setSearch(v)
+          setPage(1)
+        }}
         onRowClick={setSelected}
         onRowDoubleClick={(r) => {
           setSelected(r)
@@ -226,7 +238,21 @@ export function MenuPage() {
               ]}
             />
             {cfgMode === 'DIRECT' && (
-              <WinSelect label="Nguyên liệu trừ" {...cfgForm.register('direct_ingredient_id')} options={ingredientOptions} />
+              <Controller
+                name="direct_ingredient_id"
+                control={cfgForm.control}
+                render={({ field }) => (
+                  <WinSearchSelect
+                    label="Nguyên liệu trừ"
+                    name={field.name}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={ingredientOptions}
+                    onSearch={setIngSearch}
+                  />
+                )}
+              />
             )}
             {cfgMode === 'RECIPE' && (
               <p className="text-win-base text-win-info">
