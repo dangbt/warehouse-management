@@ -36,6 +36,10 @@ jobs:
 
       - run: npm ci
 
+      # Lint type-aware cần Prisma client; thiếu thì mọi kiểu Prisma thành error-typed
+      - run: npx prisma generate
+        working-directory: apps/api
+
       - run: npx turbo lint
 
       - run: npx turbo test
