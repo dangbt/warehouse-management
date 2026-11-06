@@ -65,6 +65,12 @@ export class ImportOrdersService {
     return { data, meta: { page, limit, total } };
   }
 
+  /** Chỉ tên/địa chỉ/MST đơn vị để in chứng từ — không lộ cấu hình thuế khác. */
+  async getPrintHeader() {
+    const s = await this.tax.getSettings();
+    return { companyName: s.companyName, address: s.address, taxCode: s.taxCode };
+  }
+
   async findOne(id: string) {
     const order = await this.prisma.importOrder.findUnique({
       where: { id },

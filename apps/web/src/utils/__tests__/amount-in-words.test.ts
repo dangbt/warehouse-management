@@ -16,6 +16,10 @@ describe('amountInWords', () => {
     expect(amountInWords('2500.40')).toBe('Hai nghìn năm trăm đồng')
   })
   it('đọc hàng tỷ', () => expect(amountInWords(2_000_000_000)).toBe('Hai tỷ đồng'))
+  it('đọc từ nghìn tỷ trở lên', () => {
+    expect(amountInWords(1_000_000_000_000)).toBe('Một nghìn tỷ đồng')
+    expect(amountInWords(1_500_000_000_000)).toBe('Một nghìn năm trăm tỷ đồng')
+  })
   it('xử lý null/âm', () => {
     expect(amountInWords(null)).toBe('Không đồng')
     expect(amountInWords(-5)).toBe('Âm năm đồng')

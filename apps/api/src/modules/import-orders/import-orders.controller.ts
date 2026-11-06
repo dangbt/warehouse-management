@@ -15,6 +15,13 @@ export class ImportOrdersController {
     return this.svc.findAll(q);
   }
 
+  /** Header đơn vị cho chứng từ in: chỉ tên/địa chỉ/MST, không nới quyền tax:read. Phải đứng trước ':id'. */
+  @Get('print-header')
+  @RequirePermissions('import_orders:read')
+  printHeader() {
+    return this.svc.getPrintHeader();
+  }
+
   @Get(':id')
   @RequirePermissions('import_orders:read')
   findOne(@Param('id') id: string) {

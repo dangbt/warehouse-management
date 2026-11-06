@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PrintLayout } from '@/components/print/print-layout'
 import { SignatureBlock } from '@/components/print/signature-block'
-import { useImportOrderDetail, useTaxSettings } from '@/data'
+import { useImportOrderDetail, usePrintHeader } from '@/data'
 import { amountInWords } from '@/utils/amount-in-words'
 import { formatDate, formatNumber } from '@wms/shared'
 import { VOUCHER_FORMS, loadVoucherForm, saveVoucherForm } from './voucher-form'
@@ -17,19 +17,25 @@ function dateLine(value: string | Date) {
 /** Phiếu nhập kho mẫu 01-VT (TT133/TT200), in A4 dọc. */
 export function ImportOrderPrintPage({ id }: { id: string }) {
   const { data: order, isLoading, error } = useImportOrderDetail(id)
-  const { data: tax, isLoading: taxLoading } = useTaxSettings()
+  const { data: tax, isLoading: taxLoading, error: taxError } = usePrintHeader()
   const [form, setForm] = useState<VoucherForm>(loadVoucherForm)
   const printed = useRef(false)
 
+  const orgReady = !!tax?.companyName && !!tax?.address && !!tax?.taxCode
+
+  // Chỉ tự in khi có đủ phiếu + header đơn vị; lỗi/thiếu header thì để người dùng xử lý rồi bấm In.
   useEffect(() => {
-    if (!order || taxLoading || printed.current) return
+    if (!order || !orgReady || printed.current) return
     printed.current = true
     const timer = setTimeout(() => window.print(), 300)
     return () => clearTimeout(timer)
-  }, [order, taxLoading])
+  }, [order, orgReady])
 
   if (isLoading || taxLoading) return <div className="p-4">Đang tải...</div>
   if (error || !order) return <div className="p-4">Không tải được phiếu nhập.</div>
+  if (taxError) {
+    return <div className="p-4" data-testid="print-header-error">Không tải được thông tin đơn vị để in. Vui lòng thử lại.</div>
+  }
 
   const legalNote = VOUCHER_FORMS.find((f) => f.value === form)?.legalNote
   const invoice = order.hasInvoice
@@ -75,12 +81,18 @@ export function ImportOrderPrintPage({ id }: { id: string }) {
       <h1 className="print-title">Phiếu nhập kho</h1>
       <div className="print-subtitle">{dateLine(order.voucherDate)}</div>
       <div className="print-meta">
-        <div>Số: <strong>{order.voucherNo}</strong></div>
+        <div className="print-meta-row">
+          <span>Số: <strong>{order.voucherNo}</strong></span>
+          <span className="print-debit-credit">
+            <span>Nợ: ……………</span>
+            <span>Có: ……………</span>
+          </span>
+        </div>
         <div>Họ và tên người giao: {order.supplier?.name}</div>
         <div>
           Theo hóa đơn số: {invoice?.no || '……………'} ngày {invoice?.date ? formatDate(invoice.date) : '……………'}
         </div>
-        <div>Nhập tại kho: {WAREHOUSE_NAME}</div>
+        <div>Nhập tại kho: {WAREHOUSE_NAME} &nbsp; địa điểm: ……………………………</div>
         {order.note && <div>Diễn giải: {order.note}</div>}
       </div>
       <table className="print-table">
