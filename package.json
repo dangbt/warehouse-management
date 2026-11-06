@@ -11,6 +11,7 @@
     "build": "turbo build",
     "test": "turbo test",
     "lint": "turbo lint",
+    "seed:profile": "npm run seed:profile -w @wms/api --",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "version:patch": "cd apps/web && npm version patch --no-git-tag-version && cd ../api && npm version patch --no-git-tag-version",
