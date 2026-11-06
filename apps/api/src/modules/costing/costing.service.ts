@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PeriodLockService } from '../common/period-lock.service';
+import { PeriodLockedException } from '../common/period-lock';
 import { COSTING_METHODS, CostingMethod, LedgerEntry, costLedger, directionOf, round2, round4 } from './costing-engine';
 
 type Db = Pick<Prisma.TransactionClient, 'stockTransaction' | 'ingredient' | 'inventorySetting'>;
@@ -13,7 +15,10 @@ export interface OutboundCost {
 /** Cấu hình phương pháp tính giá + tính giá vốn cho giao dịch xuất tại thời điểm ghi. */
 @Injectable()
 export class CostingService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private periodLock: PeriodLockService,
+  ) {}
 
   async getMethod(db: Db = this.prisma): Promise<CostingMethod> {
     const s = await db.inventorySetting.findUnique({ where: { id: 'default' } });
@@ -27,12 +32,14 @@ export class CostingService {
 
   /**
    * Đổi phương pháp. Nếu đã có giao dịch kho thì cảnh báo (409-kiểu BadRequest) trừ khi `confirm = true`.
-   * TODO WMS-7: chặn hẳn khi đã có kỳ khoá sổ.
+   * Đã có kỳ khoá sổ thì chặn hẳn (PERIOD_LOCKED): đổi phương pháp sẽ làm lệch giá vốn kỳ đã chốt.
    */
   async setMethod(method: string, confirm = false) {
     if (!COSTING_METHODS.includes(method as CostingMethod)) throw new BadRequestException('Phương pháp tính giá không hợp lệ');
     const current = await this.getMethod();
     if (current !== method) {
+      const lockedUntil = await this.periodLock.getLockedUntil();
+      if (lockedUntil) throw new PeriodLockedException(lockedUntil);
       const txCount = await this.prisma.stockTransaction.count();
       if (txCount > 0 && !confirm) {
         throw new BadRequestException(

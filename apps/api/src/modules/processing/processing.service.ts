@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class ProcessingService {
     private batchDeduction: BatchDeductionService,
     private vouchers: VoucherService,
     private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
@@ -81,6 +83,7 @@ export class ProcessingService {
     if (outputQty <= 0) throw new BadRequestException('Lượng thành phẩm thực thu phải > 0');
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('PROCESSING', body.voucher_no);
 
     return this.prisma.processingOrder
@@ -105,6 +108,7 @@ export class ProcessingService {
     const order = await this.prisma.processingOrder.findUnique({ where: { id } });
     if (!order) throw new NotFoundException('Không tìm thấy phiếu chế biến');
     if (order.status !== 'DRAFT') throw new BadRequestException('Chỉ hoàn thành phiếu ở trạng thái DRAFT');
+    await this.periodLock.assertOpen(order.voucherDate);
 
     const source = await this.prisma.ingredient.findUnique({ where: { id: order.sourceIngredientId } });
     if (!source) throw new BadRequestException('Nguyên liệu nguồn không tồn tại');
