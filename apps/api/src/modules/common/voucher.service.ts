@@ -70,6 +70,18 @@ export class VoucherService {
     return formatVoucherNo(cfg.prefix, maxSequence(cfg.prefix, nos) + 1, cfg.digits);
   }
 
+  /** `count` số chứng từ liên tiếp tiếp theo (dùng khi tạo hàng loạt). */
+  async nextNos(type: VoucherType, count: number): Promise<string[]> {
+    const cfg = (await this.getConfigs()).find((c) => c.type === type)!;
+    const start = maxSequence(cfg.prefix, await this.listNos(type, cfg.prefix)) + 1;
+    return Array.from({ length: count }, (_, i) => formatVoucherNo(cfg.prefix, start + i, cfg.digits));
+  }
+
+  /** Kiểm tra số chứng từ nhập tay đã tồn tại chưa. */
+  hasNo(type: VoucherType, no: string): Promise<boolean> {
+    return this.exists(type, no);
+  }
+
   /** Dùng số người dùng nhập (kiểm tra trùng) hoặc tự sinh số tiếp theo. */
   async resolveNo(type: VoucherType, input?: string): Promise<string> {
     const manual = input?.trim();

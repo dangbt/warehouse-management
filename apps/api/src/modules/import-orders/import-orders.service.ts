@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
+import { assertValidItems, buildOrderLines, sumLines } from './import-order-lines';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
-import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
+import { VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
 // Re-export để giữ tương thích với các import cũ từ module này (vd spec).
 export { roundVnd, computeLineVat };
@@ -94,38 +95,13 @@ export class ImportOrdersService {
       if (dup) throw new BadRequestException(`Hoá đơn đã được nhập ở phiếu ${dup.code}`);
     }
 
-    for (const item of body.items) {
-      if (!item.ingredient_id || item.quantity <= 0 || item.unit_price < 0) throw new BadRequestException('Dữ liệu item không hợp lệ');
-      if (item.factor != null && item.factor <= 0) throw new BadRequestException('Hệ số quy đổi đơn vị phải > 0');
-      if (hasInvoice) {
-        if (!item.vat_rate || !(VAT_RATES as readonly string[]).includes(item.vat_rate)) {
-          throw new BadRequestException('Thuế suất VAT không hợp lệ');
-        }
-      }
-    }
-
-    // Quy đổi về đơn vị tồn: baseQty = quantity × factor.
-    const lines = body.items.map((i) => {
-      const baseQty = i.quantity * (i.factor ?? 1);
-      const totalPrice = baseQty * i.unit_price;
-      const vatRate: VatRate | null = hasInvoice ? (i.vat_rate as VatRate) : null;
-      return {
-        ingredientId: i.ingredient_id,
-        quantity: baseQty,
-        unitPrice: i.unit_price,
-        totalPrice,
-        vatRate,
-        vatAmount: computeLineVat(totalPrice, vatRate),
-        expiryDate: i.expiry_date ? new Date(i.expiry_date) : null,
-      };
-    });
+    assertValidItems(body.items, hasInvoice);
+    const lines = buildOrderLines(body.items, hasInvoice);
 
     const voucherDate = parseVoucherDate(body.voucher_date);
     const voucherNo = await this.vouchers.resolveNo('IMPORT', body.voucher_no);
     const code = voucherNo;
-    const subtotal = lines.reduce((s, l) => s + l.totalPrice, 0);
-    const vatAmount = lines.reduce((s, l) => s + l.vatAmount, 0);
-    const totalAmount = subtotal + vatAmount;
+    const { subtotal, vatAmount, totalAmount } = sumLines(lines);
 
     // Địa chỉ nơi mua: chỉ áp dụng cho hàng không có hoá đơn.
     // Ưu tiên giá trị nhập tay; nếu bỏ trống thì mặc định lấy địa chỉ NCC.
