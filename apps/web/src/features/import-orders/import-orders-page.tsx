@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Ban, Check, ClipboardList, Copy, FileSpreadsheet, Pencil, Plus, Printer, ReceiptText, RefreshCw, Undo2, X } from 'lucide-react'
+import { Ban, Check, ClipboardList, Copy, FileCode2, FileSpreadsheet, Pencil, Plus, Printer, ReceiptText, RefreshCw, Undo2, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm, type ImportOrderSeed } from './import-order-form'
 import { ExcelImportDialog } from './excel-import/excel-import-dialog'
+import { EinvoiceImportDialog } from './einvoice-import/einvoice-import-dialog'
 import { openImportOrderPrint } from './print/voucher-form'
 import {
   useImportOrders,
@@ -114,6 +115,7 @@ export function ImportOrdersPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<ImportOrder | null>(null)
   const [excelOpen, setExcelOpen] = useState(false)
+  const [xmlOpen, setXmlOpen] = useState(false)
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const [confirmAction, setConfirmAction] = useState<ImportOrderAction | null>(null)
   const [seed, setSeed] = useState<ImportOrderSeed | null>(null)
@@ -173,6 +175,7 @@ export function ImportOrdersPage() {
           }} />
         <WinToolbar.Button icon={<Copy size={16} />} label="Nhân bản" disabled={!selected?.items?.length} onClick={handleClone} />
         <WinToolbar.Button icon={<FileSpreadsheet size={16} />} label="Nhập Excel" onClick={() => setExcelOpen(true)} />
+        <WinToolbar.Button icon={<FileCode2 size={16} />} label="Nhập HĐ XML" onClick={() => setXmlOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Check size={16} />}
@@ -351,6 +354,13 @@ export function ImportOrdersPage() {
         open={excelOpen}
         onClose={() => {
           setExcelOpen(false)
+          refetch()
+        }}
+      />
+      <EinvoiceImportDialog
+        open={xmlOpen}
+        onClose={() => {
+          setXmlOpen(false)
           refetch()
         }}
       />
