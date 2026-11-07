@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useListHotkeys } from '@/hooks/use-list-hotkeys'
 import { useNavigate } from '@tanstack/react-router'
 import { Plus, CheckCircle, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
@@ -78,10 +79,12 @@ export function ProcessingPage() {
     }
   }
 
+  useListHotkeys({ onAdd: () => setFormOpen(true), enabled: !formOpen && !confirmComplete })
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
-        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" onClick={() => setFormOpen(true)} />
+        <WinToolbar.Button icon={<Plus size={16} />} label="Tạo phiếu" shortcut="F2" onClick={() => setFormOpen(true)} />
         <WinToolbar.Button
           icon={<CheckCircle size={16} />}
           label="Hoàn thành"

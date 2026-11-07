@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState, useEffect, useCallback } from 'react'
+import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
 import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 import { VoucherFields } from '@/components/voucher-fields'
@@ -47,7 +48,7 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [ingredients, setIngredients] = useState<{ value: string; label: string }[]>([])
   const [ingLoading, setIngLoading] = useState(false)
@@ -80,35 +81,43 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
     }
   }, [open, seed, reset, fetchIngredients])
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormData, keepOpen = false) => {
     try {
       setSubmitError('')
       await onSave?.({ ...data, ...voucher.payload() })
       reset()
-      onClose()
+      if (!keepOpen) onClose()
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : 'Lỗi xuất kho')
     }
   }
+
+  const { requestClose, guard } = useFormHotkeys({
+    open,
+    isDirty,
+    onClose,
+    onSave: () => void handleSubmit((d) => onSubmit(d))(),
+    onSaveNew: () => void handleSubmit((d) => onSubmit(d, true))(),
+  })
 
   return (
     <WinDialog
       title="Xuất Kho"
       icon={<ArrowUpFromLine size={16} strokeWidth={1.75} />}
       open={open}
-      onClose={onClose}
+      onClose={requestClose}
       width={440}
       footer={
         <>
           <button
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => void handleSubmit((d) => onSubmit(d))()}
             disabled={isSubmitting}
             className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Đang xuất...' : 'Xuất'}
           </button>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
           >
             Huỷ
@@ -147,6 +156,7 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
           )}
         </div>
       </WinGroupBox>
+      {guard}
     </WinDialog>
   )
 }
