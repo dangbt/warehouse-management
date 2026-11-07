@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
 import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { assertPoReceivable, applyReceiptToPo } from '../purchasing/purchase-receipt';
 import { PeriodLockService } from '../common/period-lock.service';
 import { buildLines, parseInvoice } from './import-order-builder';
 import { VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
@@ -36,6 +37,8 @@ export interface CreateImportOrderInput {
   invoice_date?: string;
   // Địa chỉ nơi mua (áp dụng khi không có hoá đơn). Bỏ trống ⇒ mặc định lấy từ địa chỉ NCC.
   purchase_address?: string;
+  // Liên kết đơn mua hàng (PO) — duyệt phiếu sẽ cập nhật SL đã nhận của PO.
+  purchase_order_id?: string;
   items: ImportOrderItemInput[];
 }
 
@@ -105,6 +108,8 @@ export class ImportOrdersService {
     if (hasInvoice) await this.assertInvoiceUnique(body.supplier_id, invoiceSymbol, invoiceNo!);
     const { lines, subtotal, vatAmount, totalAmount } = buildLines(body, hasInvoice);
 
+    if (body.purchase_order_id) await assertPoReceivable(this.prisma, body.purchase_order_id, body.supplier_id);
+
     const voucherDate = parseVoucherDate(body.voucher_date);
     await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('IMPORT', body.voucher_no);
@@ -124,6 +129,7 @@ export class ImportOrdersService {
           invoiceSymbol,
           invoiceDate,
           purchaseAddress,
+          purchaseOrderId: body.purchase_order_id || null,
           subtotal,
           vatAmount,
           totalAmount,
@@ -275,6 +281,7 @@ export class ImportOrdersService {
           },
         });
       }
+      if (order.purchaseOrderId) await applyReceiptToPo(tx, order.purchaseOrderId, order.items);
       return { message: 'Đã duyệt phiếu nhập' };
     });
   }

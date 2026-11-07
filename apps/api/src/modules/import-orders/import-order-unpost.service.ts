@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PeriodLockService } from '../common/period-lock.service';
+import { revertReceiptFromPo } from '../purchasing/purchase-receipt';
 
 export const IMPORT_UNPOST_NEGATIVE_STOCK = 'IMPORT_UNPOST_NEGATIVE_STOCK';
 export const IMPORT_UNPOST_HAS_RETURN = 'IMPORT_UNPOST_HAS_RETURN';
@@ -110,6 +111,8 @@ export class ImportOrderUnpostService {
       if (!order.paid) {
         await tx.supplier.update({ where: { id: order.supplierId }, data: { totalDebt: { decrement: order.totalAmount } } });
       }
+      // Trả lại SL đã nhận của PO (nếu phiếu liên kết PO) để duyệt lại không bị tính đôi.
+      if (order.purchaseOrderId) await revertReceiptFromPo(tx, order.purchaseOrderId, order.items);
       // VAT đầu vào của báo cáo thuế chỉ tính phiếu COMPLETED ⇒ trả về PENDING là VAT tự được đảo.
       await tx.importOrder.update({ where: { id }, data: { status: 'PENDING', approvedById: null } });
       return { message: 'Đã bỏ ghi phiếu nhập', id, status: 'PENDING' };

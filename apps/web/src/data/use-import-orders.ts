@@ -88,6 +88,7 @@ export function useCreateImportOrder() {
       invoice_symbol?: string
       invoice_date?: string
       purchase_address?: string
+      purchase_order_id?: string
       items: {
         ingredient_id: string
         quantity: number
@@ -117,6 +118,7 @@ export function useApproveImportOrder() {
       queryClient.setQueriesData<ListResponse>({ queryKey: QUERY_KEYS.importOrders }, (old) =>
         old ? { ...old, data: old.data.map((o) => (o.id === id ? { ...o, status: 'COMPLETED' } : o)) } : old,
       )
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.purchaseOrders })
       useToastStore.getState().success('Đã duyệt phiếu nhập')
     },
     onError: (e: Error) => {
@@ -146,6 +148,7 @@ function useOrderMutation(path: (id: string) => string, successMsg: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.importOrders })
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.purchaseOrders })
       useToastStore.getState().success(successMsg)
     },
     onError: (e: Error) => {
