@@ -65,12 +65,14 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
   const voucher = useVoucherFields('EXPORT', open)
   const wh = useWarehouseChoice()
   const whRef = useRef('')
+  const searchRef = useRef('')
   whRef.current = wh.warehouseId
   const [lines, setLines] = useState<MatrixLine[]>([])
   // Số CT tự đặt chỉ dùng cho phiếu đầu tiên khi xuất nhiều dòng từ ma trận; phiếu sau để server tự sinh.
   const voucherNoUsed = useRef(false)
 
   const fetchIngredients = useCallback((search: string) => {
+    searchRef.current = search
     setIngLoading(true)
     api
       .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}${whRef.current ? `&warehouse_id=${whRef.current}` : ''}`)
@@ -100,7 +102,7 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
 
   // Đổi kho ⇒ tải lại danh sách để số tồn hiển thị đúng kho đang chọn.
   useEffect(() => {
-    if (open && wh.warehouseId) fetchIngredients('')
+    if (open && wh.warehouseId) fetchIngredients(searchRef.current)
   }, [open, wh.warehouseId, fetchIngredients])
 
   const onSubmit = async (data: FormData, keepOpen = false) => {
