@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
 // Re-export để giữ tương thích với các import cũ từ module này (vd spec).
@@ -42,6 +43,7 @@ export class ImportOrdersService {
     private prisma: PrismaService,
     private tax: TaxService,
     private vouchers: VoucherService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string; id?: string }) {
@@ -137,6 +139,7 @@ export class ImportOrdersService {
     });
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('IMPORT', body.voucher_no);
     const code = voucherNo;
     const subtotal = lines.reduce((s, l) => s + l.totalPrice, 0);
@@ -197,6 +200,7 @@ export class ImportOrdersService {
         include: { items: true },
       });
       if (!order || order.status !== 'PENDING') throw new BadRequestException('Chỉ duyệt phiếu PENDING');
+      await this.periodLock.assertOpen(order.voucherDate, tx);
 
       await tx.importOrder.update({
         where: { id },
@@ -256,6 +260,7 @@ export class ImportOrdersService {
   async reject(id: string, reason?: string) {
     const order = await this.prisma.importOrder.findUnique({ where: { id } });
     if (!order || order.status !== 'PENDING') throw new BadRequestException('Chỉ từ chối phiếu PENDING');
+    await this.periodLock.assertOpen(order.voucherDate);
     await this.prisma.importOrder.update({
       where: { id },
       data: { status: 'REJECTED', note: reason || order.note },

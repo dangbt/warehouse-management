@@ -24,6 +24,7 @@ import { MenuModule } from './modules/menu/menu.module';
 import { SupportModule } from './modules/support/support.module';
 import { TaxModule } from './modules/tax/tax.module';
 import { CostingModule } from './modules/costing/costing.module';
+import { InventoryPeriodModule } from './modules/inventory-period/inventory-period.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { CostingModule } from './modules/costing/costing.module';
     SupportModule,
     TaxModule,
     CostingModule,
+    InventoryPeriodModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],
   controllers: [HealthController],

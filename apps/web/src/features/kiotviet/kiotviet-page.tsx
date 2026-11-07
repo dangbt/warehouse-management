@@ -6,6 +6,7 @@ import type { Column } from '@wms/ui-winforms'
 import { useKiotVietOrders, useSyncKiotViet, useDeductOrder } from '@/data'
 import { formatDate, formatCurrency } from '@wms/shared'
 import type { KiotVietOrder } from '@/data/use-kiotviet'
+import { translateApiMessage } from '@/utils/api-error-messages'
 import { Route } from '@/routes/_app/kiotviet'
 
 const columns: Column<KiotVietOrder>[] = [
@@ -20,7 +21,11 @@ const columns: Column<KiotVietOrder>[] = [
     width: 100,
     align: 'center',
     render: (r) =>
-      r.deducted ? (
+      r.deductError && !r.deducted ? (
+        <span className="px-1.5 py-0.5 rounded text-win-xs font-medium text-red-700 bg-red-50" title={translateApiMessage(r.deductError)} data-testid="kiotviet-deduct-error">
+          Lỗi: {r.deductError === 'PERIOD_LOCKED' ? 'Kỳ đã khoá' : r.deductError}
+        </span>
+      ) : r.deducted ? (
         <span className="px-1.5 py-0.5 rounded text-win-xs font-medium text-green-700 bg-green-50">Đã trừ</span>
       ) : (
         <span className="px-1.5 py-0.5 rounded text-win-xs font-medium text-orange-700 bg-orange-50">Chưa trừ</span>

@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { PeriodLockService } from '../common/period-lock.service';
 import { VAT_RATES, VatRate, computeLineVat } from '../tax/vat';
 
 export interface PurchaseReturnItemInput {
@@ -41,6 +42,7 @@ export class PurchaseReturnsService {
     private prisma: PrismaService,
     private vouchers: VoucherService,
     private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string }) {
@@ -123,6 +125,7 @@ export class PurchaseReturnsService {
     }
 
     const voucherDate = parseVoucherDate(body.voucher_date);
+    await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('RETURN', body.voucher_no);
     const code = voucherNo;
 
