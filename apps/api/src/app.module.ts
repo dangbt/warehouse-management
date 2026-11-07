@@ -24,6 +24,7 @@ import { MenuModule } from './modules/menu/menu.module';
 import { SupportModule } from './modules/support/support.module';
 import { PurchasingModule } from './modules/purchasing/purchasing.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { ProductsModule } from './modules/products/products.module';
 import { TaxModule } from './modules/tax/tax.module';
 import { CostingModule } from './modules/costing/costing.module';
 import { InventoryPeriodModule } from './modules/inventory-period/inventory-period.module';
@@ -33,6 +34,7 @@ import { InventoryPeriodModule } from './modules/inventory-period/inventory-peri
     PrismaModule,
     AuthModule,
     IngredientsModule,
+    ProductsModule,
     SuppliersModule,
     ImportOrdersModule,
     StockExportsModule,

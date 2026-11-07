@@ -116,6 +116,19 @@ model Ingredient {
   processingAsOutput ProcessingOrder[] @relation("ProcOutput")
   directMenuItems    MenuItem[] @relation("DirectIngredient")
 
+  // Biến thể / SKU (WMS-19). Dữ liệu F&B cũ: productId/sku/barcode/variantKey = null
+  productId       String?              @map("product_id")
+  product         Product?             @relation(fields: [productId], references: [id])
+  sku             String?              @unique
+  barcode         String?              @unique
+  salePrice       Decimal?             @map("sale_price") @db.Decimal(12, 2)
+  // Khoá tổ hợp giá trị thuộc tính (id giá trị, sắp theo thuộc tính) — unique trong 1 product
+  variantKey      String?              @map("variant_key")
+  isActive        Boolean              @default(true) @map("is_active")
+  attributeValues ItemAttributeValue[]
+
+  @@unique([productId, variantKey])
+  @@index([productId])
   @@map("ingredients")
 }
 
@@ -630,4 +643,77 @@ model AppSetting {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("app_settings")
+}
+
+// ===== Sản phẩm + biến thể (WMS-19) =====
+model Product {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  category    String?
+  groupId     String?  @map("group_id")
+  brand       String?
+  unit        String   @default("cái")
+  basePrice   Decimal? @map("base_price") @db.Decimal(12, 2)
+  description String?
+  imageUrl    String?  @map("image_url")
+  // Mẫu SKU, vd "{PRODUCT}-{COLOR}-{SIZE}". Null = mặc định PRODUCT-COLOR-SIZE
+  skuTemplate String?  @map("sku_template")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  attributes ProductAttributeLink[]
+  items      Ingredient[]
+
+  @@map("products")
+}
+
+model ProductAttribute {
+  id   String @id @default(uuid())
+  code String @unique
+  name String
+  sort Int    @default(0)
+
+  values ProductAttributeValue[]
+  links  ProductAttributeLink[]
+
+  @@map("product_attributes")
+}
+
+model ProductAttributeValue {
+  id          String           @id @default(uuid())
+  attributeId String           @map("attribute_id")
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  value       String
+  code        String
+  sort        Int              @default(0)
+
+  itemLinks ItemAttributeValue[]
+
+  @@unique([attributeId, value])
+  @@unique([attributeId, code])
+  @@map("attribute_values")
+}
+
+model ProductAttributeLink {
+  productId   String           @map("product_id")
+  product     Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attributeId String           @map("attribute_id")
+  attribute   ProductAttribute @relation(fields: [attributeId], references: [id])
+  sort        Int              @default(0)
+
+  @@id([productId, attributeId])
+  @@map("product_attribute_links")
+}
+
+model ItemAttributeValue {
+  ingredientId     String                @map("ingredient_id")
+  ingredient       Ingredient            @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  attributeId      String                @map("attribute_id")
+  attributeValueId String                @map("attribute_value_id")
+  attributeValue   ProductAttributeValue @relation(fields: [attributeValueId], references: [id])
+
+  @@id([ingredientId, attributeId])
+  @@map("item_attribute_values")
 }
