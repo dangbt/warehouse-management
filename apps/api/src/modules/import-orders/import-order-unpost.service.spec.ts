@@ -34,6 +34,7 @@ function makeDb(over: { returns?: { voucherNo: string }[]; batchQty?: number; lo
     id: 'o1',
     status: 'COMPLETED',
     voucherDate: new Date('2026-11-01T00:00:00Z'),
+    warehouseId: 'wh-main',
     supplierId: 's1',
     totalAmount: 500,
     paid: false,
@@ -57,8 +58,14 @@ function makeDb(over: { returns?: { voucherNo: string }[]; batchQty?: number; lo
     },
     purchaseReturn: { findMany: async () => over.returns ?? [] },
     inventorySetting: { findUnique: async () => ({ lockedUntil: over.lockedUntil ?? null }) },
+    warehouse: {
+      findFirst: async () => ({ id: 'wh-main' }),
+      findUnique: async ({ where }: { where: { id: string } }) => ({ id: where.id, active: true }),
+    },
+    ingredientStock: { findUnique: async () => ({ qty: db.stock }), upsert: async () => undefined },
     ingredient: {
-      update: async ({ data }: { data: { currentStock: { decrement: number } } }) => void (db.stock -= data.currentStock.decrement),
+      update: async ({ data }: { data: { currentStock: { decrement?: number; increment?: number } } }) =>
+        void (db.stock += data.currentStock.increment ?? -(data.currentStock.decrement ?? 0)),
     },
     ingredientBatch: { deleteMany: async () => void (db.batches = 0) },
     stockTransaction: { deleteMany: async () => void (db.txs = 0) },

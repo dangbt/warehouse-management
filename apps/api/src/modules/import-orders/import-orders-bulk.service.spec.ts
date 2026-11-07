@@ -76,6 +76,10 @@ describe('bulkCreate', () => {
     const prisma: any = {
       supplier: { findMany: jest.fn().mockResolvedValue([sup]) },
       ingredient: { findMany: jest.fn().mockResolvedValue([{ id: 'i1' }]) },
+      warehouse: {
+        findFirst: jest.fn().mockResolvedValue({ id: 'wh-main' }),
+        findUnique: jest.fn().mockResolvedValue({ id: 'wh-main', active: true }),
+      },
       $transaction: jest.fn((cb, opts) => txImpl(() => cb(tx), opts)),
     };
     const vouchers: any = {
