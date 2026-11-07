@@ -17,6 +17,7 @@ import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppTaxSettingsRouteImport } from './routes/_app/tax-settings'
 import { Route as AppSuppliersRouteImport } from './routes/_app/suppliers'
 import { Route as AppStocktakeRouteImport } from './routes/_app/stocktake'
+import { Route as AppStockMatrixRouteImport } from './routes/_app/stock-matrix'
 import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports'
 import { Route as AppStockCardRouteImport } from './routes/_app/stock-card'
 import { Route as AppSettingsBusinessRouteImport } from './routes/_app/settings-business'
@@ -89,6 +90,11 @@ const AppSuppliersRoute = AppSuppliersRouteImport.update({
 const AppStocktakeRoute = AppStocktakeRouteImport.update({
   id: '/stocktake',
   path: '/stocktake',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockMatrixRoute = AppStockMatrixRouteImport.update({
+  id: '/stock-matrix',
+  path: '/stock-matrix',
   getParentRoute: () => AppRoute,
 } as any)
 const AppStockExportsRoute = AppStockExportsRouteImport.update({
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/settings-business': typeof AppSettingsBusinessRoute
   '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
+  '/stock-matrix': typeof AppStockMatrixRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
   '/tax-settings': typeof AppTaxSettingsRoute
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/settings-business': typeof AppSettingsBusinessRoute
   '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
+  '/stock-matrix': typeof AppStockMatrixRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
   '/tax-settings': typeof AppTaxSettingsRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/_app/settings-business': typeof AppSettingsBusinessRoute
   '/_app/stock-card': typeof AppStockCardRoute
   '/_app/stock-exports': typeof AppStockExportsRoute
+  '/_app/stock-matrix': typeof AppStockMatrixRoute
   '/_app/stocktake': typeof AppStocktakeRoute
   '/_app/suppliers': typeof AppSuppliersRoute
   '/_app/tax-settings': typeof AppTaxSettingsRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/settings-business'
     | '/stock-card'
     | '/stock-exports'
+    | '/stock-matrix'
     | '/stocktake'
     | '/suppliers'
     | '/tax-settings'
@@ -467,6 +477,7 @@ export interface FileRouteTypes {
     | '/settings-business'
     | '/stock-card'
     | '/stock-exports'
+    | '/stock-matrix'
     | '/stocktake'
     | '/suppliers'
     | '/tax-settings'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/_app/settings-business'
     | '/_app/stock-card'
     | '/_app/stock-exports'
+    | '/_app/stock-matrix'
     | '/_app/stocktake'
     | '/_app/suppliers'
     | '/_app/tax-settings'
@@ -594,6 +606,13 @@ declare module '@tanstack/react-router' {
       path: '/stocktake'
       fullPath: '/stocktake'
       preLoaderRoute: typeof AppStocktakeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/stock-matrix': {
+      id: '/_app/stock-matrix'
+      path: '/stock-matrix'
+      fullPath: '/stock-matrix'
+      preLoaderRoute: typeof AppStockMatrixRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/stock-exports': {
@@ -862,6 +881,7 @@ interface AppRouteChildren {
   AppSettingsBusinessRoute: typeof AppSettingsBusinessRoute
   AppStockCardRoute: typeof AppStockCardRoute
   AppStockExportsRoute: typeof AppStockExportsRoute
+  AppStockMatrixRoute: typeof AppStockMatrixRoute
   AppStocktakeRoute: typeof AppStocktakeRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
   AppTaxSettingsRoute: typeof AppTaxSettingsRoute
@@ -899,6 +919,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsBusinessRoute: AppSettingsBusinessRoute,
   AppStockCardRoute: AppStockCardRoute,
   AppStockExportsRoute: AppStockExportsRoute,
+  AppStockMatrixRoute: AppStockMatrixRoute,
   AppStocktakeRoute: AppStocktakeRoute,
   AppSuppliersRoute: AppSuppliersRoute,
   AppTaxSettingsRoute: AppTaxSettingsRoute,

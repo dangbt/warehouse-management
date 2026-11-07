@@ -17,6 +17,18 @@ interface SqlRow {
   in_value: number | null;
   out_qty: number | null;
   out_value: number | null;
+  product_id: string | null;
+  product_code: string | null;
+  product_name: string | null;
+  variant_label: string | null;
+}
+
+export interface InventorySummaryFilter {
+  groupId?: string;
+  /** Danh mục sản phẩm (products.category) — WMS-22. */
+  category?: string;
+  /** Chỉ các biến thể mang giá trị thuộc tính này (vd Size M) — WMS-22. */
+  attributeValueId?: string;
 }
 
 /**
@@ -28,8 +40,11 @@ interface SqlRow {
 export class InventorySummaryRepository {
   constructor(private prisma: PrismaService) {}
 
-  async aggregate(from: Date, to: Date, groupId?: string): Promise<InventorySummaryRawRow[]> {
-    const groupFilter = groupId ? Prisma.sql`AND i.group_id = ${groupId}` : Prisma.empty;
+  async aggregate(from: Date, to: Date, filter: InventorySummaryFilter = {}): Promise<InventorySummaryRawRow[]> {
+    const { groupId, category, attributeValueId } = filter;
+    const groupFilter = Prisma.sql`${groupId ? Prisma.sql`AND i.group_id = ${groupId}` : Prisma.empty}
+      ${category ? Prisma.sql`AND i.product_id IN (SELECT id FROM products WHERE category = ${category})` : Prisma.empty}
+      ${attributeValueId ? Prisma.sql`AND EXISTS (SELECT 1 FROM item_attribute_values iav WHERE iav.ingredient_id = i.id AND iav.attribute_value_id = ${attributeValueId})` : Prisma.empty}`;
     const rows = await this.prisma.$queryRaw<SqlRow[]>(Prisma.sql`
       WITH t AS (
         SELECT
@@ -46,11 +61,19 @@ export class InventorySummaryRepository {
       )
       SELECT
         i.id AS ingredient_id,
-        UPPER(LEFT(i.id, 8)) AS code,
+        COALESCE(i.sku, UPPER(LEFT(i.id, 8))) AS code,
         i.name,
         i.unit,
         g.id AS group_id,
         g.name AS group_name,
+        p.id AS product_id,
+        p.code AS product_code,
+        p.name AS product_name,
+        (SELECT string_agg(av.value, ' / ' ORDER BY pa.sort, pa.code)
+           FROM item_attribute_values iav
+           JOIN attribute_values av ON av.id = iav.attribute_value_id
+           JOIN product_attributes pa ON pa.id = iav.attribute_id
+          WHERE iav.ingredient_id = i.id) AS variant_label,
         COALESCE(SUM(s.sq) FILTER (WHERE s.voucher_date < ${from}), 0)::float8 AS opening_qty,
         COALESCE(SUM(s.sv) FILTER (WHERE s.voucher_date < ${from}), 0)::float8 AS opening_value,
         COALESCE(SUM(s.sq) FILTER (WHERE s.voucher_date >= ${from} AND s.sq > 0), 0)::float8 AS in_qty,
@@ -60,7 +83,8 @@ export class InventorySummaryRepository {
       FROM s
       JOIN ingredients i ON i.id = s.ingredient_id
       LEFT JOIN ingredient_groups g ON g.id = i.group_id
-      GROUP BY i.id, i.name, i.unit, g.id, g.name
+      LEFT JOIN products p ON p.id = i.product_id
+      GROUP BY i.id, i.name, i.unit, i.sku, g.id, g.name, p.id, p.code, p.name
       HAVING COUNT(*) > 0
     `);
     return rows.map((r) => ({
@@ -76,6 +100,10 @@ export class InventorySummaryRepository {
       inValue: Number(r.in_value ?? 0),
       outQty: Number(r.out_qty ?? 0),
       outValue: Number(r.out_value ?? 0),
+      productId: r.product_id,
+      productCode: r.product_code,
+      productName: r.product_name,
+      variantLabel: r.variant_label,
     }));
   }
 }

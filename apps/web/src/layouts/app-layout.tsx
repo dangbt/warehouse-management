@@ -185,6 +185,7 @@ function buildMenuTree(isHousehold: boolean, t: (k: TermKey) => string): TreeNod
     { id: 'inventory-period', label: 'Khoá sổ kho', icon: <NavIcon id="/inventory-period" />, route: '/inventory-period', permission: 'inventory_period:read' },
     { id: 'inventory-summary', label: 'Nhập–Xuất–Tồn', icon: <NavIcon id="/inventory-summary" />, route: '/inventory-summary', permission: 'reports:read' },
     { id: 'stock-card', label: 'Thẻ kho', icon: <NavIcon id="/inventory-summary" />, route: '/stock-card', permission: 'reports:read' },
+    { id: 'stock-matrix', label: 'Tồn theo size × màu', icon: <NavIcon id="/inventory-summary" />, route: '/stock-matrix', permission: 'reports:read' },
     {
       id: 'variance',
       label: 'Định mức',
@@ -349,6 +350,7 @@ export function AppLayout() {
               { label: t('item_usage_report'), route: '/ingredient-usage' },
               { label: 'Nhập – Xuất – Tồn', route: '/inventory-summary' },
               { label: 'Thẻ kho / Sổ chi tiết VT', route: '/stock-card' },
+              ...(isEnabled('product_variants') ? [{ label: 'Tồn theo size × màu', route: '/stock-matrix' }] : []),
               { label: 'Tính giá xuất kho', route: '/costing' },
               { label: 'Khoá sổ kho', route: '/inventory-period' },
               { label: 'Định mức', route: '/consumption-variance' },
