@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { BatchDeductionService } from '../common/batch-deduction.service';
+import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -12,6 +13,7 @@ export class StockExportsController {
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
     private vouchers: VoucherService,
+    private costing: CostingService,
   ) {}
 
   @Get()
@@ -105,6 +107,7 @@ export class StockExportsController {
     await this.prisma
       .$transaction(async (tx) => {
         const voucher = await tx.stockExport.create({ data: { voucherNo, voucherDate } });
+        const cost = await this.costing.costOutbound(tx, body.ingredient_id, body.quantity);
         const deducted = await this.batchDeduction.deductFromBatches(tx, body.ingredient_id, body.quantity);
 
         await tx.ingredient.update({
@@ -118,6 +121,8 @@ export class StockExportsController {
               ingredientId: body.ingredient_id,
               type: 'EXPORT',
               quantity: d.qty,
+              unitCost: cost.unitCost,
+              totalCost: +(d.qty * cost.unitCost).toFixed(2),
               referenceId: d.batchId,
               note: `${body.reason}${body.note ? ': ' + body.note : ''}`,
               createdById: req.user.id,

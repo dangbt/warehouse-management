@@ -2,9 +2,8 @@
  * Báo cáo Tổng hợp Nhập – Xuất – Tồn: kiểu dữ liệu + hàm thuần dựng báo cáo từ các dòng đã gom theo NL.
  * Query DB nằm ở inventory-summary.repository.ts.
  *
- * Ghi chú giá trị: lấy theo giá trên giao dịch (total_price, hoặc |SL| × unit_price).
- * Giao dịch chưa lưu giá (vd EXPORT, ORDER_DEDUCT, kiểm kê) tạm dùng giá vốn hiện hành của NL
- * (cost_per_unit). WMS-6 sẽ chuẩn hoá giá xuất.
+ * Ghi chú giá trị: lấy theo giá vốn lưu trên giao dịch (total_cost, WMS-6); giao dịch cũ chưa có
+ * thì dự phòng total_price hoặc |SL| × giá vốn hiện hành của NL.
  */
 
 export interface QtyValue {
@@ -55,7 +54,7 @@ export interface InventorySummaryReport {
 }
 
 export const VALUE_NOTE =
-  'Giá trị theo giá trên giao dịch; giao dịch chưa lưu giá xuất dùng giá vốn hiện hành của nguyên liệu (WMS-6 sẽ chuẩn hoá).';
+  'Giá trị theo giá vốn lưu trên giao dịch; giá xuất kho tính theo phương pháp đã cấu hình (chạy "Tính giá xuất kho" để chốt giá bình quân cuối kỳ).';
 
 const NO_GROUP_NAME = 'Chưa phân nhóm';
 

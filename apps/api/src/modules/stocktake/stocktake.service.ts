@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { Decimal } from '@prisma/client/runtime/library';
 
@@ -8,6 +9,7 @@ export class StocktakeService {
   constructor(
     private prisma: PrismaService,
     private vouchers: VoucherService,
+    private costing: CostingService,
   ) {}
 
   async findAll(q: { page?: string; limit?: string }) {
@@ -101,6 +103,13 @@ export class StocktakeService {
         const diff = Number(item.difference);
         if (diff === 0) continue;
 
+        // Giá vốn điều chỉnh: giảm → giá xuất theo phương pháp; tăng → nhập theo giá vốn hiện hành của NL
+        const absDiff = Math.abs(diff);
+        const cost =
+          diff < 0
+            ? await this.costing.costOutbound(tx, item.ingredientId, absDiff)
+            : await this.costing.currentCost(tx, item.ingredientId, absDiff);
+
         await tx.ingredient.update({
           where: { id: item.ingredientId },
           data: { currentStock: item.actualQty },
@@ -111,6 +120,8 @@ export class StocktakeService {
             ingredientId: item.ingredientId,
             type: 'STOCKTAKE_ADJUST',
             quantity: item.difference,
+            unitCost: cost.unitCost,
+            totalCost: cost.totalCost,
             referenceId: session.id,
             createdById: userId,
             voucherDate: session.voucherDate,
