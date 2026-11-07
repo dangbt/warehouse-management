@@ -2,7 +2,7 @@ import { FileText, TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react'
 import { VoucherFields } from '@/components/voucher-fields'
 import { useVoucherFields } from '@/data/use-vouchers'
 import type { VoucherPayload } from '@/data/use-vouchers'
@@ -48,12 +48,22 @@ const schema = z
 
 type FormData = z.infer<typeof schema>
 
+/** Dữ liệu điền sẵn khi nhân bản phiếu nhập (ngày/số CT/hoá đơn luôn để mới). */
+export interface ImportOrderSeed {
+  supplierId: string
+  hasInvoice: boolean
+  note?: string
+  items: { ingredient: { id: string; name: string; unit: string }; quantity: number; unitPrice: number; vatRate?: string | null }[]
+}
+
 interface Props {
   open: boolean
   onClose: () => void
   onSave?: (data: FormData & VoucherPayload) => void
   /** Có phiếu ⇒ chế độ sửa (phiếu PENDING): nạp sẵn dữ liệu, lưu = cập nhật. */
   order?: EditableImportOrder | null
+  /** Có giá trị ⇒ form mở ở chế độ nhân bản, điền sẵn NCC + dòng hàng + thuế suất. */
+  seed?: ImportOrderSeed | null
 }
 
 interface SupplierInfo {
@@ -113,7 +123,7 @@ function Section({ step, title, children }: { step: number; title: string; child
  * Phiếu nhập kho — bố cục theo luồng nhập hàng kiểu MISA:
  * ① Nhà cung cấp → ② Chứng từ (hoá đơn, thanh toán) → ③ Hàng tiền → Tổng cộng → Lưu.
  */
-export function ImportOrderForm({ open, onClose, onSave, order }: Props) {
+export function ImportOrderForm({ open, onClose, onSave, order, seed }: Props) {
   const {
     register,
     control,
@@ -138,6 +148,8 @@ export function ImportOrderForm({ open, onClose, onSave, order }: Props) {
   const [ingredients, setIngredients] = useState<IngredientOption[]>([])
   const [unitMap, setUnitMap] = useState<Record<string, string>>({})
   const [ingLoading, setIngLoading] = useState(false)
+  // NL của phiếu gốc (nhân bản) luôn giữ trong danh sách chọn dù không nằm trong kết quả tìm.
+  const seededIngredients = useRef<IngredientOption[]>([])
   const [submitError, setSubmitError] = useState('')
   const initialVoucher = useMemo(() => (order ? { date: localDay(order.voucherDate), no: order.voucherNo } : null), [order])
   const voucher = useVoucherFields('IMPORT', open, initialVoucher)
@@ -150,7 +162,8 @@ export function ImportOrderForm({ open, onClose, onSave, order }: Props) {
       .then((res) => {
         const list = res.data as { id: string; name: string; unit: string }[]
         const found = list.map((x) => ({ value: x.id, label: x.name, unit: x.unit }))
-        const extra = orderIngredientOptions(order).filter((e) => !found.some((f) => f.value === e.value))
+        const pinned = [...orderIngredientOptions(order), ...seededIngredients.current]
+        const extra = pinned.filter((e, idx) => !found.some((f) => f.value === e.value) && pinned.findIndex((p) => p.value === e.value) === idx)
         setIngredients([...extra, ...found])
         setUnitMap((m) => ({ ...m, ...Object.fromEntries([...extra, ...found].map((x) => [x.value, x.unit])) }))
       })
@@ -163,9 +176,31 @@ export function ImportOrderForm({ open, onClose, onSave, order }: Props) {
 
   useEffect(() => {
     if (!open) return
-    const initial = order ? orderToFormValues(order) : EMPTY_FORM
+    const initial = order
+      ? orderToFormValues(order)
+      : seed
+        ? {
+            ...EMPTY_FORM,
+            supplier_id: seed.supplierId,
+            has_invoice: seed.hasInvoice,
+            note: seed.note ?? '',
+            items: seed.items.map((i) => ({
+              ...DEFAULT_ITEM,
+              ingredient_id: i.ingredient.id,
+              quantity: i.quantity,
+              unit_price: i.unitPrice,
+              vat_rate: seed.hasInvoice ? (i.vatRate ?? DEFAULT_ITEM.vat_rate) : DEFAULT_ITEM.vat_rate,
+            })),
+          }
+        : EMPTY_FORM
     reset(initial)
     setSubmitError('')
+    if (seed) {
+      // Đảm bảo nguyên liệu của phiếu gốc có trong danh sách chọn + ĐVT dù không nằm trong 20 kết quả đầu.
+      const seeded = seed.items.map((i) => ({ value: i.ingredient.id, label: i.ingredient.name, unit: i.ingredient.unit }))
+      seededIngredients.current = seeded
+      setUnitMap((m) => ({ ...m, ...Object.fromEntries(seeded.map((x) => [x.value, x.unit])) }))
+    }
     api.get('/suppliers?limit=1000').then((s) => {
       const supplierList = s.data as {
         id: string
@@ -187,9 +222,10 @@ export function ImportOrderForm({ open, onClose, onSave, order }: Props) {
         ),
       )
     })
+    if (!seed) seededIngredients.current = []
     fetchIngredients('')
     setTimeout(() => setFocus('supplier_id'), 0)
-  }, [open, order, reset, setFocus, fetchIngredients])
+  }, [open, order, seed, reset, setFocus, fetchIngredients])
 
   const addRow = useCallback(() => {
     append({ ...DEFAULT_ITEM })

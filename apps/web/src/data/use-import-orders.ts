@@ -24,16 +24,18 @@ interface ImportOrder {
 }
 interface ListResponse {
   data: ImportOrder[]
-  meta: { page: number; limit: number; total: number }
+  meta: { page: number; limit: number; total: number; totals?: { subtotal: number; vatAmount: number; totalAmount: number } }
 }
 
-export function useImportOrders(params?: { id?: string; status?: string; page?: number; orderBy?: string; sort?: string }) {
+export function useImportOrders(params?: { id?: string; status?: string; page?: number; orderBy?: string; sort?: string; from?: string; to?: string }) {
   const query = new URLSearchParams({ limit: '50' })
   if (params?.id) query.set('id', params.id)
   if (params?.status) query.set('status', params.status)
   if (params?.page) query.set('page', String(params.page))
   if (params?.orderBy) query.set('orderBy', params.orderBy)
   if (params?.sort) query.set('sort', params.sort)
+  if (params?.from) query.set('from', params.from)
+  if (params?.to) query.set('to', params.to)
   return useQuery<ListResponse>({
     queryKey: QUERY_KEYS.importOrdersList(Object.fromEntries(query)),
     queryFn: () => api.get(`/import-orders?${query}`),

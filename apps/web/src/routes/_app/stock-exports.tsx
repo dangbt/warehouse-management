@@ -6,12 +6,18 @@ import { RequirePermission } from '@/components/require-permission'
 
 const defaultSearch = {
   page: 1,
+  period: '',
+  from: '',
+  to: '',
   orderBy: 'voucherDate',
   sort: 'desc',
 }
 
 const searchSchema = z.object({
   page: z.number().min(1).default(defaultSearch.page),
+  period: z.string().default(defaultSearch.period),
+  from: z.string().default(defaultSearch.from),
+  to: z.string().default(defaultSearch.to),
   orderBy: z.string().default(defaultSearch.orderBy),
   sort: z.enum(['asc', 'desc']).default(defaultSearch.sort as 'desc'),
   /** Mở đúng một chứng từ (từ Thẻ kho). */

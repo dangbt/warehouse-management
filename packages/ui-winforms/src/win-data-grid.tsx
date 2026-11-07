@@ -33,6 +33,11 @@ interface Props<T> {
   storageKey?: string
   searchable?: boolean
   onSearch?: (query: string) => void
+  /** true: onSearch chỉ chạy khi Enter / bấm nút Tìm (không gọi mỗi lần gõ). Mặc định false = hành vi cũ. */
+  searchOnSubmit?: boolean
+  /** Dòng tổng cuối lưới: giá trị theo key cột (cột không có key để trống). `footerLabel` hiện ở cột đầu tiên. */
+  footer?: Record<string, React.ReactNode>
+  footerLabel?: React.ReactNode
   tableOptions?: Partial<Omit<TableOptions<T>, 'data' | 'columns' | 'getCoreRowModel'>>
 }
 
@@ -58,6 +63,9 @@ export function WinDataGrid<T extends { id?: string }>({
   storageKey,
   searchable,
   onSearch,
+  searchOnSubmit,
+  footer,
+  footerLabel = 'Tổng cộng',
   tableOptions,
 }: Props<T>) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -141,13 +149,27 @@ export function WinDataGrid<T extends { id?: string }>({
           <input
             type="text"
             value={globalFilter}
+            data-testid="grid-search-input"
             onChange={(e) => {
               setGlobalFilter(e.target.value)
-              onSearch?.(e.target.value)
+              if (!searchOnSubmit) onSearch?.(e.target.value)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchOnSubmit && onSearch) onSearch(globalFilter)
             }}
             placeholder="Tìm kiếm..."
             className="flex-1 border border-win-input-border h-8 px-2 text-win-base outline-none focus:border-win-input-focus bg-white"
           />
+          {onSearch && searchOnSubmit && (
+            <button
+              type="button"
+              data-testid="grid-search-button"
+              onClick={() => onSearch(globalFilter)}
+              className="h-8 px-3 border border-win-input-border bg-win-control hover:bg-win-menu-hover text-win-base"
+            >
+              Tìm
+            </button>
+          )}
         </div>
       )}
       <div className="flex-1 overflow-auto">
@@ -257,6 +279,26 @@ export function WinDataGrid<T extends { id?: string }>({
               })
             )}
           </tbody>
+          {footer && !loading && data.length > 0 && (
+            <tfoot data-testid="grid-footer" className="sticky bottom-0 z-10 bg-win-grid-header">
+              <tr className="h-8 border-t-2 border-win-grid-border font-semibold">
+                {table.getVisibleLeafColumns().map((col, idx) => {
+                  const meta = col.columnDef.meta as { align?: string } | undefined
+                  const value = footer[col.id]
+                  return (
+                    <td
+                      key={col.id}
+                      data-testid={`grid-footer-${col.id}`}
+                      className={`px-2 py-1.5 border-r border-win-grid-border ${meta?.align === 'right' ? 'text-right' : meta?.align === 'center' ? 'text-center' : ''}`}
+                    >
+                      {value ?? (idx === 0 ? footerLabel : null)}
+                    </td>
+                  )
+                })}
+                {storageKey && <td className="w-6 border-r border-win-grid-border" />}
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
       {pagination && (

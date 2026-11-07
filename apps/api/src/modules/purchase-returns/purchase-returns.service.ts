@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
+import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
 import { VAT_RATES, VatRate, computeLineVat } from '../tax/vat';
@@ -45,12 +46,14 @@ export class PurchaseReturnsService {
     private periodLock: PeriodLockService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string }) {
+  async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string; from?: string; to?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { supplierId?: string; id?: string } = q.supplierId ? { supplierId: q.supplierId } : {};
+    const where: { supplierId?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.supplierId ? { supplierId: q.supplierId } : {};
     if (q.id) where.id = q.id;
-    const [data, total] = await Promise.all([
+    const dateRange = voucherDateFilter(q);
+    if (dateRange) where.voucherDate = dateRange;
+    const [data, total, agg] = await Promise.all([
       this.prisma.purchaseReturn.findMany({
         where,
         skip: (page - 1) * limit,
@@ -59,8 +62,10 @@ export class PurchaseReturnsService {
         include: { supplier: true, createdBy: { select: { id: true, fullName: true } }, items: { include: { ingredient: true } } },
       }),
       this.prisma.purchaseReturn.count({ where }),
+      this.prisma.purchaseReturn.aggregate({ where, _sum: { subtotal: true, vatAmount: true, totalAmount: true } }),
     ]);
-    return { data, meta: { page, limit, total } };
+    const totals = { subtotal: toNum(agg._sum.subtotal), vatAmount: toNum(agg._sum.vatAmount), totalAmount: toNum(agg._sum.totalAmount) };
+    return { data, meta: { page, limit, total, totals } };
   }
 
   async create(userId: string, body: CreatePurchaseReturnInput) {

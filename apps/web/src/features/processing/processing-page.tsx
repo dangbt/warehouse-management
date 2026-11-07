@@ -7,6 +7,8 @@ import { ProcessingForm } from './processing-form'
 import { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from '@/data'
 import type { ProcessingOrder } from '@/data'
 import { formatDate, formatNumber } from '@wms/shared'
+import { PeriodFilter } from '@/components/period-filter'
+import { resolvePeriod } from '@/utils/period'
 import { Route } from '@/routes/_app/processing'
 import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
 
@@ -36,7 +38,8 @@ const columns: Column<ProcessingOrder>[] = [
 ]
 
 export function ProcessingPage() {
-  const { page, status, orderBy, sort, id: focusId } = Route.useSearch()
+  const { page, status, orderBy, sort, period, from, to, id: focusId } = Route.useSearch()
+  const range = resolvePeriod(period, from, to)
   const navigate = useNavigate({ from: Route.fullPath })
 
   const setParams = (updates: Record<string, unknown>) => {
@@ -48,7 +51,7 @@ export function ProcessingPage() {
   const [selected, setSelected] = useState<ProcessingOrder | null>(null)
   const [confirmComplete, setConfirmComplete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useProcessingOrders({ id: focusId, page, status: status || undefined, orderBy, sort })
+  const { data: res, isLoading, refetch } = useProcessingOrders({ id: focusId, page, status: status || undefined, orderBy, sort, ...range })
   const createMutation = useCreateProcessing()
   const completeMutation = useCompleteProcessing()
 
@@ -87,6 +90,8 @@ export function ProcessingPage() {
         />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
+        <WinToolbar.Separator />
+        <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams({ ...v, page: 1 })} />
       </WinToolbar>
 
       {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => { setSelected(null); setParams({ id: undefined }) }} />}
@@ -98,6 +103,8 @@ export function ProcessingPage() {
         onPageChange={setPage}
         onSort={(field, dir) => setParams({ orderBy: field, sort: dir, page: 1 })}
         onRowClick={setSelected}
+        footer={res ? {} : undefined}
+        footerLabel={`Tổng cộng: ${res?.meta.total ?? 0} phiếu`}
         storageKey="processing"
       />
 

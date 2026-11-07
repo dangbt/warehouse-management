@@ -11,7 +11,7 @@ export class PurchaseReturnsController {
 
   @Get()
   @RequirePermissions('purchase_returns:read')
-  findAll(@Query() q: { page?: string; limit?: string; supplierId?: string; id?: string }) {
+  findAll(@Query() q: { page?: string; limit?: string; supplierId?: string; id?: string; from?: string; to?: string }) {
     return this.svc.findAll(q);
   }
 
