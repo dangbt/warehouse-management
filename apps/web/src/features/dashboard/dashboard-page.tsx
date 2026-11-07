@@ -15,6 +15,7 @@ import { WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement, useImportOrders, useExpiringBatches } from '@/data'
 import { formatDateTime, formatDate, formatNumber } from '@wms/shared'
 import { useTerm } from '@/data/use-features'
+import { LowStockList } from './low-stock-list'
 
 export function DashboardPage() {
   const t = useTerm()
@@ -22,6 +23,11 @@ export function DashboardPage() {
   const { data: movements } = useStockMovement()
   const { data: pendingOrders } = useImportOrders({ status: 'PENDING' })
   const { data: expiringBatches } = useExpiringBatches(7)
+
+  // Flag product_variants bật: biến thể tồn thấp gom theo SP, NL không thuộc SP vẫn liệt kê riêng
+  const lowProducts = summary?.lowStockProducts
+  const lowPlain = lowProducts ? (summary?.lowStock ?? []).filter((i) => !i.productId) : (summary?.lowStock ?? [])
+  const lowCount = lowPlain.length + (lowProducts?.length ?? 0)
 
   const cards = [
     { label: t('item'), value: summary?.total ?? 0, icon: <Package size={24} />, color: 'text-win-active-title' },
@@ -33,7 +39,7 @@ export function DashboardPage() {
     },
     {
       label: 'Tồn kho thấp',
-      value: summary?.lowStock.length ?? 0,
+      value: lowCount,
       icon: <AlertTriangle size={24} />,
       color: 'text-win-error',
     },
@@ -73,34 +79,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <WinGroupBox title="Tồn kho thấp" icon={<TriangleAlert size={16} strokeWidth={1.75} />}>
-          {summary?.lowStock.length ? (
-            <table className="w-full text-win-base">
-              <thead>
-                <tr className="bg-win-grid-header">
-                  <th className="text-left p-1">NL</th>
-                  <th className="p-1">Tồn</th>
-                  <th className="p-1">Min</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.lowStock.slice(0, 5).map((i) => (
-                  <tr key={i.name} className="border-b border-win-grid-border text-win-error">
-                    <td className="p-1">{i.name}</td>
-                    <td className="p-1 text-center">
-                      {i.currentStock} {i.unit}
-                    </td>
-                    <td className="p-1 text-center">
-                      {i.minStock} {i.unit}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p className="text-win-base text-win-success inline-flex items-center gap-1.5">
-              <CircleCheck size={14} /> Tất cả đủ stock
-            </p>
-          )}
+          <LowStockList plain={lowPlain} products={lowProducts} />
         </WinGroupBox>
 
         <WinGroupBox title="Hoạt động gần đây" icon={<Clock size={16} strokeWidth={1.75} />}>

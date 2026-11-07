@@ -4,6 +4,11 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { resolveReportRange } from './report-range';
 import { InventorySummaryRepository } from './inventory-summary.repository';
 import { buildInventorySummary } from './inventory-summary';
+import { FeatureGuard, RequireFeature } from '../settings/feature.guard';
+import { SettingsService } from '../settings/settings.service';
+import { buildInventorySummaryByProduct } from './inventory-summary-by-product';
+import { ProductReportsRepository } from './product-reports.repository';
+import { buildStockMatrixReport, groupLowStockByProduct } from './stock-matrix';
 import { StockCardRepository } from './stock-card.repository';
 import { buildStockCard } from './stock-card';
 import { withWarehouseStock } from '../common/warehouse-stock-view';
@@ -15,18 +20,49 @@ export class ReportsController {
     private prisma: PrismaService,
     private inventorySummaryRepo: InventorySummaryRepository,
     private stockCardRepo: StockCardRepository,
+    private productReports: ProductReportsRepository,
+    private settings: SettingsService,
   ) {}
 
   /** Tổng hợp Nhập – Xuất – Tồn theo kỳ (ngày chứng từ), lọc theo nhóm NL. */
   @Get('inventory-summary')
-  async inventorySummary(@Query() q: { from?: string; to?: string; group_id?: string; warehouse_id?: string }) {
+  async inventorySummary(
+    @Query()
+    q: {
+      from?: string;
+      to?: string;
+      group_id?: string;
+      group_by?: string;
+      category?: string;
+      attribute_value_id?: string;
+      warehouse_id?: string;
+    },
+  ) {
     if (!q.from || !q.to) throw new BadRequestException('Thiếu from/to');
     const { from, to } = resolveReportRange({ from: q.from, to: q.to });
     if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
       throw new BadRequestException('Khoảng thời gian không hợp lệ');
     }
-    const raw = await this.inventorySummaryRepo.aggregate(from, to, q.group_id || undefined, q.warehouse_id || undefined);
-    return buildInventorySummary(raw, q.from, q.to);
+    // Lọc danh mục/thuộc tính + gộp theo SP chỉ có tác dụng khi flag product_variants bật (FNB không đổi)
+    const variants = (await this.settings.getFeatures()).flags.product_variants;
+    const raw = await this.inventorySummaryRepo.aggregate(from, to, {
+      groupId: q.group_id || undefined,
+      category: variants ? q.category || undefined : undefined,
+      attributeValueId: variants ? q.attribute_value_id || undefined : undefined,
+      warehouseId: q.warehouse_id || undefined,
+    });
+    return variants && q.group_by === 'product'
+      ? buildInventorySummaryByProduct(raw, q.from, q.to)
+      : buildInventorySummary(raw, q.from, q.to);
+  }
+
+  /** Ma trận tồn size × màu theo sản phẩm hoặc danh mục (WMS-22). */
+  @Get('stock-matrix')
+  @UseGuards(FeatureGuard)
+  @RequireFeature('product_variants')
+  async stockMatrix(@Query() q: { product_id?: string; category?: string }) {
+    const inputs = await this.productReports.matrixInputs({ productId: q.product_id || undefined, category: q.category || undefined });
+    return buildStockMatrixReport(inputs);
   }
 
   /** Thẻ kho / Sổ chi tiết vật tư của 1 NL trong kỳ (ngày chứng từ): đầu kỳ, giao dịch, phát sinh, cuối kỳ. */
@@ -112,7 +148,12 @@ export class ReportsController {
 
     const ungrouped = ingredients.filter((i) => !i.groupId);
 
-    return { total, totalValue, lowStock, groups, ungrouped, ingredients };
+    // Flag product_variants bật: tồn thấp của biến thể gom theo SP (dashboard). Tắt → không có field, FNB giữ nguyên.
+    const lowStockProducts = (await this.settings.getFeatures()).flags.product_variants
+      ? groupLowStockByProduct(await this.productReports.lowStockVariants())
+      : undefined;
+
+    return { total, totalValue, lowStock, lowStockProducts, groups, ungrouped, ingredients };
   }
 
   @Get('stock-movement')

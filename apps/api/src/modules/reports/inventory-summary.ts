@@ -25,6 +25,12 @@ export interface InventorySummaryRawRow {
   inValue: number;
   outQty: number;
   outValue: number;
+  /** Biến thể (WMS-19): null với NL F&B thường. */
+  productId?: string | null;
+  productCode?: string | null;
+  productName?: string | null;
+  /** Nhãn biến thể, vd "Đỏ / M". */
+  variantLabel?: string | null;
 }
 
 export interface InventorySummaryRow {
@@ -36,13 +42,17 @@ export interface InventorySummaryRow {
   inbound: QtyValue;
   outbound: QtyValue;
   closing: QtyValue;
+  /** Chỉ có khi gộp theo sản phẩm: dòng SP = tổng các biến thể. */
+  productId?: string;
+  variants?: InventorySummaryRow[];
+  variantLabel?: string;
 }
 
 export interface InventorySummaryGroup {
   groupId: string | null;
   groupName: string;
   rows: InventorySummaryRow[];
-  total: Omit<InventorySummaryRow, 'ingredientId' | 'code' | 'name' | 'unit'>;
+  total: Omit<InventorySummaryRow, 'ingredientId' | 'code' | 'name' | 'unit' | 'productId' | 'variants'>;
 }
 
 export interface InventorySummaryReport {
@@ -58,17 +68,17 @@ export const VALUE_NOTE =
 
 const NO_GROUP_NAME = 'Chưa phân nhóm';
 
-const r3 = (n: number) => Math.round(n * 1000) / 1000;
-const r2 = (n: number) => Math.round(n * 100) / 100;
+export const r3 = (n: number) => Math.round(n * 1000) / 1000;
+export const r2 = (n: number) => Math.round(n * 100) / 100;
 
-type Total = InventorySummaryGroup['total'];
+export type Total = InventorySummaryGroup['total'];
 
-function emptyTotal(): Total {
+export function emptyTotal(): Total {
   const z = () => ({ qty: 0, value: 0 });
   return { opening: z(), inbound: z(), outbound: z(), closing: z() };
 }
 
-function addTo(total: Total, row: Total): void {
+export function addTo(total: Total, row: Total): void {
   for (const k of ['opening', 'inbound', 'outbound', 'closing'] as const) {
     total[k].qty = r3(total[k].qty + row[k].qty);
     total[k].value = r2(total[k].value + row[k].value);
@@ -81,6 +91,7 @@ export function toSummaryRow(r: InventorySummaryRawRow): InventorySummaryRow {
     code: r.code,
     name: r.name,
     unit: r.unit,
+    ...(r.variantLabel ? { variantLabel: r.variantLabel } : {}),
     opening: { qty: r3(r.openingQty), value: r2(r.openingValue) },
     inbound: { qty: r3(r.inQty), value: r2(r.inValue) },
     outbound: { qty: r3(r.outQty), value: r2(r.outValue) },
@@ -115,4 +126,12 @@ export function buildInventorySummary(raw: InventorySummaryRawRow[], from: strin
   });
   for (const g of groups) g.rows.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
   return { from, to, groups, grandTotal: grand, valueNote: VALUE_NOTE };
+}
+
+export function sortGroups(groups: InventorySummaryGroup[]): void {
+  groups.sort((a, b) => {
+    if (a.groupId === null) return 1;
+    if (b.groupId === null) return -1;
+    return a.groupName.localeCompare(b.groupName, 'vi');
+  });
 }

@@ -38,7 +38,10 @@ export function buildExcelRows(report: InventorySummaryReport): { rows: (string 
   const rows: (string | number | null)[][] = []
   for (const g of report.groups) {
     rows.push([null, `Nhóm: ${g.groupName}`, null, ...Array(8).fill(null)])
-    for (const r of g.rows) rows.push([r.code, r.name, r.unit, ...totalsCells(r)])
+    for (const r of g.rows) {
+      rows.push([r.code, r.name, r.unit, ...totalsCells(r)])
+      for (const v of r.variants ?? []) rows.push([v.code, `   ${v.variantLabel ?? v.name}`, v.unit, ...totalsCells(v)])
+    }
     rows.push([null, `Cộng nhóm ${g.groupName}`, null, ...totalsCells(g.total)])
   }
   return { rows, totalRow: [null, 'TỔNG CỘNG', null, ...totalsCells(report.grandTotal)] }

@@ -17,6 +17,7 @@ import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppTaxSettingsRouteImport } from './routes/_app/tax-settings'
 import { Route as AppSuppliersRouteImport } from './routes/_app/suppliers'
 import { Route as AppStocktakeRouteImport } from './routes/_app/stocktake'
+import { Route as AppStockMatrixRouteImport } from './routes/_app/stock-matrix'
 import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports'
 import { Route as AppStockCardRouteImport } from './routes/_app/stock-card'
 import { Route as AppSettingsBusinessRouteImport } from './routes/_app/settings-business'
@@ -44,6 +45,7 @@ import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
 import { Route as PrintSupplierPaymentsIdRouteImport } from './routes/print.supplier-payments.$id'
 import { Route as PrintStocktakeIdRouteImport } from './routes/print.stocktake.$id'
 import { Route as PrintStockExportsIdRouteImport } from './routes/print.stock-exports.$id'
+import { Route as PrintLabelsIdRouteImport } from './routes/print.labels.$id'
 import { Route as PrintImportOrdersIdRouteImport } from './routes/print.import-orders.$id'
 import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
 import { Route as AppTaxOutputRevenueRouteImport } from './routes/_app/tax/output-revenue'
@@ -89,6 +91,11 @@ const AppSuppliersRoute = AppSuppliersRouteImport.update({
 const AppStocktakeRoute = AppStocktakeRouteImport.update({
   id: '/stocktake',
   path: '/stocktake',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockMatrixRoute = AppStockMatrixRouteImport.update({
+  id: '/stock-matrix',
+  path: '/stock-matrix',
   getParentRoute: () => AppRoute,
 } as any)
 const AppStockExportsRoute = AppStockExportsRouteImport.update({
@@ -226,6 +233,11 @@ const PrintStockExportsIdRoute = PrintStockExportsIdRouteImport.update({
   path: '/print/stock-exports/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrintLabelsIdRoute = PrintLabelsIdRouteImport.update({
+  id: '/print/labels/$id',
+  path: '/print/labels/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrintImportOrdersIdRoute = PrintImportOrdersIdRouteImport.update({
   id: '/print/import-orders/$id',
   path: '/print/import-orders/$id',
@@ -291,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/settings-business': typeof AppSettingsBusinessRoute
   '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
+  '/stock-matrix': typeof AppStockMatrixRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
   '/tax-settings': typeof AppTaxSettingsRoute
@@ -302,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/tax/summary': typeof AppTaxSummaryRoute
   '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
+  '/print/labels/$id': typeof PrintLabelsIdRoute
   '/print/stock-exports/$id': typeof PrintStockExportsIdRoute
   '/print/stocktake/$id': typeof PrintStocktakeIdRoute
   '/print/supplier-payments/$id': typeof PrintSupplierPaymentsIdRoute
@@ -334,6 +348,7 @@ export interface FileRoutesByTo {
   '/settings-business': typeof AppSettingsBusinessRoute
   '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
+  '/stock-matrix': typeof AppStockMatrixRoute
   '/stocktake': typeof AppStocktakeRoute
   '/suppliers': typeof AppSuppliersRoute
   '/tax-settings': typeof AppTaxSettingsRoute
@@ -345,6 +360,7 @@ export interface FileRoutesByTo {
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/tax/summary': typeof AppTaxSummaryRoute
   '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
+  '/print/labels/$id': typeof PrintLabelsIdRoute
   '/print/stock-exports/$id': typeof PrintStockExportsIdRoute
   '/print/stocktake/$id': typeof PrintStocktakeIdRoute
   '/print/supplier-payments/$id': typeof PrintSupplierPaymentsIdRoute
@@ -379,6 +395,7 @@ export interface FileRoutesById {
   '/_app/settings-business': typeof AppSettingsBusinessRoute
   '/_app/stock-card': typeof AppStockCardRoute
   '/_app/stock-exports': typeof AppStockExportsRoute
+  '/_app/stock-matrix': typeof AppStockMatrixRoute
   '/_app/stocktake': typeof AppStocktakeRoute
   '/_app/suppliers': typeof AppSuppliersRoute
   '/_app/tax-settings': typeof AppTaxSettingsRoute
@@ -390,6 +407,7 @@ export interface FileRoutesById {
   '/_app/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/_app/tax/summary': typeof AppTaxSummaryRoute
   '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
+  '/print/labels/$id': typeof PrintLabelsIdRoute
   '/print/stock-exports/$id': typeof PrintStockExportsIdRoute
   '/print/stocktake/$id': typeof PrintStocktakeIdRoute
   '/print/supplier-payments/$id': typeof PrintSupplierPaymentsIdRoute
@@ -424,6 +442,7 @@ export interface FileRouteTypes {
     | '/settings-business'
     | '/stock-card'
     | '/stock-exports'
+    | '/stock-matrix'
     | '/stocktake'
     | '/suppliers'
     | '/tax-settings'
@@ -435,6 +454,7 @@ export interface FileRouteTypes {
     | '/tax/output-revenue'
     | '/tax/summary'
     | '/print/import-orders/$id'
+    | '/print/labels/$id'
     | '/print/stock-exports/$id'
     | '/print/stocktake/$id'
     | '/print/supplier-payments/$id'
@@ -467,6 +487,7 @@ export interface FileRouteTypes {
     | '/settings-business'
     | '/stock-card'
     | '/stock-exports'
+    | '/stock-matrix'
     | '/stocktake'
     | '/suppliers'
     | '/tax-settings'
@@ -478,6 +499,7 @@ export interface FileRouteTypes {
     | '/tax/output-revenue'
     | '/tax/summary'
     | '/print/import-orders/$id'
+    | '/print/labels/$id'
     | '/print/stock-exports/$id'
     | '/print/stocktake/$id'
     | '/print/supplier-payments/$id'
@@ -511,6 +533,7 @@ export interface FileRouteTypes {
     | '/_app/settings-business'
     | '/_app/stock-card'
     | '/_app/stock-exports'
+    | '/_app/stock-matrix'
     | '/_app/stocktake'
     | '/_app/suppliers'
     | '/_app/tax-settings'
@@ -522,6 +545,7 @@ export interface FileRouteTypes {
     | '/_app/tax/output-revenue'
     | '/_app/tax/summary'
     | '/print/import-orders/$id'
+    | '/print/labels/$id'
     | '/print/stock-exports/$id'
     | '/print/stocktake/$id'
     | '/print/supplier-payments/$id'
@@ -533,6 +557,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
   PrintImportOrdersIdRoute: typeof PrintImportOrdersIdRoute
+  PrintLabelsIdRoute: typeof PrintLabelsIdRoute
   PrintStockExportsIdRoute: typeof PrintStockExportsIdRoute
   PrintStocktakeIdRoute: typeof PrintStocktakeIdRoute
   PrintSupplierPaymentsIdRoute: typeof PrintSupplierPaymentsIdRoute
@@ -594,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/stocktake'
       fullPath: '/stocktake'
       preLoaderRoute: typeof AppStocktakeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/stock-matrix': {
+      id: '/_app/stock-matrix'
+      path: '/stock-matrix'
+      fullPath: '/stock-matrix'
+      preLoaderRoute: typeof AppStockMatrixRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/stock-exports': {
@@ -785,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrintStockExportsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/print/labels/$id': {
+      id: '/print/labels/$id'
+      path: '/print/labels/$id'
+      fullPath: '/print/labels/$id'
+      preLoaderRoute: typeof PrintLabelsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/print/import-orders/$id': {
       id: '/print/import-orders/$id'
       path: '/print/import-orders/$id'
@@ -862,6 +901,7 @@ interface AppRouteChildren {
   AppSettingsBusinessRoute: typeof AppSettingsBusinessRoute
   AppStockCardRoute: typeof AppStockCardRoute
   AppStockExportsRoute: typeof AppStockExportsRoute
+  AppStockMatrixRoute: typeof AppStockMatrixRoute
   AppStocktakeRoute: typeof AppStocktakeRoute
   AppSuppliersRoute: typeof AppSuppliersRoute
   AppTaxSettingsRoute: typeof AppTaxSettingsRoute
@@ -899,6 +939,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsBusinessRoute: AppSettingsBusinessRoute,
   AppStockCardRoute: AppStockCardRoute,
   AppStockExportsRoute: AppStockExportsRoute,
+  AppStockMatrixRoute: AppStockMatrixRoute,
   AppStocktakeRoute: AppStocktakeRoute,
   AppSuppliersRoute: AppSuppliersRoute,
   AppTaxSettingsRoute: AppTaxSettingsRoute,
@@ -919,6 +960,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
   PrintImportOrdersIdRoute: PrintImportOrdersIdRoute,
+  PrintLabelsIdRoute: PrintLabelsIdRoute,
   PrintStockExportsIdRoute: PrintStockExportsIdRoute,
   PrintStocktakeIdRoute: PrintStocktakeIdRoute,
   PrintSupplierPaymentsIdRoute: PrintSupplierPaymentsIdRoute,
