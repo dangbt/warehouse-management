@@ -66,3 +66,6 @@ export type { CostingMethod, CostingSettings, CostingRunResult } from './use-cos
 export { useInventoryPeriod, useLockInventoryPeriod, useReopenInventoryPeriod } from './use-inventory-period'
 export type { InventoryPeriodStatus, LockResult } from './use-inventory-period'
 export { useFeatures, useTerm, useUpdateFeatures } from './use-features'
+export { useKiotVietWarehouseMap, useSaveKiotVietWarehouseMap } from './use-kiotviet-warehouse'
+export { useWarehouses, useCreateWarehouse, useUpdateWarehouse, useDeleteWarehouse } from './use-warehouses'
+export type { Warehouse } from './use-warehouses'

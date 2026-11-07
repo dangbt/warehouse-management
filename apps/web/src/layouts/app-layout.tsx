@@ -83,6 +83,13 @@ function buildMenuTree(isHousehold: boolean, t: (k: TermKey) => string): TreeNod
           permission: 'ingredients:read',
         },
         {
+          id: 'warehouses',
+          label: 'Danh mục kho',
+          icon: <NavIcon id="/warehouses" size={15} />,
+          route: '/warehouses',
+          permission: 'warehouses:read',
+        },
+        {
           id: 'groups',
           label: t('item_group'),
           icon: <NavIcon id="/ingredient-groups" size={15} />,
@@ -298,6 +305,7 @@ export function AppLayout() {
             items={[
               { label: t('item'), route: '/ingredients' },
               { label: t('item_group'), route: '/ingredient-groups' },
+              ...(hasPermission('warehouses:read') ? [{ label: 'Danh mục kho', route: '/warehouses' }] : []),
               ...(isEnabled('product_variants')
                 ? [
                     { label: 'Sản phẩm', route: '/products' },

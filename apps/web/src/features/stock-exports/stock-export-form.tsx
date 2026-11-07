@@ -11,6 +11,8 @@ import { VoucherFields } from '@/components/voucher-fields'
 import { useVoucherFields } from '@/data/use-vouchers'
 import type { VoucherPayload } from '@/data/use-vouchers'
 import { useTerm } from '@/data/use-features'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseChoice } from '@/hooks/use-warehouse-choice'
 import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
 import { mergeExportLines, type MatrixLine } from '@/components/matrix-picker/matrix-logic'
 
@@ -42,7 +44,7 @@ export interface StockExportSeed {
 interface Props {
   open: boolean
   onClose: () => void
-  onSave?: (data: FormData & VoucherPayload) => void | Promise<unknown>
+  onSave?: (data: FormData & VoucherPayload & { warehouse_id?: string }) => void | Promise<unknown>
   seed?: StockExportSeed | null
 }
 
@@ -61,6 +63,9 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
   const [ingLoading, setIngLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const voucher = useVoucherFields('EXPORT', open)
+  const wh = useWarehouseChoice()
+  const whRef = useRef('')
+  whRef.current = wh.warehouseId
   const [lines, setLines] = useState<MatrixLine[]>([])
   // Số CT tự đặt chỉ dùng cho phiếu đầu tiên khi xuất nhiều dòng từ ma trận; phiếu sau để server tự sinh.
   const voucherNoUsed = useRef(false)
@@ -68,7 +73,7 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
   const fetchIngredients = useCallback((search: string) => {
     setIngLoading(true)
     api
-      .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}`)
+      .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}${whRef.current ? `&warehouse_id=${whRef.current}` : ''}`)
       .then((res) => {
         const list = (res.data as { id: string; name: string; sku?: string | null; currentStock: string; unit: string }[]).map((i) => ({
           value: i.id,
@@ -93,10 +98,15 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
     }
   }, [open, seed, reset, fetchIngredients])
 
+  // Đổi kho ⇒ tải lại danh sách để số tồn hiển thị đúng kho đang chọn.
+  useEffect(() => {
+    if (open && wh.warehouseId) fetchIngredients('')
+  }, [open, wh.warehouseId, fetchIngredients])
+
   const onSubmit = async (data: FormData, keepOpen = false) => {
     try {
       setSubmitError('')
-      await onSave?.({ ...data, ...voucher.payload() })
+      await onSave?.({ ...data, ...voucher.payload(), warehouse_id: wh.warehouseId || undefined })
       reset()
       if (!keepOpen) onClose()
     } catch (e: unknown) {
@@ -121,7 +131,7 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
       // Bỏ từng dòng khỏi `lines` ngay khi lưu xong: lỗi giữa chừng thì bấm Lưu lại không xuất trùng dòng đã lưu.
       for (const l of lines) {
         const { voucher_date, voucher_no } = voucher.payload()
-        await onSave?.({ ingredient_id: l.itemId, quantity: l.quantity, reason, note, voucher_date, voucher_no: voucherNoUsed.current ? undefined : voucher_no })
+        await onSave?.({ warehouse_id: wh.warehouseId || undefined, ingredient_id: l.itemId, quantity: l.quantity, reason, note, voucher_date, voucher_no: voucherNoUsed.current ? undefined : voucher_no })
         voucherNoUsed.current = true
         setLines((cur) => cur.filter((x) => x.itemId !== l.itemId))
       }
@@ -173,6 +183,7 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
       <WinGroupBox title="Thông tin xuất kho">
         <div className="space-y-2.5">
           <VoucherFields {...voucher} />
+          <WarehouseSelect label="Kho" value={wh.warehouseId} onChange={wh.setWarehouseId} />
           <Controller
             name="ingredient_id"
             control={control}

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   AlertTriangle,
   ArrowDownToLine,
@@ -16,10 +17,12 @@ import { useStockSummary, useStockMovement, useImportOrders, useExpiringBatches 
 import { formatDateTime, formatDate, formatNumber } from '@wms/shared'
 import { useTerm } from '@/data/use-features'
 import { LowStockList } from './low-stock-list'
+import { WarehouseSelect } from '@/components/warehouse-select'
 
 export function DashboardPage() {
   const t = useTerm()
-  const { data: summary, refetch: refetchSummary } = useStockSummary()
+  const [warehouseId, setWarehouseId] = useState('')
+  const { data: summary, refetch: refetchSummary } = useStockSummary(warehouseId || undefined)
   const { data: movements } = useStockMovement()
   const { data: pendingOrders } = useImportOrders({ status: 'PENDING' })
   const { data: expiringBatches } = useExpiringBatches(7)
@@ -57,6 +60,7 @@ export function DashboardPage() {
         <h2 className="text-sm font-semibold inline-flex items-center gap-1.5">
           <LayoutDashboard size={16} strokeWidth={1.75} className="text-win-active-title" /> Dashboard
         </h2>
+        <WarehouseSelect allowAll value={warehouseId} onChange={setWarehouseId} testId="filter-warehouse" />
         <button
           onClick={() => refetchSummary()}
           className="flex items-center gap-1 text-win-base text-win-active-title hover:underline cursor-pointer"

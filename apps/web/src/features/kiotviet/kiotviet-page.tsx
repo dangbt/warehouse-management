@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { RefreshCw, Upload, MinusCircle } from 'lucide-react'
+import { RefreshCw, Upload, MinusCircle, Warehouse } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useKiotVietOrders, useSyncKiotViet, useDeductOrder } from '@/data'
@@ -9,6 +9,8 @@ import type { KiotVietOrder } from '@/data/use-kiotviet'
 import { translateApiMessage } from '@/utils/api-error-messages'
 import { Route } from '@/routes/_app/kiotviet'
 import { FeatureGate } from '@/components/feature-gate'
+import { useWarehouses } from '@/data/use-warehouses'
+import { WarehouseMappingDialog } from './warehouse-mapping-dialog'
 
 const columns: Column<KiotVietOrder>[] = [
   { key: 'code', header: 'Mã đơn', width: 120 },
@@ -44,6 +46,8 @@ export function KiotVietPage() {
   const setPage = (p: number) => setParams({ page: p })
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [mappingOpen, setMappingOpen] = useState(false)
+  const { data: warehouses } = useWarehouses({ activeOnly: true })
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { data: res, isLoading, refetch } = useKiotVietOrders({ page, deducted: deducted || undefined, orderBy, sort })
   const syncMutation = useSyncKiotViet()
@@ -88,9 +92,17 @@ export function KiotVietPage() {
             disabled={!selectedOrder || selectedOrder.deducted || deductMutation.isPending}
           />
         </FeatureGate>
+        {(warehouses?.length ?? 0) > 1 && (
+          <WinToolbar.Button icon={<Warehouse size={16} />} label="Kho theo chi nhánh" onClick={() => setMappingOpen(true)} />
+        )}
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
+      <WarehouseMappingDialog
+        open={mappingOpen}
+        onClose={() => setMappingOpen(false)}
+        knownBranchIds={[...new Set((res?.data ?? []).map((o) => o.branchId).filter((b): b is string => !!b))]}
+      />
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileChange} />
       <WinDataGrid searchable
         columns={columns}

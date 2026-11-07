@@ -11,6 +11,8 @@ import type { Batch } from '@/data/use-batches'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
 import { useTerm, useFeatures } from '@/data/use-features'
 import { openPrint } from '@/components/print/print-utils'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { WarehouseStockPanel, type StockByWarehouse } from './warehouse-stock-panel'
 
 interface IngredientRow {
   id: string
@@ -24,6 +26,7 @@ interface IngredientRow {
   sku?: string | null
   barcode?: string | null
   product?: { id: string; code: string; name: string } | null
+  ingredientStocks?: StockByWarehouse[]
 }
 
 /** Cột SP cha + SKU: chỉ chèn khi profile bật product_variants (FNB giữ nguyên giao diện). */
@@ -71,12 +74,13 @@ export function IngredientsPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
+  const [warehouseId, setWarehouseId] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<IngredientRow | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined })
+  const { data: res, isLoading, refetch } = useIngredients({ page, search: search || undefined, category: category || undefined, warehouseId: warehouseId || undefined })
   const createMutation = useCreateIngredient()
   const updateMutation = useUpdateIngredient()
   const deleteMutation = useDeleteIngredient()
@@ -180,6 +184,15 @@ export function IngredientsPage() {
           <option value="Đồ khô">Đồ khô</option>
           <option value="Đồ uống">Đồ uống</option>
         </select>
+        <WarehouseSelect
+          allowAll
+          value={warehouseId}
+          onChange={(v) => {
+            setWarehouseId(v)
+            setPage(1)
+          }}
+          testId="filter-warehouse"
+        />
       </WinToolbar>
 
       <WinDataGrid
@@ -216,6 +229,7 @@ export function IngredientsPage() {
         }}
       />
 
+      {selected && <WarehouseStockPanel unit={selected.unit} total={selected.currentStock} stocks={selected.ingredientStocks} />}
       {selected && <BatchesPanel ingredientId={selected.id} />}
     </div>
   )

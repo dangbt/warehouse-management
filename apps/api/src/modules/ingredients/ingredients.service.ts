@@ -72,6 +72,8 @@ export class IngredientsService {
           product: { select: { id: true, code: true, name: true } },
           units: true,
           source: { select: { id: true, name: true } },
+          // Tồn từng kho (trang Nguyên liệu hiển thị chi tiết theo kho).
+          ingredientStocks: { select: { warehouseId: true, qty: true } },
         },
       }),
       this.prisma.ingredient.count({ where }),

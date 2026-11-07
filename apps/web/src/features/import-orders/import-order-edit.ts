@@ -3,6 +3,7 @@ export interface EditableImportOrder {
   id: string
   voucherDate: string
   voucherNo: string
+  warehouseId?: string
   supplierId?: string
   note?: string | null
   paid?: boolean

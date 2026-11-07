@@ -11,6 +11,7 @@ const defaultSearch = {
   to: '',
   orderBy: 'voucherDate',
   sort: 'desc',
+  warehouseId: '',
 }
 
 const searchSchema = z.object({
@@ -20,6 +21,7 @@ const searchSchema = z.object({
   to: z.string().default(defaultSearch.to),
   orderBy: z.string().default(defaultSearch.orderBy),
   sort: z.enum(['asc', 'desc']).default(defaultSearch.sort as 'desc'),
+  warehouseId: z.string().default(defaultSearch.warehouseId),
   /** Mở đúng một chứng từ (từ Thẻ kho). */
   id: z.string().optional(),
 })

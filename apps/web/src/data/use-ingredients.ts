@@ -16,6 +16,8 @@ interface Ingredient {
   createdAt: string
   sku?: string | null
   barcode?: string | null
+  /** Tồn từng kho (API trả kèm danh sách). */
+  ingredientStocks?: { warehouseId: string; qty: string }[]
 }
 
 interface ListResponse {
@@ -23,7 +25,7 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useIngredients(params?: { page?: number; category?: string; search?: string; limit?: number; orderBy?: string; sort?: string }) {
+export function useIngredients(params?: { page?: number; category?: string; search?: string; limit?: number; orderBy?: string; sort?: string; warehouseId?: string }) {
   const query = new URLSearchParams()
   if (params?.page) query.set('page', String(params.page))
   if (params?.category) query.set('category', params.category)
@@ -31,6 +33,7 @@ export function useIngredients(params?: { page?: number; category?: string; sear
   if (params?.limit) query.set('limit', String(params.limit))
   if (params?.orderBy) query.set('orderBy', params.orderBy)
   if (params?.sort) query.set('sort', params.sort)
+  if (params?.warehouseId) query.set('warehouse_id', params.warehouseId)
   const key = QUERY_KEYS.ingredientsList(Object.fromEntries(query))
 
   return useQuery<ListResponse>({ queryKey: key, queryFn: () => api.get(`/ingredients?${query}`) })

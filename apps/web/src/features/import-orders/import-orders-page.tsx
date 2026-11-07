@@ -19,6 +19,8 @@ import {
 } from '@/data'
 import { useAuthStore } from '@/stores/auth.store'
 import { importOrderConfirmMessage, type ImportOrderAction } from './import-order-actions'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseColumn } from '@/components/warehouse-column'
 import { PeriodFilter } from '@/components/period-filter'
 import { resolvePeriod } from '@/utils/period'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
@@ -47,6 +49,7 @@ interface ImportOrder {
   createdAt: string
   voucherDate: string
   voucherNo: string
+  warehouseId?: string
   hasInvoice?: boolean
   invoiceNo?: string | null
   invoiceSymbol?: string | null
@@ -122,13 +125,15 @@ export function ImportOrdersPage() {
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const [confirmAction, setConfirmAction] = useState<ImportOrderAction | null>(null)
   const [seed, setSeed] = useState<ImportOrderSeed | null>(null)
-  const { page, status: statusFilter, period, from, to } = Route.useSearch()
+  const { page, status: statusFilter, period, from, to, warehouseId } = Route.useSearch()
+  const whColumn = useWarehouseColumn<ImportOrder>((r) => r.warehouseId)
   const setParams = (updates: Record<string, unknown>) => navigate({ search: (prev) => ({ ...prev, ...updates }) })
 
   const { data: res, isLoading, refetch } = useImportOrders({
     id: focusId,
     status: statusFilter || undefined,
     page,
+    warehouseId: warehouseId || undefined,
     ...resolvePeriod(period, from, to),
   })
   const createMutation = useCreateImportOrder()
@@ -246,12 +251,13 @@ export function ImportOrdersPage() {
           <option value="CANCELLED">Đã huỷ</option>
         </select>
         <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams({ ...v, page: 1 })} />
+        <WarehouseSelect allowAll value={warehouseId} onChange={(v) => setParams({ warehouseId: v, page: 1 })} testId="filter-warehouse" />
       </WinToolbar>
 
       {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => { setSelected(null); navigate({ search: (p) => ({ ...p, id: undefined }) }) }} />}
       <WinDataGrid
         searchable
-        columns={columns}
+        columns={[...columns.slice(0, 2), ...whColumn, ...columns.slice(2)]}
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page, limit: 50, total: res?.meta.total ?? 0 }}
