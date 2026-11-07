@@ -62,6 +62,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   '/reports': BarChart3,
   '/ingredient-usage': TrendingDown,
   '/consumption-variance': Scale,
+  '/inventory-summary': BarChart3,
   '/users': Users,
   '/roles': KeyRound,
   '/audit-logs': ScrollText,

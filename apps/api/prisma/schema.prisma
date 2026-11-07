@@ -218,6 +218,7 @@ model StockTransaction {
 
   @@index([ingredientId, createdAt])
   @@index([ingredientId, voucherDate])
+  @@index([voucherDate, ingredientId])
   @@index([referenceId, type])
   @@map("stock_transactions")
 }
