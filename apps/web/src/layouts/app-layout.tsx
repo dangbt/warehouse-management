@@ -8,6 +8,9 @@ import { SupportWidget } from '@/components/support-widget'
 import { ShortcutHelp } from '@/components/shortcut-help'
 import { useHealth } from '@/data/use-health'
 import { useTaxSettings } from '@/data'
+import { useFeatures, useTerm } from '@/data/use-features'
+import { featureForPath } from '@/utils/route-features'
+import type { TermKey } from '@/utils/terms'
 import { now } from '@wms/shared'
 import { NavIcon } from '@/components/nav-icons'
 import type { TreeNode } from '@wms/ui-winforms'
@@ -16,7 +19,7 @@ import type { TreeNode } from '@wms/ui-winforms'
  * Cây menu bên trái. `isHousehold` bật mục "Sổ hộ kinh doanh" (chỉ áp dụng cho
  * hộ kinh doanh; ẩn khi chế độ VAT khấu trừ).
  */
-function buildMenuTree(isHousehold: boolean): TreeNode[] {
+function buildMenuTree(isHousehold: boolean, t: (k: TermKey) => string): TreeNode[] {
   const taxChildren: TreeNode[] = [
     {
       id: 'tax-settings',
@@ -72,14 +75,14 @@ function buildMenuTree(isHousehold: boolean): TreeNode[] {
       children: [
         {
           id: 'ingredients',
-          label: 'Nguyên liệu',
+          label: t('item'),
           icon: <NavIcon id="/ingredients" size={15} />,
           route: '/ingredients',
           permission: 'ingredients:read',
         },
         {
           id: 'groups',
-          label: 'Nhóm nguyên liệu',
+          label: t('item_group'),
           icon: <NavIcon id="/ingredient-groups" size={15} />,
           route: '/ingredient-groups',
           permission: 'ingredients:read',
@@ -161,7 +164,7 @@ function buildMenuTree(isHousehold: boolean): TreeNode[] {
       children: taxChildren,
     },
     { id: 'reports', label: 'Báo cáo', icon: <NavIcon id="/reports" />, route: '/reports', permission: 'reports:read' },
-    { id: 'usage', label: 'Báo cáo NL', icon: <NavIcon id="/ingredient-usage" />, route: '/ingredient-usage', permission: 'reports:read' },
+    { id: 'usage', label: t('item_usage_report'), icon: <NavIcon id="/ingredient-usage" />, route: '/ingredient-usage', permission: 'reports:read' },
     { id: 'costing', label: 'Tính giá xuất kho', icon: <NavIcon id="/costing" />, route: '/costing', permission: 'tax:read' },
     { id: 'inventory-period', label: 'Khoá sổ kho', icon: <NavIcon id="/inventory-period" />, route: '/inventory-period', permission: 'inventory_period:read' },
     { id: 'inventory-summary', label: 'Nhập–Xuất–Tồn', icon: <NavIcon id="/inventory-summary" />, route: '/inventory-summary', permission: 'reports:read' },
@@ -188,6 +191,13 @@ function buildMenuTree(isHousehold: boolean): TreeNode[] {
           route: '/audit-logs',
           permission: 'audit_logs:read',
         },
+        {
+          id: 'settings-business',
+          label: 'Ngành nghề',
+          icon: <NavIcon id="/settings-business" size={15} />,
+          route: '/settings-business',
+          permission: 'settings:update',
+        },
       ],
     },
   ]
@@ -204,7 +214,17 @@ export function AppLayout() {
   const taxSettings = useTaxSettings({ enabled: hasPermission('tax:read') })
   const isHousehold = taxSettings.data?.regime === 'HOUSEHOLD'
 
-  const filteredTree = filterTree(buildMenuTree(isHousehold), hasPermission)
+  const { isEnabled, isLoaded } = useFeatures()
+  const t = useTerm()
+
+  // Vào URL của module đã tắt → về dashboard (chỉ khi đã tải xong flag, tránh redirect nhầm).
+  const routeFeature = featureForPath(location.pathname)
+  const routeBlocked = isLoaded && !!routeFeature && !isEnabled(routeFeature)
+  useEffect(() => {
+    if (routeBlocked) navigate({ to: '/dashboard', replace: true })
+  }, [routeBlocked, navigate])
+
+  const filteredTree = filterTree(buildMenuTree(isHousehold, t), hasPermission)
   const activeNode = findActive(filteredTree, location.pathname)
 
   function findActive(nodes: TreeNode[], path: string): string | undefined {
@@ -220,6 +240,8 @@ export function AppLayout() {
   function filterTree(nodes: TreeNode[], check: (p: string) => boolean): TreeNode[] {
     return nodes.reduce<TreeNode[]>((acc, node) => {
       if (node.permission && !check(node.permission)) return acc
+      const feature = node.route ? featureForPath(node.route) : undefined
+      if (feature && !isEnabled(feature)) return acc
       const children = node.children ? filterTree(node.children, check) : undefined
       if (node.children && (!children || children.length === 0)) return acc
       acc.push({ ...node, children })
@@ -247,6 +269,7 @@ export function AppLayout() {
           label="Hệ thống"
           items={[
             { label: 'Dashboard', route: '/dashboard' },
+            ...(hasPermission('settings:update') ? [{ label: 'Ngành nghề', route: '/settings-business' }] : []),
             ...(hasPermission('users:read')
               ? [
                   { label: 'Users', route: '/users' },
@@ -261,11 +284,11 @@ export function AppLayout() {
           <MenuDrop
             label="Kho"
             items={[
-              { label: 'Nguyên liệu', route: '/ingredients' },
-              { label: 'Nhóm nguyên liệu', route: '/ingredient-groups' },
+              { label: t('item'), route: '/ingredients' },
+              { label: t('item_group'), route: '/ingredient-groups' },
               ...(hasPermission('import_orders:read') ? [{ label: 'Nhập kho', route: '/import-orders' }] : []),
               ...(hasPermission('stock_exports:read') ? [{ label: 'Xuất kho', route: '/stock-exports' }] : []),
-              ...(hasPermission('processing:read') ? [{ label: 'Chế biến', route: '/processing' }] : []),
+              ...(hasPermission('processing:read') && isEnabled('processing') ? [{ label: 'Chế biến', route: '/processing' }] : []),
               ...(hasPermission('suppliers:read') ? [{ label: 'Nhà cung cấp', route: '/suppliers' }] : []),
               { label: 'Kiểm kê', route: '/stocktake' },
               ...(hasPermission('purchase_requests:read') ? [{ label: 'Đề nghị mua hàng', route: '/purchase-requests' }] : []),
@@ -275,17 +298,19 @@ export function AppLayout() {
             onNav={(r) => navigate({ to: r })}
           />
         )}
-        {hasPermission('recipes:read') && (
+        {hasPermission('recipes:read') && (isEnabled('menu') || isEnabled('recipes')) && (
           <MenuDrop
             label="Bếp"
             items={[
-              { label: 'Thực đơn', route: '/menu' },
-              { label: 'Công thức', route: '/recipes' },
+              ...(isEnabled('menu') ? [{ label: 'Thực đơn', route: '/menu' }] : []),
+              ...(isEnabled('recipes') ? [{ label: 'Công thức', route: '/recipes' }] : []),
             ]}
             onNav={(r) => navigate({ to: r })}
           />
         )}
-        <MenuDrop label="KiotViet" items={[{ label: 'KiotViet', route: '/kiotviet' }]} onNav={(r) => navigate({ to: r })} />
+        {isEnabled('sales_channels') && (
+          <MenuDrop label="KiotViet" items={[{ label: 'KiotViet', route: '/kiotviet' }]} onNav={(r) => navigate({ to: r })} />
+        )}
         {hasPermission('tax:read') && (
           <MenuDrop
             label="Thuế"
@@ -304,7 +329,7 @@ export function AppLayout() {
             label="Báo cáo"
             items={[
               { label: 'Báo cáo', route: '/reports' },
-              { label: 'Báo cáo NL', route: '/ingredient-usage' },
+              { label: t('item_usage_report'), route: '/ingredient-usage' },
               { label: 'Nhập – Xuất – Tồn', route: '/inventory-summary' },
               { label: 'Thẻ kho / Sổ chi tiết VT', route: '/stock-card' },
               { label: 'Tính giá xuất kho', route: '/costing' },
@@ -370,7 +395,7 @@ export function AppLayout() {
 
         {/* Content Area */}
         <div className="flex-1 overflow-hidden flex flex-col bg-white">
-          <Outlet />
+          {routeBlocked ? null : <Outlet />}
         </div>
       </div>
 

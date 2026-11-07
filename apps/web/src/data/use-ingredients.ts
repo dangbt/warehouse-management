@@ -1,3 +1,4 @@
+import { currentTerm } from './use-features'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { api } from '@/services/api'
 import { queryClient } from './query-client'
@@ -51,7 +52,7 @@ export function useCreateIngredient() {
         if (!old) return old
         return { ...old, data: [...old.data, newItem], meta: { ...old.meta, total: old.meta.total + 1 } }
       })
-      useToastStore.getState().success('Thêm nguyên liệu thành công')
+      useToastStore.getState().success(`Thêm ${currentTerm('item_lower')} thành công`)
     },
     onError: (e: Error) => {
       useToastStore.getState().error(e.message)
@@ -93,7 +94,7 @@ export function useDeleteIngredient() {
         if (!old) return old
         return { ...old, data: old.data.filter((i) => i.id !== id), meta: { ...old.meta, total: old.meta.total - 1 } }
       })
-      useToastStore.getState().success('Đã xoá nguyên liệu')
+      useToastStore.getState().success(`Đã xoá ${currentTerm('item_lower')}`)
     },
     onError: (e: Error) => {
       useToastStore.getState().error(e.message)

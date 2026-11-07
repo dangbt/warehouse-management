@@ -2,8 +2,10 @@ import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, NotFoundExce
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
+import { FeatureGuard, RequireFeature } from '../settings/feature.guard';
 
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, FeatureGuard)
+@RequireFeature('recipes')
 @Controller('recipes')
 export class RecipesController {
   constructor(private prisma: PrismaService) {}

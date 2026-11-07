@@ -63,3 +63,4 @@ export { useCostingSettings, useUpdateCostingMethod, useRunCosting, COSTING_METH
 export type { CostingMethod, CostingSettings, CostingRunResult } from './use-costing'
 export { useInventoryPeriod, useLockInventoryPeriod, useReopenInventoryPeriod } from './use-inventory-period'
 export type { InventoryPeriodStatus, LockResult } from './use-inventory-period'
+export { useFeatures, useTerm, useUpdateFeatures } from './use-features'

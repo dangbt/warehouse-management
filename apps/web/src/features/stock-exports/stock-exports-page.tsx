@@ -8,11 +8,13 @@ import type { Column } from '@wms/ui-winforms'
 import { StockExportForm, type StockExportSeed } from './stock-export-form'
 import { useStockExports, useCreateStockExport, useCancelStockExport } from '@/data'
 import { useAuthStore } from '@/stores/auth.store'
+import type { TermKey } from '@/utils/terms'
 import { formatDate, formatNumber, formatCurrency } from '@wms/shared'
 import { PeriodFilter } from '@/components/period-filter'
 import { resolvePeriod } from '@/utils/period'
 import { Route } from '@/routes/_app/stock-exports'
 import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
+import { useTerm } from '@/data/use-features'
 
 interface StockExport {
   id: string
@@ -28,10 +30,10 @@ interface StockExport {
 
 const REASON_LABELS: Record<string, string> = { DAMAGED: 'Hỏng', EXPIRED: 'Hết hạn', RETURN: 'Trả NCC', INTERNAL_USE: 'Sử dụng nội bộ', OTHER: 'Khác' }
 
-const columns: Column<StockExport>[] = [
+const makeColumns = (t: (k: TermKey) => string): Column<StockExport>[] => [
   { key: 'voucherDate', header: 'Ngày CT', width: 100, align: 'center', render: (r) => formatDate(r.voucherDate) },
   { key: 'voucherNo', header: 'Số CT', width: 140, render: (r) => r.export?.voucherNo ?? '' },
-  { key: 'ingredient', header: 'Nguyên liệu', width: 150, render: (r) => r.ingredient?.name },
+  { key: 'ingredient', header: t('item'), width: 150, render: (r) => r.ingredient?.name },
   {
     key: 'quantity',
     header: 'Số lượng',
@@ -59,6 +61,8 @@ const columns: Column<StockExport>[] = [
 ]
 
 export function StockExportsPage() {
+  const t = useTerm()
+  const columns = makeColumns(t)
   const { page, orderBy, sort, period, from, to, id: focusId } = Route.useSearch()
   const range = resolvePeriod(period, from, to)
   const navigate = useNavigate({ from: Route.fullPath })

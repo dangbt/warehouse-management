@@ -622,3 +622,12 @@ model SupplierItemMapping {
   @@unique([supplierId, itemKey, unitKey])
   @@map("supplier_item_mappings")
 }
+
+/// Cấu hình key-value của deploy (business profile, feature flag override...).
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}

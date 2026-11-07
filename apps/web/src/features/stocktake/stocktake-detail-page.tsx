@@ -5,6 +5,7 @@ import { useParams, useNavigate } from '@tanstack/react-router'
 import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStocktakeDetail, useUpdateStocktakeItems, useCompleteStocktake } from '@/data'
 import type { StocktakeItem } from '@/data/use-stocktake'
+import { useTerm } from '@/data/use-features'
 
 interface ItemRow {
   id: string
@@ -17,6 +18,7 @@ interface ItemRow {
 }
 
 export function StocktakeDetailPage() {
+  const t = useTerm()
   const { id } = useParams({ from: '/_app/stocktake_/$id' })
   const navigate = useNavigate()
   const { data: detail, isLoading } = useStocktakeDetail(id)
@@ -105,7 +107,7 @@ export function StocktakeDetailPage() {
           <table className="w-full text-win-base">
             <thead>
               <tr className="bg-win-grid-header">
-                <th className="text-left p-1">Nguyên liệu</th>
+                <th className="text-left p-1">{t('item')}</th>
                 <th className="p-1 w-16">ĐVT</th>
                 <th className="p-1 w-20">Hệ thống</th>
                 <th className="p-1 w-24">Thực tế</th>

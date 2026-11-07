@@ -7,6 +7,7 @@ import { useRevenueBook, useMaterialsBook, useIngredients } from '@/data'
 import type { RevenueBookReport, MaterialsBookReport } from '@/data'
 import { exportSheet, exportMultiSheet } from '@/utils/excel'
 import { useToastStore } from '@/stores/toast.store'
+import { useTerm } from '@/data/use-features'
 
 /** Định dạng ngày ISO → dd/mm/yyyy (theo giờ VN). */
 function fmtDate(iso: string | null): string {
@@ -216,6 +217,7 @@ function materialRowClass(r: MaterialFlatRow): string {
 // ---------------------------------------------------------------------------
 
 export function HouseholdBooksPage() {
+  const t = useTerm()
   const [tab, setTab] = useState<'S1' | 'S2'>('S1')
   const [periodType, setPeriodType] = useState<'MONTH' | 'QUARTER'>('QUARTER')
   const periodOptions = useMemo(() => buildPeriodOptions(periodType), [periodType])
@@ -229,10 +231,10 @@ export function HouseholdBooksPage() {
   const ingredientsQuery = useIngredients({ limit: 1000 })
 
   const ingredientOptions = useMemo(() => {
-    const opts = [{ value: '', label: 'Tất cả nguyên liệu' }]
+    const opts = [{ value: '', label: `Tất cả ${t('item_lower')}` }]
     for (const i of ingredientsQuery.data?.data ?? []) opts.push({ value: i.id, label: i.name })
     return opts
-  }, [ingredientsQuery.data])
+  }, [ingredientsQuery.data, t])
 
   const revenueRows = useMemo(() => (revenue.data ? flattenRevenue(revenue.data) : []), [revenue.data])
   const materialRows = useMemo(() => (materials.data ? flattenMaterials(materials.data) : []), [materials.data])

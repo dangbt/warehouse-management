@@ -25,6 +25,7 @@ import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/
 import type { VatRate } from '@wms/shared'
 import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
 import { Route } from '@/routes/_app/import-orders'
+import { useTerm } from '@/data/use-features'
 
 interface ImportOrderItem {
   id: string
@@ -112,6 +113,7 @@ const columns: Column<ImportOrder>[] = [
 export function ImportOrdersPage() {
   const { id: focusId } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
+  const t = useTerm()
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<ImportOrder | null>(null)
@@ -298,7 +300,7 @@ export function ImportOrdersPage() {
             <thead>
               <tr className="bg-win-grid-header">
                 <th className="text-center p-1.5 w-[44px]">#</th>
-                <th className="text-left p-1.5">Nguyên liệu</th>
+                <th className="text-left p-1.5">{t('item')}</th>
                 <th className="text-center p-1.5">ĐVT</th>
                 <th className="text-right p-1.5">SL</th>
                 <th className="text-right p-1.5">Đơn giá</th>

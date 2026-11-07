@@ -18,6 +18,7 @@ import { Route as AppSuppliersRouteImport } from './routes/_app/suppliers'
 import { Route as AppStocktakeRouteImport } from './routes/_app/stocktake'
 import { Route as AppStockExportsRouteImport } from './routes/_app/stock-exports'
 import { Route as AppStockCardRouteImport } from './routes/_app/stock-card'
+import { Route as AppSettingsBusinessRouteImport } from './routes/_app/settings-business'
 import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
@@ -90,6 +91,11 @@ const AppStockExportsRoute = AppStockExportsRouteImport.update({
 const AppStockCardRoute = AppStockCardRouteImport.update({
   id: '/stock-card',
   path: '/stock-card',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsBusinessRoute = AppSettingsBusinessRouteImport.update({
+  id: '/settings-business',
+  path: '/settings-business',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRolesRoute = AppRolesRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
+  '/settings-business': typeof AppSettingsBusinessRoute
   '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
   '/stocktake': typeof AppStocktakeRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
   '/roles': typeof AppRolesRoute
+  '/settings-business': typeof AppSettingsBusinessRoute
   '/stock-card': typeof AppStockCardRoute
   '/stock-exports': typeof AppStockExportsRoute
   '/stocktake': typeof AppStocktakeRoute
@@ -341,6 +349,7 @@ export interface FileRoutesById {
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/roles': typeof AppRolesRoute
+  '/_app/settings-business': typeof AppSettingsBusinessRoute
   '/_app/stock-card': typeof AppStockCardRoute
   '/_app/stock-exports': typeof AppStockExportsRoute
   '/_app/stocktake': typeof AppStocktakeRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/recipes'
     | '/reports'
     | '/roles'
+    | '/settings-business'
     | '/stock-card'
     | '/stock-exports'
     | '/stocktake'
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/recipes'
     | '/reports'
     | '/roles'
+    | '/settings-business'
     | '/stock-card'
     | '/stock-exports'
     | '/stocktake'
@@ -461,6 +472,7 @@ export interface FileRouteTypes {
     | '/_app/recipes'
     | '/_app/reports'
     | '/_app/roles'
+    | '/_app/settings-business'
     | '/_app/stock-card'
     | '/_app/stock-exports'
     | '/_app/stocktake'
@@ -552,6 +564,13 @@ declare module '@tanstack/react-router' {
       path: '/stock-card'
       fullPath: '/stock-card'
       preLoaderRoute: typeof AppStockCardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings-business': {
+      id: '/_app/settings-business'
+      path: '/settings-business'
+      fullPath: '/settings-business'
+      preLoaderRoute: typeof AppSettingsBusinessRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/roles': {
@@ -780,6 +799,7 @@ interface AppRouteChildren {
   AppRecipesRoute: typeof AppRecipesRoute
   AppReportsRoute: typeof AppReportsRoute
   AppRolesRoute: typeof AppRolesRoute
+  AppSettingsBusinessRoute: typeof AppSettingsBusinessRoute
   AppStockCardRoute: typeof AppStockCardRoute
   AppStockExportsRoute: typeof AppStockExportsRoute
   AppStocktakeRoute: typeof AppStocktakeRoute
@@ -814,6 +834,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRecipesRoute: AppRecipesRoute,
   AppReportsRoute: AppReportsRoute,
   AppRolesRoute: AppRolesRoute,
+  AppSettingsBusinessRoute: AppSettingsBusinessRoute,
   AppStockCardRoute: AppStockCardRoute,
   AppStockExportsRoute: AppStockExportsRoute,
   AppStocktakeRoute: AppStocktakeRoute,

@@ -4,6 +4,7 @@ import { WinToolbar, WinGroupBox } from '@wms/ui-winforms'
 import { useStockSummary, useStockMovement } from '@/data'
 import type { StockGroup } from '@/data/use-reports'
 import { formatDateTime, formatCurrency, formatNumber } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
 function GroupRow({ g }: { g: StockGroup }) {
   const [open, setOpen] = useState(false)
@@ -47,6 +48,7 @@ function GroupRow({ g }: { g: StockGroup }) {
 }
 
 export function ReportsPage() {
+  const t = useTerm()
   const { data: summary, isLoading, refetch } = useStockSummary()
   const { data: movements } = useStockMovement()
 
@@ -61,7 +63,7 @@ export function ReportsPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold">{summary?.total}</div>
-            <div className="text-win-sm text-win-text-secondary">Nguyên liệu</div>
+            <div className="text-win-sm text-win-text-secondary">{t('item')}</div>
           </div>
           <div className="border border-win-grid-border bg-win-control p-3 text-center">
             <div className="text-lg font-bold text-win-error">{summary?.lowStock.length}</div>
@@ -78,7 +80,7 @@ export function ReportsPage() {
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
-                  <th className="text-left p-1">Nhóm / Nguyên liệu</th>
+                  <th className="text-left p-1">Nhóm / {t('item')}</th>
                   <th className="text-right p-1">Tồn (quy đổi)</th>
                   <th className="text-center p-1">Min nhóm</th>
                   <th className="text-right p-1">Giá trị</th>
@@ -98,7 +100,7 @@ export function ReportsPage() {
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
-                  <th className="text-left p-1">Nguyên liệu</th>
+                  <th className="text-left p-1">{t('item')}</th>
                   <th className="p-1">Tồn</th>
                   <th className="p-1">Min</th>
                   <th className="p-1">Thiếu</th>

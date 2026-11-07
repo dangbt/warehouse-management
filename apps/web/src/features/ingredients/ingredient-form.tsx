@@ -8,6 +8,7 @@ import { WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@w
 import { UNIT_OPTIONS } from '@wms/shared'
 import { useIngredientGroups } from '@/data'
 import { api } from '@/services/api'
+import { useTerm } from '@/data/use-features'
 
 const optionalNumber = z.preprocess((v) => (v === '' || v == null ? null : Number(v)), z.number().nullable())
 
@@ -63,6 +64,7 @@ interface Props {
 }
 
 export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
+  const t = useTerm()
   const {
     register,
     control,
@@ -147,7 +149,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
       if (keepOpen) setResetKey((k) => k + 1)
       else onClose()
     } catch (e: unknown) {
-      setSubmitError(e instanceof Error ? e.message : 'Lỗi lưu nguyên liệu')
+      setSubmitError(e instanceof Error ? e.message : `Lỗi lưu ${t('item_lower')}`)
     }
   }
 
@@ -161,7 +163,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
 
   return (
     <WinDialog
-      title={mode === 'add' ? 'Thêm Nguyên Liệu' : 'Sửa Nguyên Liệu'}
+      title={mode === 'add' ? t('item_add') : t('item_edit')}
       icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
       open={open}
       onClose={requestClose}
@@ -185,7 +187,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
       }
     >
       <div className="space-y-2">
-        <WinGroupBox title="Thông tin nguyên liệu">
+        <WinGroupBox title={t('item_info')}>
           <div className="space-y-2.5">
             <WinInput label="Tên" {...register('name')} error={errors.name?.message} />
             <WinSelect label="Đơn vị" {...register('unit')} options={units} error={errors.unit?.message} />
