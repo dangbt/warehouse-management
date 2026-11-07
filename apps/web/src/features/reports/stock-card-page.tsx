@@ -5,6 +5,7 @@ import { WinToolbar } from '@wms/ui-winforms'
 import { useIngredients, useStockCard } from '@/data'
 import { exportSheet } from '@/utils/excel'
 import { Route } from '@/routes/_app/stock-card'
+import { WarehouseSelect } from '@/components/warehouse-select'
 import { fmtDisplay } from './inventory-summary-utils'
 import { PeriodPicker, usePeriod } from './period-picker'
 import { StockCardTable } from './stock-card-table'
@@ -21,8 +22,9 @@ export function StockCardPage() {
   const ingredientId = search.ingredientId ?? ''
   const setIngredientId = (v: string) => navigate({ search: (p) => ({ ...p, ingredientId: v || undefined }) })
   const mode = search.mode
+  const [warehouseId, setWarehouseId] = useState('')
   const { data: ingRes } = useIngredients({ limit: 1000, orderBy: 'name', sort: 'asc' })
-  const { data, isLoading, refetch } = useStockCard({ ingredientId, ...range }, valid)
+  const { data, isLoading, refetch } = useStockCard({ ingredientId, warehouseId: warehouseId || undefined, ...range }, valid)
 
   const periodLabel = `Từ ngày ${fmtDisplay(range.from)} đến ngày ${fmtDisplay(range.to)}`
 
@@ -49,6 +51,7 @@ export function StockCardPage() {
           <option value="">— Chọn nguyên liệu —</option>
           {ingRes?.data.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
+        <WarehouseSelect allowAll value={warehouseId} onChange={setWarehouseId} testId="filter-warehouse" />
         <WinToolbar.Separator />
         <PeriodPicker p={period} />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />

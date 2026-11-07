@@ -16,6 +16,7 @@ export interface PurchaseReturn {
   createdAt: string
   voucherDate: string
   voucherNo: string
+  warehouseId?: string
   items: PurchaseReturnItem[]
 }
 
@@ -58,11 +59,12 @@ interface ImportOrderListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function usePurchaseReturns(params?: { id?: string; from?: string; to?: string }) {
+export function usePurchaseReturns(params?: { id?: string; from?: string; to?: string; warehouseId?: string }) {
   const query = new URLSearchParams({ limit: '50' })
   if (params?.id) query.set('id', params.id)
   if (params?.from) query.set('from', params.from)
   if (params?.to) query.set('to', params.to)
+  if (params?.warehouseId) query.set('warehouse_id', params.warehouseId)
   return useQuery<ListResponse>({
     queryKey: QUERY_KEYS.purchaseReturnsList(Object.fromEntries(query)),
     queryFn: () => api.get(`/purchase-returns?${query}`),
@@ -100,6 +102,7 @@ export function useCreatePurchaseReturn() {
       note?: string
       voucherDate?: string
       voucherNo?: string
+      warehouseId?: string
       importOrderId?: string
       items: { ingredientId: string; quantity: number; unitPrice: number; vatRate?: string }[]
     }) =>
@@ -109,6 +112,7 @@ export function useCreatePurchaseReturn() {
         note: data.note,
         voucher_date: data.voucherDate,
         voucher_no: data.voucherNo,
+        warehouse_id: data.warehouseId || undefined,
         import_order_id: data.importOrderId || undefined,
         items: data.items.map((i) => ({
           ingredient_id: i.ingredientId,

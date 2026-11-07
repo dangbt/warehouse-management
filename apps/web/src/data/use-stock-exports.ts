@@ -19,7 +19,7 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number; totals?: { quantity: number; totalPrice: number } }
 }
 
-export function useStockExports(params?: { id?: string; page?: number; orderBy?: string; sort?: string; from?: string; to?: string }) {
+export function useStockExports(params?: { id?: string; page?: number; orderBy?: string; sort?: string; from?: string; to?: string; warehouseId?: string }) {
   const query = new URLSearchParams({ limit: '20' })
   if (params?.id) query.set('id', params.id)
   if (params?.page) query.set('page', String(params.page))
@@ -27,6 +27,7 @@ export function useStockExports(params?: { id?: string; page?: number; orderBy?:
   if (params?.sort) query.set('sort', params.sort)
   if (params?.from) query.set('from', params.from)
   if (params?.to) query.set('to', params.to)
+  if (params?.warehouseId) query.set('warehouse_id', params.warehouseId)
   return useQuery<ListResponse>({
     queryKey: [...QUERY_KEYS.stockExportsList(), Object.fromEntries(query)],
     queryFn: () => api.get(`/stock-exports?${query}`),
@@ -42,6 +43,7 @@ export function useCreateStockExport() {
       note?: string
       voucher_date?: string
       voucher_no?: string
+      warehouse_id?: string
     }) =>
       api.post('/stock-exports', data),
     onSuccess: () => {
