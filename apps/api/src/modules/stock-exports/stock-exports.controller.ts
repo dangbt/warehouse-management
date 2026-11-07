@@ -16,7 +16,7 @@ export class StockExportsController {
 
   @Get()
   @RequirePermissions('stock_exports:read')
-  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string }) {
+  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string; id?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
 
@@ -24,15 +24,16 @@ export class StockExportsController {
     const sortField = q.orderBy && ['voucherDate', 'createdAt', 'quantity'].includes(q.orderBy) ? q.orderBy : 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
+    const where = q.id ? { type: 'EXPORT', exportId: q.id } : { type: 'EXPORT' };
     const [data, total] = await Promise.all([
       this.prisma.stockTransaction.findMany({
-        where: { type: 'EXPORT' },
+        where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortField]: sortDir },
         include: { ingredient: true, createdBy: true, export: { select: { id: true, voucherNo: true, voucherDate: true } } },
       }),
-      this.prisma.stockTransaction.count({ where: { type: 'EXPORT' } }),
+      this.prisma.stockTransaction.count({ where }),
     ]);
     return { data, meta: { page, limit, total } };
   }

@@ -44,10 +44,11 @@ export class ImportOrdersService {
     private vouchers: VoucherService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string }) {
+  async findAll(q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string; id?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { status?: string; supplierId?: string; hasInvoice?: boolean } = {};
+    const where: { id?: string; status?: string; supplierId?: string; hasInvoice?: boolean } = {};
+    if (q.id) where.id = q.id;
     if (q.status) where.status = q.status;
     if (q.supplier_id) where.supplierId = q.supplier_id;
     if (q.has_invoice === 'true') where.hasInvoice = true;

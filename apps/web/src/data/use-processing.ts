@@ -26,8 +26,9 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useProcessingOrders(params?: { page?: number; status?: string; orderBy?: string; sort?: string }) {
+export function useProcessingOrders(params?: { id?: string; page?: number; status?: string; orderBy?: string; sort?: string }) {
   const query = new URLSearchParams()
+  if (params?.id) query.set('id', params.id)
   if (params?.page) query.set('page', String(params.page))
   if (params?.status) query.set('status', params.status)
   if (params?.orderBy) query.set('orderBy', params.orderBy)
