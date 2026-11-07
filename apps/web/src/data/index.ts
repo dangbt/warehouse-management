@@ -25,6 +25,8 @@ export { usePurchaseReturns, useCreatePurchaseReturn, useCompletedImportOrders }
 export { useSupplierPayments, useCreateSupplierPayment, useSupplierPaymentDetail } from './use-supplier-payments'
 export { useConsumptionVariance } from './use-variance'
 export { useInventorySummary } from './use-inventory-summary'
+export { useStockMatrix } from './use-stock-matrix'
+export type { StockMatrix, StockMatrixCell, StockMatrixReport } from './use-stock-matrix'
 export type { InventorySummaryReport, InventorySummaryGroup, InventorySummaryRow, InventoryTotals } from './use-inventory-summary'
 export { useStockCard } from './use-stock-card'
 export type { StockCardData, StockCardLine, StockDocType } from './use-stock-card'
