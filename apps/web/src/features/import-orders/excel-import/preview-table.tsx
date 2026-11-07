@@ -8,10 +8,12 @@ interface Props {
   ingredients: IngredientRef[]
   onMapIngredient: (ingredientText: string, id: string) => void
   onRemove: (rowNo: number) => void
+  /** Có ⇒ ô Hệ số cho sửa trực tiếp (dùng khi nhập từ hoá đơn điện tử). */
+  onFactorChange?: (rowNo: number, factor: number) => void
 }
 
 /** Bảng xem trước: trạng thái + lý do lỗi từng dòng; dòng NL chưa khớp có ô tìm để map tay. */
-export function PreviewTable({ rows, ingredients, onMapIngredient, onRemove }: Props) {
+export function PreviewTable({ rows, ingredients, onMapIngredient, onRemove, onFactorChange }: Props) {
   const options = ingredients.map((i) => ({ value: i.id, label: i.unit ? `${i.name} (${i.unit})` : i.name }))
   return (
     <div className="overflow-auto border border-win-grid-border max-h-[50vh]">
@@ -63,7 +65,21 @@ export function PreviewTable({ rows, ingredients, onMapIngredient, onRemove }: P
                   )}
                 </td>
                 <td className="p-1.5 text-right">{r.quantity == null ? '' : formatNumber(r.quantity)}</td>
-                <td className="p-1.5 text-right">{r.factor ?? ''}</td>
+                <td className="p-1.5 text-right">
+                  {onFactorChange ? (
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      aria-label={`Hệ số dòng ${r.rowNo}`}
+                      defaultValue={r.factor ?? 1}
+                      onBlur={(e) => Number(e.target.value) > 0 && onFactorChange(r.rowNo, Number(e.target.value))}
+                      className="w-20 h-8 px-1 text-right border border-win-button-border"
+                    />
+                  ) : (
+                    (r.factor ?? '')
+                  )}
+                </td>
                 <td className="p-1.5 text-right">{r.unitPrice == null ? '' : formatNumber(r.unitPrice)}</td>
                 <td className="p-1.5">{r.vatRate}</td>
                 <td className="p-1.5">
