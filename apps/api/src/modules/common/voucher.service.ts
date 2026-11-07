@@ -1,7 +1,7 @@
 import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
-export const VOUCHER_TYPES = ['IMPORT', 'EXPORT', 'RETURN', 'STOCKTAKE', 'PROCESSING'] as const;
+export const VOUCHER_TYPES = ['IMPORT', 'EXPORT', 'RETURN', 'STOCKTAKE', 'PROCESSING', 'TRANSFER'] as const;
 export type VoucherType = (typeof VOUCHER_TYPES)[number];
 
 export const VOUCHER_NO_DUPLICATE = 'VOUCHER_NO_DUPLICATE';
@@ -12,6 +12,7 @@ const DEFAULT_PREFIX: Record<VoucherType, string> = {
   RETURN: 'TH',
   STOCKTAKE: 'KK',
   PROCESSING: 'CB',
+  TRANSFER: 'CK',
 };
 
 /** Ghép tiền tố + số thứ tự đệm 0 theo số chữ số cấu hình. */
@@ -123,6 +124,7 @@ export class VoucherService {
       RETURN: p.purchaseReturn,
       STOCKTAKE: p.stocktakeSession,
       PROCESSING: p.processingOrder,
+      TRANSFER: p.stockTransfer,
     };
     return map[type] as unknown as {
       findMany(a: unknown): Promise<{ voucherNo: string }[]>;

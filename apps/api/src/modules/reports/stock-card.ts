@@ -3,7 +3,7 @@
  * từ tồn đầu kỳ và các giao dịch trong kỳ (đã sắp theo ngày chứng từ). Query DB: stock-card.repository.ts.
  */
 
-export type StockDocType = 'IMPORT_ORDER' | 'STOCK_EXPORT' | 'PURCHASE_RETURN' | 'STOCKTAKE' | 'PROCESSING';
+export type StockDocType = 'IMPORT_ORDER' | 'STOCK_EXPORT' | 'PURCHASE_RETURN' | 'STOCKTAKE' | 'PROCESSING' | 'STOCK_TRANSFER';
 
 /** Giao dịch thô từ SQL: qty/value có dấu (nhập > 0, xuất < 0). */
 export interface StockCardRawTx {
@@ -69,6 +69,8 @@ const TYPE_LABEL: Record<string, string> = {
   PROCESS_OUT: 'Xuất chế biến',
   RETURN: 'Trả hàng NCC',
   STOCKTAKE_ADJUST: 'Điều chỉnh kiểm kê',
+  TRANSFER_IN: 'Nhập chuyển kho',
+  TRANSFER_OUT: 'Xuất chuyển kho',
 };
 
 export function describeTx(type: string, note: string | null): string {
