@@ -229,6 +229,8 @@ export class ImportOrdersService {
             quantity: item.quantity,
             unitPrice: costPerUnit,
             totalPrice: lineTotal,
+            unitCost: costPerUnit,
+            totalCost: lineTotal,
             referenceId: order.id,
             createdById: approvedById,
             voucherDate: order.voucherDate,

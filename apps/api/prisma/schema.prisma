@@ -207,6 +207,9 @@ model StockTransaction {
   quantity     Decimal  @db.Decimal(10, 3)
   unitPrice    Decimal? @map("unit_price") @db.Decimal(12, 2)
   totalPrice   Decimal? @map("total_price") @db.Decimal(14, 2)
+  // Giá vốn của giao dịch (luôn dương, độ lớn). Xuất: giá vốn xuất kho theo phương pháp tính giá; nhập: giá vốn nhập.
+  unitCost     Decimal? @map("unit_cost") @db.Decimal(14, 4)
+  totalCost    Decimal? @map("total_cost") @db.Decimal(14, 2)
   referenceId  String?  @map("reference_id")
   note         String?
   createdById  String   @map("created_by")
@@ -507,4 +510,14 @@ model VoucherConfig {
   digits Int    @default(5)
 
   @@map("voucher_configs")
+}
+
+// Cấu hình kho (1 dòng "default"): phương pháp tính giá xuất kho áp dụng toàn doanh nghiệp.
+model InventorySetting {
+  id            String   @id @default("default")
+  // AVG_PERIOD = bình quân cuối kỳ (mặc định), AVG_MOVING = bình quân tức thời, FIFO
+  costingMethod String   @default("AVG_PERIOD") @map("costing_method")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("inventory_settings")
 }
