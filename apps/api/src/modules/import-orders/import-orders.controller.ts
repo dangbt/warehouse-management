@@ -19,7 +19,17 @@ export class ImportOrdersController {
   @Get()
   @RequirePermissions('import_orders:read')
   findAll(
-    @Query() q: { page?: string; limit?: string; status?: string; supplier_id?: string; has_invoice?: string; id?: string; from?: string; to?: string },
+    @Query()
+    q: {
+      page?: string;
+      limit?: string;
+      status?: string;
+      supplier_id?: string;
+      has_invoice?: string;
+      id?: string;
+      from?: string;
+      to?: string;
+    },
   ) {
     return this.svc.findAll(q);
   }

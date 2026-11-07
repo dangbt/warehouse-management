@@ -49,7 +49,9 @@ export class PurchaseReturnsService {
   async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string; from?: string; to?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { supplierId?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.supplierId ? { supplierId: q.supplierId } : {};
+    const where: { supplierId?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.supplierId
+      ? { supplierId: q.supplierId }
+      : {};
     if (q.id) where.id = q.id;
     const dateRange = voucherDateFilter(q);
     if (dateRange) where.voucherDate = dateRange;

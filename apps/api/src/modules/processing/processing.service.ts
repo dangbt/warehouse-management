@@ -16,7 +16,16 @@ export class ProcessingService {
     private periodLock: PeriodLockService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string; id?: string; from?: string; to?: string }) {
+  async findAll(q: {
+    page?: string;
+    limit?: string;
+    status?: string;
+    orderBy?: string;
+    sort?: string;
+    id?: string;
+    from?: string;
+    to?: string;
+  }) {
     const page = +(q.page || 1);
     const limit = +(q.limit || 20);
     const where: { status?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.status ? { status: q.status } : {};

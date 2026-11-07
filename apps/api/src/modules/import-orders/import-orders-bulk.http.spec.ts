@@ -5,6 +5,7 @@ import * as supertest from 'supertest';
 import { ImportOrdersController } from './import-orders.controller';
 import { ImportOrdersService } from './import-orders.service';
 import { ImportOrdersBulkService, BULK_MAX_ITEMS } from './import-orders-bulk.service';
+import { ImportOrderUnpostService } from './import-order-unpost.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard } from '../../auth/permissions.guard';
 import { applyBodyLimit } from '../../body-limit';
@@ -43,6 +44,7 @@ describe('POST /import-orders/bulk qua HTTP', () => {
       controllers: [ImportOrdersController],
       providers: [
         { provide: ImportOrdersService, useValue: {} },
+        { provide: ImportOrderUnpostService, useValue: {} },
         { provide: ImportOrdersBulkService, useValue: { bulkCreate } },
       ],
     })
