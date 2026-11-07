@@ -9,12 +9,26 @@ import { Prisma } from '@prisma/client';
  * Giá trị: |total_cost| (giá vốn trên giao dịch, WMS-6); giao dịch cũ chưa có thì |total_price|, ngược lại |q| × COALESCE(unit_price, cost_per_unit).
  * Yêu cầu alias: `st` = stock_transactions, `i` = ingredients.
  */
-export const SIGNED_QTY_SQL = Prisma.sql`CASE
+/**
+ * Chuyển kho (WMS-12): TRANSFER_IN = +|q|, TRANSFER_OUT = −|q|. Chỉ tính khi báo cáo lọc theo MỘT kho
+ * (`includeTransfers = true`); toàn doanh nghiệp bỏ qua vì chuyển kho không làm đổi tổng nhập/xuất.
+ */
+export function signedQtySql(includeTransfers: boolean) {
+  const transfers = includeTransfers
+    ? Prisma.sql`WHEN st.type = 'TRANSFER_IN' THEN ABS(st.quantity)
+  WHEN st.type = 'TRANSFER_OUT' THEN -ABS(st.quantity)`
+    : Prisma.empty;
+  return Prisma.sql`CASE
   WHEN st.type IN ('IMPORT', 'PROCESS_IN') THEN ABS(st.quantity)
   WHEN st.type IN ('EXPORT', 'ORDER_DEDUCT', 'PROCESS_OUT', 'RETURN') THEN -ABS(st.quantity)
   WHEN st.type = 'STOCKTAKE_ADJUST' THEN st.quantity
+  ${transfers}
   ELSE 0
 END`;
+}
+
+/** Biểu thức toàn doanh nghiệp (không tính chuyển kho). */
+export const SIGNED_QTY_SQL = signedQtySql(false);
 
 export const ABS_VALUE_SQL = Prisma.sql`COALESCE(ABS(st.total_cost), ABS(st.total_price), ABS(st.quantity) * COALESCE(st.unit_price, i.cost_per_unit))`;
 
