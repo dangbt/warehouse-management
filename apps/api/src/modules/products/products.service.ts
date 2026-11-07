@@ -49,7 +49,15 @@ export class ProductsService {
       }),
       this.prisma.product.count({ where }),
     ]);
-    return { data, meta: { page, limit, total } };
+    // Tồn tổng = cộng tồn các biến thể (item) còn hoạt động của từng SP trong trang
+    const sums = await this.prisma.ingredient.groupBy({
+      by: ['productId'],
+      where: { productId: { in: data.map((p) => p.id) }, isActive: true },
+      _sum: { currentStock: true },
+    });
+    const stock = new Map(sums.map((s) => [s.productId, s._sum.currentStock]));
+    const rows = data.map((p) => ({ ...p, totalStock: stock.get(p.id) ?? 0 }));
+    return { data: rows, meta: { page, limit, total } };
   }
 
   async findOne(id: string) {

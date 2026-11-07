@@ -2,6 +2,7 @@ import { ArrowUpFromLine, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { itemLabel } from '@/utils/item-label'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
 import { WinDialog, WinGroupBox, WinSearchSelect, WinSelect, WinInput } from '@wms/ui-winforms'
@@ -63,9 +64,9 @@ export function StockExportForm({ open, onClose, onSave, seed }: Props) {
     api
       .get(`/ingredients?limit=10&search=${encodeURIComponent(search)}`)
       .then((res) => {
-        const list = (res.data as { id: string; name: string; currentStock: string; unit: string }[]).map((i) => ({
+        const list = (res.data as { id: string; name: string; sku?: string | null; currentStock: string; unit: string }[]).map((i) => ({
           value: i.id,
-          label: `${i.name} (tồn: ${i.currentStock} ${i.unit})`,
+          label: `${itemLabel(i)} (tồn: ${i.currentStock} ${i.unit})`,
         }))
         // Nhân bản: NL của phiếu gốc luôn có trong danh sách chọn.
         if (seed && !list.some((o) => o.value === seed.ingredient.id)) {

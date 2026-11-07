@@ -1,3 +1,4 @@
+import { itemLabel } from '@/utils/item-label'
 import { FileText, TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -178,8 +179,8 @@ export function ImportOrderForm({ open, onClose, onSave, initial, order, seed }:
     api
       .get(`/ingredients?limit=20&search=${encodeURIComponent(q)}`)
       .then((res) => {
-        const list = res.data as { id: string; name: string; unit: string }[]
-        const found = list.map((x) => ({ value: x.id, label: x.name, unit: x.unit }))
+        const list = res.data as { id: string; name: string; sku?: string | null; unit: string }[]
+        const found = list.map((x) => ({ value: x.id, label: itemLabel(x), unit: x.unit }))
         const pinned = [...orderIngredientOptions(order), ...seededIngredients.current]
         const extra = pinned.filter((e, idx) => !found.some((f) => f.value === e.value) && pinned.findIndex((p) => p.value === e.value) === idx)
         setIngredients([...extra, ...found])
