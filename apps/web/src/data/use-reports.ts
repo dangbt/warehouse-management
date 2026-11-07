@@ -21,10 +21,22 @@ export interface StockGroup {
   totalValue: number
   isLow: boolean
 }
+export interface LowStockProduct {
+  productId: string
+  code: string
+  name: string
+  unit: string
+  lowCount: number
+  outCount: number
+  totalStock: number
+  variants: { id: string; name: string; sku: string | null; currentStock: number; minStock: number; status: 'out' | 'low' | 'ok' }[]
+}
 interface StockSummary {
   total: number
   totalValue: number
-  lowStock: { name: string; unit: string; currentStock: string; minStock: string }[]
+  lowStock: { name: string; unit: string; currentStock: string; minStock: string; productId?: string | null }[]
+  /** Chỉ có khi flag product_variants bật: tồn thấp gom theo SP. */
+  lowStockProducts?: LowStockProduct[]
   groups: StockGroup[]
   ingredients: unknown[]
 }

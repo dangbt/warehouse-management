@@ -8,6 +8,7 @@ export const ROUTE_FEATURES: Record<string, FeatureKey> = {
   '/kiotviet': 'sales_channels',
   '/products': 'product_variants',
   '/product-attributes': 'product_variants',
+  '/stock-matrix': 'product_variants',
 }
 
 export function featureForPath(pathname: string): FeatureKey | undefined {
