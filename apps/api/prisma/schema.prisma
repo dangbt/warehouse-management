@@ -19,27 +19,28 @@ model Department {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  passwordHash   String    @map("password_hash")
-  fullName       String    @map("full_name")
-  phone          String?
-  avatarUrl      String?   @map("avatar_url")
-  departmentId   String?   @map("department_id")
-  department     Department? @relation(fields: [departmentId], references: [id])
-  isActive       Boolean   @default(true) @map("is_active")
-  lastLoginAt    DateTime? @map("last_login_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  userRoles      UserRole[]
-  auditLogs      AuditLog[]
-  importOrders   ImportOrder[] @relation("CreatedBy")
-  approvedOrders ImportOrder[] @relation("ApprovedBy")
+  id                String             @id @default(uuid())
+  email             String             @unique
+  passwordHash      String             @map("password_hash")
+  fullName          String             @map("full_name")
+  phone             String?
+  avatarUrl         String?            @map("avatar_url")
+  departmentId      String?            @map("department_id")
+  department        Department?        @relation(fields: [departmentId], references: [id])
+  isActive          Boolean            @default(true) @map("is_active")
+  lastLoginAt       DateTime?          @map("last_login_at")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  userRoles         UserRole[]
+  auditLogs         AuditLog[]
+  importOrders      ImportOrder[]      @relation("CreatedBy")
+  approvedOrders    ImportOrder[]      @relation("ApprovedBy")
   stockTransactions StockTransaction[]
-  stocktakeSessions  StocktakeSession[] @relation("StocktakeCreatedBy")
-  purchaseReturns    PurchaseReturn[] @relation("ReturnCreatedBy")
-  supplierPayments   SupplierPayment[] @relation("PaymentCreatedBy")
-  processingOrders   ProcessingOrder[] @relation("ProcessingCreatedBy")
-  taxPeriodCloses    TaxPeriodClose[] @relation("TaxPeriodClosedBy")
+  warehouseStocks   IngredientStock[]
+  stocktakeSessions StocktakeSession[] @relation("StocktakeCreatedBy")
+  purchaseReturns   PurchaseReturn[]   @relation("ReturnCreatedBy")
+  supplierPayments  SupplierPayment[]  @relation("PaymentCreatedBy")
+  processingOrders  ProcessingOrder[]  @relation("ProcessingCreatedBy")
+  taxPeriodCloses   TaxPeriodClose[]   @relation("TaxPeriodClosedBy")
   purchaseRequests  PurchaseRequest[]  @relation("PurchaseRequestCreatedBy")
   purchaseOrders    PurchaseOrder[]    @relation("PurchaseOrderCreatedBy")
 
@@ -47,9 +48,9 @@ model User {
 }
 
 model Role {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
   name        String
-  code        String   @unique
+  code        String           @unique
   description String?
   permissions RolePermission[]
   userRoles   UserRole[]
@@ -90,42 +91,43 @@ model Ingredient {
   trackStock   Boolean  @default(true) @map("track_stock")
 
   // Gom nhóm để báo cáo tồn (quy về base_unit của nhóm)
-  groupId      String?  @map("group_id")
-  group        IngredientGroup? @relation(fields: [groupId], references: [id])
-  baseFactor   Decimal? @map("base_factor") @db.Decimal(12, 6)
+  groupId    String?          @map("group_id")
+  group      IngredientGroup? @relation(fields: [groupId], references: [id])
+  baseFactor Decimal?         @map("base_factor") @db.Decimal(12, 6)
 
   // Bán thành phẩm: làm từ NL nguồn nào + định mức quy đổi mặc định
-  sourceIngredientId String? @map("source_ingredient_id")
-  source       Ingredient?  @relation("Derivation", fields: [sourceIngredientId], references: [id])
-  derived      Ingredient[] @relation("Derivation")
-  yieldRatio   Decimal? @map("yield_ratio") @db.Decimal(10, 4)
+  sourceIngredientId String?      @map("source_ingredient_id")
+  source             Ingredient?  @relation("Derivation", fields: [sourceIngredientId], references: [id])
+  derived            Ingredient[] @relation("Derivation")
+  yieldRatio         Decimal?     @map("yield_ratio") @db.Decimal(10, 4)
   // Hao hụt sơ chế: tỷ lệ hao hụt khi chế biến (vd 0.1 = 10%)
-  lossRatio    Decimal? @map("loss_ratio") @db.Decimal(5, 4)
+  lossRatio          Decimal?     @map("loss_ratio") @db.Decimal(5, 4)
 
-  importOrderItems ImportOrderItem[]
+  importOrderItems     ImportOrderItem[]
   supplierItemMappings SupplierItemMapping[]
   purchaseRequestItems PurchaseRequestItem[]
   purchaseOrderItems   PurchaseOrderItem[]
-  stockTransactions StockTransaction[]
-  recipeIngredients RecipeIngredient[]
-  batches      IngredientBatch[]
-  stocktakeItems StocktakeItem[]
-  purchaseReturnItems PurchaseReturnItem[]
-  units        IngredientUnit[]
-  processingAsSource ProcessingOrder[] @relation("ProcSource")
-  processingAsOutput ProcessingOrder[] @relation("ProcOutput")
-  directMenuItems    MenuItem[] @relation("DirectIngredient")
+  stockTransactions    StockTransaction[]
+  recipeIngredients    RecipeIngredient[]
+  batches              IngredientBatch[]
+  stocktakeItems       StocktakeItem[]
+  purchaseReturnItems  PurchaseReturnItem[]
+  units                IngredientUnit[]
+  processingAsSource   ProcessingOrder[]     @relation("ProcSource")
+  processingAsOutput   ProcessingOrder[]     @relation("ProcOutput")
+  directMenuItems      MenuItem[]            @relation("DirectIngredient")
 
   // Biến thể / SKU (WMS-19). Dữ liệu F&B cũ: productId/sku/barcode/variantKey = null
-  productId       String?              @map("product_id")
-  product         Product?             @relation(fields: [productId], references: [id])
-  sku             String?              @unique
-  barcode         String?              @unique
-  salePrice       Decimal?             @map("sale_price") @db.Decimal(12, 2)
+  productId        String?              @map("product_id")
+  product          Product?             @relation(fields: [productId], references: [id])
+  sku              String?              @unique
+  barcode          String?              @unique
+  salePrice        Decimal?             @map("sale_price") @db.Decimal(12, 2)
   // Khoá tổ hợp giá trị thuộc tính (id giá trị, sắp theo thuộc tính) — unique trong 1 product
-  variantKey      String?              @map("variant_key")
-  isActive        Boolean              @default(true) @map("is_active")
-  attributeValues ItemAttributeValue[]
+  variantKey       String?              @map("variant_key")
+  isActive         Boolean              @default(true) @map("is_active")
+  attributeValues  ItemAttributeValue[]
+  ingredientStocks IngredientStock[]
 
   @@unique([productId, variantKey])
   @@index([productId])
@@ -133,21 +135,21 @@ model Ingredient {
 }
 
 model Supplier {
-  id         String  @id @default(uuid())
-  name       String
-  phone      String?
-  address    String?
-  taxCode    String? @map("tax_code")
-  note       String?
+  id                   String                @id @default(uuid())
+  name                 String
+  phone                String?
+  address              String?
+  taxCode              String?               @map("tax_code")
+  note                 String?
   // Người bán là cá nhân/hộ không có hoá đơn (chợ, nông dân...). Dùng cho bảng kê 01/TNDN.
-  isIndividual Boolean @default(false) @map("is_individual")
+  isIndividual         Boolean               @default(false) @map("is_individual")
   // Số CCCD/CMND của người bán cá nhân (nếu có).
-  idNumber   String? @map("id_number")
-  totalDebt  Decimal @default(0) @map("total_debt") @db.Decimal(14, 2)
-  importOrders    ImportOrder[]
-  purchaseReturns PurchaseReturn[]
-  payments        SupplierPayment[]
-  itemMappings    SupplierItemMapping[]
+  idNumber             String?               @map("id_number")
+  totalDebt            Decimal               @default(0) @map("total_debt") @db.Decimal(14, 2)
+  importOrders         ImportOrder[]
+  purchaseReturns      PurchaseReturn[]
+  payments             SupplierPayment[]
+  itemMappings         SupplierItemMapping[]
   purchaseRequestItems PurchaseRequestItem[]
   purchaseOrders       PurchaseOrder[]
 
@@ -155,129 +157,138 @@ model Supplier {
 }
 
 model ImportOrder {
-  id          String   @id @default(uuid())
-  code        String   @unique
-  voucherDate DateTime @default(now()) @map("voucher_date")
-  voucherNo   String   @unique @map("voucher_no")
-  supplierId  String   @map("supplier_id")
-  supplier    Supplier @relation(fields: [supplierId], references: [id])
-  hasInvoice    Boolean   @default(false) @map("has_invoice")
-  invoiceNo     String?   @map("invoice_no")
-  invoiceSymbol String?   @map("invoice_symbol")
-  invoiceDate   DateTime? @map("invoice_date") @db.Date
-  subtotal    Decimal  @default(0) @db.Decimal(14, 2)
-  vatAmount   Decimal  @default(0) @map("vat_amount") @db.Decimal(14, 2)
-  totalAmount Decimal  @default(0) @map("total_amount") @db.Decimal(14, 2)
-  status      String   @default("PENDING")
-  paid        Boolean  @default(false)
-  note        String?
+  id              String            @id @default(uuid())
+  code            String            @unique
+  voucherDate     DateTime          @default(now()) @map("voucher_date")
+  voucherNo       String            @unique @map("voucher_no")
+  supplierId      String            @map("supplier_id")
+  supplier        Supplier          @relation(fields: [supplierId], references: [id])
+  hasInvoice      Boolean           @default(false) @map("has_invoice")
+  invoiceNo       String?           @map("invoice_no")
+  invoiceSymbol   String?           @map("invoice_symbol")
+  invoiceDate     DateTime?         @map("invoice_date") @db.Date
+  subtotal        Decimal           @default(0) @db.Decimal(14, 2)
+  vatAmount       Decimal           @default(0) @map("vat_amount") @db.Decimal(14, 2)
+  totalAmount     Decimal           @default(0) @map("total_amount") @db.Decimal(14, 2)
+  status          String            @default("PENDING")
+  paid            Boolean           @default(false)
+  note            String?
   // Địa chỉ nơi mua (hàng không có hoá đơn của NCC cá nhân). Mặc định lấy từ NCC khi tạo.
-  purchaseAddress String? @map("purchase_address")
-  createdById String   @map("created_by")
-  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
-  approvedById String? @map("approved_by")
-  approvedBy  User?    @relation("ApprovedBy", fields: [approvedById], references: [id])
-  createdAt   DateTime @default(now()) @map("created_at")
-  items       ImportOrderItem[]
+  purchaseAddress String?           @map("purchase_address")
+  createdById     String            @map("created_by")
+  createdBy       User              @relation("CreatedBy", fields: [createdById], references: [id])
+  approvedById    String?           @map("approved_by")
+  approvedBy      User?             @relation("ApprovedBy", fields: [approvedById], references: [id])
+  createdAt       DateTime          @default(now()) @map("created_at")
+  items           ImportOrderItem[]
   purchaseReturns PurchaseReturn[]
   // Đơn mua hàng (PO) mà phiếu nhập này nhận hàng theo
   purchaseOrderId String?           @map("purchase_order_id")
   purchaseOrder   PurchaseOrder?    @relation(fields: [purchaseOrderId], references: [id])
+  warehouseId     String            @map("warehouse_id")
+  warehouse       Warehouse         @relation(fields: [warehouseId], references: [id])
 
   @@index([purchaseOrderId])
+  @@index([warehouseId])
   @@map("import_orders")
 }
 
 model ImportOrderItem {
-  id            String   @id @default(uuid())
-  importOrderId String   @map("import_order_id")
-  importOrder   ImportOrder @relation(fields: [importOrderId], references: [id], onDelete: Cascade)
-  ingredientId  String   @map("ingredient_id")
-  ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
-  quantity      Decimal  @db.Decimal(10, 3)
-  unitPrice     Decimal  @map("unit_price") @db.Decimal(12, 2)
-  totalPrice    Decimal  @map("total_price") @db.Decimal(14, 2)
-  vatRate       String?  @map("vat_rate")
-  vatAmount     Decimal  @default(0) @map("vat_amount") @db.Decimal(14, 2)
-  expiryDate    DateTime? @map("expiry_date") @db.Date
+  id            String           @id @default(uuid())
+  importOrderId String           @map("import_order_id")
+  importOrder   ImportOrder      @relation(fields: [importOrderId], references: [id], onDelete: Cascade)
+  ingredientId  String           @map("ingredient_id")
+  ingredient    Ingredient       @relation(fields: [ingredientId], references: [id])
+  quantity      Decimal          @db.Decimal(10, 3)
+  unitPrice     Decimal          @map("unit_price") @db.Decimal(12, 2)
+  totalPrice    Decimal          @map("total_price") @db.Decimal(14, 2)
+  vatRate       String?          @map("vat_rate")
+  vatAmount     Decimal          @default(0) @map("vat_amount") @db.Decimal(14, 2)
+  expiryDate    DateTime?        @map("expiry_date") @db.Date
   batch         IngredientBatch?
 
   @@map("import_order_items")
 }
 
 model IngredientBatch {
-  id                String    @id @default(uuid())
-  ingredientId      String    @map("ingredient_id")
-  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
-  importOrderItemId String?   @unique @map("import_order_item_id")
+  id                String           @id @default(uuid())
+  ingredientId      String           @map("ingredient_id")
+  ingredient        Ingredient       @relation(fields: [ingredientId], references: [id])
+  importOrderItemId String?          @unique @map("import_order_item_id")
   importOrderItem   ImportOrderItem? @relation(fields: [importOrderItemId], references: [id])
-  batchCode         String    @map("batch_code")
-  quantity          Decimal   @db.Decimal(10, 3)
-  costPerUnit       Decimal   @map("cost_per_unit") @db.Decimal(12, 2)
-  expiryDate        DateTime? @map("expiry_date") @db.Date
-  receivedDate      DateTime  @map("received_date")
-  status            String    @default("ACTIVE")
+  batchCode         String           @map("batch_code")
+  quantity          Decimal          @db.Decimal(10, 3)
+  costPerUnit       Decimal          @map("cost_per_unit") @db.Decimal(12, 2)
+  expiryDate        DateTime?        @map("expiry_date") @db.Date
+  receivedDate      DateTime         @map("received_date")
+  status            String           @default("ACTIVE")
   note              String?
-  createdAt         DateTime  @default(now()) @map("created_at")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  warehouseId       String           @map("warehouse_id")
+  warehouse         Warehouse        @relation(fields: [warehouseId], references: [id])
 
   @@index([ingredientId, status])
+  @@index([warehouseId])
   @@map("ingredient_batches")
 }
 
 model StockTransaction {
-  id           String   @id @default(uuid())
-  ingredientId String   @map("ingredient_id")
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  id           String       @id @default(uuid())
+  ingredientId String       @map("ingredient_id")
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
   type         String
-  quantity     Decimal  @db.Decimal(10, 3)
-  unitPrice    Decimal? @map("unit_price") @db.Decimal(12, 2)
-  totalPrice   Decimal? @map("total_price") @db.Decimal(14, 2)
+  quantity     Decimal      @db.Decimal(10, 3)
+  unitPrice    Decimal?     @map("unit_price") @db.Decimal(12, 2)
+  totalPrice   Decimal?     @map("total_price") @db.Decimal(14, 2)
   // Giá vốn của giao dịch (luôn dương, độ lớn). Xuất: giá vốn xuất kho theo phương pháp tính giá; nhập: giá vốn nhập.
-  unitCost     Decimal? @map("unit_cost") @db.Decimal(14, 4)
-  totalCost    Decimal? @map("total_cost") @db.Decimal(14, 2)
-  referenceId  String?  @map("reference_id")
+  unitCost     Decimal?     @map("unit_cost") @db.Decimal(14, 4)
+  totalCost    Decimal?     @map("total_cost") @db.Decimal(14, 2)
+  referenceId  String?      @map("reference_id")
   note         String?
-  createdById  String   @map("created_by")
-  createdBy    User     @relation(fields: [createdById], references: [id])
-  createdAt    DateTime @default(now()) @map("created_at")
-  voucherDate  DateTime @default(now()) @map("voucher_date")
-  exportId     String?  @map("export_id")
+  createdById  String       @map("created_by")
+  createdBy    User         @relation(fields: [createdById], references: [id])
+  createdAt    DateTime     @default(now()) @map("created_at")
+  voucherDate  DateTime     @default(now()) @map("voucher_date")
+  exportId     String?      @map("export_id")
   export       StockExport? @relation(fields: [exportId], references: [id])
+  warehouseId  String       @map("warehouse_id")
+  warehouse    Warehouse    @relation(fields: [warehouseId], references: [id])
 
   @@index([ingredientId, createdAt])
   @@index([ingredientId, voucherDate])
   @@index([voucherDate, ingredientId])
   @@index([referenceId, type])
+  @@index([warehouseId])
   @@map("stock_transactions")
 }
 
 model MenuItem {
-  id       String  @id @default(uuid())
-  name     String
-  price    Decimal @db.Decimal(12, 2)
-  category String
-  isActive Boolean @default(true) @map("is_active")
+  id                 String              @id @default(uuid())
+  name               String
+  price              Decimal             @db.Decimal(12, 2)
+  category           String
+  isActive           Boolean             @default(true) @map("is_active")
   // Thuế suất VAT đầu ra của món (mã trong VAT_RATES). null = dùng defaultOutputVatRate của cấu hình thuế.
-  vatRate  String? @map("vat_rate")
+  vatRate            String?             @map("vat_rate")
   // Khớp ổn định với sản phẩm KiotViet (thay vì khớp theo tên)
-  kiotvietProductId String? @unique @map("kiotviet_product_id")
+  kiotvietProductId  String?             @unique @map("kiotviet_product_id")
   // Cách trừ tồn: null = chưa cấu hình, RECIPE = theo công thức, DIRECT = trừ thẳng 1 NL, NONE = không quản tồn
-  inventoryMode String? @map("inventory_mode")
+  inventoryMode      String?             @map("inventory_mode")
   // NL trừ trực tiếp khi inventoryMode = DIRECT (vd Coca → ingredient "Coca")
-  directIngredientId String? @map("direct_ingredient_id")
-  directIngredient   Ingredient? @relation("DirectIngredient", fields: [directIngredientId], references: [id])
-  recipe   Recipe?
+  directIngredientId String?             @map("direct_ingredient_id")
+  directIngredient   Ingredient?         @relation("DirectIngredient", fields: [directIngredientId], references: [id])
+  recipe             Recipe?
   kiotVietOrderItems KiotVietOrderItem[]
 
   @@map("menu_items")
 }
 
 model Recipe {
-  id          String   @id @default(uuid())
-  menuItemId  String   @unique @map("menu_item_id")
-  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+  id          String             @id @default(uuid())
+  menuItemId  String             @unique @map("menu_item_id")
+  menuItem    MenuItem           @relation(fields: [menuItemId], references: [id])
   name        String
-  servingSize Int      @default(1) @map("serving_size")
+  servingSize Int                @default(1) @map("serving_size")
   ingredients RecipeIngredient[]
 
   @@map("recipes")
@@ -297,39 +308,41 @@ model RecipeIngredient {
 }
 
 model KiotVietOrder {
-  id            String   @id @default(uuid())
-  kiotVietId    String   @unique @map("kiotviet_id")
-  code          String
-  customerName  String?  @map("customer_name")
-  totalAmount   Decimal  @map("total_amount") @db.Decimal(14, 2)
+  id              String              @id @default(uuid())
+  kiotVietId      String              @unique @map("kiotviet_id")
+  code            String
+  customerName    String?             @map("customer_name")
+  totalAmount     Decimal             @map("total_amount") @db.Decimal(14, 2)
   // Snapshot thuế đầu ra tại thời điểm đồng bộ (0 với đơn cũ cho tới khi recompute).
-  amountBeforeTax Decimal @default(0) @map("amount_before_tax") @db.Decimal(14, 2)
-  vatAmount       Decimal @default(0) @map("vat_amount") @db.Decimal(14, 2)
-  status        String   @default("SYNCED")
-  deducted      Boolean  @default(false)
+  amountBeforeTax Decimal             @default(0) @map("amount_before_tax") @db.Decimal(14, 2)
+  vatAmount       Decimal             @default(0) @map("vat_amount") @db.Decimal(14, 2)
+  status          String              @default("SYNCED")
+  deducted        Boolean             @default(false)
+  // Chi nhánh KiotViet của đơn (mapping branch→kho ở app_settings.kiotviet_branch_warehouses)
+  branchId        String?             @map("branch_id")
   /// Mã lỗi lần trừ kho gần nhất (vd PERIOD_LOCKED); null khi không lỗi / đã trừ thành công.
-  deductError   String?  @map("deduct_error")
-  orderDate     DateTime @map("order_date")
-  syncedAt      DateTime @default(now()) @map("synced_at")
-  items         KiotVietOrderItem[]
+  deductError     String?             @map("deduct_error")
+  orderDate       DateTime            @map("order_date")
+  syncedAt        DateTime            @default(now()) @map("synced_at")
+  items           KiotVietOrderItem[]
 
   @@index([orderDate])
   @@map("kiotviet_orders")
 }
 
 model KiotVietOrderItem {
-  id          String   @id @default(uuid())
-  orderId     String   @map("order_id")
-  order       KiotVietOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productName String   @map("product_name")
-  menuItemId  String?  @map("menu_item_id")
-  menuItem    MenuItem? @relation(fields: [menuItemId], references: [id])
-  quantity    Int
-  price       Decimal  @db.Decimal(12, 2)
+  id              String        @id @default(uuid())
+  orderId         String        @map("order_id")
+  order           KiotVietOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productName     String        @map("product_name")
+  menuItemId      String?       @map("menu_item_id")
+  menuItem        MenuItem?     @relation(fields: [menuItemId], references: [id])
+  quantity        Int
+  price           Decimal       @db.Decimal(12, 2)
   // Snapshot thuế đầu ra của dòng tại thời điểm đồng bộ.
-  vatRate         String? @map("vat_rate")
-  amountBeforeTax Decimal @default(0) @map("amount_before_tax") @db.Decimal(14, 2)
-  vatAmount       Decimal @default(0) @map("vat_amount") @db.Decimal(14, 2)
+  vatRate         String?       @map("vat_rate")
+  amountBeforeTax Decimal       @default(0) @map("amount_before_tax") @db.Decimal(14, 2)
+  vatAmount       Decimal       @default(0) @map("vat_amount") @db.Decimal(14, 2)
 
   @@map("kiotviet_order_items")
 }
@@ -354,18 +367,21 @@ model AuditLog {
 }
 
 model StocktakeSession {
-  id          String    @id @default(uuid())
-  code        String    @unique
-  voucherDate DateTime @default(now()) @map("voucher_date")
-  voucherNo   String   @unique @map("voucher_no")
-  status      String    @default("DRAFT")
+  id          String          @id @default(uuid())
+  code        String          @unique
+  voucherDate DateTime        @default(now()) @map("voucher_date")
+  voucherNo   String          @unique @map("voucher_no")
+  status      String          @default("DRAFT")
   note        String?
-  createdById String    @map("created_by")
-  createdBy   User      @relation("StocktakeCreatedBy", fields: [createdById], references: [id])
-  completedAt DateTime? @map("completed_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
+  createdById String          @map("created_by")
+  createdBy   User            @relation("StocktakeCreatedBy", fields: [createdById], references: [id])
+  completedAt DateTime?       @map("completed_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
   items       StocktakeItem[]
+  warehouseId String          @map("warehouse_id")
+  warehouse   Warehouse       @relation(fields: [warehouseId], references: [id])
 
+  @@index([warehouseId])
   @@map("stocktake_sessions")
 }
 
@@ -384,24 +400,27 @@ model StocktakeItem {
 }
 
 model PurchaseReturn {
-  id          String   @id @default(uuid())
-  code        String   @unique
-  voucherDate DateTime @default(now()) @map("voucher_date")
-  voucherNo   String   @unique @map("voucher_no")
-  supplierId  String   @map("supplier_id")
-  supplier    Supplier @relation(fields: [supplierId], references: [id])
-  importOrderId String?    @map("import_order_id")
-  importOrder   ImportOrder? @relation(fields: [importOrderId], references: [id])
-  subtotal    Decimal  @default(0) @db.Decimal(14, 2)
-  vatAmount   Decimal  @default(0) @map("vat_amount") @db.Decimal(14, 2)
-  totalAmount Decimal  @default(0) @map("total_amount") @db.Decimal(14, 2)
-  reason      String
-  note        String?
-  createdById String   @map("created_by")
-  createdBy   User     @relation("ReturnCreatedBy", fields: [createdById], references: [id])
-  createdAt   DateTime @default(now()) @map("created_at")
-  items       PurchaseReturnItem[]
+  id            String               @id @default(uuid())
+  code          String               @unique
+  voucherDate   DateTime             @default(now()) @map("voucher_date")
+  voucherNo     String               @unique @map("voucher_no")
+  supplierId    String               @map("supplier_id")
+  supplier      Supplier             @relation(fields: [supplierId], references: [id])
+  importOrderId String?              @map("import_order_id")
+  importOrder   ImportOrder?         @relation(fields: [importOrderId], references: [id])
+  subtotal      Decimal              @default(0) @db.Decimal(14, 2)
+  vatAmount     Decimal              @default(0) @map("vat_amount") @db.Decimal(14, 2)
+  totalAmount   Decimal              @default(0) @map("total_amount") @db.Decimal(14, 2)
+  reason        String
+  note          String?
+  createdById   String               @map("created_by")
+  createdBy     User                 @relation("ReturnCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime             @default(now()) @map("created_at")
+  items         PurchaseReturnItem[]
+  warehouseId   String               @map("warehouse_id")
+  warehouse     Warehouse            @relation(fields: [warehouseId], references: [id])
 
+  @@index([warehouseId])
   @@map("purchase_returns")
 }
 
@@ -460,8 +479,8 @@ model IngredientUnit {
 model ProcessingOrder {
   id                 String     @id @default(uuid())
   code               String     @unique
-  voucherDate DateTime @default(now()) @map("voucher_date")
-  voucherNo   String   @unique @map("voucher_no")
+  voucherDate        DateTime   @default(now()) @map("voucher_date")
+  voucherNo          String     @unique @map("voucher_no")
   sourceIngredientId String     @map("source_ingredient_id")
   source             Ingredient @relation("ProcSource", fields: [sourceIngredientId], references: [id])
   sourceQty          Decimal    @map("source_qty") @db.Decimal(10, 3)
@@ -475,7 +494,10 @@ model ProcessingOrder {
   createdBy          User       @relation("ProcessingCreatedBy", fields: [createdById], references: [id])
   completedAt        DateTime?  @map("completed_at")
   createdAt          DateTime   @default(now()) @map("created_at")
+  warehouseId        String     @map("warehouse_id")
+  warehouse          Warehouse  @relation(fields: [warehouseId], references: [id])
 
+  @@index([warehouseId])
   @@map("processing_orders")
 }
 
@@ -517,14 +539,17 @@ model TaxPeriodClose {
 
 // Chứng từ xuất kho (gom các dòng StockTransaction EXPORT theo lô FIFO của 1 lần xuất).
 model StockExport {
-  id          String   @id @default(uuid())
-  voucherDate DateTime @default(now()) @map("voucher_date")
-  voucherNo   String   @unique @map("voucher_no")
+  id           String             @id @default(uuid())
+  voucherDate  DateTime           @default(now()) @map("voucher_date")
+  voucherNo    String             @unique @map("voucher_no")
   // POSTED = đã ghi sổ; CANCELLED = đã huỷ (bút toán kho đã được đảo).
-  status      String   @default("POSTED")
-  createdAt   DateTime @default(now()) @map("created_at")
+  status       String             @default("POSTED")
+  createdAt    DateTime           @default(now()) @map("created_at")
   transactions StockTransaction[]
+  warehouseId  String             @map("warehouse_id")
+  warehouse    Warehouse          @relation(fields: [warehouseId], references: [id])
 
+  @@index([warehouseId])
   @@map("stock_exports")
 }
 
@@ -607,12 +632,12 @@ model PurchaseOrderItem {
 
 // Cấu hình kho (1 dòng "default"): phương pháp tính giá xuất kho áp dụng toàn doanh nghiệp.
 model InventorySetting {
-  id            String   @id @default("default")
+  id            String    @id @default("default")
   // AVG_PERIOD = bình quân cuối kỳ (mặc định), AVG_MOVING = bình quân tức thời, FIFO
-  costingMethod String   @default("AVG_PERIOD") @map("costing_method")
+  costingMethod String    @default("AVG_PERIOD") @map("costing_method")
   /// Khoá sổ kho: mọi chứng từ có ngày CT (lịch VN) <= ngày này bị chặn tạo/sửa/duyệt. null = chưa khoá.
   lockedUntil   DateTime? @map("locked_until") @db.Date
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@map("inventory_settings")
 }
@@ -716,4 +741,41 @@ model ItemAttributeValue {
 
   @@id([ingredientId, attributeId])
   @@map("item_attribute_values")
+}
+
+// Kho. Luôn có đúng 1 kho is_default (migration tạo "Kho chính").
+model Warehouse {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  address   String?
+  isDefault Boolean  @default(false) @map("is_default")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  stocks            IngredientStock[]
+  batches           IngredientBatch[]
+  stockTransactions StockTransaction[]
+  importOrders      ImportOrder[]
+  stockExports      StockExport[]
+  purchaseReturns   PurchaseReturn[]
+  stocktakeSessions StocktakeSession[]
+  processingOrders  ProcessingOrder[]
+
+  @@map("warehouses")
+}
+
+// Tồn theo kho. Ingredient.currentStock = tổng qty mọi kho.
+model IngredientStock {
+  ingredientId String     @map("ingredient_id")
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  warehouseId  String     @map("warehouse_id")
+  warehouse    Warehouse  @relation(fields: [warehouseId], references: [id])
+  qty          Decimal    @default(0) @db.Decimal(14, 3)
+  user         User?      @relation(fields: [userId], references: [id])
+  userId       String?
+
+  @@id([ingredientId, warehouseId])
+  @@index([warehouseId])
+  @@map("ingredient_stock")
 }

@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PeriodLockService } from '../common/period-lock.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { revertReceiptFromPo } from '../purchasing/purchase-receipt';
 
 export const IMPORT_UNPOST_NEGATIVE_STOCK = 'IMPORT_UNPOST_NEGATIVE_STOCK';
@@ -62,13 +63,14 @@ export class ImportOrderUnpostService {
   constructor(
     private prisma: PrismaService,
     private periodLock: PeriodLockService,
+    private stockSvc: WarehouseStockService = new WarehouseStockService(prisma),
   ) {}
 
   async unpost(id: string) {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.importOrder.findUnique({
         where: { id },
-        include: { items: { include: { batch: true, ingredient: { select: { name: true, currentStock: true } } } } },
+        include: { items: { include: { batch: true, ingredient: { select: { name: true } } } } },
       });
       if (!order) throw new NotFoundException('Không tìm thấy phiếu nhập');
       if (order.status !== 'COMPLETED') throw new BadRequestException('Chỉ bỏ ghi phiếu đã duyệt');
@@ -84,7 +86,9 @@ export class ImportOrderUnpostService {
         });
       }
 
-      const stock = new Map(order.items.map((i) => [i.ingredientId, Number(i.ingredient.currentStock)]));
+      // Chỉ xét tồn tại kho của phiếu: hàng nhập vào kho này không thể bỏ ghi nếu đã xuất khỏi kho này.
+      const stock = new Map<string, number>();
+      for (const i of order.items) stock.set(i.ingredientId, await this.stockSvc.getQty(tx, i.ingredientId, order.warehouseId));
       const shortages = findUnpostShortages(
         order.items.map((i) => ({
           ingredientId: i.ingredientId,
@@ -104,7 +108,7 @@ export class ImportOrderUnpostService {
       }
 
       for (const item of order.items) {
-        await tx.ingredient.update({ where: { id: item.ingredientId }, data: { currentStock: { decrement: item.quantity } } });
+        await this.stockSvc.adjust(tx, item.ingredientId, order.warehouseId, Number(item.quantity) * -1);
       }
       await tx.ingredientBatch.deleteMany({ where: { importOrderItemId: { in: order.items.map((i) => i.id) } } });
       await tx.stockTransaction.deleteMany({ where: { type: 'IMPORT', referenceId: id } });

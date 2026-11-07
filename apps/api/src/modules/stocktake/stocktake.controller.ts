@@ -10,13 +10,13 @@ export class StocktakeController {
 
   @Get()
   @RequirePermissions('stocktake:read')
-  findAll(@Query() q: { page?: string; limit?: string }) {
+  findAll(@Query() q: { page?: string; limit?: string; warehouse_id?: string }) {
     return this.service.findAll(q);
   }
 
   @Post()
   @RequirePermissions('stocktake:create')
-  create(@Req() req, @Body() body: { note?: string; voucher_date?: string; voucher_no?: string }) {
+  create(@Req() req, @Body() body: { note?: string; voucher_date?: string; voucher_no?: string; warehouse_id?: string }) {
     return this.service.create(req.user.id, body);
   }
 

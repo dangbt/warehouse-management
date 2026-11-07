@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { PeriodLockService } from '../common/period-lock.service';
 import { Decimal } from '@prisma/client/runtime/library';
 
@@ -12,19 +13,22 @@ export class StocktakeService {
     private vouchers: VoucherService,
     private costing: CostingService,
     private periodLock: PeriodLockService,
+    private stock: WarehouseStockService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string }) {
+  async findAll(q: { page?: string; limit?: string; warehouse_id?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
+    const where = q.warehouse_id ? { warehouseId: q.warehouse_id } : {};
     const [data, total] = await Promise.all([
       this.prisma.stocktakeSession.findMany({
+        where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: [{ voucherDate: 'desc' }, { createdAt: 'desc' }],
         include: { createdBy: { select: { id: true, fullName: true } }, _count: { select: { items: true } } },
       }),
-      this.prisma.stocktakeSession.count(),
+      this.prisma.stocktakeSession.count({ where }),
     ]);
     return { data, meta: { page, limit, total } };
   }
@@ -41,10 +45,15 @@ export class StocktakeService {
     return session;
   }
 
-  async create(userId: string, body: { note?: string; voucher_date?: string; voucher_no?: string }) {
-    const ingredients = await this.prisma.ingredient.findMany({
-      select: { id: true, currentStock: true },
-    });
+  async create(userId: string, body: { note?: string; voucher_date?: string; voucher_no?: string; warehouse_id?: string }) {
+    // Kiểm kê theo kho: tồn hệ thống = tồn tại kho được kiểm (bỏ trống ⇒ kho mặc định).
+    const warehouseId = await this.stock.resolveId(body.warehouse_id);
+    const [all, stocks] = await Promise.all([
+      this.prisma.ingredient.findMany({ select: { id: true } }),
+      this.prisma.ingredientStock.findMany({ where: { warehouseId }, select: { ingredientId: true, qty: true } }),
+    ]);
+    const qtyById = new Map(stocks.map((s) => [s.ingredientId, s.qty]));
+    const ingredients = all.map((i) => ({ id: i.id, currentStock: qtyById.get(i.id) ?? new Decimal(0) }));
 
     const voucherDate = parseVoucherDate(body.voucher_date);
     await this.periodLock.assertOpen(voucherDate);
@@ -56,6 +65,7 @@ export class StocktakeService {
           code: voucherNo,
           voucherNo,
           voucherDate,
+          warehouseId,
           note: body.note,
           createdById: userId,
           items: {
@@ -115,14 +125,12 @@ export class StocktakeService {
             ? await this.costing.costOutbound(tx, item.ingredientId, absDiff)
             : await this.costing.currentCost(tx, item.ingredientId, absDiff);
 
-        await tx.ingredient.update({
-          where: { id: item.ingredientId },
-          data: { currentStock: item.actualQty },
-        });
+        await this.stock.setQty(tx, item.ingredientId, session.warehouseId, item.actualQty);
 
         await tx.stockTransaction.create({
           data: {
             ingredientId: item.ingredientId,
+            warehouseId: session.warehouseId,
             type: 'STOCKTAKE_ADJUST',
             quantity: item.difference,
             unitCost: cost.unitCost,
@@ -137,7 +145,7 @@ export class StocktakeService {
         // Adjust batches: add to or deduct from latest batch
         if (diff > 0) {
           const latestBatch = await tx.ingredientBatch.findFirst({
-            where: { ingredientId: item.ingredientId, status: 'ACTIVE' },
+            where: { ingredientId: item.ingredientId, warehouseId: session.warehouseId, status: 'ACTIVE' },
             orderBy: { receivedDate: 'desc' },
           });
           if (latestBatch) {
@@ -151,7 +159,7 @@ export class StocktakeService {
           const deductQty = Math.abs(diff);
           let remaining = deductQty;
           const batches = await tx.ingredientBatch.findMany({
-            where: { ingredientId: item.ingredientId, status: 'ACTIVE', quantity: { gt: 0 } },
+            where: { ingredientId: item.ingredientId, warehouseId: session.warehouseId, status: 'ACTIVE', quantity: { gt: 0 } },
             orderBy: { receivedDate: 'desc' },
           });
 
