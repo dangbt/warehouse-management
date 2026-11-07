@@ -15,7 +15,8 @@ import { computeVatTotals } from './vat'
 import { orderToFormValues, orderIngredientOptions, localDay, type EditableImportOrder } from './import-order-edit'
 import { ImportOrderItemsTable, type IngredientOption } from './import-order-items-table'
 import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
-import { mergeLines, type MatrixLine } from '@/components/matrix-picker/matrix-logic'
+import { ScanControls } from '@/components/barcode/scan-controls'
+import { makeLineAdders } from './import-order-lines'
 
 const itemSchema = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
@@ -269,27 +270,14 @@ export function ImportOrderForm({ open, onClose, onSave, initial, order, seed }:
     setTimeout(() => setFocus(`items.${fields.length}.quantity`), 0)
   }, [append, setFocus, fields.length])
 
-  /** Thêm dòng từ MatrixPicker: 1 dòng/biến thể, trùng biến thể thì cộng dồn số lượng. */
-  const addMatrixLines = (lines: MatrixLine[]) => {
-    const current = getValues('items').filter((r) => r.ingredient_id)
-    const incoming = lines.map((l) => ({
-      itemId: l.itemId,
-      quantity: l.quantity,
-      ingredient_id: l.itemId,
-      factor: 1,
-      unit_price: l.unitPrice,
-      vat_rate: DEFAULT_ITEM.vat_rate,
-      expiry_date: '',
-    }))
-    const merged = mergeLines(current.map((r) => ({ ...r, itemId: r.ingredient_id })), incoming).map(({ itemId: _id, ...r }) => r)
-    replace(merged)
-    setIngredients((o) => [
-      ...o,
-      ...lines.filter((l) => !o.some((x) => x.value === l.itemId)).map((l) => ({ value: l.itemId, label: l.sku ? `${l.sku} · ${l.productName} ${l.variantLabel}` : `${l.productName} ${l.variantLabel}`, unit: l.unit })),
-    ])
-    setUnitMap((m) => ({ ...m, ...Object.fromEntries(lines.map((l) => [l.itemId, l.unit])) }))
-    setGroupMap((g) => ({ ...g, ...Object.fromEntries(lines.map((l) => [l.itemId, { product: l.productName, variant: l.variantLabel }])) }))
-  }
+  const { addMatrixLines, addScanned } = makeLineAdders({
+    getValues: () => getValues('items'),
+    replace,
+    setIngredients,
+    setUnitMap,
+    setGroupMap,
+    defaultVat: DEFAULT_ITEM.vat_rate,
+  })
 
   const onSubmit = async (data: FormData, keepOpen = false) => {
     try {
@@ -485,7 +473,12 @@ export function ImportOrderForm({ open, onClose, onSave, initial, order, seed }:
             onAdd={addRow}
             onRemove={remove}
             groupMap={groupMap}
-            extraActions={<MatrixAddButton mode="import" onConfirm={addMatrixLines} />}
+            extraActions={
+              <>
+                <MatrixAddButton mode="import" onConfirm={addMatrixLines} />
+                <ScanControls onItem={addScanned} />
+              </>
+            }
             rootError={errors.items?.root?.message ?? errors.items?.message}
           />
 

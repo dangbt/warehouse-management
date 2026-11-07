@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Save, CheckCircle, ArrowLeft, Printer } from 'lucide-react'
 import { openPrint } from '@/components/print/print-utils'
 import { useParams, useNavigate } from '@tanstack/react-router'
@@ -9,6 +9,9 @@ import { useTerm } from '@/data/use-features'
 import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
 import type { MatrixLine } from '@/components/matrix-picker/matrix-logic'
 import { useToastStore } from '@/stores/toast.store'
+import { ScanControls } from '@/components/barcode/scan-controls'
+import type { ScannedItem } from '@/components/barcode/lookup'
+import { bumpActual } from './scan-logic'
 
 interface ItemRow {
   id: string
@@ -69,6 +72,21 @@ export function StocktakeDetailPage() {
     if (missing > 0) useToastStore.getState().error(`${missing} biến thể không có trong phiên kiểm kê này`)
   }
 
+  /** Quét mã: +1 số thực tế của hàng; hàng ngoài phiên kiểm kê thì báo rõ, không sửa gì. */
+  const itemsRef = useRef(items)
+  itemsRef.current = items
+  const handleScan = (item: ScannedItem): string => {
+    const next = bumpActual(itemsRef.current, item.id)
+    if (!next) {
+      const msg = `"${item.name}" không thuộc phiên kiểm kê này`
+      useToastStore.getState().error(msg)
+      return msg
+    }
+    itemsRef.current = next // quét liên tiếp trước khi render lại vẫn cộng dồn đúng
+    setItems(next)
+    return `${item.name}: ${next.find((r) => r.ingredientId === item.id)?.actualQty}`
+  }
+
   const handleNoteChange = (index: number, val: string) => {
     setItems((prev) => {
       const next = [...prev]
@@ -119,22 +137,25 @@ export function StocktakeDetailPage() {
           <MatrixAddButton mode="stocktake" disabled={isCompleted} onConfirm={applyMatrix} />
         </div>
         <WinToolbar.Separator />
+        <ScanControls onItem={handleScan} disabled={isCompleted} />
+        <WinToolbar.Separator />
         <span className="text-win-base px-2">
           Phiên: <strong>{detail?.code}</strong> — {isCompleted ? 'Đã hoàn thành' : 'Đang kiểm'}
         </span>
       </WinToolbar>
 
-      <div className="flex-1 overflow-auto p-2">
+      <div className="flex-1 overflow-auto p-1 sm:p-2">
         <WinGroupBox title="Danh sách kiểm kê">
+          <div className="overflow-x-auto">
           <table className="w-full text-win-base">
             <thead>
               <tr className="bg-win-grid-header">
                 <th className="text-left p-1">{t('item')}</th>
                 <th className="p-1 w-16">ĐVT</th>
-                <th className="p-1 w-20">Hệ thống</th>
+                <th className="p-1 w-20 hidden sm:table-cell">Hệ thống</th>
                 <th className="p-1 w-24">Thực tế</th>
                 <th className="p-1 w-20">Chênh lệch</th>
-                <th className="p-1 w-40">Ghi chú</th>
+                <th className="p-1 w-40 hidden sm:table-cell">Ghi chú</th>
               </tr>
             </thead>
             <tbody>
@@ -145,20 +166,21 @@ export function StocktakeDetailPage() {
                 >
                   <td className="p-1">{item.ingredientName}</td>
                   <td className="p-1 text-center">{item.unit}</td>
-                  <td className="p-1 text-right">{item.systemQty}</td>
+                  <td className="p-1 text-right hidden sm:table-cell">{item.systemQty}</td>
                   <td className="p-1">
                     <input
                       type="number"
+                      inputMode="decimal"
                       value={item.actualQty}
                       onChange={(e) => handleActualChange(idx, e.target.value)}
                       disabled={isCompleted}
-                      className="w-full border border-win-input-border h-8 px-2 text-right text-win-base outline-none focus:border-win-input-focus disabled:bg-gray-100"
+                      className="w-full border border-win-input-border h-10 sm:h-8 px-2 text-right text-win-base outline-none focus:border-win-input-focus disabled:bg-gray-100"
                     />
                   </td>
                   <td className={`p-1 text-right font-bold ${item.difference !== 0 ? 'text-win-error' : ''}`}>
                     {item.difference !== 0 ? (item.difference > 0 ? `+${item.difference}` : item.difference) : '0'}
                   </td>
-                  <td className="p-1">
+                  <td className="p-1 hidden sm:table-cell">
                     <input
                       type="text"
                       value={item.note}
@@ -171,6 +193,7 @@ export function StocktakeDetailPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </WinGroupBox>
       </div>
     </div>
