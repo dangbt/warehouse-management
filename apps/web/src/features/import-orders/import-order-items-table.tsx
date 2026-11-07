@@ -1,3 +1,4 @@
+import { Fragment, type KeyboardEvent, type ReactNode } from 'react'
 import { Controller, type Control, type FieldArrayWithId, type UseFormRegister } from 'react-hook-form'
 import { WinSearchSelect } from '@wms/ui-winforms'
 import { Plus, Trash2 } from 'lucide-react'
@@ -32,6 +33,9 @@ interface Props {
   onAdd: () => void
   onRemove: (index: number) => void
   rootError?: string
+  /** ingredient_id → tên SP + biến thể (dòng thêm từ ma trận) để hiển thị nhóm theo sản phẩm. */
+  groupMap?: Record<string, { product: string; variant: string }>
+  extraActions?: ReactNode
 }
 
 const cell = 'w-full h-10 border border-win-input-border px-2 text-[14px] bg-white outline-none focus:border-win-input-focus'
@@ -60,6 +64,8 @@ export function ImportOrderItemsTable({
   onAdd,
   onRemove,
   rootError,
+  groupMap = {},
+  extraActions,
 }: Props) {
   const t = useTerm()
   const unitOf = (id?: string) => (id ? (unitMap[id] ?? '') : '')
@@ -92,8 +98,17 @@ export function ImportOrderItemsTable({
               const row = rows[i] ?? {}
               const total = lineTotalPrice(row)
               const unit = unitOf(row.ingredient_id)
+              const grp = row.ingredient_id ? groupMap[row.ingredient_id] : undefined
+              const prevId = i > 0 ? rows[i - 1]?.ingredient_id : undefined
+              const showGroup = !!grp && (!prevId || groupMap[prevId]?.product !== grp.product)
               return (
-                <tr key={field.id} className="border-b border-win-grid-border">
+                <Fragment key={field.id}>
+                {showGroup && (
+                  <tr data-testid={`group-${i}`} className="bg-win-grid-header border-b border-win-grid-border">
+                    <td colSpan={hasInvoice ? 11 : 9} className="px-2 py-1 text-[13px] font-semibold">{grp.product}</td>
+                  </tr>
+                )}
+                <tr className="border-b border-win-grid-border">
                   <td className="px-2 text-center text-win-text-secondary">{i + 1}</td>
                   <td className="p-1">
                     <Controller
@@ -186,6 +201,7 @@ export function ImportOrderItemsTable({
                     )}
                   </td>
                 </tr>
+                </Fragment>
               )
             })}
           </tbody>
@@ -200,6 +216,7 @@ export function ImportOrderItemsTable({
         >
           <Plus size={16} /> Thêm dòng
         </button>
+        {extraActions}
         <span className="text-[12px] text-win-text-secondary">Enter: sang ô kế tiếp, hết dòng cuối thì thêm dòng · Ctrl+Insert: thêm dòng · Ctrl+Delete: xoá dòng</span>
         {rootError && <span className="text-[13px] text-win-error ml-auto">{rootError}</span>}
       </div>
