@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { applyBodyLimit } from './body-limit';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  applyBodyLimit(app);
   app.set('trust proxy', true);
   const origins = (process.env.CORS_ORIGINS || 'http://localhost:5173').split(',');
   app.enableCors({ origin: origins, credentials: true });
