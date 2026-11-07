@@ -8,6 +8,7 @@ function setup(lockedUntil: Date | null = null) {
   const voucher = () => ({
     id: 'e1',
     status: db.status,
+    warehouseId: 'wh-main',
     voucherDate: new Date('2026-11-01T00:00:00Z'),
     transactions: [{ id: 't1', ingredientId: 'ing', quantity: db.txQty, referenceId: 'b1', note: db.txNote }],
   });
@@ -16,6 +17,11 @@ function setup(lockedUntil: Date | null = null) {
       findUnique: async () => voucher(),
       update: async ({ data }: { data: { status: string } }) => void (db.status = data.status),
     },
+    warehouse: {
+      findFirst: async () => ({ id: 'wh-main' }),
+      findUnique: async ({ where }: { where: { id: string } }) => ({ id: where.id, active: true }),
+    },
+    ingredientStock: { findUnique: async () => ({ qty: db.stock }), upsert: async () => undefined },
     ingredient: { update: async ({ data }: any) => void (db.stock += data.currentStock.increment) },
     ingredientBatch: { updateMany: async ({ data }: any) => void (db.batch += data.quantity.increment) },
     stockTransaction: {
