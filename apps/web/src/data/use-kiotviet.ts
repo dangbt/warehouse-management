@@ -8,6 +8,7 @@ export interface KiotVietOrder {
   id: string
   code: string
   customerName: string
+  branchId?: string | null
   totalAmount: number
   items: { productName: string; quantity: number }[]
   orderDate: string

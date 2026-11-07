@@ -3,7 +3,7 @@ import { FileText, TriangleAlert } from 'lucide-react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { VoucherFields } from '@/components/voucher-fields'
 import { useVoucherFields } from '@/data/use-vouchers'
 import type { VoucherPayload } from '@/data/use-vouchers'
@@ -17,6 +17,9 @@ import { ImportOrderItemsTable, type IngredientOption } from './import-order-ite
 import { MatrixAddButton } from '@/components/matrix-picker/matrix-add-button'
 import { ScanControls } from '@/components/barcode/scan-controls'
 import { makeLineAdders } from './import-order-lines'
+import { Field, Section, input } from './import-order-layout'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseChoice } from '@/hooks/use-warehouse-choice'
 
 const itemSchema = z.object({
   ingredient_id: z.string().min(1, 'Chọn NL'),
@@ -71,7 +74,7 @@ export interface ImportOrderInitial {
 interface Props {
   open: boolean
   onClose: () => void
-  onSave?: (data: FormData & VoucherPayload) => void
+  onSave?: (data: FormData & VoucherPayload & { warehouse_id?: string }) => void
   initial?: ImportOrderInitial
   /** Có phiếu ⇒ chế độ sửa (phiếu PENDING): nạp sẵn dữ liệu, lưu = cập nhật. */
   order?: EditableImportOrder | null
@@ -109,38 +112,6 @@ function initialToForm(init: ImportOrderInitial): FormData {
   }
 }
 
-const input = 'w-full h-10 border px-3 text-[14px] bg-white outline-none focus:border-win-input-focus disabled:bg-win-control'
-
-/** Một dòng "nhãn: ô nhập" cỡ lớn, nhãn bên trái như chứng từ MISA. */
-function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <label className="w-[120px] shrink-0 pt-2.5 text-[14px] text-right">
-        {label}
-        {required && <span className="text-win-error"> *</span>}
-      </label>
-      <div className="flex-1 min-w-0">
-        {children}
-        {error && <p className="text-[12px] text-win-error mt-0.5">{error}</p>}
-      </div>
-    </div>
-  )
-}
-
-function Section({ step, title, children }: { step: number; title: string; children: ReactNode }) {
-  return (
-    <section className="border border-win-grid-border bg-white">
-      <header className="flex items-center gap-2 px-3 h-10 border-b border-win-grid-border bg-win-grid-header">
-        <span className="w-6 h-6 rounded-full bg-win-active-title text-white text-[13px] font-semibold flex items-center justify-center">
-          {step}
-        </span>
-        <span className="text-[15px] font-semibold">{title}</span>
-      </header>
-      <div className="p-3">{children}</div>
-    </section>
-  )
-}
-
 /**
  * Phiếu nhập kho — bố cục theo luồng nhập hàng kiểu MISA:
  * ① Nhà cung cấp → ② Chứng từ (hoá đơn, thanh toán) → ③ Hàng tiền → Tổng cộng → Lưu.
@@ -176,6 +147,7 @@ export function ImportOrderForm({ open, onClose, onSave, initial, order, seed }:
   const [submitError, setSubmitError] = useState('')
   const initialVoucher = useMemo(() => (order ? { date: localDay(order.voucherDate), no: order.voucherNo } : null), [order])
   const voucher = useVoucherFields('IMPORT', open, initialVoucher)
+  const wh = useWarehouseChoice(order?.warehouseId)
   // Nhóm theo sản phẩm cho các dòng thêm từ ma trận: ingredient_id → tên SP + biến thể.
   const [groupMap, setGroupMap] = useState<Record<string, { product: string; variant: string }>>({})
 
@@ -292,7 +264,7 @@ export function ImportOrderForm({ open, onClose, onSave, initial, order, seed }:
             invoice_date: undefined,
             items: data.items.map((i) => ({ ...i, vat_rate: undefined })),
           }
-      await onSave?.({ ...payload, ...voucher.payload() })
+      await onSave?.({ ...payload, ...voucher.payload(), warehouse_id: wh.warehouseId || undefined })
       reset(EMPTY_FORM)
       if (keepOpen) setTimeout(() => setFocus('supplier_id'), 0)
       else onClose()
@@ -369,6 +341,11 @@ export function ImportOrderForm({ open, onClose, onSave, initial, order, seed }:
                   className={`${input} ${border()}`}
                 />
               </Field>
+              {wh.multi && (
+                <Field label="Kho">
+                  <WarehouseSelect value={wh.warehouseId} onChange={wh.setWarehouseId} />
+                </Field>
+              )}
               <Field label="Số chứng từ">
                 <input
                   data-testid="input-Số chứng từ"

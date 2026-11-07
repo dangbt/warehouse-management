@@ -3,6 +3,8 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect, useState, useCallback } from 'react'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseChoice } from '@/hooks/use-warehouse-choice'
 import { VoucherFields } from '@/components/voucher-fields'
 import { useVoucherFields } from '@/data/use-vouchers'
 import type { VoucherPayload } from '@/data/use-vouchers'
@@ -25,7 +27,7 @@ type FormData = z.infer<typeof schema>
 interface Props {
   open: boolean
   onClose: () => void
-  onSave?: (data: FormData & VoucherPayload) => Promise<void> | void
+  onSave?: (data: FormData & VoucherPayload & { warehouse_id?: string }) => Promise<void> | void
 }
 
 interface Ing {
@@ -90,6 +92,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
   }, [open, resetKey, reset, fetchSource, fetchOutput])
 
   const voucher = useVoucherFields('PROCESSING', open)
+  const wh = useWarehouseChoice()
   const outputId = watch('output_ingredient_id')
   const sourceQty = watch('source_qty')
   const output = allOutputs.find((i) => i.id === outputId)
@@ -99,7 +102,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
   const onSubmit = async (formData: FormData, keepOpen = false) => {
     try {
       setSubmitError('')
-      await onSave?.({ ...formData, ...voucher.payload() })
+      await onSave?.({ ...formData, ...voucher.payload(), warehouse_id: wh.warehouseId || undefined })
       if (keepOpen) setResetKey((k) => k + 1)
       else onClose()
     } catch (e: unknown) {
@@ -143,6 +146,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
       <WinGroupBox title="Nguyên liệu sống → Bán thành phẩm">
         <div className="space-y-2.5">
           <VoucherFields {...voucher} />
+          <WarehouseSelect label="Kho" value={wh.warehouseId} onChange={wh.setWarehouseId} />
           <Controller
             name="source_ingredient_id"
             control={control}

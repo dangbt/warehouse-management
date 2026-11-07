@@ -27,7 +27,7 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number; totals?: { subtotal: number; vatAmount: number; totalAmount: number } }
 }
 
-export function useImportOrders(params?: { id?: string; status?: string; page?: number; orderBy?: string; sort?: string; from?: string; to?: string }) {
+export function useImportOrders(params?: { id?: string; status?: string; page?: number; orderBy?: string; sort?: string; from?: string; to?: string; warehouseId?: string }) {
   const query = new URLSearchParams({ limit: '50' })
   if (params?.id) query.set('id', params.id)
   if (params?.status) query.set('status', params.status)
@@ -36,6 +36,7 @@ export function useImportOrders(params?: { id?: string; status?: string; page?: 
   if (params?.sort) query.set('sort', params.sort)
   if (params?.from) query.set('from', params.from)
   if (params?.to) query.set('to', params.to)
+  if (params?.warehouseId) query.set('warehouse_id', params.warehouseId)
   return useQuery<ListResponse>({
     queryKey: QUERY_KEYS.importOrdersList(Object.fromEntries(query)),
     queryFn: () => api.get(`/import-orders?${query}`),
@@ -80,6 +81,7 @@ export function useCreateImportOrder() {
     mutationFn: (data: {
       voucher_date?: string
       voucher_no?: string
+      warehouse_id?: string
       supplier_id: string
       note?: string
       paid?: boolean

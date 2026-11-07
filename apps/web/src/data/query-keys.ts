@@ -1,4 +1,8 @@
 export const QUERY_KEYS = {
+  warehouses: ['warehouses'] as const,
+  warehousesList: () => ['warehouses', 'list'] as const,
+  kiotvietWarehouseMap: ['kiotviet-warehouse-map'] as const,
+
   ingredients: ['ingredients'] as const,
   ingredientsList: (params?: Record<string, string>) => ['ingredients', 'list', params] as const,
 

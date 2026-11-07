@@ -23,6 +23,7 @@ export class ProcessingController {
       id?: string;
       from?: string;
       to?: string;
+      warehouse_id?: string;
     },
   ) {
     return this.svc.findAll(q);

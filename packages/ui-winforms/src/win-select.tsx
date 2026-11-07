@@ -5,9 +5,11 @@ interface Props extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   error?: string
   options: { value: string; label: string }[]
+  /** Nhãn của lựa chọn rỗng (mặc định "-- Chọn --"); `null` ⇒ không hiện lựa chọn rỗng. */
+  emptyLabel?: string | null
 }
 
-export const WinSelect = forwardRef<HTMLSelectElement, Props>(({ label, error, options, ...props }, ref) => (
+export const WinSelect = forwardRef<HTMLSelectElement, Props>(({ label, error, options, emptyLabel = '-- Chọn --', ...props }, ref) => (
   <div className="flex items-center gap-2">
     {label && <label className="text-win-base w-30 text-right shrink-0">{label}:</label>}
     <div className="flex-1 min-w-0">
@@ -17,7 +19,7 @@ export const WinSelect = forwardRef<HTMLSelectElement, Props>(({ label, error, o
         {...props}
         className={`w-full h-8 border px-2 text-win-base outline-none focus:border-win-input-focus bg-white ${error ? 'border-win-error' : 'border-win-input-border'}`}
       >
-        <option value="">-- Chọn --</option>
+        {emptyLabel !== null && <option value="">{emptyLabel}</option>}
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}

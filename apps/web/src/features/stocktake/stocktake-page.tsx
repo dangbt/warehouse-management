@@ -1,4 +1,5 @@
 import { Plus, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -6,6 +7,9 @@ import { useStocktakeSessions, useCreateStocktake, useVoucherFields } from '@/da
 import { formatDate } from '@wms/shared'
 import { VoucherFields } from '@/components/voucher-fields'
 import type { StocktakeSession } from '@/data/use-stocktake'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseColumn } from '@/components/warehouse-column'
+import { useWarehouseChoice } from '@/hooks/use-warehouse-choice'
 
 const STATUS_LABEL: Record<string, { text: string; color: string }> = {
   DRAFT: { text: 'Đang kiểm', color: 'bg-yellow-100 text-yellow-800' },
@@ -22,12 +26,15 @@ const columns: Column<StocktakeSession>[] = [
 
 export function StocktakePage() {
   const navigate = useNavigate()
-  const { data: res, isLoading, refetch } = useStocktakeSessions()
+  const [filterWh, setFilterWh] = useState('')
+  const { data: res, isLoading, refetch } = useStocktakeSessions(filterWh || undefined)
+  const wh = useWarehouseChoice()
+  const whColumn = useWarehouseColumn<StocktakeSession>((r) => r.warehouseId)
   const createMutation = useCreateStocktake()
   const voucher = useVoucherFields('STOCKTAKE', true)
 
   const handleCreate = async () => {
-    const session = await createMutation.mutateAsync(voucher.payload())
+    const session = await createMutation.mutateAsync({ ...voucher.payload(), warehouse_id: wh.warehouseId || undefined })
     navigate({ to: '/stocktake/$id', params: { id: (session as StocktakeSession).id } })
   }
 
@@ -40,9 +47,11 @@ export function StocktakePage() {
       </WinToolbar>
       <div className="flex items-center gap-4 px-2 py-1.5 border-b border-win-button-border">
         <VoucherFields {...voucher} />
+        <WarehouseSelect label="Kho kiểm kê" value={wh.warehouseId} onChange={wh.setWarehouseId} testId="stocktake-warehouse" />
+        <WarehouseSelect allowAll label="Lọc kho" value={filterWh} onChange={setFilterWh} testId="filter-warehouse" />
       </div>
       <WinDataGrid
-        columns={columns}
+        columns={[...columns.slice(0, 3), ...whColumn, ...columns.slice(3)]}
         data={res?.data ?? []}
         loading={isLoading}
         onRowClick={(row) => navigate({ to: '/stocktake/$id', params: { id: row.id } })}

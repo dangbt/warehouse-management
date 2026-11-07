@@ -6,6 +6,7 @@ import { useProductAttributes, useProducts } from '@/data/use-products'
 import { useFeatures } from '@/data/use-features'
 import { exportSheet } from '@/utils/excel'
 import { useNavigate } from '@tanstack/react-router'
+import { WarehouseSelect } from '@/components/warehouse-select'
 import { InventorySummaryTable } from './inventory-summary-table'
 import { EXCEL_COLUMNS, buildExcelRows, fmtDisplay } from './inventory-summary-utils'
 import { PeriodPicker, usePeriod } from './period-picker'
@@ -16,6 +17,7 @@ export function InventorySummaryPage() {
   const period = usePeriod()
   const { range, valid } = period
   const [groupId, setGroupId] = useState('')
+  const [warehouseId, setWarehouseId] = useState('')
   const { data: groups } = useIngredientGroups()
   const variants = useFeatures().isEnabled('product_variants')
   const [byProduct, setByProduct] = useState(false)
@@ -27,6 +29,7 @@ export function InventorySummaryPage() {
   const { data, isLoading, refetch } = useInventorySummary({
     ...range,
     groupId: groupId || undefined,
+    warehouseId: warehouseId || undefined,
     ...(variants ? { groupBy: byProduct ? 'product' : undefined, category: category || undefined, attributeValueId: attrValueId || undefined } : {}),
   })
 
@@ -54,6 +57,7 @@ export function InventorySummaryPage() {
           <option value="">Tất cả nhóm</option>
           {groups?.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
         </select>
+        <WarehouseSelect allowAll value={warehouseId} onChange={setWarehouseId} testId="filter-warehouse" />
         {variants && (
           <>
             <select className="text-win-base" value={category} onChange={(e) => setCategory(e.target.value)}>
