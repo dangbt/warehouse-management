@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useConsumptionVariance } from '@/data'
 import type { VarianceItem } from '@/data/use-variance'
 import { formatNumber } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
-const columns: Column<VarianceItem>[] = [
-  { key: 'name', header: 'Nguyên liệu', width: 160 },
+const makeColumns = (itemLabel: string): Column<VarianceItem>[] => [
+  { key: 'name', header: itemLabel, width: 160 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
   { key: 'theoreticalUsage', header: 'Lý thuyết', width: 100, align: 'right', render: (r) => formatNumber(r.theoreticalUsage) },
   { key: 'actualUsage', header: 'Thực tế', width: 100, align: 'right', render: (r) => formatNumber(r.actualUsage) },
@@ -49,6 +50,8 @@ function fmtDisplay(d: string) {
 }
 
 export function VarianceReportPage() {
+  const t = useTerm()
+  const columns = useMemo(() => makeColumns(t('item')), [t])
   const [period, setPeriod] = useState<'week' | 'month'>('week')
   const [offset, setOffset] = useState(0)
 

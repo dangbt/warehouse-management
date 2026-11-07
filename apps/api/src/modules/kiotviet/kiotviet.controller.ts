@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { KiotVietService } from './kiotviet.service';
+import { FeatureGuard, RequireFeature } from '../settings/feature.guard';
 
 interface SyncBody {
   orders: {
@@ -23,7 +24,8 @@ interface SyncApiBody {
   toDate?: string;
 }
 
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, FeatureGuard)
+@RequireFeature('sales_channels')
 @Controller('kiotviet')
 export class KiotVietController {
   constructor(private svc: KiotVietService) {}
@@ -53,6 +55,7 @@ export class KiotVietController {
   }
 
   @Post('orders/:id/deduct')
+  @RequireFeature('kiotviet_recipe_deduct')
   @RequirePermissions('kiotviet:deduct')
   deduct(@Param('id') id: string, @Req() req: Request & { user: { id: string } }) {
     return this.svc.deductOrder(id, req.user.id);

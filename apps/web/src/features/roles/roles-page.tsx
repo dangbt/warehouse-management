@@ -3,6 +3,7 @@ import { KeyRound, Plus, RefreshCw, Shield } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { useRoles, useCreateRole, useUpdateRolePermissions } from '@/data'
+import { useTerm } from '@/data/use-features'
 
 interface Role {
   id: string
@@ -32,6 +33,7 @@ const RESOURCES = [
   'departments',
   'purchase_requests',
   'purchase_orders',
+  'settings',
 ]
 const ACTIONS = ['create', 'read', 'update', 'delete', 'approve']
 const RESOURCE_LABELS: Record<string, string> = {
@@ -47,6 +49,7 @@ const RESOURCE_LABELS: Record<string, string> = {
   departments: 'Bộ phận',
   purchase_requests: 'Đề nghị mua hàng',
   purchase_orders: 'Đơn mua hàng',
+  settings: 'Cài đặt ngành nghề',
 }
 const ACTION_LABELS: Record<string, string> = {
   create: 'Tạo',
@@ -57,6 +60,7 @@ const ACTION_LABELS: Record<string, string> = {
 }
 
 export function RolesPage() {
+  const t = useTerm()
   const [selected, setSelected] = useState<Role | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [permOpen, setPermOpen] = useState(false)
@@ -211,7 +215,7 @@ export function RolesPage() {
             <tbody>
               {RESOURCES.map((res) => (
                 <tr key={res} className="border-t border-win-grid-border hover:bg-win-menu-hover">
-                  <td className="py-1.5 px-1.5 font-medium border-r border-win-grid-border">{RESOURCE_LABELS[res] || res}</td>
+                  <td className="py-1.5 px-1.5 font-medium border-r border-win-grid-border">{res === 'ingredients' ? t('item') : RESOURCE_LABELS[res] || res}</td>
                   {ACTIONS.map((act) => (
                     <td key={act} className="py-1.5 px-1.5 text-center border-r border-win-grid-border">
                       <input

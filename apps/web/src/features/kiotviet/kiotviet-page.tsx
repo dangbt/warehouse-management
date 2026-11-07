@@ -8,6 +8,7 @@ import { formatDate, formatCurrency } from '@wms/shared'
 import type { KiotVietOrder } from '@/data/use-kiotviet'
 import { translateApiMessage } from '@/utils/api-error-messages'
 import { Route } from '@/routes/_app/kiotviet'
+import { FeatureGate } from '@/components/feature-gate'
 
 const columns: Column<KiotVietOrder>[] = [
   { key: 'code', header: 'Mã đơn', width: 120 },
@@ -75,16 +76,18 @@ export function KiotVietPage() {
           onClick={() => fileInputRef.current?.click()}
           disabled={syncMutation.isPending}
         />
-        <WinToolbar.Button
-          icon={<MinusCircle size={16} />}
-          label="Trừ kho"
-          onClick={() => {
-            if (selectedOrder && !selectedOrder.deducted) {
-              deductMutation.mutateAsync(selectedOrder.id)
-            }
-          }}
-          disabled={!selectedOrder || selectedOrder.deducted || deductMutation.isPending}
-        />
+        <FeatureGate feature="kiotviet_recipe_deduct">
+          <WinToolbar.Button
+            icon={<MinusCircle size={16} />}
+            label="Trừ kho"
+            onClick={() => {
+              if (selectedOrder && !selectedOrder.deducted) {
+                deductMutation.mutateAsync(selectedOrder.id)
+              }
+            }}
+            disabled={!selectedOrder || selectedOrder.deducted || deductMutation.isPending}
+          />
+        </FeatureGate>
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>

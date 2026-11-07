@@ -6,6 +6,7 @@ import type { Column } from '@wms/ui-winforms'
 import { useIngredientGroups, useCreateIngredientGroup, useUpdateIngredientGroup, useIngredients } from '@/data'
 import type { IngredientGroup } from '@/data'
 import { formatNumber } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
 interface GroupMember {
   id: string
@@ -19,6 +20,7 @@ interface GroupMember {
 }
 
 function GroupMembersPanel({ group }: { group: IngredientGroup }) {
+  const t = useTerm()
   const { data: res } = useIngredients({ limit: 1000 })
   const members = ((res?.data ?? []) as unknown as GroupMember[]).filter((i) => i.groupId === group.id)
   const totalBase = members.reduce((s, m) => s + Number(m.currentStock) * (m.baseFactor != null ? Number(m.baseFactor) : 1), 0)
@@ -32,7 +34,7 @@ function GroupMembersPanel({ group }: { group: IngredientGroup }) {
         <table className="w-full text-win-base">
           <thead>
             <tr className="bg-win-grid-header">
-              <th className="text-left py-2 px-1">Nguyên liệu</th>
+              <th className="text-left py-2 px-1">{t('item')}</th>
               <th className="text-center py-2 px-1">ĐVT</th>
               <th className="text-right py-2 px-1">Hệ số về nhóm</th>
               <th className="text-center py-2 px-1">Loại</th>
@@ -63,7 +65,7 @@ function GroupMembersPanel({ group }: { group: IngredientGroup }) {
             {!members.length && (
               <tr>
                 <td colSpan={6} className="p-2 text-center text-win-text-secondary">
-                  Nhóm chưa có nguyên liệu
+                  Nhóm chưa có {t('item_lower')}
                 </td>
               </tr>
             )}
@@ -94,6 +96,7 @@ interface GroupForm {
 }
 
 export function IngredientGroupsPage() {
+  const t = useTerm()
   const [formOpen, setFormOpen] = useState(false)
   const [mode, setMode] = useState<'add' | 'edit'>('add')
   const [selected, setSelected] = useState<IngredientGroup | null>(null)
@@ -174,7 +177,7 @@ export function IngredientGroupsPage() {
       {selected && <GroupMembersPanel group={selected} />}
 
       <WinDialog
-        title={mode === 'add' ? 'Thêm Nhóm Nguyên Liệu' : 'Sửa Nhóm'}
+        title={mode === 'add' ? t('item_group_add') : 'Sửa Nhóm'}
       icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
         open={formOpen}
         onClose={() => setFormOpen(false)}

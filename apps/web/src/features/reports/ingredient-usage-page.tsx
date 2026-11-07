@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { WinToolbar, WinDataGrid } from '@wms/ui-winforms'
@@ -6,9 +6,10 @@ import type { Column } from '@wms/ui-winforms'
 import { useIngredientUsage } from '@/data'
 import type { IngredientUsageItem } from '@/data/use-ingredient-usage'
 import { formatNumber } from '@wms/shared'
+import { useTerm } from '@/data/use-features'
 
-const columns: Column<IngredientUsageItem>[] = [
-  { key: 'name', header: 'Nguyên liệu', width: 160 },
+const makeColumns = (itemLabel: string): Column<IngredientUsageItem>[] => [
+  { key: 'name', header: itemLabel, width: 160 },
   { key: 'unit', header: 'ĐVT', width: 60, align: 'center' },
   { key: 'imported', header: 'Nhập', width: 90, align: 'right', render: (r) => <span className="text-green-700">{formatNumber(r.imported)}</span> },
   { key: 'exported', header: 'Xuất', width: 90, align: 'right', render: (r) => <span className="text-red-700">{formatNumber(r.exported)}</span> },
@@ -62,6 +63,8 @@ function UsageChart({ data }: { data: IngredientUsageItem[] }) {
 }
 
 export function IngredientUsagePage() {
+  const t = useTerm()
+  const columns = useMemo(() => makeColumns(t('item')), [t])
   const [period, setPeriod] = useState<'week' | 'month'>('week')
   const [offset, setOffset] = useState(0)
 

@@ -16,6 +16,7 @@ import { PeriodFilter } from '@/components/period-filter'
 import { resolvePeriod } from '@/utils/period'
 import { Route } from '@/routes/_app/purchase-returns'
 import { lineTotalPrice, computeLineVat, computeVatTotals } from '../import-orders/vat'
+import { useTerm } from '@/data/use-features'
 
 const columns: Column<PurchaseReturn>[] = [
   { key: 'voucherDate', header: 'Ngày CT', width: 100, align: 'center', render: (r) => formatDate(r.voucherDate) },
@@ -45,6 +46,7 @@ const EMPTY_ITEM: ReturnItem = { ingredientId: '', quantity: 0, unitPrice: 0, va
 export function PurchaseReturnsPage() {
   const { id: focusId } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
+  const t = useTerm()
   const [dialogOpen, setDialogOpen] = useState(false)
   const { period, from, to } = Route.useSearch()
   const setParams = (updates: Record<string, unknown>) => navigate({ search: (prev) => ({ ...prev, ...updates }) })
@@ -239,7 +241,7 @@ export function PurchaseReturnsPage() {
             <table className="w-full text-win-base">
               <thead>
                 <tr className="bg-win-grid-header">
-                  <th className="text-left p-1">Nguyên liệu</th>
+                  <th className="text-left p-1">{t('item')}</th>
                   <th className="p-1 w-20">SL</th>
                   <th className="p-1 w-24">Đơn giá</th>
                   {hasInvoice && <th className="p-1 w-24">Thuế suất</th>}
