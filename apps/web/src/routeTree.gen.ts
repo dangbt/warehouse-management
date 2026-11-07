@@ -45,6 +45,7 @@ import { Route as AppAuditLogsRouteImport } from './routes/_app/audit-logs'
 import { Route as PrintSupplierPaymentsIdRouteImport } from './routes/print.supplier-payments.$id'
 import { Route as PrintStocktakeIdRouteImport } from './routes/print.stocktake.$id'
 import { Route as PrintStockExportsIdRouteImport } from './routes/print.stock-exports.$id'
+import { Route as PrintLabelsIdRouteImport } from './routes/print.labels.$id'
 import { Route as PrintImportOrdersIdRouteImport } from './routes/print.import-orders.$id'
 import { Route as AppTaxSummaryRouteImport } from './routes/_app/tax/summary'
 import { Route as AppTaxOutputRevenueRouteImport } from './routes/_app/tax/output-revenue'
@@ -232,6 +233,11 @@ const PrintStockExportsIdRoute = PrintStockExportsIdRouteImport.update({
   path: '/print/stock-exports/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrintLabelsIdRoute = PrintLabelsIdRouteImport.update({
+  id: '/print/labels/$id',
+  path: '/print/labels/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrintImportOrdersIdRoute = PrintImportOrdersIdRouteImport.update({
   id: '/print/import-orders/$id',
   path: '/print/import-orders/$id',
@@ -309,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/tax/summary': typeof AppTaxSummaryRoute
   '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
+  '/print/labels/$id': typeof PrintLabelsIdRoute
   '/print/stock-exports/$id': typeof PrintStockExportsIdRoute
   '/print/stocktake/$id': typeof PrintStocktakeIdRoute
   '/print/supplier-payments/$id': typeof PrintSupplierPaymentsIdRoute
@@ -353,6 +360,7 @@ export interface FileRoutesByTo {
   '/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/tax/summary': typeof AppTaxSummaryRoute
   '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
+  '/print/labels/$id': typeof PrintLabelsIdRoute
   '/print/stock-exports/$id': typeof PrintStockExportsIdRoute
   '/print/stocktake/$id': typeof PrintStocktakeIdRoute
   '/print/supplier-payments/$id': typeof PrintSupplierPaymentsIdRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/_app/tax/output-revenue': typeof AppTaxOutputRevenueRoute
   '/_app/tax/summary': typeof AppTaxSummaryRoute
   '/print/import-orders/$id': typeof PrintImportOrdersIdRoute
+  '/print/labels/$id': typeof PrintLabelsIdRoute
   '/print/stock-exports/$id': typeof PrintStockExportsIdRoute
   '/print/stocktake/$id': typeof PrintStocktakeIdRoute
   '/print/supplier-payments/$id': typeof PrintSupplierPaymentsIdRoute
@@ -445,6 +454,7 @@ export interface FileRouteTypes {
     | '/tax/output-revenue'
     | '/tax/summary'
     | '/print/import-orders/$id'
+    | '/print/labels/$id'
     | '/print/stock-exports/$id'
     | '/print/stocktake/$id'
     | '/print/supplier-payments/$id'
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
     | '/tax/output-revenue'
     | '/tax/summary'
     | '/print/import-orders/$id'
+    | '/print/labels/$id'
     | '/print/stock-exports/$id'
     | '/print/stocktake/$id'
     | '/print/supplier-payments/$id'
@@ -534,6 +545,7 @@ export interface FileRouteTypes {
     | '/_app/tax/output-revenue'
     | '/_app/tax/summary'
     | '/print/import-orders/$id'
+    | '/print/labels/$id'
     | '/print/stock-exports/$id'
     | '/print/stocktake/$id'
     | '/print/supplier-payments/$id'
@@ -545,6 +557,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
   PrintImportOrdersIdRoute: typeof PrintImportOrdersIdRoute
+  PrintLabelsIdRoute: typeof PrintLabelsIdRoute
   PrintStockExportsIdRoute: typeof PrintStockExportsIdRoute
   PrintStocktakeIdRoute: typeof PrintStocktakeIdRoute
   PrintSupplierPaymentsIdRoute: typeof PrintSupplierPaymentsIdRoute
@@ -804,6 +817,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrintStockExportsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/print/labels/$id': {
+      id: '/print/labels/$id'
+      path: '/print/labels/$id'
+      fullPath: '/print/labels/$id'
+      preLoaderRoute: typeof PrintLabelsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/print/import-orders/$id': {
       id: '/print/import-orders/$id'
       path: '/print/import-orders/$id'
@@ -940,6 +960,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
   PrintImportOrdersIdRoute: PrintImportOrdersIdRoute,
+  PrintLabelsIdRoute: PrintLabelsIdRoute,
   PrintStockExportsIdRoute: PrintStockExportsIdRoute,
   PrintStocktakeIdRoute: PrintStocktakeIdRoute,
   PrintSupplierPaymentsIdRoute: PrintSupplierPaymentsIdRoute,

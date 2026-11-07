@@ -18,6 +18,8 @@
     "@tanstack/react-router": "1.170.16",
     "@wms/shared": "*",
     "@wms/ui-winforms": "*",
+    "@zxing/browser": "0.2.1",
+    "@zxing/library": "0.23.0",
     "exceljs": "4.4.0",
     "lucide-react": "1.21.0",
     "react": "19.2.7",
