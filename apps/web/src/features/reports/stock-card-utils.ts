@@ -13,6 +13,7 @@ type DocTarget =
   | { to: '/stock-exports'; search: { id: string } }
   | { to: '/purchase-returns'; search: { id: string } }
   | { to: '/processing'; search: { id: string } }
+  | { to: '/stock-transfers'; search: { id: string } }
   | { to: '/stocktake/$id'; params: { id: string } }
 
 /** Chứng từ gốc: trang danh sách lọc đúng phiếu (search.id) hoặc trang chi tiết kiểm kê. */
@@ -21,6 +22,7 @@ export function docRoute(docType: StockDocType, docId: string): DocTarget {
     case 'IMPORT_ORDER': return { to: '/import-orders', search: { id: docId } }
     case 'STOCK_EXPORT': return { to: '/stock-exports', search: { id: docId } }
     case 'PURCHASE_RETURN': return { to: '/purchase-returns', search: { id: docId } }
+    case 'STOCK_TRANSFER': return { to: '/stock-transfers', search: { id: docId } }
     case 'PROCESSING': return { to: '/processing', search: { id: docId } }
     case 'STOCKTAKE': return { to: '/stocktake/$id', params: { id: docId } }
   }

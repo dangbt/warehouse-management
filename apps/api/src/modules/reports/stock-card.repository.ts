@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { StockCardOpening, StockCardRawTx, StockDocType } from './stock-card';
-import { ABS_VALUE_SQL, SIGNED_QTY_SQL, SIGNED_VALUE_SQL } from './stock-movement-sql';
+import { ABS_VALUE_SQL, SIGNED_VALUE_SQL, signedQtySql } from './stock-movement-sql';
 
 interface TxSqlRow {
   id: string;
@@ -33,8 +33,8 @@ export class StockCardRepository {
   private signed(ingredientId: string, extra: Prisma.Sql, warehouseId?: string) {
     const wh = warehouseId ? Prisma.sql`AND st.warehouse_id = ${warehouseId}` : Prisma.empty;
     return Prisma.sql`
-      SELECT st.id, st.voucher_date, st.created_at, st.type, st.note, st.reference_id, st.export_id,
-        ${SIGNED_QTY_SQL} AS sq, ${ABS_VALUE_SQL} AS av
+      SELECT st.id, st.voucher_date, st.created_at, st.type, st.note, st.reference_id, st.export_id, st.transfer_id,
+        ${signedQtySql(!!warehouseId)} AS sq, ${ABS_VALUE_SQL} AS av
       FROM stock_transactions st
       JOIN ingredients i ON i.id = st.ingredient_id
       WHERE st.ingredient_id = ${ingredientId} ${wh} ${extra}`;
@@ -57,6 +57,7 @@ export class StockCardRepository {
           WHEN t.type = 'EXPORT' THEN se.voucher_no
           WHEN t.type = 'RETURN' THEN pr.voucher_no
           WHEN t.type = 'STOCKTAKE_ADJUST' THEN ss.voucher_no
+          WHEN t.type IN ('TRANSFER_IN', 'TRANSFER_OUT') THEN tr.voucher_no
           WHEN t.type IN ('PROCESS_IN', 'PROCESS_OUT') THEN po.voucher_no
         END AS voucher_no,
         CASE
@@ -65,14 +66,16 @@ export class StockCardRepository {
           WHEN pr.id IS NOT NULL THEN 'PURCHASE_RETURN'
           WHEN ss.id IS NOT NULL THEN 'STOCKTAKE'
           WHEN po.id IS NOT NULL THEN 'PROCESSING'
+          WHEN tr.id IS NOT NULL THEN 'STOCK_TRANSFER'
         END AS doc_type,
-        COALESCE(io.id, se.id, pr.id, ss.id, po.id) AS doc_id
+        COALESCE(io.id, se.id, pr.id, ss.id, po.id, tr.id) AS doc_id
       FROM t
       LEFT JOIN import_orders io ON t.type = 'IMPORT' AND io.id = t.reference_id
       LEFT JOIN stock_exports se ON t.type = 'EXPORT' AND se.id = t.export_id
       LEFT JOIN purchase_returns pr ON t.type = 'RETURN' AND pr.id = t.reference_id
       LEFT JOIN stocktake_sessions ss ON t.type = 'STOCKTAKE_ADJUST' AND ss.id = t.reference_id
       LEFT JOIN processing_orders po ON t.type IN ('PROCESS_IN', 'PROCESS_OUT') AND po.code = t.reference_id
+      LEFT JOIN stock_transfers tr ON t.type IN ('TRANSFER_IN', 'TRANSFER_OUT') AND tr.id = t.transfer_id
       WHERE t.sq <> 0
       ORDER BY t.voucher_date, t.created_at, t.id`);
     return rows.map((r) => ({

@@ -125,6 +125,13 @@ function buildMenuTree(isHousehold: boolean, t: (k: TermKey) => string): TreeNod
           permission: 'stock_exports:read',
         },
         {
+          id: 'transfers',
+          label: 'Chuyển kho',
+          icon: <NavIcon id="/stock-transfers" size={15} />,
+          route: '/stock-transfers',
+          permission: 'stock_transfers:read',
+        },
+        {
           id: 'processing',
           label: 'Chế biến',
           icon: <NavIcon id="/processing" size={15} />,
@@ -314,6 +321,7 @@ export function AppLayout() {
                 : []),
               ...(hasPermission('import_orders:read') ? [{ label: 'Nhập kho', route: '/import-orders' }] : []),
               ...(hasPermission('stock_exports:read') ? [{ label: 'Xuất kho', route: '/stock-exports' }] : []),
+              ...(hasPermission('stock_transfers:read') ? [{ label: 'Chuyển kho', route: '/stock-transfers' }] : []),
               ...(hasPermission('processing:read') && isEnabled('processing') ? [{ label: 'Chế biến', route: '/processing' }] : []),
               ...(hasPermission('suppliers:read') ? [{ label: 'Nhà cung cấp', route: '/suppliers' }] : []),
               { label: 'Kiểm kê', route: '/stocktake' },

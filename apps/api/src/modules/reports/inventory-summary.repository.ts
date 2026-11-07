@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { InventorySummaryRawRow } from './inventory-summary';
-import { ABS_VALUE_SQL, SIGNED_QTY_SQL, SIGNED_VALUE_SQL } from './stock-movement-sql';
+import { ABS_VALUE_SQL, SIGNED_VALUE_SQL, signedQtySql } from './stock-movement-sql';
 
 interface SqlRow {
   ingredient_id: string;
@@ -53,7 +53,7 @@ export class InventorySummaryRepository {
         SELECT
           st.ingredient_id,
           st.voucher_date,
-          ${SIGNED_QTY_SQL} AS sq,
+          ${signedQtySql(!!warehouseId)} AS sq,
           ${ABS_VALUE_SQL} AS av
         FROM stock_transactions st
         JOIN ingredients i ON i.id = st.ingredient_id

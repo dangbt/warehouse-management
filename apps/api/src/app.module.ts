@@ -30,6 +30,7 @@ import { CostingModule } from './modules/costing/costing.module';
 import { InventoryPeriodModule } from './modules/inventory-period/inventory-period.module';
 import { WarehousesModule } from './modules/warehouses/warehouses.module';
 import { SetupModule } from './modules/setup/setup.module';
+import { StockTransfersModule } from './modules/stock-transfers/stock-transfers.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SetupModule } from './modules/setup/setup.module';
     SuppliersModule,
     ImportOrdersModule,
     StockExportsModule,
+    StockTransfersModule,
     RecipesModule,
     UsersModule,
     AuditLogsModule,
