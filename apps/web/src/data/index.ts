@@ -3,7 +3,7 @@ export { queryClient } from './query-client'
 
 export { useIngredients, useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from './use-ingredients'
 export { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from './use-suppliers'
-export { useImportOrders, useImportOrderDetail, usePrintHeader, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder, useUnpostImportOrder, useCancelImportOrder, useUpdateImportOrder } from './use-import-orders'
+export { useImportOrders, useImportOrderDetail, usePrintHeader, useBulkCreateImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder, useUnpostImportOrder, useCancelImportOrder, useUpdateImportOrder } from './use-import-orders'
 export { useStockExports, useCreateStockExport, useStockExportVoucher, useCancelStockExport } from './use-stock-exports'
 export { useRecipes, useCreateRecipe, useUpdateRecipe } from './use-recipes'
 export { useUsers, useCreateUser, useUpdateUser, useToggleUserActive } from './use-users'

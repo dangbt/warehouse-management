@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Ban, Check, ClipboardList, Copy, Pencil, Plus, Printer, ReceiptText, RefreshCw, Undo2, X } from 'lucide-react'
+import { Ban, Check, ClipboardList, Copy, FileSpreadsheet, Pencil, Plus, Printer, ReceiptText, RefreshCw, Undo2, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm, type ImportOrderSeed } from './import-order-form'
+import { ExcelImportDialog } from './excel-import/excel-import-dialog'
 import { openImportOrderPrint } from './print/voucher-form'
 import {
   useImportOrders,
@@ -112,6 +113,7 @@ export function ImportOrdersPage() {
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<ImportOrder | null>(null)
+  const [excelOpen, setExcelOpen] = useState(false)
   const hasPermission = useAuthStore((s) => s.hasPermission)
   const [confirmAction, setConfirmAction] = useState<ImportOrderAction | null>(null)
   const [seed, setSeed] = useState<ImportOrderSeed | null>(null)
@@ -170,6 +172,7 @@ export function ImportOrdersPage() {
             setFormOpen(true)
           }} />
         <WinToolbar.Button icon={<Copy size={16} />} label="Nhân bản" disabled={!selected?.items?.length} onClick={handleClone} />
+        <WinToolbar.Button icon={<FileSpreadsheet size={16} />} label="Nhập Excel" onClick={() => setExcelOpen(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Check size={16} />}
@@ -342,6 +345,13 @@ export function ImportOrdersPage() {
             await updateMutation.mutateAsync({ id: editing.id, data })
             setSelected(null)
           } else await createMutation.mutateAsync(data)
+        }}
+      />
+      <ExcelImportDialog
+        open={excelOpen}
+        onClose={() => {
+          setExcelOpen(false)
+          refetch()
         }}
       />
       <WinMessageBox

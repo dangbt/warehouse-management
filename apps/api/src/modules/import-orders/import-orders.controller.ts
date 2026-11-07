@@ -2,6 +2,8 @@ import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, Req } from '
 import { ImportOrdersService } from './import-orders.service';
 import type { CreateImportOrderInput } from './import-orders.service';
 import { ImportOrderUnpostService } from './import-order-unpost.service';
+import { ImportOrdersBulkService } from './import-orders-bulk.service';
+import type { BulkImportInput } from './import-orders-bulk.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 
@@ -11,6 +13,7 @@ export class ImportOrdersController {
   constructor(
     private svc: ImportOrdersService,
     private unposting: ImportOrderUnpostService,
+    private bulk: ImportOrdersBulkService,
   ) {}
 
   @Get()
@@ -38,6 +41,12 @@ export class ImportOrdersController {
   @RequirePermissions('import_orders:create')
   create(@Req() req, @Body() body: CreateImportOrderInput) {
     return this.svc.create(req.user.id, body);
+  }
+
+  @Post('bulk')
+  @RequirePermissions('import_orders:create')
+  bulkCreate(@Req() req, @Body() body: BulkImportInput) {
+    return this.bulk.bulkCreate(req.user.id, body);
   }
 
   @Put(':id/approve')
