@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, RefreshCw, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -7,6 +8,8 @@ import { VoucherFields } from '@/components/voucher-fields'
 import { formatDate, formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
+import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
+import { Route } from '@/routes/_app/purchase-returns'
 import { lineTotalPrice, computeLineVat, computeVatTotals } from '../import-orders/vat'
 
 const columns: Column<PurchaseReturn>[] = [
@@ -35,8 +38,10 @@ interface ReturnItem {
 const EMPTY_ITEM: ReturnItem = { ingredientId: '', quantity: 0, unitPrice: 0, vatRate: '' }
 
 export function PurchaseReturnsPage() {
+  const { id: focusId } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
   const [dialogOpen, setDialogOpen] = useState(false)
-  const { data: res, isLoading, refetch } = usePurchaseReturns()
+  const { data: res, isLoading, refetch } = usePurchaseReturns({ id: focusId })
   const createMutation = useCreatePurchaseReturn()
   const { data: suppliersRes } = useSuppliers()
   const { data: ingredientsRes } = useIngredients()
@@ -140,6 +145,7 @@ export function PurchaseReturnsPage() {
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
       </WinToolbar>
+      {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => navigate({ search: {} })} />}
       <WinDataGrid searchable columns={columns} data={res?.data ?? []} loading={isLoading} storageKey="purchase-returns" />
 
       <WinDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Tạo phiếu trả hàng" width={hasInvoice ? 760 : 600}>

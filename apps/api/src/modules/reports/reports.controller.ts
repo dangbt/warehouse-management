@@ -1,9 +1,11 @@
-import { BadRequestException, Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, NotFoundException, Query, UseGuards } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { resolveReportRange } from './report-range';
 import { InventorySummaryRepository } from './inventory-summary.repository';
 import { buildInventorySummary } from './inventory-summary';
+import { StockCardRepository } from './stock-card.repository';
+import { buildStockCard } from './stock-card';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
@@ -11,6 +13,7 @@ export class ReportsController {
   constructor(
     private prisma: PrismaService,
     private inventorySummaryRepo: InventorySummaryRepository,
+    private stockCardRepo: StockCardRepository,
   ) {}
 
   /** Tổng hợp Nhập – Xuất – Tồn theo kỳ (ngày chứng từ), lọc theo nhóm NL. */
@@ -23,6 +26,21 @@ export class ReportsController {
     }
     const raw = await this.inventorySummaryRepo.aggregate(from, to, q.group_id || undefined);
     return buildInventorySummary(raw, q.from, q.to);
+  }
+
+  /** Thẻ kho / Sổ chi tiết vật tư của 1 NL trong kỳ (ngày chứng từ): đầu kỳ, giao dịch, phát sinh, cuối kỳ. */
+  @Get('stock-card')
+  async stockCard(@Query() q: { ingredient_id?: string; from?: string; to?: string }) {
+    if (!q.ingredient_id || !q.from || !q.to) throw new BadRequestException('Thiếu ingredient_id/from/to');
+    const { from, to } = resolveReportRange({ from: q.from, to: q.to });
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
+      throw new BadRequestException('Khoảng thời gian không hợp lệ');
+    }
+    const ing = await this.stockCardRepo.findIngredient(q.ingredient_id);
+    if (!ing) throw new NotFoundException('Không tìm thấy nguyên liệu');
+    const [opening, txs] = await Promise.all([this.stockCardRepo.opening(ing.id, from), this.stockCardRepo.transactions(ing.id, from, to)]);
+    const ingredient = { id: ing.id, code: ing.id.slice(0, 8).toUpperCase(), name: ing.name, unit: ing.unit };
+    return buildStockCard(ingredient, opening, txs, q.from, q.to);
   }
 
   @Get('stock-summary')

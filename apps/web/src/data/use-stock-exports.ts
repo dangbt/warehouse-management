@@ -19,8 +19,9 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useStockExports(params?: { page?: number; orderBy?: string; sort?: string }) {
+export function useStockExports(params?: { id?: string; page?: number; orderBy?: string; sort?: string }) {
   const query = new URLSearchParams({ limit: '20' })
+  if (params?.id) query.set('id', params.id)
   if (params?.page) query.set('page', String(params.page))
   if (params?.orderBy) query.set('orderBy', params.orderBy)
   if (params?.sort) query.set('sort', params.sort)

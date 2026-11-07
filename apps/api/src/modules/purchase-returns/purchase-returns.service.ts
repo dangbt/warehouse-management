@@ -41,10 +41,11 @@ export class PurchaseReturnsService {
     private vouchers: VoucherService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; supplierId?: string }) {
+  async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { supplierId?: string } = q.supplierId ? { supplierId: q.supplierId } : {};
+    const where: { supplierId?: string; id?: string } = q.supplierId ? { supplierId: q.supplierId } : {};
+    if (q.id) where.id = q.id;
     const [data, total] = await Promise.all([
       this.prisma.purchaseReturn.findMany({
         where,

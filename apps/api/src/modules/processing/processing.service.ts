@@ -11,10 +11,11 @@ export class ProcessingService {
     private vouchers: VoucherService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string }) {
+  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string; id?: string }) {
     const page = +(q.page || 1);
     const limit = +(q.limit || 20);
-    const where: { status?: string } = q.status ? { status: q.status } : {};
+    const where: { status?: string; id?: string } = q.status ? { status: q.status } : {};
+    if (q.id) where.id = q.id;
 
     const sortField = q.orderBy || 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
