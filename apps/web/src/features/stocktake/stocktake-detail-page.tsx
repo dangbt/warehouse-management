@@ -74,9 +74,10 @@ export function StocktakeDetailPage() {
 
   /** Quét mã: +1 số thực tế của hàng; hàng ngoài phiên kiểm kê thì báo rõ, không sửa gì. */
   const itemsRef = useRef(items)
+  const scannedRef = useRef(new Set<string>())
   itemsRef.current = items
   const handleScan = (item: ScannedItem): string => {
-    const next = bumpActual(itemsRef.current, item.id)
+    const next = bumpActual(itemsRef.current, item.id, scannedRef.current)
     if (!next) {
       const msg = `"${item.name}" không thuộc phiên kiểm kê này`
       useToastStore.getState().error(msg)

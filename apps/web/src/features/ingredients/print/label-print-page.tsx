@@ -54,7 +54,7 @@ export function LabelPrintPage({ id }: { id: string }) {
 
   return (
     <PrintLayout bare toolbar={toolbar}>
-      <style>{`@page { size: ${spec.page}; margin: ${size === 'a4' ? '10mm 0' : '0'}; }`}</style>
+      <style>{`@page { size: ${spec.page}; margin: 0; }`}</style>
       {isLoading && <div className="p-4">Đang tải...</div>}
       {error && <div className="p-4">Không tải được dữ liệu hàng.</div>}
       {missing.length > 0 && (
