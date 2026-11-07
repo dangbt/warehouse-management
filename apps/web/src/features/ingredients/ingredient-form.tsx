@@ -77,6 +77,7 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
@@ -216,6 +217,10 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
                 title="Sinh EAN-13 nội bộ (tiền tố 2). Có SKU thì dùng chính SKU làm mã Code128."
                 onClick={() => {
                   const sku = watch('sku')?.trim()
+                  if (sku && !/^[\x20-\x7e]+$/.test(sku)) {
+                    setError('barcode', { message: 'SKU có ký tự có dấu/ngoài ASCII, không in được mã vạch — dùng SKU không dấu hoặc để trống để sinh EAN-13' })
+                    return
+                  }
                   setValue('barcode', sku ? codeFromSku(sku) : generateInternalEan13(), { shouldDirty: true })
                 }}
                 className="h-8 px-2 text-xs bg-win-button border border-win-button-border cursor-pointer hover:bg-win-button-hover flex items-center gap-1"

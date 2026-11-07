@@ -20,6 +20,6 @@ export function pickExact(list: ScannedItem[], code: string): ScannedItem | null
 export async function findItemByCode(code: string): Promise<ScannedItem | null> {
   const clean = code.trim()
   if (!clean) return null
-  const res = (await api.get(`/ingredients?limit=20&search=${encodeURIComponent(clean)}`)) as { data: ScannedItem[] }
+  const res = (await api.get(`/ingredients?limit=100&search=${encodeURIComponent(clean)}`)) as { data: ScannedItem[] }
   return pickExact(res.data, clean)
 }

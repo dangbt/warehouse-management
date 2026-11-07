@@ -6,6 +6,10 @@ export const LABEL_SIZES: Record<LabelSize, { label: string; w: number; h: numbe
   a4: { label: 'A4 nhiều tem (3×8)', w: 70, h: 37, perPage: 24, page: 'A4 portrait' },
 }
 
+/** Chiều cao vùng in A4 (@page margin 0) và số hàng/cột của lưới A4 — rows*h phải ≤ A4_HEIGHT_MM. */
+export const A4_HEIGHT_MM = 297
+export const A4_GRID = { cols: 3, rows: 8 }
+
 export interface LabelSource {
   id: string
   name: string
