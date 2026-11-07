@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
+import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
@@ -15,16 +16,18 @@ export class ProcessingService {
     private periodLock: PeriodLockService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string; id?: string }) {
+  async findAll(q: { page?: string; limit?: string; status?: string; orderBy?: string; sort?: string; id?: string; from?: string; to?: string }) {
     const page = +(q.page || 1);
     const limit = +(q.limit || 20);
-    const where: { status?: string; id?: string } = q.status ? { status: q.status } : {};
+    const where: { status?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.status ? { status: q.status } : {};
     if (q.id) where.id = q.id;
+    const dateRange = voucherDateFilter(q);
+    if (dateRange) where.voucherDate = dateRange;
 
     const sortField = q.orderBy || 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
-    const [data, total] = await Promise.all([
+    const [data, total, agg] = await Promise.all([
       this.prisma.processingOrder.findMany({
         where,
         skip: (page - 1) * limit,
@@ -37,8 +40,10 @@ export class ProcessingService {
         },
       }),
       this.prisma.processingOrder.count({ where }),
+      this.prisma.processingOrder.aggregate({ where, _sum: { sourceQty: true, outputQty: true } }),
     ]);
-    return { data, meta: { page, limit, total } };
+    const totals = { sourceQty: toNum(agg._sum.sourceQty), outputQty: toNum(agg._sum.outputQty) };
+    return { data, meta: { page, limit, total, totals } };
   }
 
   async getDetail(id: string) {

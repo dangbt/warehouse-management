@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 import { CostingService } from '../costing/costing.service';
+import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
 import { StockExportCancelService } from './stock-export-cancel.service';
@@ -22,7 +23,7 @@ export class StockExportsController {
 
   @Get()
   @RequirePermissions('stock_exports:read')
-  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string; id?: string }) {
+  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string; id?: string; from?: string; to?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
 
@@ -30,8 +31,12 @@ export class StockExportsController {
     const sortField = q.orderBy && ['voucherDate', 'createdAt', 'quantity'].includes(q.orderBy) ? q.orderBy : 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
-    const where = q.id ? { type: 'EXPORT', exportId: q.id } : { type: 'EXPORT' };
-    const [data, total] = await Promise.all([
+    const where: { type: string; exportId?: string; voucherDate?: { gte?: Date; lte?: Date } } = { type: 'EXPORT' };
+    if (q.id) where.exportId = q.id;
+    const dateRange = voucherDateFilter(q);
+    if (dateRange) where.voucherDate = dateRange;
+
+    const [data, total, agg] = await Promise.all([
       this.prisma.stockTransaction.findMany({
         where,
         skip: (page - 1) * limit,
@@ -40,8 +45,11 @@ export class StockExportsController {
         include: { ingredient: true, createdBy: true, export: { select: { id: true, voucherNo: true, voucherDate: true, status: true } } },
       }),
       this.prisma.stockTransaction.count({ where }),
+      this.prisma.stockTransaction.aggregate({ where, _sum: { quantity: true, totalPrice: true } }),
     ]);
-    return { data, meta: { page, limit, total } };
+    // Phiếu xuất lưu quantity âm → tổng hiển thị theo trị tuyệt đối.
+    const totals = { quantity: Math.abs(toNum(agg._sum.quantity)), totalPrice: Math.abs(toNum(agg._sum.totalPrice)) };
+    return { data, meta: { page, limit, total, totals } };
   }
 
   /** Chứng từ xuất kho để in 02-VT: mỗi dòng gắn giá vốn lấy từ lô đã trừ (referenceId = batchId). */
