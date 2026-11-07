@@ -30,6 +30,8 @@ const RESOURCES = [
   'reports',
   'roles',
   'departments',
+  'purchase_requests',
+  'purchase_orders',
 ]
 const ACTIONS = ['create', 'read', 'update', 'delete', 'approve']
 const RESOURCE_LABELS: Record<string, string> = {
@@ -43,6 +45,8 @@ const RESOURCE_LABELS: Record<string, string> = {
   reports: 'Báo cáo',
   roles: 'Roles',
   departments: 'Bộ phận',
+  purchase_requests: 'Đề nghị mua hàng',
+  purchase_orders: 'Đơn mua hàng',
 }
 const ACTION_LABELS: Record<string, string> = {
   create: 'Tạo',

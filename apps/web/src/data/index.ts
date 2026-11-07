@@ -48,6 +48,17 @@ export { useRevenueBook, useMaterialsBook } from './use-tax-reports'
 export type { RevenueBookReport, RevenueBookRow, MaterialsBookReport, MaterialsBookEntry, MaterialsBookRow } from './use-tax-reports'
 export { useVoucherFields, todayInputValue, voucherDateToIso } from './use-vouchers'
 export type { VoucherType, VoucherFieldsState } from './use-vouchers'
+export {
+  usePurchaseRequests,
+  useCreatePurchaseRequest,
+  usePurchaseRequestAction,
+  usePurchaseOrders,
+  useCreatePurchaseOrdersFromRequest,
+  useCancelPurchaseOrder,
+  fetchLowStockSuggestion,
+  fetchReceiptDraft,
+} from './use-purchasing'
+export type { PurchaseRequest, PurchaseOrder, LowStockSuggestion } from './use-purchasing'
 export { useCostingSettings, useUpdateCostingMethod, useRunCosting, COSTING_METHOD_LABELS } from './use-costing'
 export type { CostingMethod, CostingSettings, CostingRunResult } from './use-costing'
 export { useInventoryPeriod, useLockInventoryPeriod, useReopenInventoryPeriod } from './use-inventory-period'

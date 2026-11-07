@@ -22,6 +22,7 @@ import { IngredientGroupsModule } from './modules/ingredient-groups/ingredient-g
 import { ProcessingModule } from './modules/processing/processing.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { SupportModule } from './modules/support/support.module';
+import { PurchasingModule } from './modules/purchasing/purchasing.module';
 import { TaxModule } from './modules/tax/tax.module';
 import { CostingModule } from './modules/costing/costing.module';
 import { InventoryPeriodModule } from './modules/inventory-period/inventory-period.module';
@@ -49,6 +50,7 @@ import { InventoryPeriodModule } from './modules/inventory-period/inventory-peri
     MenuModule,
     SupportModule,
     TaxModule,
+    PurchasingModule,
     CostingModule,
     InventoryPeriodModule,
   ],

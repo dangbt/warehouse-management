@@ -22,6 +22,8 @@ import { Route as AppRolesRouteImport } from './routes/_app/roles'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppRecipesRouteImport } from './routes/_app/recipes'
 import { Route as AppPurchaseReturnsRouteImport } from './routes/_app/purchase-returns'
+import { Route as AppPurchaseRequestsRouteImport } from './routes/_app/purchase-requests'
+import { Route as AppPurchaseOrdersRouteImport } from './routes/_app/purchase-orders'
 import { Route as AppProcessingRouteImport } from './routes/_app/processing'
 import { Route as AppMenuRouteImport } from './routes/_app/menu'
 import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
@@ -108,6 +110,16 @@ const AppRecipesRoute = AppRecipesRouteImport.update({
 const AppPurchaseReturnsRoute = AppPurchaseReturnsRouteImport.update({
   id: '/purchase-returns',
   path: '/purchase-returns',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPurchaseRequestsRoute = AppPurchaseRequestsRouteImport.update({
+  id: '/purchase-requests',
+  path: '/purchase-requests',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPurchaseOrdersRoute = AppPurchaseOrdersRouteImport.update({
+  id: '/purchase-orders',
+  path: '/purchase-orders',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProcessingRoute = AppProcessingRouteImport.update({
@@ -243,6 +255,8 @@ export interface FileRoutesByFullPath {
   '/kiotviet': typeof AppKiotvietRoute
   '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
+  '/purchase-orders': typeof AppPurchaseOrdersRoute
+  '/purchase-requests': typeof AppPurchaseRequestsRoute
   '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
@@ -280,6 +294,8 @@ export interface FileRoutesByTo {
   '/kiotviet': typeof AppKiotvietRoute
   '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
+  '/purchase-orders': typeof AppPurchaseOrdersRoute
+  '/purchase-requests': typeof AppPurchaseRequestsRoute
   '/purchase-returns': typeof AppPurchaseReturnsRoute
   '/recipes': typeof AppRecipesRoute
   '/reports': typeof AppReportsRoute
@@ -319,6 +335,8 @@ export interface FileRoutesById {
   '/_app/kiotviet': typeof AppKiotvietRoute
   '/_app/menu': typeof AppMenuRoute
   '/_app/processing': typeof AppProcessingRoute
+  '/_app/purchase-orders': typeof AppPurchaseOrdersRoute
+  '/_app/purchase-requests': typeof AppPurchaseRequestsRoute
   '/_app/purchase-returns': typeof AppPurchaseReturnsRoute
   '/_app/recipes': typeof AppRecipesRoute
   '/_app/reports': typeof AppReportsRoute
@@ -358,6 +376,8 @@ export interface FileRouteTypes {
     | '/kiotviet'
     | '/menu'
     | '/processing'
+    | '/purchase-orders'
+    | '/purchase-requests'
     | '/purchase-returns'
     | '/recipes'
     | '/reports'
@@ -395,6 +415,8 @@ export interface FileRouteTypes {
     | '/kiotviet'
     | '/menu'
     | '/processing'
+    | '/purchase-orders'
+    | '/purchase-requests'
     | '/purchase-returns'
     | '/recipes'
     | '/reports'
@@ -433,6 +455,8 @@ export interface FileRouteTypes {
     | '/_app/kiotviet'
     | '/_app/menu'
     | '/_app/processing'
+    | '/_app/purchase-orders'
+    | '/_app/purchase-requests'
     | '/_app/purchase-returns'
     | '/_app/recipes'
     | '/_app/reports'
@@ -556,6 +580,20 @@ declare module '@tanstack/react-router' {
       path: '/purchase-returns'
       fullPath: '/purchase-returns'
       preLoaderRoute: typeof AppPurchaseReturnsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/purchase-requests': {
+      id: '/_app/purchase-requests'
+      path: '/purchase-requests'
+      fullPath: '/purchase-requests'
+      preLoaderRoute: typeof AppPurchaseRequestsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/purchase-orders': {
+      id: '/_app/purchase-orders'
+      path: '/purchase-orders'
+      fullPath: '/purchase-orders'
+      preLoaderRoute: typeof AppPurchaseOrdersRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/processing': {
@@ -736,6 +774,8 @@ interface AppRouteChildren {
   AppKiotvietRoute: typeof AppKiotvietRoute
   AppMenuRoute: typeof AppMenuRoute
   AppProcessingRoute: typeof AppProcessingRoute
+  AppPurchaseOrdersRoute: typeof AppPurchaseOrdersRoute
+  AppPurchaseRequestsRoute: typeof AppPurchaseRequestsRoute
   AppPurchaseReturnsRoute: typeof AppPurchaseReturnsRoute
   AppRecipesRoute: typeof AppRecipesRoute
   AppReportsRoute: typeof AppReportsRoute
@@ -768,6 +808,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppKiotvietRoute: AppKiotvietRoute,
   AppMenuRoute: AppMenuRoute,
   AppProcessingRoute: AppProcessingRoute,
+  AppPurchaseOrdersRoute: AppPurchaseOrdersRoute,
+  AppPurchaseRequestsRoute: AppPurchaseRequestsRoute,
   AppPurchaseReturnsRoute: AppPurchaseReturnsRoute,
   AppRecipesRoute: AppRecipesRoute,
   AppReportsRoute: AppReportsRoute,
