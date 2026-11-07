@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Check, ClipboardList, Plus, Printer, ReceiptText, RefreshCw, X } from 'lucide-react'
+import { Ban, Check, ClipboardList, Pencil, Plus, Printer, ReceiptText, RefreshCw, Undo2, X } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { ImportOrderForm } from './import-order-form'
 import { openImportOrderPrint } from './print/voucher-form'
-import { useImportOrders, useCreateImportOrder, useApproveImportOrder, useRejectImportOrder } from '@/data'
+import {
+  useImportOrders,
+  useCreateImportOrder,
+  useApproveImportOrder,
+  useRejectImportOrder,
+  useUnpostImportOrder,
+  useCancelImportOrder,
+  useUpdateImportOrder,
+} from '@/data'
+import { useAuthStore } from '@/stores/auth.store'
+import { importOrderConfirmMessage, type ImportOrderAction } from './import-order-actions'
 import { formatDate, formatCurrency, formatNumber, VAT_RATE_LABELS } from '@wms/shared'
 import type { VatRate } from '@wms/shared'
 import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
@@ -38,18 +48,23 @@ interface ImportOrder {
   vatAmount?: string
   items?: ImportOrderItem[]
   note?: string
+  supplierId?: string
+  paid?: boolean
+  purchaseAddress?: string | null
 }
 
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
   COMPLETED: 'bg-green-100 text-green-800',
   REJECTED: 'bg-red-100 text-red-800',
+  CANCELLED: 'bg-gray-200 text-gray-600',
 }
 
 const statusLabels: Record<string, string> = {
   PENDING: 'Chờ duyệt',
   COMPLETED: 'Đã duyệt',
   REJECTED: 'Từ chối',
+  CANCELLED: 'Đã huỷ',
 }
 
 const columns: Column<ImportOrder>[] = [
@@ -93,23 +108,30 @@ export function ImportOrdersPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const [selected, setSelected] = useState<ImportOrder | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null)
+  const [editing, setEditing] = useState<ImportOrder | null>(null)
+  const hasPermission = useAuthStore((s) => s.hasPermission)
+  const [confirmAction, setConfirmAction] = useState<ImportOrderAction | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
 
   const { data: res, isLoading, refetch } = useImportOrders({ id: focusId, status: statusFilter || undefined })
   const createMutation = useCreateImportOrder()
   const approveMutation = useApproveImportOrder()
   const rejectMutation = useRejectImportOrder()
+  const unpostMutation = useUnpostImportOrder()
+  const cancelMutation = useCancelImportOrder()
+  const updateMutation = useUpdateImportOrder()
 
   // Mở từ Thẻ kho: tự chọn phiếu để hiện chi tiết.
   useEffect(() => {
     if (focusId && res?.data[0]?.id === focusId) setSelected(res.data[0] as ImportOrder)
   }, [focusId, res])
 
-  const handleAction = (action: 'approve' | 'reject') => {
+  const handleAction = (action: ImportOrderAction) => {
     if (!selected) return
     if (action === 'approve') approveMutation.mutate(selected.id)
-    else rejectMutation.mutate({ id: selected.id })
+    else if (action === 'reject') rejectMutation.mutate({ id: selected.id })
+    else if (action === 'unpost') unpostMutation.mutate(selected.id)
+    else cancelMutation.mutate(selected.id)
     setSelected(null)
   }
 
@@ -131,6 +153,28 @@ export function ImportOrdersPage() {
           disabled={selected?.status !== 'PENDING'}
           onClick={() => setConfirmAction('reject')}
         />
+        <WinToolbar.Button
+          icon={<Pencil size={16} />}
+          label="Sửa"
+          disabled={selected?.status !== 'PENDING' || !hasPermission('import_orders:create')}
+          onClick={() => {
+            setEditing(selected)
+            setFormOpen(true)
+          }}
+        />
+        <WinToolbar.Button
+          icon={<Undo2 size={16} />}
+          label="Bỏ ghi"
+          disabled={selected?.status !== 'COMPLETED' || !hasPermission('import_orders:approve')}
+          onClick={() => setConfirmAction('unpost')}
+        />
+        <WinToolbar.Button
+          icon={<Ban size={16} />}
+          label="Huỷ phiếu"
+          danger
+          disabled={(selected?.status !== 'PENDING' && selected?.status !== 'REJECTED') || !hasPermission('import_orders:create')}
+          onClick={() => setConfirmAction('cancel')}
+        />
         <WinToolbar.Separator />
         <WinToolbar.Button
           icon={<Printer size={16} />}
@@ -149,6 +193,7 @@ export function ImportOrdersPage() {
           <option value="PENDING">Chờ duyệt</option>
           <option value="COMPLETED">Đã duyệt</option>
           <option value="REJECTED">Từ chối</option>
+          <option value="CANCELLED">Đã huỷ</option>
         </select>
       </WinToolbar>
 
@@ -245,16 +290,23 @@ export function ImportOrdersPage() {
 
       <ImportOrderForm
         open={formOpen}
+        order={editing}
         onClose={() => {
           setFormOpen(false)
+          setEditing(null)
           refetch()
         }}
-        onSave={(data) => createMutation.mutateAsync(data)}
+        onSave={async (data) => {
+          if (editing) {
+            await updateMutation.mutateAsync({ id: editing.id, data })
+            setSelected(null)
+          } else await createMutation.mutateAsync(data)
+        }}
       />
       <WinMessageBox
         type="question"
         title="Xác nhận"
-        message={confirmAction === 'approve' ? `Duyệt phiếu ${selected?.code}?` : `Từ chối phiếu ${selected?.code}?`}
+        message={confirmAction ? importOrderConfirmMessage(confirmAction, selected?.code) : ''}
         open={!!confirmAction}
         buttons="yes_no"
         onResult={(r) => {

@@ -12,7 +12,7 @@ interface StockExport {
   createdBy: { fullName: string }
   createdAt: string
   voucherDate: string
-  export?: { id: string; voucherNo: string; voucherDate: string } | null
+  export?: { id: string; voucherNo: string; voucherDate: string; status: string } | null
 }
 interface ListResponse {
   data: StockExport[]
@@ -70,5 +70,20 @@ export function useStockExportVoucher(id: string) {
     queryKey: ['stock-export-voucher', id],
     queryFn: () => api.get(`/stock-exports/vouchers/${id}`),
     enabled: !!id,
+  })
+}
+
+/** Huỷ phiếu xuất: trả lại lô + tồn đã trừ. */
+export function useCancelStockExport() {
+  return useMutation({
+    mutationFn: (exportId: string) => api.put(`/stock-exports/${exportId}/cancel`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.stockExports })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
+      useToastStore.getState().success('Đã huỷ phiếu xuất')
+    },
+    onError: (e: Error) => {
+      useToastStore.getState().error(e.message)
+    },
   })
 }

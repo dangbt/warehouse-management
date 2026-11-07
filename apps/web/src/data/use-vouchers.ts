@@ -32,12 +32,18 @@ export interface VoucherFieldsState {
 }
 
 /** State Ngày CT + Số CT của form; mỗi lần mở form lấy lại số chứng từ tiếp theo để prefill. */
-export function useVoucherFields(type: VoucherType, open: boolean): VoucherFieldsState {
+export function useVoucherFields(type: VoucherType, open: boolean, initial?: { date: string; no: string } | null): VoucherFieldsState {
   const [date, setDate] = useState(todayInputValue)
   const [no, setNo] = useState('')
 
   useEffect(() => {
     if (!open) return
+    if (initial) {
+      // Chế độ sửa: giữ ngày/số CT của phiếu, không sinh số mới.
+      setDate(initial.date)
+      setNo(initial.no)
+      return
+    }
     setDate(todayInputValue())
     setNo('')
     let cancelled = false
@@ -50,7 +56,7 @@ export function useVoucherFields(type: VoucherType, open: boolean): VoucherField
     return () => {
       cancelled = true
     }
-  }, [open, type])
+  }, [open, type, initial?.date, initial?.no]) // eslint-disable-line react-hooks/exhaustive-deps -- initial chỉ đổi khi đổi phiếu
 
   return {
     date,
