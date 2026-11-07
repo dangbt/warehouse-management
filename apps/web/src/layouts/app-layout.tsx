@@ -148,6 +148,7 @@ function buildMenuTree(isHousehold: boolean): TreeNode[] {
     { id: 'reports', label: 'Báo cáo', icon: <NavIcon id="/reports" />, route: '/reports', permission: 'reports:read' },
     { id: 'usage', label: 'Báo cáo NL', icon: <NavIcon id="/ingredient-usage" />, route: '/ingredient-usage', permission: 'reports:read' },
     { id: 'costing', label: 'Tính giá xuất kho', icon: <NavIcon id="/costing" />, route: '/costing', permission: 'tax:read' },
+    { id: 'inventory-period', label: 'Khoá sổ kho', icon: <NavIcon id="/inventory-period" />, route: '/inventory-period', permission: 'inventory_period:read' },
     { id: 'inventory-summary', label: 'Nhập–Xuất–Tồn', icon: <NavIcon id="/inventory-summary" />, route: '/inventory-summary', permission: 'reports:read' },
     { id: 'stock-card', label: 'Thẻ kho', icon: <NavIcon id="/inventory-summary" />, route: '/stock-card', permission: 'reports:read' },
     {
@@ -290,6 +291,7 @@ export function AppLayout() {
               { label: 'Nhập – Xuất – Tồn', route: '/inventory-summary' },
               { label: 'Thẻ kho / Sổ chi tiết VT', route: '/stock-card' },
               { label: 'Tính giá xuất kho', route: '/costing' },
+              { label: 'Khoá sổ kho', route: '/inventory-period' },
               { label: 'Định mức', route: '/consumption-variance' },
             ]}
             onNav={(r) => navigate({ to: r })}

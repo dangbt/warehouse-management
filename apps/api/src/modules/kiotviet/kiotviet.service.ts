@@ -1,3 +1,5 @@
+import { PeriodLockService } from '../common/period-lock.service';
+import { PeriodLockedException, PERIOD_LOCKED, isDateLocked } from '../common/period-lock';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
@@ -35,6 +37,7 @@ export class KiotVietService {
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
     private costing: CostingService,
+    private periodLock: PeriodLockService,
   ) {}
 
   private normalize(s: string) {
@@ -203,6 +206,13 @@ export class KiotVietService {
     if (!order) throw new BadRequestException('Đơn hàng không tồn tại');
     if (order.deducted) throw new BadRequestException('Đơn hàng đã được trừ kho');
 
+    // Đơn rơi vào kỳ đã khoá sổ: không trừ kho, đánh dấu lỗi để trang KiotViet hiển thị
+    const lockedUntil = await this.periodLock.getLockedUntil();
+    if (lockedUntil && isDateLocked(order.orderDate, lockedUntil)) {
+      await this.prisma.kiotVietOrder.update({ where: { id: orderId }, data: { deductError: PERIOD_LOCKED } });
+      throw new PeriodLockedException(lockedUntil);
+    }
+
     // Gom NL cần trừ theo cách cấu hình của từng món (mode)
     const deductions: { ingredientId: string; quantity: number }[] = [];
     const unconfigured: string[] = []; // tên món chưa cấu hình cách trừ tồn
@@ -256,11 +266,11 @@ export class KiotVietService {
             });
           }
         }
-        await tx.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true } });
+        await tx.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true, deductError: null } });
       });
     } else if (unconfigured.length === 0) {
       // Toàn món "không quản tồn" → đánh dấu đã xử lý
-      await this.prisma.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true } });
+      await this.prisma.kiotVietOrder.update({ where: { id: orderId }, data: { deducted: true, deductError: null } });
     }
     // else: có món chưa cấu hình & chưa trừ gì → để deducted=false, retry sau khi cấu hình
 

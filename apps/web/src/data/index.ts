@@ -50,3 +50,5 @@ export { useVoucherFields, todayInputValue, voucherDateToIso } from './use-vouch
 export type { VoucherType, VoucherFieldsState } from './use-vouchers'
 export { useCostingSettings, useUpdateCostingMethod, useRunCosting, COSTING_METHOD_LABELS } from './use-costing'
 export type { CostingMethod, CostingSettings, CostingRunResult } from './use-costing'
+export { useInventoryPeriod, useLockInventoryPeriod, useReopenInventoryPeriod } from './use-inventory-period'
+export type { InventoryPeriodStatus, LockResult } from './use-inventory-period'
