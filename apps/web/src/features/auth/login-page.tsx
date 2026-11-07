@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { api } from '@/services/api'
+import { queryClient } from '@/data/query-client'
+import { useApplyBranding } from '@/data/use-branding'
 
 const schema = z.object({
   email: z.string().min(1, 'Vui lòng nhập email').email('Email không hợp lệ'),
@@ -21,6 +24,16 @@ export function LoginPage() {
   const { login } = useAuthStore()
   const navigate = useNavigate()
   const [error, setError] = useState('')
+  const brand = useApplyBranding()
+  // DB chưa có user nào → chuyển sang wizard cài đặt lần đầu.
+  const setup = useQuery<{ needsSetup: boolean }>(
+    { queryKey: ['setup', 'status'], queryFn: () => api.get('/setup/status'), retry: false },
+    queryClient,
+  )
+  const needsSetup = setup.data?.needsSetup === true
+  useEffect(() => {
+    if (needsSetup) navigate({ to: '/setup' })
+  }, [needsSetup, navigate])
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -41,7 +54,7 @@ export function LoginPage() {
         className="w-[360px] bg-white border border-win-grid-border shadow-md"
       >
         <div className="px-4 py-3 border-b border-win-grid-border flex items-center gap-2">
-          <img src="/logo.svg" alt="Mâm Vị" className="h-6" />
+          <img src={brand.logoUrl} alt={brand.name} className="h-6" />
         </div>
         <div className="p-5 space-y-3">
           <div>
