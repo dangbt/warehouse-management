@@ -8,12 +8,14 @@ const defaultSearch = {
   period: '',
   from: '',
   to: '',
+  warehouseId: '',
 }
 
 const searchSchema = z.object({
   period: z.string().default(defaultSearch.period),
   from: z.string().default(defaultSearch.from),
   to: z.string().default(defaultSearch.to),
+  warehouseId: z.string().default(defaultSearch.warehouseId),
   id: z.string().optional(),
 })
 

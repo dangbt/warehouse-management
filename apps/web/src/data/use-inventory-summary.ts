@@ -35,6 +35,7 @@ export interface InventorySummaryParams {
   groupBy?: 'product'
   category?: string
   attributeValueId?: string
+  warehouseId?: string
 }
 
 export function useInventorySummary(params: InventorySummaryParams) {
@@ -45,6 +46,7 @@ export function useInventorySummary(params: InventorySummaryParams) {
       if (params.groupId) q.set('group_id', params.groupId)
       if (params.groupBy) q.set('group_by', params.groupBy)
       if (params.category) q.set('category', params.category)
+      if (params.warehouseId) q.set('warehouse_id', params.warehouseId)
       if (params.attributeValueId) q.set('attribute_value_id', params.attributeValueId)
       const res: { data: InventorySummaryReport } | InventorySummaryReport = await api.get(`/reports/inventory-summary?${q}`)
       return 'groups' in res ? res : res.data

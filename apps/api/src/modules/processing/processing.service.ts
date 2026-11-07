@@ -27,11 +27,15 @@ export class ProcessingService {
     id?: string;
     from?: string;
     to?: string;
+    warehouse_id?: string;
   }) {
     const page = +(q.page || 1);
     const limit = +(q.limit || 20);
-    const where: { status?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.status ? { status: q.status } : {};
+    const where: { status?: string; id?: string; warehouseId?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.status
+      ? { status: q.status }
+      : {};
     if (q.id) where.id = q.id;
+    if (q.warehouse_id) where.warehouseId = q.warehouse_id;
     const dateRange = voucherDateFilter(q);
     if (dateRange) where.voucherDate = dateRange;
 

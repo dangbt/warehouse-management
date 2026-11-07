@@ -16,6 +16,7 @@ export interface ProcessingOrder {
   createdAt: string
   voucherDate: string
   voucherNo: string
+  warehouseId?: string
   source: { id: string; name: string; unit: string }
   output: { id: string; name: string; unit: string }
   createdBy?: { id: string; fullName: string }
@@ -26,7 +27,7 @@ interface ListResponse {
   meta: { page: number; limit: number; total: number; totals?: { sourceQty: number; outputQty: number } }
 }
 
-export function useProcessingOrders(params?: { id?: string; page?: number; status?: string; orderBy?: string; sort?: string; from?: string; to?: string }) {
+export function useProcessingOrders(params?: { id?: string; page?: number; status?: string; orderBy?: string; sort?: string; from?: string; to?: string; warehouseId?: string }) {
   const query = new URLSearchParams()
   if (params?.id) query.set('id', params.id)
   if (params?.page) query.set('page', String(params.page))
@@ -35,6 +36,7 @@ export function useProcessingOrders(params?: { id?: string; page?: number; statu
   if (params?.sort) query.set('sort', params.sort)
   if (params?.from) query.set('from', params.from)
   if (params?.to) query.set('to', params.to)
+  if (params?.warehouseId) query.set('warehouse_id', params.warehouseId)
   return useQuery<ListResponse>({
     queryKey: QUERY_KEYS.processingList(Object.fromEntries(query)),
     queryFn: () => api.get(`/processing?${query}`),
@@ -51,6 +53,7 @@ export function useCreateProcessing() {
       note?: string
       voucher_date?: string
       voucher_no?: string
+      warehouse_id?: string
     }) => api.post('/processing', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.processing })

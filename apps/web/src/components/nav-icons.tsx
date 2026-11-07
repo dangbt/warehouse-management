@@ -49,6 +49,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   admin: Settings,
   // trang
   '/dashboard': LayoutDashboard,
+  '/warehouses': Warehouse,
   '/ingredients': Package,
   '/ingredient-groups': FolderTree,
   '/products': Shirt,

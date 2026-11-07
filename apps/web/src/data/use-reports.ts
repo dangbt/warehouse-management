@@ -50,10 +50,10 @@ interface Transaction {
   createdAt: string
 }
 
-export function useStockSummary() {
+export function useStockSummary(warehouseId?: string) {
   return useQuery<StockSummary>({
-    queryKey: QUERY_KEYS.reports.stockSummary,
-    queryFn: () => api.get('/reports/stock-summary'),
+    queryKey: [...QUERY_KEYS.reports.stockSummary, warehouseId ?? ''],
+    queryFn: () => api.get(`/reports/stock-summary${warehouseId ? `?warehouse_id=${warehouseId}` : ''}`),
   })
 }
 

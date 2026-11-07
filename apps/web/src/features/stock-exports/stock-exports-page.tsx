@@ -10,6 +10,8 @@ import { useStockExports, useCreateStockExport, useCancelStockExport } from '@/d
 import { useAuthStore } from '@/stores/auth.store'
 import type { TermKey } from '@/utils/terms'
 import { formatDate, formatNumber, formatCurrency } from '@wms/shared'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseColumn } from '@/components/warehouse-column'
 import { PeriodFilter } from '@/components/period-filter'
 import { resolvePeriod } from '@/utils/period'
 import { Route } from '@/routes/_app/stock-exports'
@@ -25,6 +27,7 @@ interface StockExport {
   createdBy: { fullName: string }
   createdAt: string
   voucherDate: string
+  warehouseId?: string
   export?: { id: string; voucherNo: string; status: string } | null
 }
 
@@ -63,7 +66,8 @@ const makeColumns = (t: (k: TermKey) => string): Column<StockExport>[] => [
 export function StockExportsPage() {
   const t = useTerm()
   const columns = makeColumns(t)
-  const { page, orderBy, sort, period, from, to, id: focusId } = Route.useSearch()
+  const { page, orderBy, sort, period, from, to, warehouseId, id: focusId } = Route.useSearch()
+  const whColumn = useWarehouseColumn<StockExport>((r) => r.warehouseId)
   const range = resolvePeriod(period, from, to)
   const navigate = useNavigate({ from: Route.fullPath })
 
@@ -75,7 +79,7 @@ export function StockExportsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<StockExport | null>(null)
   const [seed, setSeed] = useState<StockExportSeed | null>(null)
-  const { data: res, isLoading, refetch } = useStockExports({ id: focusId, page, orderBy, sort, ...range })
+  const { data: res, isLoading, refetch } = useStockExports({ id: focusId, page, orderBy, sort, warehouseId: warehouseId || undefined, ...range })
   const createMutation = useCreateStockExport()
   const cancelMutation = useCancelStockExport()
   const hasPermission = useAuthStore((s) => s.hasPermission)
@@ -125,10 +129,11 @@ export function StockExportsPage() {
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams({ ...v, page: 1 })} />
+        <WarehouseSelect allowAll value={warehouseId} onChange={(v) => setParams({ warehouseId: v, page: 1 })} testId="filter-warehouse" />
       </WinToolbar>
       {focusId && <FocusedVoucherBanner label={res?.data[0]?.export?.voucherNo} onClear={() => setParams({ id: undefined })} />}
       <WinDataGrid searchable
-        columns={columns}
+        columns={[...columns.slice(0, 2), ...whColumn, ...columns.slice(2)]}
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}

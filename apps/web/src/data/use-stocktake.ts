@@ -12,6 +12,7 @@ export interface StocktakeSession {
   createdAt: string
   voucherDate: string
   voucherNo: string
+  warehouseId?: string
   completedAt: string | null
 }
 
@@ -29,6 +30,7 @@ export interface StocktakeDetail {
   code: string
   voucherNo?: string
   voucherDate?: string
+  warehouseId?: string
   status: string
   createdBy?: { id: string; fullName: string }
   items: StocktakeItem[]
@@ -41,10 +43,10 @@ interface SessionListResponse {
   meta: { page: number; limit: number; total: number }
 }
 
-export function useStocktakeSessions() {
+export function useStocktakeSessions(warehouseId?: string) {
   return useQuery<SessionListResponse>({
-    queryKey: QUERY_KEYS.stocktakeList(),
-    queryFn: () => api.get('/stocktake?limit=50'),
+    queryKey: [...QUERY_KEYS.stocktakeList(), warehouseId ?? ''],
+    queryFn: () => api.get(`/stocktake?limit=50${warehouseId ? `&warehouse_id=${warehouseId}` : ''}`),
   })
 }
 
@@ -58,7 +60,7 @@ export function useStocktakeDetail(id: string) {
 
 export function useCreateStocktake() {
   return useMutation({
-    mutationFn: (data: { voucher_date?: string; voucher_no?: string } = {}) => api.post('/stocktake', data),
+    mutationFn: (data: { voucher_date?: string; voucher_no?: string; warehouse_id?: string } = {}) => api.post('/stocktake', data),
     onSuccess: (newItem) => {
       queryClient.setQueriesData<SessionListResponse>({ queryKey: QUERY_KEYS.stocktake }, (old) =>
         old ? { ...old, data: [newItem, ...old.data] } : old,

@@ -12,6 +12,9 @@ import { formatDate, formatCurrency, formatNumber, VAT_RATES, VAT_RATE_LABELS } 
 import type { VatRate } from '@wms/shared'
 import type { PurchaseReturn } from '@/data/use-purchase-returns'
 import { FocusedVoucherBanner } from '@/components/focused-voucher-banner'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseColumn } from '@/components/warehouse-column'
+import { useWarehouseChoice } from '@/hooks/use-warehouse-choice'
 import { PeriodFilter } from '@/components/period-filter'
 import { resolvePeriod } from '@/utils/period'
 import { Route } from '@/routes/_app/purchase-returns'
@@ -50,9 +53,11 @@ export function PurchaseReturnsPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const t = useTerm()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const { period, from, to } = Route.useSearch()
+  const { period, from, to, warehouseId: filterWh } = Route.useSearch()
+  const wh = useWarehouseChoice()
+  const whColumn = useWarehouseColumn<PurchaseReturn>((r) => r.warehouseId)
   const setParams = (updates: Record<string, unknown>) => navigate({ search: (prev) => ({ ...prev, ...updates }) })
-  const { data: res, isLoading, refetch } = usePurchaseReturns({ id: focusId, ...resolvePeriod(period, from, to) })
+  const { data: res, isLoading, refetch } = usePurchaseReturns({ id: focusId, warehouseId: filterWh || undefined, ...resolvePeriod(period, from, to) })
   const createMutation = useCreatePurchaseReturn()
   const { data: suppliersRes } = useSuppliers()
   const { data: ingredientsRes } = useIngredients()
@@ -146,6 +151,8 @@ export function PurchaseReturnsPage() {
       voucherDate: voucher.payload().voucher_date,
       voucherNo: voucher.payload().voucher_no,
       importOrderId: importOrderId || undefined,
+      // Trả theo phiếu nhập ⇒ API lấy kho của phiếu gốc.
+      warehouseId: importOrderId ? undefined : wh.warehouseId || undefined,
       items: validItems.map((i) => ({
         ingredientId: i.ingredientId,
         quantity: i.quantity,
@@ -184,11 +191,12 @@ export function PurchaseReturnsPage() {
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams(v)} />
+        <WarehouseSelect allowAll value={filterWh} onChange={(v) => setParams({ warehouseId: v })} testId="filter-warehouse" />
       </WinToolbar>
       {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => setParams({ id: undefined })} />}
       <WinDataGrid
         searchable
-        columns={columns}
+        columns={[...columns.slice(0, 3), ...whColumn, ...columns.slice(3)]}
         data={res?.data ?? []}
         loading={isLoading}
         footer={
@@ -203,6 +211,7 @@ export function PurchaseReturnsPage() {
         <div className="space-y-3 p-3">
           <div className="space-y-2.5">
             <VoucherFields {...voucher} />
+            {!importOrderId && <WarehouseSelect label="Kho" value={wh.warehouseId} onChange={wh.setWarehouseId} />}
           </div>
           <div>
             <label className="text-win-base block mb-0.5">Nhà cung cấp</label>

@@ -8,6 +8,8 @@ import { ProcessingForm } from './processing-form'
 import { useProcessingOrders, useCreateProcessing, useCompleteProcessing } from '@/data'
 import type { ProcessingOrder } from '@/data'
 import { formatDate, formatNumber } from '@wms/shared'
+import { WarehouseSelect } from '@/components/warehouse-select'
+import { useWarehouseColumn } from '@/components/warehouse-column'
 import { PeriodFilter } from '@/components/period-filter'
 import { resolvePeriod } from '@/utils/period'
 import { Route } from '@/routes/_app/processing'
@@ -39,7 +41,8 @@ const columns: Column<ProcessingOrder>[] = [
 ]
 
 export function ProcessingPage() {
-  const { page, status, orderBy, sort, period, from, to, id: focusId } = Route.useSearch()
+  const { page, status, orderBy, sort, period, from, to, warehouseId, id: focusId } = Route.useSearch()
+  const whColumn = useWarehouseColumn<ProcessingOrder>((r) => r.warehouseId)
   const range = resolvePeriod(period, from, to)
   const navigate = useNavigate({ from: Route.fullPath })
 
@@ -52,7 +55,7 @@ export function ProcessingPage() {
   const [selected, setSelected] = useState<ProcessingOrder | null>(null)
   const [confirmComplete, setConfirmComplete] = useState(false)
 
-  const { data: res, isLoading, refetch } = useProcessingOrders({ id: focusId, page, status: status || undefined, orderBy, sort, ...range })
+  const { data: res, isLoading, refetch } = useProcessingOrders({ id: focusId, page, status: status || undefined, orderBy, sort, warehouseId: warehouseId || undefined, ...range })
   const createMutation = useCreateProcessing()
   const completeMutation = useCompleteProcessing()
 
@@ -68,6 +71,7 @@ export function ProcessingPage() {
     note?: string
     voucher_date?: string
     voucher_no?: string
+    warehouse_id?: string
   }) => {
     await createMutation.mutateAsync(data)
   }
@@ -95,11 +99,12 @@ export function ProcessingPage() {
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Separator />
         <PeriodFilter period={period} from={from} to={to} onChange={(v) => setParams({ ...v, page: 1 })} />
+        <WarehouseSelect allowAll value={warehouseId} onChange={(v) => setParams({ warehouseId: v, page: 1 })} testId="filter-warehouse" />
       </WinToolbar>
 
       {focusId && <FocusedVoucherBanner label={res?.data[0]?.voucherNo} onClear={() => { setSelected(null); setParams({ id: undefined }) }} />}
       <WinDataGrid searchable
-        columns={columns}
+        columns={[...columns.slice(0, 2), ...whColumn, ...columns.slice(2)]}
         data={res?.data ?? []}
         loading={isLoading}
         pagination={{ page, limit: 20, total: res?.meta.total ?? 0 }}
