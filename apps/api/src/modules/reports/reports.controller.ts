@@ -11,6 +11,7 @@ import { ProductReportsRepository } from './product-reports.repository';
 import { buildStockMatrixReport, groupLowStockByProduct } from './stock-matrix';
 import { StockCardRepository } from './stock-card.repository';
 import { buildStockCard } from './stock-card';
+import { withWarehouseStock } from '../common/warehouse-stock-view';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reports')
@@ -26,7 +27,16 @@ export class ReportsController {
   /** Tổng hợp Nhập – Xuất – Tồn theo kỳ (ngày chứng từ), lọc theo nhóm NL. */
   @Get('inventory-summary')
   async inventorySummary(
-    @Query() q: { from?: string; to?: string; group_id?: string; group_by?: string; category?: string; attribute_value_id?: string },
+    @Query()
+    q: {
+      from?: string;
+      to?: string;
+      group_id?: string;
+      group_by?: string;
+      category?: string;
+      attribute_value_id?: string;
+      warehouse_id?: string;
+    },
   ) {
     if (!q.from || !q.to) throw new BadRequestException('Thiếu from/to');
     const { from, to } = resolveReportRange({ from: q.from, to: q.to });
@@ -39,6 +49,7 @@ export class ReportsController {
       groupId: q.group_id || undefined,
       category: variants ? q.category || undefined : undefined,
       attributeValueId: variants ? q.attribute_value_id || undefined : undefined,
+      warehouseId: q.warehouse_id || undefined,
     });
     return variants && q.group_by === 'product'
       ? buildInventorySummaryByProduct(raw, q.from, q.to)
@@ -56,25 +67,31 @@ export class ReportsController {
 
   /** Thẻ kho / Sổ chi tiết vật tư của 1 NL trong kỳ (ngày chứng từ): đầu kỳ, giao dịch, phát sinh, cuối kỳ. */
   @Get('stock-card')
-  async stockCard(@Query() q: { ingredient_id?: string; from?: string; to?: string }) {
+  async stockCard(@Query() q: { ingredient_id?: string; from?: string; to?: string; warehouse_id?: string }) {
     if (!q.ingredient_id || !q.from || !q.to) throw new BadRequestException('Thiếu ingredient_id/from/to');
     const { from, to } = resolveReportRange({ from: q.from, to: q.to });
     if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
       throw new BadRequestException('Khoảng thời gian không hợp lệ');
     }
+    const wh = q.warehouse_id || undefined;
     const ing = await this.stockCardRepo.findIngredient(q.ingredient_id);
     if (!ing) throw new NotFoundException('Không tìm thấy nguyên liệu');
-    const [opening, txs] = await Promise.all([this.stockCardRepo.opening(ing.id, from), this.stockCardRepo.transactions(ing.id, from, to)]);
+    const [opening, txs] = await Promise.all([
+      this.stockCardRepo.opening(ing.id, from, wh),
+      this.stockCardRepo.transactions(ing.id, from, to, wh),
+    ]);
     const ingredient = { id: ing.id, code: ing.id.slice(0, 8).toUpperCase(), name: ing.name, unit: ing.unit };
     return buildStockCard(ingredient, opening, txs, q.from, q.to);
   }
 
   @Get('stock-summary')
-  async stockSummary() {
-    const ingredients = await this.prisma.ingredient.findMany({
+  async stockSummary(@Query() q: { warehouse_id?: string }) {
+    const all = await this.prisma.ingredient.findMany({
       orderBy: { name: 'asc' },
       include: { group: true },
     });
+    // Lọc theo kho: currentStock của từng NL được thay bằng tồn tại kho đó.
+    const ingredients = q.warehouse_id ? await withWarehouseStock(this.prisma, all, q.warehouse_id) : all;
     const total = ingredients.length;
     const totalValue = ingredients.reduce((s, i) => s + Number(i.currentStock) * Number(i.costPerUnit), 0);
     const lowStock = ingredients.filter((i) => Number(i.currentStock) <= Number(i.minStock));

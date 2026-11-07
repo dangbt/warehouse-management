@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
 import { KiotVietService } from './kiotviet.service';
+import { KiotVietWarehouseService, BranchWarehouseMap } from './kiotviet-warehouse.service';
 import { FeatureGuard, RequireFeature } from '../settings/feature.guard';
 
 interface SyncBody {
@@ -10,6 +11,7 @@ interface SyncBody {
     id: string;
     code: string;
     customerName?: string;
+    branchId?: string;
     totalAmount: number;
     orderDate: string;
     items: { productName: string; quantity: number; price: number }[];
@@ -28,7 +30,22 @@ interface SyncApiBody {
 @RequireFeature('sales_channels')
 @Controller('kiotviet')
 export class KiotVietController {
-  constructor(private svc: KiotVietService) {}
+  constructor(
+    private svc: KiotVietService,
+    private warehouses: KiotVietWarehouseService,
+  ) {}
+
+  @Get('warehouse-mapping')
+  @RequirePermissions('kiotviet:read')
+  getWarehouseMapping() {
+    return this.warehouses.getMap();
+  }
+
+  @Put('warehouse-mapping')
+  @RequirePermissions('kiotviet:sync')
+  setWarehouseMapping(@Body() body: Partial<BranchWarehouseMap>) {
+    return this.warehouses.setMap(body);
+  }
 
   @Get('orders')
   @RequirePermissions('kiotviet:read')

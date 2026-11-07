@@ -6,6 +6,7 @@ import { BatchDeductionService } from '../common/batch-deduction.service';
 import { CostingService } from '../costing/costing.service';
 import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { PeriodLockService } from '../common/period-lock.service';
 import { StockExportCancelService } from './stock-export-cancel.service';
 
@@ -19,11 +20,24 @@ export class StockExportsController {
     private costing: CostingService,
     private periodLock: PeriodLockService,
     private canceller: StockExportCancelService,
+    private stock: WarehouseStockService,
   ) {}
 
   @Get()
   @RequirePermissions('stock_exports:read')
-  async findAll(@Query() q: { page?: string; limit?: string; orderBy?: string; sort?: string; id?: string; from?: string; to?: string }) {
+  async findAll(
+    @Query()
+    q: {
+      page?: string;
+      limit?: string;
+      orderBy?: string;
+      sort?: string;
+      id?: string;
+      from?: string;
+      to?: string;
+      warehouse_id?: string;
+    },
+  ) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
 
@@ -31,8 +45,9 @@ export class StockExportsController {
     const sortField = q.orderBy && ['voucherDate', 'createdAt', 'quantity'].includes(q.orderBy) ? q.orderBy : 'voucherDate';
     const sortDir = q.sort === 'asc' ? 'asc' : 'desc';
 
-    const where: { type: string; exportId?: string; voucherDate?: { gte?: Date; lte?: Date } } = { type: 'EXPORT' };
+    const where: { type: string; warehouseId?: string; exportId?: string; voucherDate?: { gte?: Date; lte?: Date } } = { type: 'EXPORT' };
     if (q.id) where.exportId = q.id;
+    if (q.warehouse_id) where.warehouseId = q.warehouse_id;
     const dateRange = voucherDateFilter(q);
     if (dateRange) where.voucherDate = dateRange;
 
@@ -101,6 +116,8 @@ export class StockExportsController {
       note?: string;
       voucher_date?: string;
       voucher_no?: string;
+      // Kho xuất. Bỏ trống ⇒ kho mặc định.
+      warehouse_id?: string;
     },
   ) {
     if (!body.ingredient_id || !body.quantity || body.quantity <= 0 || !body.reason) {
@@ -111,7 +128,9 @@ export class StockExportsController {
       where: { id: body.ingredient_id },
     });
     if (!ingredient) throw new BadRequestException('Nguyên liệu không tồn tại');
-    if (Number(ingredient.currentStock) < body.quantity) throw new BadRequestException('Không đủ tồn kho');
+    const warehouseId = await this.stock.resolveId(body.warehouse_id);
+    if ((await this.stock.getQty(this.prisma, body.ingredient_id, warehouseId)) < body.quantity)
+      throw new BadRequestException('Không đủ tồn kho');
 
     const voucherDate = parseVoucherDate(body.voucher_date);
     await this.periodLock.assertOpen(voucherDate);
@@ -119,19 +138,17 @@ export class StockExportsController {
 
     await this.prisma
       .$transaction(async (tx) => {
-        const voucher = await tx.stockExport.create({ data: { voucherNo, voucherDate } });
+        const voucher = await tx.stockExport.create({ data: { voucherNo, voucherDate, warehouseId } });
         const cost = await this.costing.costOutbound(tx, body.ingredient_id, body.quantity);
-        const deducted = await this.batchDeduction.deductFromBatches(tx, body.ingredient_id, body.quantity);
+        const deducted = await this.batchDeduction.deductFromBatches(tx, body.ingredient_id, body.quantity, warehouseId);
 
-        await tx.ingredient.update({
-          where: { id: body.ingredient_id },
-          data: { currentStock: { decrement: body.quantity } },
-        });
+        await this.stock.adjust(tx, body.ingredient_id, warehouseId, -body.quantity);
 
         for (const d of deducted) {
           await tx.stockTransaction.create({
             data: {
               ingredientId: body.ingredient_id,
+              warehouseId,
               type: 'EXPORT',
               quantity: d.qty,
               unitCost: cost.unitCost,

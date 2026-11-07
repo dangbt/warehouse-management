@@ -29,6 +29,8 @@ export interface InventorySummaryFilter {
   category?: string;
   /** Chỉ các biến thể mang giá trị thuộc tính này (vd Size M) — WMS-22. */
   attributeValueId?: string;
+  /** Chỉ giao dịch của kho này — WMS-10. */
+  warehouseId?: string;
 }
 
 /**
@@ -41,7 +43,8 @@ export class InventorySummaryRepository {
   constructor(private prisma: PrismaService) {}
 
   async aggregate(from: Date, to: Date, filter: InventorySummaryFilter = {}): Promise<InventorySummaryRawRow[]> {
-    const { groupId, category, attributeValueId } = filter;
+    const { groupId, category, attributeValueId, warehouseId } = filter;
+    const whFilter = warehouseId ? Prisma.sql`AND st.warehouse_id = ${warehouseId}` : Prisma.empty;
     const groupFilter = Prisma.sql`${groupId ? Prisma.sql`AND i.group_id = ${groupId}` : Prisma.empty}
       ${category ? Prisma.sql`AND i.product_id IN (SELECT id FROM products WHERE category = ${category})` : Prisma.empty}
       ${attributeValueId ? Prisma.sql`AND EXISTS (SELECT 1 FROM item_attribute_values iav WHERE iav.ingredient_id = i.id AND iav.attribute_value_id = ${attributeValueId})` : Prisma.empty}`;
@@ -54,7 +57,7 @@ export class InventorySummaryRepository {
           ${ABS_VALUE_SQL} AS av
         FROM stock_transactions st
         JOIN ingredients i ON i.id = st.ingredient_id
-        WHERE st.voucher_date <= ${to} ${groupFilter}
+        WHERE st.voucher_date <= ${to} ${groupFilter} ${whFilter}
       ),
       s AS (
         SELECT *, ${SIGNED_VALUE_SQL} AS sv FROM t WHERE sq <> 0

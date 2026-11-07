@@ -30,26 +30,27 @@ export class StockCardRepository {
     return this.prisma.ingredient.findUnique({ where: { id }, select: { id: true, name: true, unit: true } });
   }
 
-  private signed(ingredientId: string, extra: Prisma.Sql) {
+  private signed(ingredientId: string, extra: Prisma.Sql, warehouseId?: string) {
+    const wh = warehouseId ? Prisma.sql`AND st.warehouse_id = ${warehouseId}` : Prisma.empty;
     return Prisma.sql`
       SELECT st.id, st.voucher_date, st.created_at, st.type, st.note, st.reference_id, st.export_id,
         ${SIGNED_QTY_SQL} AS sq, ${ABS_VALUE_SQL} AS av
       FROM stock_transactions st
       JOIN ingredients i ON i.id = st.ingredient_id
-      WHERE st.ingredient_id = ${ingredientId} ${extra}`;
+      WHERE st.ingredient_id = ${ingredientId} ${wh} ${extra}`;
   }
 
-  async opening(ingredientId: string, from: Date): Promise<StockCardOpening> {
+  async opening(ingredientId: string, from: Date, warehouseId?: string): Promise<StockCardOpening> {
     const rows = await this.prisma.$queryRaw<OpeningSqlRow[]>(Prisma.sql`
-      WITH t AS (${this.signed(ingredientId, Prisma.sql`AND st.voucher_date < ${from}`)})
+      WITH t AS (${this.signed(ingredientId, Prisma.sql`AND st.voucher_date < ${from}`, warehouseId)})
       SELECT COALESCE(SUM(sq), 0)::float8 AS qty, COALESCE(SUM(${SIGNED_VALUE_SQL}), 0)::float8 AS value
       FROM t WHERE sq <> 0`);
     return { qty: Number(rows[0]?.qty ?? 0), value: Number(rows[0]?.value ?? 0) };
   }
 
-  async transactions(ingredientId: string, from: Date, to: Date): Promise<StockCardRawTx[]> {
+  async transactions(ingredientId: string, from: Date, to: Date, warehouseId?: string): Promise<StockCardRawTx[]> {
     const rows = await this.prisma.$queryRaw<TxSqlRow[]>(Prisma.sql`
-      WITH t AS (${this.signed(ingredientId, Prisma.sql`AND st.voucher_date >= ${from} AND st.voucher_date <= ${to}`)})
+      WITH t AS (${this.signed(ingredientId, Prisma.sql`AND st.voucher_date >= ${from} AND st.voucher_date <= ${to}`, warehouseId)})
       SELECT t.id, t.voucher_date, t.type, t.note, t.sq::float8 AS sq, (${SIGNED_VALUE_SQL})::float8 AS sv,
         CASE
           WHEN t.type = 'IMPORT' THEN io.voucher_no

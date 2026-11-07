@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CostingService } from '../costing/costing.service';
 import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { PeriodLockService } from '../common/period-lock.service';
 import { VAT_RATES, VatRate, computeLineVat } from '../tax/vat';
 
@@ -21,6 +22,8 @@ export interface CreatePurchaseReturnInput {
   // Ngày chứng từ (ISO, mặc định hôm nay) + số chứng từ (bỏ trống ⇒ tự sinh).
   voucher_date?: string;
   voucher_no?: string;
+  // Kho trả hàng. Bỏ trống ⇒ kho của phiếu nhập gốc, không có phiếu gốc ⇒ kho mặc định.
+  warehouse_id?: string;
   // Phiếu nhập gốc (tuỳ chọn). Có ⇒ ràng buộc NCC/COMPLETED + giới hạn số lượng trả.
   import_order_id?: string;
   items: PurchaseReturnItemInput[];
@@ -44,15 +47,17 @@ export class PurchaseReturnsService {
     private vouchers: VoucherService,
     private costing: CostingService,
     private periodLock: PeriodLockService,
+    private stock: WarehouseStockService,
   ) {}
 
-  async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string; from?: string; to?: string }) {
+  async findAll(q: { page?: string; limit?: string; supplierId?: string; id?: string; from?: string; to?: string; warehouse_id?: string }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { supplierId?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.supplierId
+    const where: { supplierId?: string; warehouseId?: string; id?: string; voucherDate?: { gte?: Date; lte?: Date } } = q.supplierId
       ? { supplierId: q.supplierId }
       : {};
     if (q.id) where.id = q.id;
+    if (q.warehouse_id) where.warehouseId = q.warehouse_id;
     const dateRange = voucherDateFilter(q);
     if (dateRange) where.voucherDate = dateRange;
     const [data, total, agg] = await Promise.all([
@@ -86,12 +91,14 @@ export class PurchaseReturnsService {
     // Thuế suất mặc định theo nguyên liệu, lấy từ dòng cùng nguyên liệu của phiếu nhập gốc.
     const defaultVatByIngredient: Map<string, VatRate | null> = new Map();
 
+    let sourceWarehouseId: string | null = null;
     if (body.import_order_id) {
       const importOrder = await this.prisma.importOrder.findUnique({
         where: { id: body.import_order_id },
         include: { items: true },
       });
       if (!importOrder) throw new BadRequestException('Phiếu nhập không tồn tại');
+      sourceWarehouseId = importOrder.warehouseId;
       if (importOrder.status !== 'COMPLETED') throw new BadRequestException('Phiếu nhập gốc phải ở trạng thái đã duyệt');
       if (importOrder.supplierId !== body.supplier_id) throw new BadRequestException('Phiếu nhập gốc không cùng nhà cung cấp');
 
@@ -135,6 +142,7 @@ export class PurchaseReturnsService {
     await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('RETURN', body.voucher_no);
     const code = voucherNo;
+    const warehouseId = await this.stock.resolveId(body.warehouse_id ?? sourceWarehouseId);
 
     // Tính từng dòng: thành tiền + tiền thuế (làm tròn về đồng theo từng dòng).
     const lines = body.items.map((i) => {
@@ -163,6 +171,7 @@ export class PurchaseReturnsService {
             voucherNo,
             voucherDate,
             supplierId: body.supplier_id,
+            warehouseId,
             importOrderId: body.import_order_id ?? null,
             subtotal,
             vatAmount,
@@ -185,14 +194,12 @@ export class PurchaseReturnsService {
         });
 
         for (const line of lines) {
-          await tx.ingredient.update({
-            where: { id: line.ingredientId },
-            data: { currentStock: { decrement: line.quantity } },
-          });
+          await this.stock.adjust(tx, line.ingredientId, warehouseId, -line.quantity);
           const cost = await this.costing.costOutbound(tx, line.ingredientId, Number(line.quantity));
           await tx.stockTransaction.create({
             data: {
               ingredientId: line.ingredientId,
+              warehouseId,
               type: 'RETURN',
               quantity: -line.quantity,
               unitCost: cost.unitCost,

@@ -5,6 +5,7 @@ import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { assertPoReceivable, applyReceiptToPo } from '../purchasing/purchase-receipt';
 import { PeriodLockService } from '../common/period-lock.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { buildLines, parseInvoice } from './import-order-builder';
 import { VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
@@ -30,6 +31,8 @@ export interface CreateImportOrderInput {
   // Ngày chứng từ (ISO, mặc định hôm nay) + số chứng từ (bỏ trống ⇒ tự sinh theo tiền tố).
   voucher_date?: string;
   voucher_no?: string;
+  // Kho nhập. Bỏ trống ⇒ kho mặc định (tương thích client cũ).
+  warehouse_id?: string;
   paid?: boolean;
   has_invoice?: boolean;
   invoice_no?: string;
@@ -49,6 +52,7 @@ export class ImportOrdersService {
     private tax: TaxService,
     private vouchers: VoucherService,
     private periodLock: PeriodLockService,
+    private stock: WarehouseStockService,
   ) {}
 
   async findAll(q: {
@@ -56,6 +60,7 @@ export class ImportOrdersService {
     limit?: string;
     status?: string;
     supplier_id?: string;
+    warehouse_id?: string;
     has_invoice?: string;
     id?: string;
     from?: string;
@@ -63,12 +68,20 @@ export class ImportOrdersService {
   }) {
     const page = +(q.page || 1),
       limit = +(q.limit || 20);
-    const where: { id?: string; status?: string; supplierId?: string; hasInvoice?: boolean; voucherDate?: { gte?: Date; lte?: Date } } = {};
+    const where: {
+      id?: string;
+      status?: string;
+      supplierId?: string;
+      warehouseId?: string;
+      hasInvoice?: boolean;
+      voucherDate?: { gte?: Date; lte?: Date };
+    } = {};
     if (q.id) where.id = q.id;
     const dateRange = voucherDateFilter(q);
     if (dateRange) where.voucherDate = dateRange;
     if (q.status) where.status = q.status;
     if (q.supplier_id) where.supplierId = q.supplier_id;
+    if (q.warehouse_id) where.warehouseId = q.warehouse_id;
     if (q.has_invoice === 'true') where.hasInvoice = true;
     else if (q.has_invoice === 'false') where.hasInvoice = false;
     const [data, total, agg] = await Promise.all([
@@ -114,6 +127,7 @@ export class ImportOrdersService {
     await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('IMPORT', body.voucher_no);
     const code = voucherNo;
+    const warehouseId = await this.stock.resolveId(body.warehouse_id);
 
     const purchaseAddress = await this.resolvePurchaseAddress(body, hasInvoice);
 
@@ -124,6 +138,7 @@ export class ImportOrdersService {
           voucherNo,
           voucherDate,
           supplierId: body.supplier_id,
+          warehouseId,
           hasInvoice,
           invoiceNo,
           invoiceSymbol,
@@ -186,6 +201,7 @@ export class ImportOrdersService {
     const newNo = body.voucher_no?.trim();
     const voucherNo = newNo && newNo !== order.voucherNo ? await this.vouchers.resolveNo('IMPORT', newNo) : order.voucherNo;
     const purchaseAddress = await this.resolvePurchaseAddress(body, hasInvoice);
+    const warehouseId = body.warehouse_id ? await this.stock.resolveId(body.warehouse_id) : order.warehouseId;
 
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -197,6 +213,7 @@ export class ImportOrdersService {
             code: voucherNo,
             voucherDate,
             supplierId: body.supplier_id,
+            warehouseId,
             hasInvoice,
             invoiceNo,
             invoiceSymbol,
@@ -242,10 +259,7 @@ export class ImportOrdersService {
         });
       }
       for (const item of order.items) {
-        await tx.ingredient.update({
-          where: { id: item.ingredientId },
-          data: { currentStock: { increment: item.quantity } },
-        });
+        await this.stock.adjust(tx, item.ingredientId, order.warehouseId, item.quantity);
 
         // Giá vốn đơn vị theo chế độ thuế:
         // VAT_DEDUCTION → giá chưa thuế; HOUSEHOLD → giá gồm VAT (VAT không được khấu trừ).
@@ -263,6 +277,7 @@ export class ImportOrdersService {
             totalPrice: lineTotal,
             unitCost: costPerUnit,
             totalCost: lineTotal,
+            warehouseId: order.warehouseId,
             referenceId: order.id,
             createdById: approvedById,
             voucherDate: order.voucherDate,
@@ -272,6 +287,7 @@ export class ImportOrdersService {
         await tx.ingredientBatch.create({
           data: {
             ingredientId: item.ingredientId,
+            warehouseId: order.warehouseId,
             importOrderItemId: item.id,
             batchCode: `${order.code}-${item.id.slice(0, 4)}`,
             quantity: item.quantity,
