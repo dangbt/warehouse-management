@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PeriodLockService } from '../common/period-lock.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 
 /** Huỷ chứng từ xuất kho: trả lại lô + tồn đã trừ, giữ dòng giao dịch (SL=0), đánh dấu CANCELLED (giữ bản ghi). */
 @Injectable()
@@ -8,6 +9,7 @@ export class StockExportCancelService {
   constructor(
     private prisma: PrismaService,
     private periodLock: PeriodLockService,
+    private stockSvc: WarehouseStockService = new WarehouseStockService(prisma),
   ) {}
 
   async cancel(id: string) {
@@ -19,7 +21,7 @@ export class StockExportCancelService {
 
       for (const t of voucher.transactions) {
         const qty = Math.abs(Number(t.quantity));
-        await tx.ingredient.update({ where: { id: t.ingredientId }, data: { currentStock: { increment: qty } } });
+        await this.stockSvc.adjust(tx, t.ingredientId, voucher.warehouseId, qty);
         // referenceId = lô đã bị trừ; lô cũ có thể không còn ⇒ chỉ cộng lại khi tồn tại.
         if (t.referenceId) {
           await tx.ingredientBatch.updateMany({ where: { id: t.referenceId }, data: { quantity: { increment: qty }, status: 'ACTIVE' } });

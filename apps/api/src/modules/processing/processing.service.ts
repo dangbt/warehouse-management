@@ -4,6 +4,7 @@ import { CostingService } from '../costing/costing.service';
 import { voucherDateFilter, toNum } from '../common/voucher-date-filter';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class ProcessingService {
   constructor(
     private prisma: PrismaService,
     private batchDeduction: BatchDeductionService,
+    private stock: WarehouseStockService,
     private vouchers: VoucherService,
     private costing: CostingService,
     private periodLock: PeriodLockService,
@@ -78,6 +80,8 @@ export class ProcessingService {
       note?: string;
       voucher_date?: string;
       voucher_no?: string;
+      // Kho chế biến (nguồn trừ + thành phẩm nhập cùng kho). Bỏ trống ⇒ kho mặc định.
+      warehouse_id?: string;
     },
   ) {
     if (!body.source_ingredient_id || !body.output_ingredient_id) throw new BadRequestException('Thiếu nguyên liệu nguồn hoặc thành phẩm');
@@ -100,6 +104,7 @@ export class ProcessingService {
     const voucherDate = parseVoucherDate(body.voucher_date);
     await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('PROCESSING', body.voucher_no);
+    const warehouseId = await this.stock.resolveId(body.warehouse_id);
 
     return this.prisma.processingOrder
       .create({
@@ -107,6 +112,7 @@ export class ProcessingService {
           code: voucherNo,
           voucherNo,
           voucherDate,
+          warehouseId,
           sourceIngredientId: body.source_ingredient_id,
           sourceQty: body.source_qty,
           outputIngredientId: body.output_ingredient_id,
@@ -129,20 +135,19 @@ export class ProcessingService {
     if (!source) throw new BadRequestException('Nguyên liệu nguồn không tồn tại');
     const sourceQty = Number(order.sourceQty);
     const outputQty = Number(order.outputQty);
-    if (Number(source.currentStock) < sourceQty) throw new BadRequestException('Không đủ tồn nguyên liệu nguồn');
+    if ((await this.stock.getQty(this.prisma, order.sourceIngredientId, order.warehouseId)) < sourceQty)
+      throw new BadRequestException('Không đủ tồn nguyên liệu nguồn');
 
     let outputCost = 0;
     await this.prisma.$transaction(async (tx) => {
       // 1. Giá vốn NL nguồn xuất theo phương pháp tính giá; trừ nguồn theo lô + trừ tồn
       const sourceCost = await this.costing.costOutbound(tx, order.sourceIngredientId, sourceQty);
-      await this.batchDeduction.deductFromBatches(tx, order.sourceIngredientId, sourceQty);
-      await tx.ingredient.update({
-        where: { id: order.sourceIngredientId },
-        data: { currentStock: { decrement: sourceQty } },
-      });
+      await this.batchDeduction.deductFromBatches(tx, order.sourceIngredientId, sourceQty, order.warehouseId);
+      await this.stock.adjust(tx, order.sourceIngredientId, order.warehouseId, -sourceQty);
       await tx.stockTransaction.create({
         data: {
           ingredientId: order.sourceIngredientId,
+          warehouseId: order.warehouseId,
           type: 'PROCESS_OUT',
           quantity: -sourceQty,
           unitPrice: sourceCost.unitCost,
@@ -159,13 +164,12 @@ export class ProcessingService {
       // 2. Giá BTP = tổng giá vốn NL nguồn xuất ra; hao hụt tự đẩy giá vốn/đơn vị lên
       const movedValue = sourceCost.totalCost;
       outputCost = +(movedValue / outputQty).toFixed(2);
-      await tx.ingredient.update({
-        where: { id: order.outputIngredientId },
-        data: { currentStock: { increment: outputQty }, costPerUnit: outputCost },
-      });
+      await this.stock.adjust(tx, order.outputIngredientId, order.warehouseId, outputQty);
+      await tx.ingredient.update({ where: { id: order.outputIngredientId }, data: { costPerUnit: outputCost } });
       await tx.stockTransaction.create({
         data: {
           ingredientId: order.outputIngredientId,
+          warehouseId: order.warehouseId,
           type: 'PROCESS_IN',
           quantity: outputQty,
           unitPrice: outputCost,

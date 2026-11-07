@@ -28,6 +28,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { TaxModule } from './modules/tax/tax.module';
 import { CostingModule } from './modules/costing/costing.module';
 import { InventoryPeriodModule } from './modules/inventory-period/inventory-period.module';
+import { WarehousesModule } from './modules/warehouses/warehouses.module';
 import { SetupModule } from './modules/setup/setup.module';
 
 @Module({
@@ -58,6 +59,7 @@ import { SetupModule } from './modules/setup/setup.module';
     CostingModule,
     InventoryPeriodModule,
     SetupModule,
+    WarehousesModule,
     SettingsModule,
   ],
   providers: [{ provide: APP_INTERCEPTOR, useClass: AuditInterceptor }],

@@ -1,6 +1,7 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { withWarehouseStock } from '../common/warehouse-stock-view';
 import { mapUniqueError } from '../products/unique-conflict';
 
 type UnitInput = { unit_name: string; factor: number; is_default_buy?: boolean };
@@ -34,6 +35,7 @@ export class IngredientsService {
     limit?: string;
     category?: string;
     low_stock?: string;
+    warehouse_id?: string;
     search?: string;
     orderBy?: string;
     sort?: string;
@@ -75,7 +77,9 @@ export class IngredientsService {
       this.prisma.ingredient.count({ where }),
     ]);
 
-    const result = query.low_stock === 'true' ? data.filter((i) => Number(i.currentStock) <= Number(i.minStock)) : data;
+    // Lọc theo kho: hiển thị + so tồn thấp theo tồn tại kho đó thay vì tổng mọi kho.
+    const scoped = query.warehouse_id ? await withWarehouseStock(this.prisma, data, query.warehouse_id) : data;
+    const result = query.low_stock === 'true' ? scoped.filter((i) => Number(i.currentStock) <= Number(i.minStock)) : scoped;
 
     return { data: result, meta: { page, limit, total } };
   }

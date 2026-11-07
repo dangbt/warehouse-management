@@ -28,8 +28,9 @@ interface SqlRow {
 export class InventorySummaryRepository {
   constructor(private prisma: PrismaService) {}
 
-  async aggregate(from: Date, to: Date, groupId?: string): Promise<InventorySummaryRawRow[]> {
+  async aggregate(from: Date, to: Date, groupId?: string, warehouseId?: string): Promise<InventorySummaryRawRow[]> {
     const groupFilter = groupId ? Prisma.sql`AND i.group_id = ${groupId}` : Prisma.empty;
+    const whFilter = warehouseId ? Prisma.sql`AND st.warehouse_id = ${warehouseId}` : Prisma.empty;
     const rows = await this.prisma.$queryRaw<SqlRow[]>(Prisma.sql`
       WITH t AS (
         SELECT
@@ -39,7 +40,7 @@ export class InventorySummaryRepository {
           ${ABS_VALUE_SQL} AS av
         FROM stock_transactions st
         JOIN ingredients i ON i.id = st.ingredient_id
-        WHERE st.voucher_date <= ${to} ${groupFilter}
+        WHERE st.voucher_date <= ${to} ${groupFilter} ${whFilter}
       ),
       s AS (
         SELECT *, ${SIGNED_VALUE_SQL} AS sv FROM t WHERE sq <> 0

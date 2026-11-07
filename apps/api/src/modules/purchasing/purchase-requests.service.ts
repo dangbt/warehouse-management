@@ -1,3 +1,4 @@
+import { withWarehouseStock } from '../common/warehouse-stock-view';
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { formatVoucherNo, maxSequence } from '../common/voucher.service';
@@ -56,15 +57,16 @@ export class PurchaseRequestsService {
    * Gợi ý từ tồn thấp: NL track tồn có currentStock < minStock.
    * SL = (minStock × hệ số − tồn) làm tròn lên theo ĐVT mua mặc định; NCC/giá = lần nhập đã duyệt gần nhất.
    */
-  async suggestLowStock(safetyFactor?: string) {
+  async suggestLowStock(safetyFactor?: string, warehouseId?: string) {
     const factor = safetyFactor ? Number(safetyFactor) : DEFAULT_SAFETY_FACTOR;
     if (!(factor > 0)) throw new BadRequestException('Hệ số an toàn phải > 0');
 
-    const all = await this.prisma.ingredient.findMany({
+    const base = await this.prisma.ingredient.findMany({
       where: { trackStock: true, minStock: { gt: 0 } },
       include: { units: { where: { isDefaultBuy: true }, take: 1 } },
       orderBy: { name: 'asc' },
     });
+    const all = warehouseId ? await withWarehouseStock(this.prisma, base, warehouseId) : base;
     const low = all.filter((i) => num(i.currentStock) < num(i.minStock));
     if (!low.length) return { safetyFactor: factor, items: [] };
 

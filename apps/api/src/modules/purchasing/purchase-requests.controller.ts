@@ -17,8 +17,8 @@ export class PurchaseRequestsController {
 
   @Get('suggest-low-stock')
   @RequirePermissions('purchase_requests:create')
-  suggest(@Query('safety_factor') safetyFactor?: string) {
-    return this.svc.suggestLowStock(safetyFactor);
+  suggest(@Query('safety_factor') safetyFactor?: string, @Query('warehouse_id') warehouseId?: string) {
+    return this.svc.suggestLowStock(safetyFactor, warehouseId || undefined);
   }
 
   @Post()

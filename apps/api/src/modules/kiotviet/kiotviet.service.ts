@@ -6,12 +6,15 @@ import { CostingService } from '../costing/costing.service';
 import { BatchDeductionService } from '../common/batch-deduction.service';
 import { splitLineTax, allocateDiscount, VAT_RATES, type VatRate } from '../tax/vat';
 import { parsePeriod } from '../tax/period';
+import { KiotVietWarehouseService } from './kiotviet-warehouse.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { SettingsService } from '../settings/settings.service';
 
 interface KiotVietOrderInput {
   id: string;
   code: string;
   customerName?: string;
+  branchId?: string;
   totalAmount: number;
   orderDate: string;
   items: { productName: string; quantity: number; price: number }[];
@@ -21,6 +24,7 @@ interface KiotVietInvoice {
   id: number;
   code: string;
   customerName?: string;
+  branchId?: number;
   total: number;
   purchaseDate: string;
   invoiceDetails?: KiotVietInvoiceDetail[];
@@ -40,6 +44,8 @@ export class KiotVietService {
     private costing: CostingService,
     private periodLock: PeriodLockService,
     private settings: SettingsService,
+    private stock: WarehouseStockService,
+    private branchWarehouse: KiotVietWarehouseService,
   ) {}
 
   private normalize(s: string) {
@@ -82,6 +88,7 @@ export class KiotVietService {
       id: String(inv.id),
       code: inv.code,
       customerName: inv.customerName,
+      branchId: inv.branchId != null ? String(inv.branchId) : undefined,
       totalAmount: inv.total,
       orderDate: inv.purchaseDate,
       items: (inv.invoiceDetails || []).map((d) => ({
@@ -171,6 +178,7 @@ export class KiotVietService {
           kiotVietId: order.id,
           code: order.code,
           customerName: order.customerName,
+          branchId: order.branchId ?? null,
           totalAmount: order.totalAmount,
           amountBeforeTax: snapshot.amountBeforeTax,
           vatAmount: snapshot.vatAmount,
@@ -251,15 +259,17 @@ export class KiotVietService {
     }
 
     if (deductions.length > 0) {
+      const warehouseId = await this.branchWarehouse.resolveForBranch(order.branchId);
       await this.prisma.$transaction(async (tx) => {
         for (const d of deductions) {
           const cost = await this.costing.costOutbound(tx, d.ingredientId, d.quantity);
-          const batchResults = await this.batchDeduction.deductFromBatches(tx, d.ingredientId, d.quantity);
-          await tx.ingredient.update({ where: { id: d.ingredientId }, data: { currentStock: { decrement: d.quantity } } });
+          const batchResults = await this.batchDeduction.deductFromBatches(tx, d.ingredientId, d.quantity, warehouseId);
+          await this.stock.adjust(tx, d.ingredientId, warehouseId, -d.quantity);
           for (const b of batchResults) {
             await tx.stockTransaction.create({
               data: {
                 ingredientId: d.ingredientId,
+                warehouseId,
                 type: 'ORDER_DEDUCT',
                 quantity: -b.qty,
                 unitCost: cost.unitCost,
