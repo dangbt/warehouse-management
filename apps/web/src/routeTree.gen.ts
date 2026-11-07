@@ -24,6 +24,7 @@ import { Route as AppPurchaseReturnsRouteImport } from './routes/_app/purchase-r
 import { Route as AppProcessingRouteImport } from './routes/_app/processing'
 import { Route as AppMenuRouteImport } from './routes/_app/menu'
 import { Route as AppKiotvietRouteImport } from './routes/_app/kiotviet'
+import { Route as AppInventorySummaryRouteImport } from './routes/_app/inventory-summary'
 import { Route as AppIngredientsRouteImport } from './routes/_app/ingredients'
 import { Route as AppIngredientUsageRouteImport } from './routes/_app/ingredient-usage'
 import { Route as AppIngredientGroupsRouteImport } from './routes/_app/ingredient-groups'
@@ -114,6 +115,11 @@ const AppMenuRoute = AppMenuRouteImport.update({
 const AppKiotvietRoute = AppKiotvietRouteImport.update({
   id: '/kiotviet',
   path: '/kiotviet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventorySummaryRoute = AppInventorySummaryRouteImport.update({
+  id: '/inventory-summary',
+  path: '/inventory-summary',
   getParentRoute: () => AppRoute,
 } as any)
 const AppIngredientsRoute = AppIngredientsRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/ingredient-groups': typeof AppIngredientGroupsRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
+  '/inventory-summary': typeof AppInventorySummaryRoute
   '/kiotviet': typeof AppKiotvietRoute
   '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/ingredient-groups': typeof AppIngredientGroupsRoute
   '/ingredient-usage': typeof AppIngredientUsageRoute
   '/ingredients': typeof AppIngredientsRoute
+  '/inventory-summary': typeof AppInventorySummaryRoute
   '/kiotviet': typeof AppKiotvietRoute
   '/menu': typeof AppMenuRoute
   '/processing': typeof AppProcessingRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/_app/ingredient-groups': typeof AppIngredientGroupsRoute
   '/_app/ingredient-usage': typeof AppIngredientUsageRoute
   '/_app/ingredients': typeof AppIngredientsRoute
+  '/_app/inventory-summary': typeof AppInventorySummaryRoute
   '/_app/kiotviet': typeof AppKiotvietRoute
   '/_app/menu': typeof AppMenuRoute
   '/_app/processing': typeof AppProcessingRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/ingredient-groups'
     | '/ingredient-usage'
     | '/ingredients'
+    | '/inventory-summary'
     | '/kiotviet'
     | '/menu'
     | '/processing'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/ingredient-groups'
     | '/ingredient-usage'
     | '/ingredients'
+    | '/inventory-summary'
     | '/kiotviet'
     | '/menu'
     | '/processing'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/_app/ingredient-groups'
     | '/_app/ingredient-usage'
     | '/_app/ingredients'
+    | '/_app/inventory-summary'
     | '/_app/kiotviet'
     | '/_app/menu'
     | '/_app/processing'
@@ -524,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppKiotvietRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/inventory-summary': {
+      id: '/_app/inventory-summary'
+      path: '/inventory-summary'
+      fullPath: '/inventory-summary'
+      preLoaderRoute: typeof AppInventorySummaryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ingredients': {
       id: '/_app/ingredients'
       path: '/ingredients'
@@ -654,6 +673,7 @@ interface AppRouteChildren {
   AppIngredientGroupsRoute: typeof AppIngredientGroupsRoute
   AppIngredientUsageRoute: typeof AppIngredientUsageRoute
   AppIngredientsRoute: typeof AppIngredientsRoute
+  AppInventorySummaryRoute: typeof AppInventorySummaryRoute
   AppKiotvietRoute: typeof AppKiotvietRoute
   AppMenuRoute: typeof AppMenuRoute
   AppProcessingRoute: typeof AppProcessingRoute
@@ -682,6 +702,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIngredientGroupsRoute: AppIngredientGroupsRoute,
   AppIngredientUsageRoute: AppIngredientUsageRoute,
   AppIngredientsRoute: AppIngredientsRoute,
+  AppInventorySummaryRoute: AppInventorySummaryRoute,
   AppKiotvietRoute: AppKiotvietRoute,
   AppMenuRoute: AppMenuRoute,
   AppProcessingRoute: AppProcessingRoute,
