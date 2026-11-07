@@ -13,6 +13,7 @@ export const QUERY_KEYS = {
   importOrdersList: (params?: Record<string, string>) => ['import-orders', 'list', params] as const,
 
   stockExports: ['stock-exports'] as const,
+  stockTransfers: ['stock-transfers'] as const,
   stockExportsList: () => ['stock-exports', 'list'] as const,
 
   recipes: ['recipes'] as const,

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '@/services/api'
 import { QUERY_KEYS } from './query-keys'
 
-export type StockDocType = 'IMPORT_ORDER' | 'STOCK_EXPORT' | 'PURCHASE_RETURN' | 'STOCKTAKE' | 'PROCESSING'
+export type StockDocType = 'IMPORT_ORDER' | 'STOCK_EXPORT' | 'PURCHASE_RETURN' | 'STOCKTAKE' | 'PROCESSING' | 'STOCK_TRANSFER'
 
 export interface StockCardLine {
   id: string

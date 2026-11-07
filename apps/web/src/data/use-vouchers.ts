@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/services/api'
 
-export type VoucherType = 'IMPORT' | 'EXPORT' | 'RETURN' | 'STOCKTAKE' | 'PROCESSING'
+export type VoucherType = 'IMPORT' | 'EXPORT' | 'RETURN' | 'STOCKTAKE' | 'PROCESSING' | 'TRANSFER'
 
 /** Hôm nay dạng YYYY-MM-DD theo giờ máy (giờ VN) — giá trị mặc định của ô Ngày chứng từ. */
 export function todayInputValue(): string {

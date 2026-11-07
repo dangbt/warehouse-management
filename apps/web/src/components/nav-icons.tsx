@@ -1,6 +1,7 @@
 import {
   Archive,
   ArrowDownToLine,
+  ArrowRightLeft,
   ArrowUpFromLine,
   BarChart3,
   BookOpen,
@@ -56,6 +57,7 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   '/product-attributes': Shapes,
   '/import-orders': ArrowDownToLine,
   '/stock-exports': ArrowUpFromLine,
+  '/stock-transfers': ArrowRightLeft,
   '/processing': Flame,
   '/suppliers': Building2,
   '/stocktake': ClipboardCheck,
