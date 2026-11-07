@@ -15,14 +15,24 @@ interface PrintLayoutProps {
   /** Công cụ chỉ hiện trên màn hình (chọn mẫu, nút In...). */
   toolbar?: ReactNode
   children: ReactNode
+  /** Không header đơn vị/khổ A4 cố định (tem nhãn): chỉ toolbar + nội dung. */
+  bare?: boolean
 }
 
 /**
  * Khung in A4 dọc dùng chung cho mọi chứng từ: header đơn vị (tên/địa chỉ/MST từ cấu hình),
  * CSS @media print ẩn mọi thứ có class `no-print`. Nội dung chứng từ truyền qua children.
  */
-export function PrintLayout({ org, formNote, toolbar, children }: PrintLayoutProps) {
+export function PrintLayout({ org, formNote, toolbar, children, bare }: PrintLayoutProps) {
   const canConfigure = useAuthStore((s) => s.hasPermission)('tax:manage')
+  if (bare) {
+    return (
+      <div className="print-root">
+        <div className="no-print print-toolbar">{toolbar}</div>
+        {children}
+      </div>
+    )
+  }
   const missing = !org?.companyName || !org?.address || !org?.taxCode
   return (
     <div className="print-root">

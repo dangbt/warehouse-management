@@ -1,4 +1,4 @@
-import { Pencil, Plus, TriangleAlert } from 'lucide-react'
+import { Pencil, Plus, TriangleAlert, Wand2 } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -9,6 +9,7 @@ import { UNIT_OPTIONS } from '@wms/shared'
 import { useIngredientGroups } from '@/data'
 import { api } from '@/services/api'
 import { useTerm } from '@/data/use-features'
+import { codeFromSku, generateInternalEan13 } from '@/utils/barcode'
 
 const optionalNumber = z.preprocess((v) => (v === '' || v == null ? null : Number(v)), z.number().nullable())
 
@@ -19,6 +20,8 @@ const schema = z.object({
   cost_per_unit: z.coerce.number().min(0, 'Phải >= 0'),
   min_stock: z.coerce.number().min(0, 'Phải >= 0'),
   track_stock: z.boolean().optional(),
+  sku: z.string().optional(),
+  barcode: z.string().optional(),
   group_id: z.string().optional(),
   base_factor: optionalNumber.optional(),
   source_ingredient_id: z.string().optional(),
@@ -53,6 +56,8 @@ interface IngredientData {
   yieldRatio?: string | null
   lossRatio?: string | null
   trackStock?: boolean
+  sku?: string | null
+  barcode?: string | null
 }
 
 interface Props {
@@ -70,6 +75,8 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
     control,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
@@ -115,6 +122,8 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               cost_per_unit: Number(data.costPerUnit ?? data.cost_per_unit),
               min_stock: Number(data.minStock ?? data.min_stock),
               track_stock: data.trackStock !== false,
+              sku: data.sku ?? '',
+              barcode: data.barcode ?? '',
               group_id: data.groupId ?? '',
               base_factor: data.baseFactor != null ? Number(data.baseFactor) : null,
               source_ingredient_id: data.sourceIngredientId ?? '',
@@ -128,6 +137,8 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
               cost_per_unit: 0,
               min_stock: 0,
               track_stock: true,
+              sku: '',
+              barcode: '',
               group_id: '',
               base_factor: null,
               source_ingredient_id: '',
@@ -145,6 +156,8 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
         ...formData,
         group_id: formData.group_id || null,
         source_ingredient_id: formData.source_ingredient_id || null,
+        sku: formData.sku?.trim() || null,
+        barcode: formData.barcode?.trim() || null,
       } as FormData)
       if (keepOpen) setResetKey((k) => k + 1)
       else onClose()
@@ -192,6 +205,24 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
             <WinInput label="Tên" {...register('name')} error={errors.name?.message} />
             <WinSelect label="Đơn vị" {...register('unit')} options={units} error={errors.unit?.message} />
             <WinSelect label="Phân loại" {...register('category')} options={categories} error={errors.category?.message} />
+            <WinInput label="Mã nội bộ (SKU)" {...register('sku')} error={errors.sku?.message} />
+            <div className="flex items-start gap-1">
+              <div className="flex-1">
+                <WinInput label="Mã vạch" data-testid="barcode-input" {...register('barcode')} error={errors.barcode?.message} />
+              </div>
+              <button
+                type="button"
+                data-testid="barcode-generate"
+                title="Sinh EAN-13 nội bộ (tiền tố 2). Có SKU thì dùng chính SKU làm mã Code128."
+                onClick={() => {
+                  const sku = watch('sku')?.trim()
+                  setValue('barcode', sku ? codeFromSku(sku) : generateInternalEan13(), { shouldDirty: true })
+                }}
+                className="h-8 px-2 text-xs bg-win-button border border-win-button-border cursor-pointer hover:bg-win-button-hover flex items-center gap-1"
+              >
+                <Wand2 size={13} /> Sinh mã
+              </button>
+            </div>
             <WinInput label="Giá/đơn vị" type="number" {...register('cost_per_unit')} error={errors.cost_per_unit?.message} />
             <WinInput label="Tồn kho min" type="number" {...register('min_stock')} error={errors.min_stock?.message} />
             <div className="flex items-center gap-2">
