@@ -5,9 +5,14 @@ type PrismaTransaction = Omit<Prisma.TransactionClient, '$connect' | '$disconnec
 
 @Injectable()
 export class BatchDeductionService {
-  async deductFromBatches(tx: PrismaTransaction, ingredientId: string, quantity: number): Promise<{ batchId: string; qty: number }[]> {
+  async deductFromBatches(
+    tx: PrismaTransaction,
+    ingredientId: string,
+    quantity: number,
+    warehouseId?: string,
+  ): Promise<{ batchId: string; qty: number }[]> {
     const batches = await tx.ingredientBatch.findMany({
-      where: { ingredientId, status: 'ACTIVE', quantity: { gt: 0 } },
+      where: { ingredientId, status: 'ACTIVE', quantity: { gt: 0 }, ...(warehouseId ? { warehouseId } : {}) },
       orderBy: [{ expiryDate: { sort: 'asc', nulls: 'last' } }, { receivedDate: 'asc' }],
     });
 

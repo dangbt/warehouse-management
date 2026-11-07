@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
+import { WarehouseStockService } from '../common/warehouse-stock.service';
 import { assertValidItems, buildOrderLines, sumLines } from './import-order-lines';
 import type { CreateImportOrderInput } from './import-orders.service';
 
@@ -76,6 +77,7 @@ export class ImportOrdersBulkService {
     private prisma: PrismaService,
     private vouchers: VoucherService,
     private periodLock: PeriodLockService,
+    private stock: WarehouseStockService = new WarehouseStockService(prisma),
   ) {}
 
   /** Tạo nhiều phiếu PENDING trong 1 transaction: một phiếu lỗi ⇒ không phiếu nào được tạo. */
@@ -85,6 +87,8 @@ export class ImportOrdersBulkService {
     // Khoá sổ kỳ kho (WMS-7): chặn cả phiếu nhập hàng loạt có ngày CT trong kỳ đã khoá.
     for (const o of body.orders) await this.periodLock.assertOpen(parseVoucherDate(o.voucher_date));
     const voucherNos = await this.resolveVoucherNos(body);
+    const warehouseIds = new Map<string, string>();
+    for (const key of new Set(body.orders.map((o) => o.warehouse_id ?? ''))) warehouseIds.set(key, await this.stock.resolveId(key || null));
 
     const prepared = body.orders.map((o, idx) => {
       const hasInvoice = o.has_invoice ?? false;
@@ -108,6 +112,7 @@ export class ImportOrdersBulkService {
               voucherNo: p.voucherNo,
               voucherDate: parseVoucherDate(p.o.voucher_date),
               supplierId: p.o.supplier_id,
+              warehouseId: warehouseIds.get(p.o.warehouse_id ?? '')!,
               hasInvoice: p.hasInvoice,
               invoiceNo: p.hasInvoice ? p.o.invoice_no!.trim() : null,
               invoiceSymbol: p.hasInvoice ? p.o.invoice_symbol?.trim() || null : null,

@@ -28,6 +28,7 @@ export class IngredientsController {
   findAll(
     @Query()
     query: {
+      warehouse_id?: string;
       page?: string;
       limit?: string;
       category?: string;
