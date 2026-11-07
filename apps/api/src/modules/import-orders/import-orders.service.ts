@@ -3,7 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { TaxService } from '../tax/tax.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
-import { VAT_RATES, VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
+import { buildLines, parseInvoice } from './import-order-builder';
+import { VatRate, computeUnitCost, TaxRegime, roundVnd, computeLineVat } from '../tax/vat';
 
 // Re-export để giữ tương thích với các import cũ từ module này (vd spec).
 export { roundVnd, computeLineVat };
@@ -86,81 +87,16 @@ export class ImportOrdersService {
   async create(userId: string, body: CreateImportOrderInput) {
     if (!body.supplier_id || !body.items?.length) throw new BadRequestException('Thiếu nhà cung cấp hoặc danh sách hàng');
 
-    const hasInvoice = body.has_invoice ?? false;
-    let invoiceNo: string | null = null;
-    let invoiceSymbol: string | null = null;
-    let invoiceDate: Date | null = null;
-
-    if (hasInvoice) {
-      if (!body.invoice_no?.trim()) throw new BadRequestException('Thiếu số hoá đơn');
-      if (!body.invoice_date) throw new BadRequestException('Thiếu ngày hoá đơn');
-      invoiceNo = body.invoice_no.trim();
-      invoiceSymbol = body.invoice_symbol?.trim() || null;
-      invoiceDate = new Date(body.invoice_date);
-      if (isNaN(invoiceDate.getTime())) throw new BadRequestException('Ngày hoá đơn không hợp lệ');
-
-      // Chống trùng hoá đơn: cùng NCC + ký hiệu + số HĐ, bỏ qua phiếu đã bị từ chối.
-      const dup = await this.prisma.importOrder.findFirst({
-        where: {
-          supplierId: body.supplier_id,
-          invoiceSymbol,
-          invoiceNo,
-          status: { not: 'REJECTED' },
-        },
-        select: { code: true },
-      });
-      if (dup) throw new BadRequestException(`Hoá đơn đã được nhập ở phiếu ${dup.code}`);
-    }
-
-    for (const item of body.items) {
-      if (!item.ingredient_id || item.quantity <= 0 || item.unit_price < 0) throw new BadRequestException('Dữ liệu item không hợp lệ');
-      if (item.factor != null && item.factor <= 0) throw new BadRequestException('Hệ số quy đổi đơn vị phải > 0');
-      if (hasInvoice) {
-        if (!item.vat_rate || !(VAT_RATES as readonly string[]).includes(item.vat_rate)) {
-          throw new BadRequestException('Thuế suất VAT không hợp lệ');
-        }
-      }
-    }
-
-    // Quy đổi về đơn vị tồn: baseQty = quantity × factor.
-    const lines = body.items.map((i) => {
-      const baseQty = i.quantity * (i.factor ?? 1);
-      const totalPrice = baseQty * i.unit_price;
-      const vatRate: VatRate | null = hasInvoice ? (i.vat_rate as VatRate) : null;
-      return {
-        ingredientId: i.ingredient_id,
-        quantity: baseQty,
-        unitPrice: i.unit_price,
-        totalPrice,
-        vatRate,
-        vatAmount: computeLineVat(totalPrice, vatRate),
-        expiryDate: i.expiry_date ? new Date(i.expiry_date) : null,
-      };
-    });
+    const { hasInvoice, invoiceNo, invoiceSymbol, invoiceDate } = parseInvoice(body);
+    if (hasInvoice) await this.assertInvoiceUnique(body.supplier_id, invoiceSymbol, invoiceNo!);
+    const { lines, subtotal, vatAmount, totalAmount } = buildLines(body, hasInvoice);
 
     const voucherDate = parseVoucherDate(body.voucher_date);
     await this.periodLock.assertOpen(voucherDate);
     const voucherNo = await this.vouchers.resolveNo('IMPORT', body.voucher_no);
     const code = voucherNo;
-    const subtotal = lines.reduce((s, l) => s + l.totalPrice, 0);
-    const vatAmount = lines.reduce((s, l) => s + l.vatAmount, 0);
-    const totalAmount = subtotal + vatAmount;
 
-    // Địa chỉ nơi mua: chỉ áp dụng cho hàng không có hoá đơn.
-    // Ưu tiên giá trị nhập tay; nếu bỏ trống thì mặc định lấy địa chỉ NCC.
-    let purchaseAddress: string | null = null;
-    if (!hasInvoice) {
-      const explicit = body.purchase_address?.trim();
-      if (explicit) {
-        purchaseAddress = explicit;
-      } else {
-        const supplier = await this.prisma.supplier.findUnique({
-          where: { id: body.supplier_id },
-          select: { address: true },
-        });
-        purchaseAddress = supplier?.address?.trim() || null;
-      }
-    }
+    const purchaseAddress = await this.resolvePurchaseAddress(body, hasInvoice);
 
     try {
       return await this.prisma.importOrder.create({
@@ -183,6 +119,78 @@ export class ImportOrdersService {
           items: { create: lines },
         },
         include: { items: true },
+      });
+    } catch (e) {
+      this.vouchers.rethrowUnique(e, voucherNo);
+    }
+  }
+
+  /** Chống trùng hoá đơn: cùng NCC + ký hiệu + số HĐ, bỏ qua phiếu đã từ chối/huỷ (và phiếu đang sửa). */
+  private async assertInvoiceUnique(supplierId: string, invoiceSymbol: string | null, invoiceNo: string, excludeId?: string) {
+    const dup = await this.prisma.importOrder.findFirst({
+      where: {
+        supplierId,
+        invoiceSymbol,
+        invoiceNo,
+        status: { notIn: ['REJECTED', 'CANCELLED'] },
+        ...(excludeId ? { id: { not: excludeId } } : {}),
+      },
+      select: { code: true },
+    });
+    if (dup) throw new BadRequestException(`Hoá đơn đã được nhập ở phiếu ${dup.code}`);
+  }
+
+  /** Địa chỉ nơi mua (chỉ hàng không hoá đơn): ưu tiên nhập tay, bỏ trống thì lấy địa chỉ NCC. */
+  private async resolvePurchaseAddress(body: CreateImportOrderInput, hasInvoice: boolean): Promise<string | null> {
+    if (hasInvoice) return null;
+    const explicit = body.purchase_address?.trim();
+    if (explicit) return explicit;
+    const supplier = await this.prisma.supplier.findUnique({ where: { id: body.supplier_id }, select: { address: true } });
+    return supplier?.address?.trim() || null;
+  }
+
+  /** Sửa toàn bộ phiếu PENDING (header + dòng). Phiếu đã duyệt phải Bỏ ghi trước. */
+  async update(id: string, body: CreateImportOrderInput) {
+    if (!body.supplier_id || !body.items?.length) throw new BadRequestException('Thiếu nhà cung cấp hoặc danh sách hàng');
+    const order = await this.prisma.importOrder.findUnique({ where: { id } });
+    if (!order) throw new NotFoundException('Không tìm thấy phiếu nhập');
+    if (order.status !== 'PENDING') throw new BadRequestException('Chỉ sửa phiếu PENDING (phiếu đã duyệt phải bỏ ghi trước)');
+
+    const { hasInvoice, invoiceNo, invoiceSymbol, invoiceDate } = parseInvoice(body);
+    if (hasInvoice) await this.assertInvoiceUnique(body.supplier_id, invoiceSymbol, invoiceNo!, id);
+    const { lines, subtotal, vatAmount, totalAmount } = buildLines(body, hasInvoice);
+
+    const voucherDate = body.voucher_date ? parseVoucherDate(body.voucher_date) : order.voucherDate;
+    await this.periodLock.assertOpen(order.voucherDate);
+    await this.periodLock.assertOpen(voucherDate);
+    const newNo = body.voucher_no?.trim();
+    const voucherNo = newNo && newNo !== order.voucherNo ? await this.vouchers.resolveNo('IMPORT', newNo) : order.voucherNo;
+    const purchaseAddress = await this.resolvePurchaseAddress(body, hasInvoice);
+
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        await tx.importOrderItem.deleteMany({ where: { importOrderId: id } });
+        return tx.importOrder.update({
+          where: { id },
+          data: {
+            voucherNo,
+            code: voucherNo,
+            voucherDate,
+            supplierId: body.supplier_id,
+            hasInvoice,
+            invoiceNo,
+            invoiceSymbol,
+            invoiceDate,
+            purchaseAddress,
+            subtotal,
+            vatAmount,
+            totalAmount,
+            paid: body.paid ?? false,
+            note: body.note,
+            items: { create: lines },
+          },
+          include: { items: true },
+        });
       });
     } catch (e) {
       this.vouchers.rethrowUnique(e, voucherNo);

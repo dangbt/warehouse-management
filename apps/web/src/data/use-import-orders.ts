@@ -3,6 +3,7 @@ import { api } from '@/services/api'
 import { queryClient } from './query-client'
 import { QUERY_KEYS } from './query-keys'
 import { useToastStore } from '@/stores/toast.store'
+import { describeUnpostError } from '@/utils/api-error-messages'
 
 interface ImportOrder {
   id: string
@@ -130,6 +131,40 @@ export function useRejectImportOrder() {
         old ? { ...old, data: old.data.map((o) => (o.id === id ? { ...o, status: 'REJECTED' } : o)) } : old,
       )
       useToastStore.getState().success('Đã từ chối phiếu nhập')
+    },
+    onError: (e: Error) => {
+      useToastStore.getState().error(e.message)
+    },
+  })
+}
+
+function useOrderMutation(path: (id: string) => string, successMsg: string) {
+  return useMutation({
+    mutationFn: (id: string) => api.put(path(id), {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.importOrders })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ingredients })
+      useToastStore.getState().success(successMsg)
+    },
+    onError: (e: Error) => {
+      useToastStore.getState().error(describeUnpostError(e))
+    },
+  })
+}
+
+/** Bỏ ghi phiếu nhập đã duyệt (đảo tồn/lô/công nợ/VAT) → về Chờ duyệt. */
+export const useUnpostImportOrder = () => useOrderMutation((id) => `/import-orders/${id}/unpost`, 'Đã bỏ ghi phiếu nhập')
+
+/** Huỷ mềm phiếu Chờ duyệt / Từ chối. */
+export const useCancelImportOrder = () => useOrderMutation((id) => `/import-orders/${id}/cancel`, 'Đã huỷ phiếu nhập')
+
+/** Sửa toàn bộ phiếu Chờ duyệt (header + dòng). */
+export function useUpdateImportOrder() {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => api.put(`/import-orders/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.importOrders })
+      useToastStore.getState().success('Đã cập nhật phiếu nhập')
     },
     onError: (e: Error) => {
       useToastStore.getState().error(e.message)

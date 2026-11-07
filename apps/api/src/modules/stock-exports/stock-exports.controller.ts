@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Param, UseGuards, Req, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, Req, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PermissionsGuard, RequirePermissions } from '../../auth/permissions.guard';
@@ -6,6 +6,7 @@ import { BatchDeductionService } from '../common/batch-deduction.service';
 import { CostingService } from '../costing/costing.service';
 import { VoucherService, parseVoucherDate } from '../common/voucher.service';
 import { PeriodLockService } from '../common/period-lock.service';
+import { StockExportCancelService } from './stock-export-cancel.service';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('stock-exports')
@@ -16,6 +17,7 @@ export class StockExportsController {
     private vouchers: VoucherService,
     private costing: CostingService,
     private periodLock: PeriodLockService,
+    private canceller: StockExportCancelService,
   ) {}
 
   @Get()
@@ -35,7 +37,7 @@ export class StockExportsController {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { [sortField]: sortDir },
-        include: { ingredient: true, createdBy: true, export: { select: { id: true, voucherNo: true, voucherDate: true } } },
+        include: { ingredient: true, createdBy: true, export: { select: { id: true, voucherNo: true, voucherDate: true, status: true } } },
       }),
       this.prisma.stockTransaction.count({ where }),
     ]);
@@ -137,5 +139,11 @@ export class StockExportsController {
       })
       .catch((e) => this.vouchers.rethrowUnique(e, voucherNo));
     return { message: 'Xuất kho thành công', voucher_no: voucherNo };
+  }
+
+  @Put(':id/cancel')
+  @RequirePermissions('stock_exports:create')
+  cancel(@Param('id') id: string) {
+    return this.canceller.cancel(id);
   }
 }
