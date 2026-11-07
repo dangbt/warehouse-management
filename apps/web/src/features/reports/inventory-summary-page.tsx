@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { WinToolbar } from '@wms/ui-winforms'
 import { useIngredientGroups, useInventorySummary } from '@/data'
+import { useProductAttributes, useProducts } from '@/data/use-products'
+import { useFeatures } from '@/data/use-features'
 import { exportSheet } from '@/utils/excel'
 import { useNavigate } from '@tanstack/react-router'
 import { InventorySummaryTable } from './inventory-summary-table'
@@ -15,7 +17,18 @@ export function InventorySummaryPage() {
   const { range, valid } = period
   const [groupId, setGroupId] = useState('')
   const { data: groups } = useIngredientGroups()
-  const { data, isLoading, refetch } = useInventorySummary({ ...range, groupId: groupId || undefined })
+  const variants = useFeatures().isEnabled('product_variants')
+  const [byProduct, setByProduct] = useState(false)
+  const [category, setCategory] = useState('')
+  const [attrValueId, setAttrValueId] = useState('')
+  const { data: products } = useProducts({ limit: 500 }, variants)
+  const { data: attributes } = useProductAttributes(variants)
+  const categories = [...new Set((products?.data ?? []).map((p) => p.category).filter((c): c is string => !!c))].sort()
+  const { data, isLoading, refetch } = useInventorySummary({
+    ...range,
+    groupId: groupId || undefined,
+    ...(variants ? { groupBy: byProduct ? 'product' : undefined, category: category || undefined, attributeValueId: attrValueId || undefined } : {}),
+  })
 
   const periodLabel = `Từ ngày ${fmtDisplay(range.from)} đến ngày ${fmtDisplay(range.to)}`
 
@@ -41,6 +54,25 @@ export function InventorySummaryPage() {
           <option value="">Tất cả nhóm</option>
           {groups?.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
         </select>
+        {variants && (
+          <>
+            <select className="text-win-base" value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="">Tất cả danh mục</option>
+              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select className="text-win-base" value={attrValueId} onChange={(e) => setAttrValueId(e.target.value)}>
+              <option value="">Mọi thuộc tính</option>
+              {attributes?.map((a) => (
+                <optgroup key={a.id} label={a.name}>
+                  {a.values.map((v) => <option key={v.id} value={v.id}>{v.value}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <label className="inline-flex items-center gap-1 text-win-base">
+              <input type="checkbox" checked={byProduct} onChange={(e) => setByProduct(e.target.checked)} /> Gộp theo sản phẩm
+            </label>
+          </>
+        )}
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<RefreshCw size={14} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={14} />} label="Xuất Excel" disabled={!data || !valid} onClick={handleExport} />

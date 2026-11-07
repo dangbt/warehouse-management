@@ -14,6 +14,8 @@ interface Ingredient {
   costPerUnit: string
   category: string
   createdAt: string
+  sku?: string | null
+  barcode?: string | null
 }
 
 interface ListResponse {
@@ -41,6 +43,8 @@ type BtpFields = {
   source_ingredient_id?: string | null
   yield_ratio?: number | null
   loss_ratio?: number | null
+  sku?: string | null
+  barcode?: string | null
 }
 
 export function useCreateIngredient() {

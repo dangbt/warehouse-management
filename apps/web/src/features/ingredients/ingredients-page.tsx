@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useListHotkeys } from '@/hooks/use-list-hotkeys'
-import { BookOpen, Check, Download, Package, Pencil, Plus, RefreshCw, Trash2, TriangleAlert } from 'lucide-react'
+import { BookOpen, Barcode, Check, Download, Package, Pencil, Plus, RefreshCw, Trash2, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
 import { IngredientForm } from './ingredient-form'
@@ -10,6 +10,7 @@ import type { TermKey } from '@/utils/terms'
 import type { Batch } from '@/data/use-batches'
 import { formatDate, formatCurrency, formatNumber } from '@wms/shared'
 import { useTerm, useFeatures } from '@/data/use-features'
+import { openPrint } from '@/components/print/print-utils'
 
 interface IngredientRow {
   id: string
@@ -21,6 +22,7 @@ interface IngredientRow {
   category: string
   trackStock: boolean
   sku?: string | null
+  barcode?: string | null
   product?: { id: string; code: string; name: string } | null
 }
 
@@ -90,6 +92,8 @@ export function IngredientsPage() {
     source_ingredient_id?: string | null
     yield_ratio?: number | null
     loss_ratio?: number | null
+    sku?: string | null
+    barcode?: string | null
   }) => {
     if (formMode === 'add') {
       await createMutation.mutateAsync(formData)
@@ -146,6 +150,7 @@ export function IngredientsPage() {
           disabled={!selected}
           onClick={() => selected && navigate({ to: '/stock-card', search: { ingredientId: selected.id, mode: 'qty' } })}
         />
+        <WinToolbar.Button icon={<Barcode size={16} />} label="In tem" disabled={!selected} onClick={() => selected && openPrint('labels', selected.id)} />
         <WinToolbar.Button icon={<RefreshCw size={16} />} label="Refresh" onClick={() => refetch()} />
         <WinToolbar.Button icon={<Download size={16} />} label="Export" />
         <WinToolbar.Separator />

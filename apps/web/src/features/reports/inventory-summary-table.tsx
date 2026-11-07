@@ -1,4 +1,6 @@
-import type { InventorySummaryReport, InventoryTotals, QtyValue } from '@/data'
+import type { InventorySummaryReport, InventorySummaryRow, InventoryTotals, QtyValue } from '@/data'
+import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { formatNumber } from '@wms/shared'
 
 const HEADS = ['Tồn đầu kỳ', 'Nhập trong kỳ', 'Xuất trong kỳ', 'Tồn cuối kỳ'] as const
@@ -28,6 +30,30 @@ function Cells({ t, bold }: { t: InventoryTotals; bold?: boolean }) {
   )
 }
 
+function ProductRow({ r }: { r: InventorySummaryRow }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <tr className="border-b border-win-border/40 cursor-pointer hover:bg-win-surface font-semibold" onClick={() => setOpen((o) => !o)}>
+        <td className="px-2 py-0.5">{r.code}</td>
+        <td className="px-2 py-0.5">
+          <span className="inline-flex items-center gap-1">{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}{r.name} ({r.variants?.length} biến thể)</span>
+        </td>
+        <td className="px-2 py-0.5 text-center">{r.unit}</td>
+        <Cells t={r} />
+      </tr>
+      {open && r.variants?.map((v) => (
+        <tr key={v.ingredientId} className="border-b border-win-border/40 text-win-text-secondary">
+          <td className="px-2 py-0.5 pl-6">{v.code}</td>
+          <td className="px-2 py-0.5 pl-6">{v.variantLabel ?? v.name}</td>
+          <td className="px-2 py-0.5 text-center">{v.unit}</td>
+          <Cells t={v} />
+        </tr>
+      ))}
+    </>
+  )
+}
+
 export function InventorySummaryTable({ report, onRowOpen }: { report: InventorySummaryReport; onRowOpen?: (ingredientId: string) => void }) {
   return (
     <table className="text-win-base border-collapse w-full min-w-[1100px]">
@@ -53,7 +79,7 @@ export function InventorySummaryTable({ report, onRowOpen }: { report: Inventory
             <tr key={`h-${g.groupId}`} className="bg-win-surface font-semibold">
               <td colSpan={11} className="px-2 py-0.5">{g.groupName}</td>
             </tr>
-            {g.rows.map((r) => (
+            {g.rows.map((r) => r.variants ? <ProductRow key={r.ingredientId} r={r} /> : (
               <tr
                 key={r.ingredientId}
                 className="border-b border-win-border/40 cursor-pointer hover:bg-win-surface"

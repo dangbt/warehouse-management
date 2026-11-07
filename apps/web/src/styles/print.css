@@ -39,3 +39,14 @@
 .print-debit-credit { display: inline-flex; gap: 24px; }
 .print-table-dense { font-size: 10px; }
 .print-table-dense th, .print-table-dense td { padding: 1px 2px; }
+
+/* Tem mã vạch (feature ingredients/print/label-*) */
+.label-page { background: #fff; margin: 8px auto; break-after: page; page-break-after: always; box-sizing: border-box; }
+.label-page:last-child { break-after: auto; page-break-after: auto; }
+.label-page-decal { width: 40mm; height: 30mm; }
+.label-page-a4 { width: 210mm; display: grid; grid-template-columns: repeat(3, 70mm); grid-auto-rows: 37mm; }
+.label-cell { box-sizing: border-box; padding: 1.5mm 2mm; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; font-family: sans-serif; color: #000; }
+.label-name { font-size: 8pt; font-weight: bold; line-height: 1.1; max-height: 2.3em; overflow: hidden; }
+.label-bars { width: 100%; flex: 1; min-height: 0; margin: 1mm 0; }
+.label-foot { display: flex; justify-content: space-between; font-size: 7pt; font-family: monospace; }
+@media print { .label-page { margin: 0; } }

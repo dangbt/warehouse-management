@@ -99,7 +99,7 @@ export const attributeApi = {
   removeValue: (id: string) => api.delete(`/product-attributes/values/${id}`),
 }
 
-export function useProducts(params: { page?: number; search?: string; limit?: number }) {
+export function useProducts(params: { page?: number; search?: string; limit?: number }, enabled = true) {
   const q = new URLSearchParams()
   if (params.page) q.set('page', String(params.page))
   if (params.limit) q.set('limit', String(params.limit))
@@ -107,6 +107,7 @@ export function useProducts(params: { page?: number; search?: string; limit?: nu
   return useQuery<{ data: ProductRow[]; meta: { page: number; limit: number; total: number } }>({
     queryKey: [...PRODUCTS_KEY, 'list', q.toString()],
     queryFn: () => api.get(`/products?${q}`),
+    enabled,
   })
 }
 
