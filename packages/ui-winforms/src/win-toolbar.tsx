@@ -7,12 +7,15 @@ interface ToolbarButtonProps {
   disabled?: boolean
   danger?: boolean
   active?: boolean
+  /** Phím tắt hiển thị trong tooltip, vd 'F2'. */
+  shortcut?: string
 }
 
-function Button({ icon, label, onClick, disabled, danger, active }: ToolbarButtonProps) {
+function Button({ icon, label, onClick, disabled, danger, active, shortcut }: ToolbarButtonProps) {
   return (
     <button
       onClick={onClick}
+      title={shortcut && label ? `${label} (${shortcut})` : undefined}
       disabled={disabled}
       data-testid={label ? `toolbar-${label}` : undefined}
       className={`flex items-center gap-1 h-8 px-2.5 border text-win-base cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${active ? 'bg-win-active-title text-white border-win-active-title' : danger ? 'border-transparent text-win-error hover:bg-red-50 hover:border-win-error/40' : 'border-transparent hover:bg-win-menu-hover hover:border-win-button-border'}`}

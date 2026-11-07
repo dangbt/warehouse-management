@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useEffect, useState } from 'react'
+import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
 import { WinDialog, WinGroupBox, WinInput } from '@wms/ui-winforms'
 import type { Supplier } from '@/types'
 
@@ -42,10 +43,12 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
   const isIndividual = watch('is_individual')
+
+  const [resetKey, setResetKey] = useState(0)
 
   useEffect(() => {
     if (open) {
@@ -64,36 +67,45 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
           : { name: '', phone: '', address: '', tax_code: '', note: '', is_individual: false, id_number: '' },
       )
     }
-  }, [open, mode, data, reset])
+  }, [open, mode, data, reset, resetKey])
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: FormData, keepOpen = false) => {
     try {
       setSubmitError('')
       await onSave?.(formData)
-      onClose()
+      if (keepOpen) setResetKey((k) => k + 1)
+      else onClose()
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : 'Lỗi lưu NCC')
     }
   }
+
+  const { requestClose, guard } = useFormHotkeys({
+    open,
+    isDirty,
+    onClose,
+    onSave: () => void handleSubmit((d) => onSubmit(d))(),
+    onSaveNew: mode === 'add' ? () => void handleSubmit((d) => onSubmit(d, true))()  : undefined,
+  })
 
   return (
     <WinDialog
       title={mode === 'add' ? 'Thêm Nhà Cung Cấp' : 'Sửa Nhà Cung Cấp'}
       icon={mode === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <Pencil size={16} strokeWidth={1.75} />}
       open={open}
-      onClose={onClose}
+      onClose={requestClose}
       width={440}
       footer={
         <>
           <button
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => void handleSubmit((d) => onSubmit(d))()}
             disabled={isSubmitting}
             className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Đang lưu...' : 'OK'}
           </button>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
           >
             Cancel
@@ -123,6 +135,7 @@ export function SupplierForm({ open, mode, data, onClose, onSave }: Props) {
           )}
         </div>
       </WinGroupBox>
+      {guard}
     </WinDialog>
   )
 }

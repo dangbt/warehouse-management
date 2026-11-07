@@ -5,6 +5,7 @@ import { WinTreeView, WinStatusBar } from '@wms/ui-winforms'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
 import { SupportWidget } from '@/components/support-widget'
+import { ShortcutHelp } from '@/components/shortcut-help'
 import { useHealth } from '@/data/use-health'
 import { useTaxSettings } from '@/data'
 import { now } from '@wms/shared'
@@ -392,6 +393,7 @@ export function AppLayout() {
         <WinStatusBar.Section>v{__APP_VERSION__}</WinStatusBar.Section>
         <div className="flex-1" />
         <SupportWidget />
+        <ShortcutHelp />
       </WinStatusBar>
     </div>
   )

@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { VoucherFields } from '@/components/voucher-fields'
 import { useVoucherFields } from '@/data/use-vouchers'
 import type { VoucherPayload } from '@/data/use-vouchers'
+import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
 import { WinDialog, WinGroupBox, WinInput, WinSearchSelect } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 
@@ -42,7 +43,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
     handleSubmit,
     reset,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({ resolver: zodResolver(schema) })
   const [submitError, setSubmitError] = useState('')
 
@@ -77,6 +78,8 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
       .finally(() => setOutputLoading(false))
   }, [])
 
+  const [resetKey, setResetKey] = useState(0)
+
   useEffect(() => {
     if (open) {
       setSubmitError('')
@@ -84,7 +87,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
       fetchSource('')
       fetchOutput('')
     }
-  }, [open, reset, fetchSource, fetchOutput])
+  }, [open, resetKey, reset, fetchSource, fetchOutput])
 
   const voucher = useVoucherFields('PROCESSING', open)
   const outputId = watch('output_ingredient_id')
@@ -93,34 +96,43 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
   const yieldRatio = output?.yieldRatio != null ? Number(output.yieldRatio) : null
   const suggested = yieldRatio != null && sourceQty ? +(Number(sourceQty) * yieldRatio).toFixed(3) : null
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: FormData, keepOpen = false) => {
     try {
       setSubmitError('')
       await onSave?.({ ...formData, ...voucher.payload() })
-      onClose()
+      if (keepOpen) setResetKey((k) => k + 1)
+      else onClose()
     } catch (e: unknown) {
       setSubmitError(e instanceof Error ? e.message : 'Lỗi tạo phiếu chế biến')
     }
   }
+
+  const { requestClose, guard } = useFormHotkeys({
+    open,
+    isDirty,
+    onClose,
+    onSave: () => void handleSubmit((d) => onSubmit(d))(),
+    onSaveNew: () => void handleSubmit((d) => onSubmit(d, true))(),
+  })
 
   return (
     <WinDialog
       title="Tạo Phiếu Chế Biến"
       icon={<ChefHat size={16} strokeWidth={1.75} />}
       open={open}
-      onClose={onClose}
+      onClose={requestClose}
       width={440}
       footer={
         <>
           <button
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => void handleSubmit((d) => onSubmit(d))()}
             disabled={isSubmitting}
             className="px-4 py-1 text-xs bg-win-active-title text-white border border-win-active-title min-w-[75px] cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? 'Đang lưu...' : 'Lưu'}
           </button>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="px-4 py-1 text-xs bg-win-button border border-win-button-border min-w-[75px] cursor-pointer hover:bg-win-button-hover"
           >
             Huỷ
@@ -188,6 +200,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
           )}
         </div>
       </WinGroupBox>
+      {guard}
     </WinDialog>
   )
 }

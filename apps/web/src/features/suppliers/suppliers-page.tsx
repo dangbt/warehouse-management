@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useListHotkeys } from '@/hooks/use-list-hotkeys'
 import { Banknote, Pencil, Plus, RefreshCw, Trash2, Wallet } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinMessageBox, WinDialog, WinGroupBox } from '@wms/ui-winforms'
 import type { Column } from '@wms/ui-winforms'
@@ -78,28 +79,40 @@ export function SuppliersPage() {
     setPayNote('')
   }
 
+  const openAdd = () => {
+    setFormMode('add')
+    setSelected(null)
+    setFormOpen(true)
+  }
+  const openEdit = () => {
+    if (!selected) return
+    setFormMode('edit')
+    setFormOpen(true)
+  }
+  useListHotkeys({
+    onAdd: openAdd,
+    onEdit: openEdit,
+    onDelete: selected ? () => setConfirmDelete(true) : undefined,
+    enabled: !formOpen && !confirmDelete && !paymentOpen,
+  })
+
   return (
     <div className="flex flex-col h-full">
       <WinToolbar>
         <WinToolbar.Button
           icon={<Plus size={16} />}
           label="Thêm"
-          onClick={() => {
-            setFormMode('add')
-            setSelected(null)
-            setFormOpen(true)
-          }}
+          shortcut="F2"
+          onClick={openAdd}
         />
         <WinToolbar.Button
           icon={<Pencil size={16} />}
           label="Sửa"
+          shortcut="F4"
           disabled={!selected}
-          onClick={() => {
-            setFormMode('edit')
-            setFormOpen(true)
-          }}
+          onClick={openEdit}
         />
-        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
+        <WinToolbar.Button icon={<Trash2 size={16} />} label="Xoá" shortcut="Delete" danger disabled={!selected} onClick={() => setConfirmDelete(true)} />
         <WinToolbar.Separator />
         <WinToolbar.Button icon={<Banknote size={16} />} label="Thanh toán" disabled={!selected} onClick={() => setPaymentOpen(true)} />
         <WinToolbar.Separator />
