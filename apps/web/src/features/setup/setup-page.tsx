@@ -111,7 +111,9 @@ export function SetupPage() {
           </button>
         </div>
       </form>
-      <PoweredBy />
+      <div className="mt-2">
+        <PoweredBy />
+      </div>
     </div>
   )
 }

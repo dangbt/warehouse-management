@@ -96,7 +96,9 @@ export function LoginPage() {
           </button>
         </div>
       </form>
-      <PoweredBy />
+      <div className="mt-2">
+        <PoweredBy />
+      </div>
     </div>
   )
 }

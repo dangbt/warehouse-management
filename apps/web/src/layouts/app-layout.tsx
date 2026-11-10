@@ -451,7 +451,6 @@ export function AppLayout() {
         <WinStatusBar.Section>User: {user?.full_name ?? '-'}</WinStatusBar.Section>
         <WinStatusBar.Section>Role: {user?.roles?.[0] ?? '-'}</WinStatusBar.Section>
         <WinStatusBar.Section>{now()}</WinStatusBar.Section>
-        <WinStatusBar.Section>v{__APP_VERSION__}</WinStatusBar.Section>
         <WinStatusBar.Section><PoweredBy /></WinStatusBar.Section>
         <div className="flex-1" />
         <SupportWidget />

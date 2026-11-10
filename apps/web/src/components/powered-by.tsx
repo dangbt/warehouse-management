@@ -6,7 +6,7 @@ const REPO_URL = 'https://github.com/dangbt/warehouse-management'
  */
 export function PoweredBy() {
   return (
-    <p className="text-[11px] text-gray-400 text-center py-1 select-none" data-testid="powered-by">
+    <p className="text-[11px] text-gray-400 text-center select-none" data-testid="powered-by">
       Powered by{' '}
       <a
         href={REPO_URL}
