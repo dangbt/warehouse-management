@@ -5,7 +5,7 @@
 @source '../../../../packages/ui-winforms/src';
 
 @theme {
-  /* Mâm Vị brand overrides */
+  /* Default brand overrides */
   --color-win-active-title: #d4451a;
   --color-win-menu: #fff9f5;
   --color-win-menu-hover: #fff0e8;

@@ -27,7 +27,7 @@ describe('LoginPage', () => {
 
   it('renders login form', () => {
     render(<LoginPage />)
-    expect(screen.getByAltText('Mâm Vị')).toBeInTheDocument()
+    expect(screen.getByAltText('Kho Việt')).toBeInTheDocument()
     expect(screen.getByText('Đăng Nhập')).toBeInTheDocument()
   })
 

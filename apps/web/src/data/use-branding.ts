@@ -10,8 +10,8 @@ export interface Branding {
   primaryColor: string | null
 }
 
-/** Mặc định = Mâm Vị: hiển thị như cũ khi chưa tải xong / API chưa có cấu hình. */
-export const DEFAULT_BRANDING: Branding = { name: 'Mâm Vị', shortName: 'MV', logoUrl: '/logo.svg', primaryColor: null }
+/** Mặc định = Kho Việt: hiển thị khi chưa tải xong / API chưa có cấu hình. */
+export const DEFAULT_BRANDING: Branding = { name: 'Kho Việt', shortName: 'KV', logoUrl: '/logo.svg', primaryColor: null }
 
 export const BRANDING_KEY = ['settings', 'branding'] as const
 

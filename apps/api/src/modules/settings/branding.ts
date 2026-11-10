@@ -1,4 +1,4 @@
-/** Branding hiển thị (tên, logo, màu chủ đạo). Mặc định = Mâm Vị để deploy cũ không đổi. */
+/** Branding hiển thị (tên, logo, màu chủ đạo). Mặc định = Kho Việt (open-source default). */
 export interface Branding {
   name: string;
   shortName: string;
@@ -9,8 +9,8 @@ export interface Branding {
 export const BRANDING_KEY = 'branding';
 
 export const DEFAULT_BRANDING: Branding = {
-  name: 'Mâm Vị',
-  shortName: 'MV',
+  name: 'Kho Việt',
+  shortName: 'KV',
   logoUrl: '/logo.svg',
   primaryColor: null,
 };

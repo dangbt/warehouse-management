@@ -45,7 +45,7 @@ Mỗi khách có **DB riêng + API riêng + web riêng**, cùng một codebase. 
 
 Mở web lần đầu: khi DB **chưa có user nào**, trang đăng nhập tự chuyển sang `/setup`. Điền:
 ngành nghề, tên doanh nghiệp, MST, địa chỉ (dùng cho in chứng từ), chế độ thuế, logo (tuỳ chọn), tài khoản admin.
-Wizard seed nền tảng theo ngành (như mục B nhưng **không** nạp dữ liệu Mâm Vị) rồi tạo admin. Xong là tự khoá:
+Wizard seed nền tảng theo ngành rồi tạo admin. Xong là tự khoá:
 `GET /setup/status` trả `needsSetup: false` và `POST /setup` trả 409.
 
 ### B. Seed bằng CLI
@@ -57,13 +57,13 @@ npm run seed:profile -- --profile=FASHION   # FNB | FASHION | RETAIL
 
 Tạo: vai trò + quyền mặc định (admin, warehouse_staff, accountant; FNB thêm kitchen_staff), kho chính, tiền tố chứng từ
 (PN/PX/KK/TH/KT), danh mục mẫu, cấu hình thuế mặc định, và với FASHION: thuộc tính **Size** (XS–XXL, 28–36) + **Màu** cơ bản.
-FNB còn chạy seed Mâm Vị + recipes (bỏ bằng `--no-data`). **Idempotent** — chạy lại không tạo trùng và không đè cấu hình đã chỉnh.
+**Idempotent** — chạy lại không tạo trùng và không đè cấu hình đã chỉnh.
 Script **không** tạo user: tạo admin qua wizard, hoặc `npx prisma db seed` (chỉ dev: tạo user demo) / SQL.
 
 ## 5. Branding (tên, logo, màu)
 
 Tên/logo hiển thị ở thanh tiêu đề, trang đăng nhập và tab trình duyệt lấy từ `GET /api/v1/settings/branding`
-(lưu trong bảng `app_settings`, key `branding`). Chưa cấu hình → mặc định **Mâm Vị** (deploy cũ không đổi).
+(lưu trong bảng `app_settings`, key `branding`). Chưa cấu hình → mặc định **Kho Việt**.
 
 - Wizard tự đặt tên theo tên doanh nghiệp (+ logo URL nếu nhập).
 - Đổi sau này (cần quyền `settings:update`):

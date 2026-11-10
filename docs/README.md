@@ -1,4 +1,4 @@
-# Mâm Vị - Hệ Thống Quản Lý Kho Nhà Hàng
+# Kho Việt - Hệ Thống Quản Lý Kho Nhà Hàng
 
 Hệ thống quản lý xuất nhập kho nguyên liệu cho nhà hàng, hỗ trợ mô hình **Bán thành phẩm (BTP)** — chế biến nguyên liệu thô thành bán thành phẩm với định mức quy đổi và hao hụt.
 
