@@ -15,6 +15,7 @@ services:
       retries: 10
 
   api:
+    image: ghcr.io/dangbt/kho-viet-api:${KHO_VIET_VERSION:-latest}
     build:
       context: .
       dockerfile: docker/api.Dockerfile
@@ -39,6 +40,7 @@ services:
       start_period: 30s
 
   web:
+    image: ghcr.io/dangbt/kho-viet-web:${KHO_VIET_VERSION:-latest}
     build:
       context: .
       dockerfile: docker/web.Dockerfile

@@ -27,11 +27,12 @@ check_docker() {
 
 usage() {
   cat <<EOF
-Sử dụng: $0 [--profile=FNB|FASHION|RETAIL] [--port=PORT]
+Sử dụng: $0 [--profile=FNB|FASHION|RETAIL] [--port=PORT] [--build]
 
 Tuỳ chọn:
   --profile=PROFILE   Loại hình kinh doanh (mặc định: FNB)
   --port=PORT         Cổng HTTP (mặc định: 8080)
+  --build             Ép tự build image thay vì pull
   --help              Hiện trợ giúp
 EOF
   exit 0
@@ -41,11 +42,13 @@ EOF
 
 PROFILE=""
 PORT=""
+FORCE_BUILD=false
 
 for arg in "$@"; do
   case "$arg" in
     --profile=*) PROFILE="${arg#*=}" ;;
     --port=*)    PORT="${arg#*=}" ;;
+    --build)     FORCE_BUILD=true ;;
     --help)      usage ;;
     *)           die "Tham số không hợp lệ: $arg. Chạy $0 --help để xem hướng dẫn." ;;
   esac
@@ -98,6 +101,20 @@ if [ -n "$PORT" ]; then
   echo "   ✅ HTTP_PORT=${PORT}"
 fi
 
+# Xác định KHO_VIET_VERSION từ git tag hiện tại
+KHO_VIET_VERSION="latest"
+if TAG="$(git describe --tags --exact-match 2>/dev/null)"; then
+  KHO_VIET_VERSION="${TAG#v}"
+fi
+
+# Ghi KHO_VIET_VERSION vào .env
+if grep -q '^KHO_VIET_VERSION=' "$ENV_FILE"; then
+  sed -i "s|^KHO_VIET_VERSION=.*|KHO_VIET_VERSION=${KHO_VIET_VERSION}|" "$ENV_FILE"
+else
+  echo "KHO_VIET_VERSION=${KHO_VIET_VERSION}" >> "$ENV_FILE"
+fi
+echo "   ✅ KHO_VIET_VERSION=${KHO_VIET_VERSION}"
+
 # Đọc port hiện tại từ .env
 CURRENT_PORT=$(grep -E '^HTTP_PORT=' "$ENV_FILE" | cut -d= -f2)
 CURRENT_PORT="${CURRENT_PORT:-8080}"
@@ -105,7 +122,18 @@ CURRENT_PORT="${CURRENT_PORT:-8080}"
 echo ""
 echo "🐳 Khởi động containers..."
 cd "$ROOT_DIR"
-docker compose up -d --build
+
+# Pull image dựng sẵn hoặc fallback build
+if [ "$FORCE_BUILD" = true ]; then
+  echo "   🔨 Chế độ --build: tự build image (5–15 phút)..."
+  docker compose up -d --build
+elif docker compose pull api web 2>/dev/null; then
+  echo "   ✅ Đã tải image dựng sẵn."
+  docker compose up -d --no-build
+else
+  echo "   ⚠️  Không tải được image dựng sẵn, chuyển sang tự build (lâu hơn)..."
+  docker compose up -d --build
+fi
 
 # Chờ health check
 echo ""

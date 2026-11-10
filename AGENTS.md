@@ -79,7 +79,7 @@ Script `scripts/install.sh` tự động:
 - Tạo `.env` từ `.env.example` (nếu chưa có)
 - Sinh ngẫu nhiên `JWT_SECRET`, `POSTGRES_PASSWORD`, `SETUP_TOKEN`
 - Đặt `BUSINESS_PROFILE` và `HTTP_PORT` theo tham số
-- Chạy `docker compose up -d --build`
+- Tải image dựng sẵn từ GHCR; nếu không tải được sẽ tự build (5–15 phút)
 - Chờ health check (tối đa 180 giây)
 
 **Kết quả mong đợi:**

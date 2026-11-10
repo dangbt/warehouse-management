@@ -22,6 +22,7 @@ RUN npm run build -w @wms/api
 
 # ---------- production stage ----------
 FROM node:22-alpine
+LABEL org.opencontainers.image.source=https://github.com/dangbt/warehouse-management
 
 RUN addgroup -S wms && adduser -S wms -G wms
 WORKDIR /app
