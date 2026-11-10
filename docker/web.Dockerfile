@@ -1,5 +1,9 @@
 # ---------- build stage ----------
-FROM node:22-alpine AS build
+# Always build on the host arch — Vite output is static HTML/JS/CSS,
+# no native binaries. This avoids the rolldown arm64-musl binding issue
+# when the lockfile was created on x86_64.
+ARG BUILDPLATFORM
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 
 WORKDIR /app
 
