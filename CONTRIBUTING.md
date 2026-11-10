@@ -5,9 +5,16 @@
 ```bash
 npm install
 
-# Backend (API)
+# Database (có thể dùng Docker hoặc PostgreSQL local)
+docker compose up -d db        # khởi chạy PostgreSQL qua Docker
+
+# Backend (API) — tạo file .env thủ công
 cd apps/api
-cp .env.example .env          # cấu hình DATABASE_URL
+cat > .env << 'EOF'
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/kho_viet?schema=public
+JWT_SECRET=changeme-dev-secret-at-least-32-chars
+CORS_ORIGINS=http://localhost:5173
+EOF
 npx prisma migrate dev
 npx prisma db seed             # tạo dữ liệu demo (chỉ dùng cho dev)
 cd ../..
@@ -15,6 +22,9 @@ cd ../..
 # Chạy toàn bộ (turbo)
 npm run dev
 ```
+
+> **Lưu ý:** `JWT_SECRET` phải ≥ 32 ký tự — API từ chối khởi động nếu ngắn hơn.
+> Nếu dùng PostgreSQL local (không qua Docker), sửa `DATABASE_URL` cho đúng host/port/password.
 
 - API: http://localhost:3000/api/v1
 - Web: http://localhost:5173 (Vite dev server)

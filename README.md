@@ -14,7 +14,7 @@ Mỗi khách hàng sở hữu 1 instance và database riêng biệt (self-host).
 |-----------|:-:|:-:|:-:|
 | Nhập kho + phê duyệt | ✅ | ✅ | ✅ |
 | Xuất kho + kiểm kê | ✅ | ✅ | ✅ |
-| Lô hàng & hạn sử dụng | ✅ | ✅ | ✅ |
+| Lô hàng & hạn sử dụng | ✅ | tuỳ chọn | ✅ |
 | Mua hàng (PR → PO → nhập) | ✅ | ✅ | ✅ |
 | Trả hàng NCC + công nợ | ✅ | ✅ | ✅ |
 | Hoá đơn điện tử (e-invoice XML) | ✅ | ✅ | ✅ |
@@ -22,7 +22,11 @@ Mỗi khách hàng sở hữu 1 instance và database riêng biệt (self-host).
 | Chế biến (NL thô → BTP) | ✅ | — | — |
 | Đồng bộ KiotViet (POS) | ✅ | ✅ | ✅ |
 | Biến thể sản phẩm (Size, Màu) | — | ✅ | tuỳ chọn |
+| Khách trả hàng | — | ✅ | ✅ |
+| Bắt buộc mã vạch | — | ✅ | ✅ |
 | Phân quyền RBAC + Audit log | ✅ | ✅ | ✅ |
+
+Bật/tắt từng tính năng ở menu Hệ thống → Ngành nghề.
 
 ## Yêu cầu hệ thống
 

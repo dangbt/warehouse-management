@@ -93,7 +93,7 @@ Script `scripts/install.sh` tự động:
 
 ### Bước 5 — Kiểm chứng & hướng dẫn wizard
 
-Kiểm tra health:
+Kiểm tra health (chạy trên server):
 
 ```bash
 curl -s http://localhost:<CỔNG>/api/v1/health
@@ -109,9 +109,9 @@ curl -s http://localhost:<CỔNG>/api/v1/setup/status
 
 **Kết quả mong đợi:** `{"needsSetup":true,"requiresToken":true}`
 
-Đưa người dùng:
-- **URL:** `http://localhost:<CỔNG>` (hoặc `http://<tên-miền>:<CỔNG>` nếu VPS)
-- **SETUP_TOKEN:** lấy từ output bước 4, hoặc đọc từ `.env`: `grep SETUP_TOKEN .env`
+**Nếu chạy trên localhost:** Đưa người dùng URL `http://localhost:<CỔNG>` và SETUP_TOKEN (lấy từ output bước 4, hoặc `grep SETUP_TOKEN .env`).
+
+**Nếu chạy trên VPS:** ⚠️ KHÔNG đưa người dùng mở wizard qua HTTP công khai — SETUP_TOKEN và mật khẩu admin sẽ bị gửi dạng plaintext. Thiết lập HTTPS trước (xem [Tên miền & HTTPS (VPS)](#tên-miền--https-vps) bên dưới), rồi mới đưa URL HTTPS để người dùng hoàn tất wizard.
 
 Hướng dẫn người dùng mở trình duyệt, hoàn tất wizard:
 - Nhập SETUP_TOKEN
@@ -140,6 +140,91 @@ crontab -e
 ```
 
 Thay `/đường/dẫn/đến/warehouse-management` bằng đường dẫn thực tế trên máy người dùng.
+
+---
+
+## Tên miền & HTTPS (VPS)
+
+Trên VPS, **bắt buộc thiết lập HTTPS** trước khi cho người dùng mở wizard hoặc đăng nhập — SETUP_TOKEN và mật khẩu
+gửi qua HTTP trần sẽ bị lộ.
+
+Có 2 cách:
+
+### Cách A — Caddy (reverse proxy, tự cấp Let's Encrypt)
+
+**Yêu cầu:** DNS A record trỏ tên miền về IP của VPS, mở cổng 80 và 443 trên firewall.
+
+1. Cài Caddy theo hướng dẫn chính thức: https://caddyserver.com/docs/install
+
+2. Tạo file `/etc/caddy/Caddyfile`:
+
+```
+kho.example.com {
+    reverse_proxy localhost:<HTTP_PORT>
+}
+```
+
+Thay `kho.example.com` bằng tên miền thực và `<HTTP_PORT>` bằng cổng đã chọn (mặc định `8080`).
+
+3. Khởi động Caddy:
+
+```bash
+sudo systemctl enable --now caddy
+```
+
+**Kết quả mong đợi:** Caddy tự xin chứng chỉ Let's Encrypt. Truy cập `https://kho.example.com` → thấy trang Kho Việt.
+
+**Nếu lỗi:** `sudo journalctl -u caddy` để xem log. Nguyên nhân phổ biến: DNS chưa trỏ đúng, cổng 80/443 bị chặn.
+
+### Cách B — Cloudflare Tunnel
+
+Không cần mở cổng 80/443, không cần DNS A record thủ công (Cloudflare quản lý).
+
+**Thử nhanh (tunnel tạm thời):**
+
+```bash
+cloudflared tunnel --url http://localhost:<HTTP_PORT>
+```
+
+**Kết quả mong đợi:** Terminal hiện URL dạng `https://xxx-yyy-zzz.trycloudflare.com`. Truy cập URL đó → thấy trang Kho Việt.
+
+**Dùng lâu dài (tunnel có tên):**
+
+1. Cài cloudflared: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
+
+2. Đăng nhập và tạo tunnel:
+
+```bash
+cloudflared tunnel login
+cloudflared tunnel create kho-viet
+cloudflared tunnel route dns kho-viet kho.example.com
+```
+
+3. Tạo file `~/.cloudflared/config.yml`:
+
+```yaml
+tunnel: kho-viet
+credentials-file: ~/.cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  - hostname: kho.example.com
+    service: http://localhost:<HTTP_PORT>
+  - service: http_status:404
+```
+
+4. Chạy tunnel:
+
+```bash
+cloudflared tunnel run kho-viet
+```
+
+**Kết quả mong đợi:** Truy cập `https://kho.example.com` → thấy trang Kho Việt.
+
+Để chạy nền (systemd): `sudo cloudflared service install && sudo systemctl enable --now cloudflared`.
+
+---
+
+Sau khi HTTPS hoạt động, quay lại Bước 5: đưa người dùng URL `https://<tên-miền>` và SETUP_TOKEN để hoàn tất wizard.
 
 ---
 
