@@ -5,8 +5,12 @@
 ```bash
 npm install
 
-# Database (có thể dùng Docker hoặc PostgreSQL local)
-docker compose up -d db        # khởi chạy PostgreSQL qua Docker
+# Database (PostgreSQL qua Docker)
+docker run -d --name kho-viet-dev-db \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=kho_viet \
+  -p 5432:5432 \
+  postgres:16-alpine
 
 # Backend (API) — tạo file .env thủ công
 cd apps/api
