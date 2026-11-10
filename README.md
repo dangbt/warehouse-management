@@ -103,7 +103,7 @@ Kho Việt hỗ trợ đầy đủ nghiệp vụ kho cho nhà hàng/F&B: quản 
 
 ### Có dùng cho shop thời trang / cửa hàng bán lẻ được không?
 
-Có. Hồ sơ ngành Thời trang (FASHION) bật sẵn biến thể sản phẩm theo size/màu, bắt buộc mã vạch, và xử lý khách trả hàng. Hồ sơ Bán lẻ (RETAIL) tương tự nhưng thêm theo dõi hạn sử dụng. Bạn có thể bật/tắt từng tính năng riêng trong menu Hệ thống → Ngành nghề.
+Có. Hồ sơ ngành Thời trang (FASHION) bật sẵn biến thể sản phẩm theo size/màu, bắt buộc mã vạch, và xử lý khách trả hàng. Hồ sơ Bán lẻ (RETAIL) bật sẵn mã vạch bắt buộc, khách trả hàng, và theo dõi hạn sử dụng; biến thể size/màu là tuỳ chọn (bật ở Hệ thống → Ngành nghề).
 
 ### Có thay thế được KiotViet / Sapo / MISA không?
 
@@ -115,7 +115,7 @@ Có. Bạn chỉ cần máy tính có Docker. Dán câu "Hãy cài Kho Việt t�
 
 ### Dữ liệu lưu ở đâu, có an toàn không?
 
-Toàn bộ dữ liệu lưu trên máy chủ hoặc VPS của bạn, trong database PostgreSQL riêng biệt — không gửi lên cloud hay bên thứ ba nào. Kho Việt có sẵn script `backup.sh` để sao lưu database, và bạn nên đặt lịch backup tự động bằng crontab để tránh mất dữ liệu.
+Toàn bộ dữ liệu lưu trên máy chủ hoặc VPS của bạn, trong database PostgreSQL riêng biệt — Kho Việt không tự gửi dữ liệu đi đâu, trừ khi bạn tự bật tích hợp KiotViet (đồng bộ đơn hàng) hoặc Telegram hỗ trợ. Kho Việt có sẵn script `backup.sh` để sao lưu database, và bạn nên đặt lịch backup tự động bằng crontab để tránh mất dữ liệu.
 
 ### Cài trên máy tính cá nhân hay cần server?
 
