@@ -141,7 +141,7 @@ if [ "$HEALTHY" = true ]; then
   echo "📋 Bước tiếp theo:"
   echo "   1. Mở trình duyệt → http://localhost:${CURRENT_PORT}"
   echo "   2. Dùng SETUP_TOKEN ở trên để tạo tài khoản admin"
-  echo "   3. Cấu hình HTTPS bằng Caddy hoặc Cloudflare Tunnel (TASK sau)"
+  echo "   3. (Tuỳ chọn) Dùng tên miền + HTTPS: xem AGENTS.md"
   echo ""
   echo "📦 Backup:  ./scripts/backup.sh"
   echo "🔄 Update:  ./scripts/update.sh"

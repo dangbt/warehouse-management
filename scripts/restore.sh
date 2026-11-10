@@ -37,6 +37,45 @@ if [ "$CONFIRM" != "yes" ]; then
   exit 1
 fi
 
+# Đảm bảo api luôn được start lại dù có lỗi
+restart_api() {
+  echo "🔄 Khởi động lại api..."
+  docker compose start api || true
+
+  # Đọc port từ .env
+  ENV_FILE="$ROOT_DIR/.env"
+  CURRENT_PORT=$(grep -E '^HTTP_PORT=' "$ENV_FILE" 2>/dev/null | cut -d= -f2)
+  CURRENT_PORT="${CURRENT_PORT:-8080}"
+
+  echo "⏳ Chờ api sẵn sàng (tối đa 180s)..."
+  SECONDS_WAITED=0
+  MAX_WAIT=180
+  HEALTHY=false
+
+  while [ "$SECONDS_WAITED" -lt "$MAX_WAIT" ]; do
+    if curl -fsS "http://localhost:${CURRENT_PORT}/api/v1/health" >/dev/null 2>&1; then
+      HEALTHY=true
+      break
+    fi
+    sleep 5
+    SECONDS_WAITED=$((SECONDS_WAITED + 5))
+    printf "   %ds...\r" "$SECONDS_WAITED"
+  done
+
+  echo ""
+
+  if [ "$HEALTHY" = true ]; then
+    echo "✅ API sẵn sàng."
+  else
+    echo "⚠️  API chưa sẵn sàng sau ${MAX_WAIT}s. Kiểm tra: docker compose logs api" >&2
+  fi
+}
+
+trap restart_api EXIT
+
+echo "🛑 Dừng api để giải phóng kết nối database..."
+docker compose stop api
+
 echo "🔄 Đang restore database..."
 
 # Drop và tạo lại database
@@ -48,5 +87,4 @@ gunzip -c "$BACKUP_FILE" | docker compose exec -T db psql -U khoviet -d khoviet
 
 echo "✅ Restore thành công từ: $BACKUP_FILE"
 echo ""
-echo "📋 Khởi động lại API để chạy migration (nếu cần):"
-echo "   docker compose restart api"
+echo "🔄 Api sẽ tự động khởi động lại (migrate deploy chạy lúc start)..."

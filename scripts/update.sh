@@ -3,6 +3,15 @@ set -euo pipefail
 
 # ===== Kho Việt — Update =====
 
+# --- Re-exec từ bản copy tạm để tránh git checkout ghi đè script đang chạy ---
+if [ -z "${KHO_VIET_UPDATE_REEXEC:-}" ]; then
+  TMPSCRIPT="$(mktemp)"
+  cp "$0" "$TMPSCRIPT"
+  chmod +x "$TMPSCRIPT"
+  export KHO_VIET_UPDATE_REEXEC=1
+  exec "$TMPSCRIPT" "$@"
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -10,10 +19,21 @@ cd "$ROOT_DIR"
 
 TAG="${1:-}"
 
+# ---------- Kiểm tra thay đổi local ----------
+
+DIRTY="$(git status --porcelain)"
+if [ -n "$DIRTY" ]; then
+  echo "❌ Có thay đổi local chưa commit:" >&2
+  echo "$DIRTY" >&2
+  echo "" >&2
+  echo "Hãy commit hoặc stash trước khi update." >&2
+  exit 1
+fi
+
 # ---------- Backup trước ----------
 
 echo "📦 Backup trước khi update..."
-if ! bash "$SCRIPT_DIR/backup.sh"; then
+if ! bash scripts/backup.sh; then
   echo "❌ Backup thất bại. Huỷ update." >&2
   exit 1
 fi
