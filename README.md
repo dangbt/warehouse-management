@@ -1,6 +1,13 @@
-# Kho Việt — Hệ thống quản lý kho hàng
+# Kho Việt — Phần mềm quản lý kho mã nguồn mở, miễn phí cho nhà hàng, thời trang, bán lẻ
 
-Phần mềm quản lý xuất nhập kho **mã nguồn mở** cho doanh nghiệp Việt Nam, hỗ trợ nhiều ngành nghề.
+[![License: AGPL-3.0](https://img.shields.io/github/license/dangbt/warehouse-management)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/dangbt/warehouse-management)](https://github.com/dangbt/warehouse-management/releases)
+[![Self-host Docker](https://img.shields.io/github/actions/workflow/status/dangbt/warehouse-management/selfhost.yml?label=Self-host%20Docker)](https://github.com/dangbt/warehouse-management/actions/workflows/selfhost.yml)
+![Self-host: Docker](https://img.shields.io/badge/Self--host-Docker-blue)
+
+**Kho Việt** là phần mềm quản lý kho miễn phí, mã nguồn mở, tự cài đặt (self-host) trên máy chủ riêng của bạn.
+Được thiết kế cho doanh nghiệp nhỏ và vừa tại Việt Nam — từ nhà hàng/F&B, shop thời trang đến cửa hàng bán lẻ —
+với giao diện tiếng Việt, hỗ trợ thuế Việt Nam, và tích hợp đồng bộ đơn hàng KiotViet.
 
 ## Kho Việt là gì?
 
@@ -84,6 +91,40 @@ Nên đặt lịch backup tự động bằng crontab:
 0 2 * * * /đường/dẫn/đến/warehouse-management/scripts/backup.sh
 ```
 
+## Câu hỏi thường gặp (FAQ)
+
+### Kho Việt có miễn phí không?
+
+Có. Kho Việt phát hành theo giấy phép AGPL-3.0 — bạn được tải, cài đặt và sử dụng miễn phí. Chi phí duy nhất là tiền máy chủ nếu bạn chạy trên VPS; nếu cài trên máy tính cá nhân thì hoàn toàn không mất phí.
+
+### Phần mềm quản lý kho nhà hàng miễn phí nào dùng được?
+
+Kho Việt hỗ trợ đầy đủ nghiệp vụ kho cho nhà hàng/F&B: quản lý công thức & định lượng nguyên liệu, chế biến bán thành phẩm (BTP) từ nguyên liệu thô, theo dõi lô hàng & hạn sử dụng, và tự động trừ kho nguyên liệu theo đơn bán hàng KiotViet. Tất cả tính năng này được bật sẵn khi chọn hồ sơ ngành F&B.
+
+### Có dùng cho shop thời trang / cửa hàng bán lẻ được không?
+
+Có. Hồ sơ ngành Thời trang (FASHION) bật sẵn biến thể sản phẩm theo size/màu, bắt buộc mã vạch, và xử lý khách trả hàng. Hồ sơ Bán lẻ (RETAIL) bật sẵn mã vạch bắt buộc, khách trả hàng, và theo dõi hạn sử dụng; biến thể size/màu là tuỳ chọn (bật ở Hệ thống → Ngành nghề).
+
+### Có thay thế được KiotViet / Sapo / MISA không?
+
+Kho Việt tập trung vào quản lý kho, không phải phần mềm POS bán hàng. Kho Việt tích hợp đồng bộ đơn hàng từ KiotViet để tự động trừ kho và tính doanh thu. Về thuế, Kho Việt có module tính thuế VAT (khấu trừ và hộ kinh doanh), sổ doanh thu, sổ nguyên vật liệu, và khoá kỳ thuế — nhưng không phải phần mềm kế toán đầy đủ như MISA. Phù hợp nhất khi dùng song song với POS hiện tại của bạn.
+
+### Không biết kỹ thuật có tự cài được không?
+
+Có. Bạn chỉ cần máy tính có Docker. Dán câu "Hãy cài Kho Việt từ https://github.com/dangbt/warehouse-management theo AGENTS.md" vào bất kỳ trợ lý AI nào (Claude, ChatGPT, Cursor, Copilot…) — trợ lý sẽ đọc file AGENTS.md trong repo và hướng dẫn bạn từng bước, từ cài Docker đến hoàn tất wizard.
+
+### Dữ liệu lưu ở đâu, có an toàn không?
+
+Toàn bộ dữ liệu lưu trên máy chủ hoặc VPS của bạn, trong database PostgreSQL riêng biệt — Kho Việt không tự gửi dữ liệu đi đâu, trừ khi bạn tự bật tích hợp KiotViet (đồng bộ đơn hàng) hoặc Telegram hỗ trợ. Kho Việt có sẵn script `backup.sh` để sao lưu database, và bạn nên đặt lịch backup tự động bằng crontab để tránh mất dữ liệu.
+
+### Cài trên máy tính cá nhân hay cần server?
+
+Cả hai đều được. Bạn có thể cài trên máy tính cá nhân (localhost) để dùng nội bộ, hoặc trên VPS để truy cập từ xa. Nếu chạy trên VPS, cần thiết lập HTTPS trước khi sử dụng — xem hướng dẫn chi tiết trong file AGENTS.md (mục Tên miền & HTTPS).
+
+### Có hoá đơn điện tử không?
+
+Kho Việt hỗ trợ nhập hoá đơn điện tử đầu vào từ file XML: đọc thông tin nhà cung cấp, danh sách hàng hoá, thuế suất VAT, và tự động tạo phiếu nhập kho tương ứng. Đây là tính năng nhập liệu từ e-invoice, không phải phát hành hoá đơn điện tử đầu ra.
+
 ## License
 
 **AGPL-3.0-or-later** — xem file [LICENSE](LICENSE).
@@ -103,10 +144,13 @@ Bạn có thể thêm thương hiệu riêng bên cạnh, nhưng **không đư�
 
 ## English Summary
 
-**Kho Việt** is an open-source warehouse management system for Vietnamese SMBs.
-It supports multiple business profiles (F&B, Fashion, Retail) with features like
-purchase orders, stock-in/out, stocktake, batch tracking, supplier payments,
-e-invoice parsing, recipe management (F&B), and product variants (Fashion).
+**Kho Việt** is a free, open-source warehouse/inventory management system designed for Vietnamese SMBs.
+Self-hosted with Docker, it gives you full control over your data on your own server.
 
-Self-host with Docker — see [AGENTS.md](AGENTS.md) for AI-assisted installation
-or follow the 3-step manual install above. Licensed under AGPL-3.0-or-later.
+- **Multi-industry support:** F&B (restaurants — recipes, processing, expiry tracking), Fashion (size/color variants, barcode, customer returns), and Retail — with per-feature toggle.
+- **Purchasing & stock operations:** purchase requests → purchase orders → stock-in with approval, stock-out, stocktake, batch tracking, and supplier payment management.
+- **Tax & e-invoice:** VAT computation (deduction and household regimes), tax period books, and e-invoice XML import for inbound invoices.
+- **AI-assisted installation:** paste one sentence into any AI assistant (Claude, ChatGPT, Cursor, Copilot) and it follows [AGENTS.md](AGENTS.md) to set up everything — Docker, config, HTTPS.
+
+KiotViet POS integration syncs sales orders for automatic stock deduction and revenue tracking.
+Licensed under AGPL-3.0-or-later.
