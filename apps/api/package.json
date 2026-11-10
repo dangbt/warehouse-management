@@ -7,7 +7,7 @@
   "description": "",
   "author": "",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "seed:profile": "tsx prisma/seed-profile.ts",

@@ -1,6 +1,7 @@
 {
   "name": "warehouse-management",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "packageManager": "npm@10.9.7",
   "workspaces": [
     "apps/*",
