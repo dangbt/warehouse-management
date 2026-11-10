@@ -70,6 +70,8 @@ Tên/logo hiển thị ở thanh tiêu đề, trang đăng nhập và tab trình
   `PUT /api/v1/settings/branding` body `{ "name": "...", "shortName": "AB", "logoUrl": "https://...", "primaryColor": "#0f766e" }`
   (`primaryColor` hex 6 ký tự, tuỳ chọn; gửi `""` để về màu mặc định).
 
+> **Lưu ý:** Dòng "Powered by Kho Việt — dangbt" là bắt buộc theo NOTICE (AGPL §7(b)), không thể đổi hoặc ẩn.
+
 ## 6. Kiểm tra sau deploy
 
 - [ ] `GET <api>/api/v1/health` OK
