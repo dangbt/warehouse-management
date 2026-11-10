@@ -1,9 +1,9 @@
 import { DEFAULT_BRANDING, initialsOf, sanitizeBranding } from './branding';
 
 describe('branding', () => {
-  it('mặc định là Mâm Vị', () => {
+  it('mặc định là Kho Việt', () => {
     expect(sanitizeBranding(undefined)).toEqual(DEFAULT_BRANDING);
-    expect(DEFAULT_BRANDING.name).toBe('Mâm Vị');
+    expect(DEFAULT_BRANDING.name).toBe('Kho Việt');
   });
 
   it('giữ giá trị hợp lệ, bỏ giá trị sai', () => {
@@ -21,6 +21,6 @@ describe('branding', () => {
 
   it('initialsOf lấy chữ cái đầu', () => {
     expect(initialsOf('Shop Thời Trang')).toBe('ST');
-    expect(initialsOf('   ')).toBe('MV');
+    expect(initialsOf('   ')).toBe('KV');
   });
 });

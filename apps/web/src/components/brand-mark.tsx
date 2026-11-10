@@ -1,6 +1,6 @@
 import type { Branding } from '@/data/use-branding'
 
-/** Logo tròn ở thanh tiêu đề: ảnh từ cấu hình; Mâm Vị mặc định giữ nguyên huy hiệu "MV". */
+/** Logo tròn ở thanh tiêu đề: ảnh từ cấu hình; mặc định giữ nguyên huy hiệu viết tắt. */
 export function BrandMark({ brand }: { brand: Branding }) {
   if (brand.logoUrl && brand.logoUrl !== '/logo.svg') {
     return <img src={brand.logoUrl} alt={brand.name} className="h-6 w-6 mr-2 shrink-0 object-contain" />

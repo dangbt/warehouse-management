@@ -35,7 +35,7 @@ async function selectByText(select: Locator, text: string) {
   await select.selectOption(value)
 }
 
-test.describe('Warehouse Mâm Vị - Full Flow', () => {
+test.describe('Warehouse Kho Việt - Full Flow', () => {
   test.describe('Authentication', () => {
     test('login with wrong password shows error', async ({ page }) => {
       await page.goto('/login')
