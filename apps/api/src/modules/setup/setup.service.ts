@@ -19,11 +19,20 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Injectable()
 export class SetupService {
+  private setupTokenWarned = false;
+
   constructor(private prisma: PrismaService) {}
 
   /** Cần cài đặt lần đầu khi DB chưa có user nào. */
   async needsSetup(): Promise<boolean> {
-    return (await this.prisma.user.count()) === 0;
+    const needs = (await this.prisma.user.count()) === 0;
+    if (needs && !process.env.SETUP_TOKEN && !this.setupTokenWarned) {
+      this.setupTokenWarned = true;
+      console.warn(
+        '⚠ SETUP_TOKEN chưa được cấu hình — bất kỳ ai truy cập /setup đều có thể cài đặt hệ thống. ' + 'Đặt SETUP_TOKEN để bảo vệ wizard.',
+      );
+    }
+    return needs;
   }
 
   async run(dto: SetupDto) {

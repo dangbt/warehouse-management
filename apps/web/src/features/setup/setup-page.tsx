@@ -25,10 +25,12 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 export function SetupPage() {
   const navigate = useNavigate()
   const [error, setError] = useState('')
-  const status = useQuery<{ needsSetup: boolean }>(
+  const [setupToken, setSetupToken] = useState('')
+  const status = useQuery<{ needsSetup: boolean; requiresToken?: boolean }>(
     { queryKey: ['setup', 'status'], queryFn: () => api.get('/setup/status'), retry: false },
     queryClient,
   )
+  const requiresToken = status.data?.requiresToken ?? false
   const {
     register,
     handleSubmit,
@@ -45,7 +47,11 @@ export function SetupPage() {
   const onSubmit = async (data: SetupForm) => {
     try {
       setError('')
-      await api.post('/setup', toPayload(data))
+      const headers: Record<string, string> = {}
+      if (requiresToken && setupToken) {
+        headers['x-setup-token'] = setupToken
+      }
+      await api.post('/setup', toPayload(data), headers)
       queryClient.removeQueries({ queryKey: ['setup'] })
       queryClient.removeQueries({ queryKey: ['settings'] })
       navigate({ to: '/login' })
@@ -59,6 +65,19 @@ export function SetupPage() {
       <form onSubmit={handleSubmit(onSubmit)} data-testid="setup-form" className="w-[480px] bg-white border border-win-grid-border shadow-md">
         <div className="px-4 py-3 border-b border-win-grid-border font-semibold">Cài đặt lần đầu</div>
         <div className="p-5 space-y-3">
+          {requiresToken && (
+            <Field label="Mã cài đặt:" error={!setupToken && error ? 'Vui lòng nhập mã cài đặt' : undefined}>
+              <input
+                data-testid="setup-token-input"
+                type="password"
+                value={setupToken}
+                onChange={(e) => setSetupToken(e.target.value)}
+                className={INPUT}
+                placeholder="SETUP_TOKEN"
+                required
+              />
+            </Field>
+          )}
           <Field label="Ngành nghề:">
             <select {...register('profile')} className={INPUT}>
               {PROFILE_OPTIONS.map((o) => (

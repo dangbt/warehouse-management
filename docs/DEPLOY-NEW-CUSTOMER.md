@@ -24,7 +24,8 @@ Mỗi khách có **DB riêng + API riêng + web riêng**, cùng một codebase. 
 | Biến | Giá trị |
 | --- | --- |
 | `DATABASE_URL` | connection string Neon ở bước 1 |
-| `JWT_SECRET` | chuỗi ngẫu nhiên dài (`openssl rand -hex 32`), **mỗi khách một giá trị** |
+| `JWT_SECRET` | chuỗi ngẫu nhiên **≥ 32 ký tự** (`openssl rand -hex 32`), **mỗi khách một giá trị**, bắt buộc |
+| `SETUP_TOKEN` | (tuỳ chọn) chuỗi bí mật bảo vệ wizard `/setup` — nếu đặt, người dùng phải nhập mã này khi cài đặt lần đầu |
 | `BUSINESS_PROFILE` | `FNB` \| `FASHION` \| `RETAIL` (profile mặc định khi DB chưa có cấu hình) |
 | `NODE_ENV` | `production` |
 
