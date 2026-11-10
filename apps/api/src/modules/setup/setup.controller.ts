@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Headers, Post } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { SetupService } from './setup.service';
 import type { SetupDto } from './setup.service';
@@ -33,7 +33,7 @@ export class SetupController {
     const expected = process.env.SETUP_TOKEN;
     if (expected) {
       if (!token || !safeEqual(token, expected)) {
-        throw new UnauthorizedException('Mã cài đặt không đúng');
+        throw new ForbiddenException('Mã cài đặt không đúng');
       }
     }
     return this.svc.run(body);

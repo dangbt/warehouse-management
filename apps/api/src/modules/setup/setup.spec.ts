@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 import { SetupController } from './setup.controller';
 import { SetupService } from './setup.service';
 
@@ -72,19 +72,19 @@ describe('SetupController — SETUP_TOKEN', () => {
       process.env.SETUP_TOKEN = 'my-secret-token';
     });
 
-    it('thiếu header → 401', () => {
+    it('thiếu header → 403', () => {
       expect(() => {
         controller.run(VALID_DTO, undefined);
-      }).toThrow(UnauthorizedException);
+      }).toThrow(ForbiddenException);
     });
 
-    it('token sai → 401 với message tiếng Việt', () => {
+    it('token sai → 403 với message tiếng Việt', () => {
       try {
         controller.run(VALID_DTO, 'wrong-token');
         throw new Error('phải ném lỗi');
       } catch (e) {
-        expect(e).toBeInstanceOf(UnauthorizedException);
-        expect((e as UnauthorizedException).message).toBe('Mã cài đặt không đúng');
+        expect(e).toBeInstanceOf(ForbiddenException);
+        expect((e as ForbiddenException).message).toBe('Mã cài đặt không đúng');
       }
     });
 

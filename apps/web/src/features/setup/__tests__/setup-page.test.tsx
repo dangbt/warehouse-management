@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 /* ─── Mocks ─── */
 const mockGet = vi.fn()
@@ -71,5 +72,29 @@ describe('SetupPage — ô mã cài đặt', () => {
     queryData = { needsSetup: true }
     render(<SetupPage />)
     expect(screen.queryByTestId('setup-token-input')).not.toBeInTheDocument()
+  })
+
+  it('POST /setup trả 403 → hiển thị "Mã cài đặt không đúng", không chuyển trang', async () => {
+    queryData = { needsSetup: true, requiresToken: true }
+    mockPost.mockRejectedValue(new Error('Mã cài đặt không đúng'))
+    const user = userEvent.setup()
+    render(<SetupPage />)
+
+    // Điền form bắt buộc — dùng name attribute vì label không có htmlFor
+    await user.type(screen.getByTestId('setup-token-input'), 'wrong-token')
+    await user.type(document.querySelector('input[name="companyName"]')!, 'ACME')
+    await user.type(document.querySelector('input[name="fullName"]')!, 'Admin')
+    await user.type(document.querySelector('input[name="email"]')!, 'a@b.com')
+    await user.type(document.querySelector('input[name="password"]')!, '123456')
+
+    // Submit
+    await user.click(screen.getByRole('button', { name: /Hoàn tất cài đặt/ }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Mã cài đặt không đúng')).toBeInTheDocument()
+    })
+
+    // Không gọi navigate (không logout/redirect)
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 })
