@@ -65,16 +65,38 @@ fi
 echo "🔖 Chuyển sang tag: $TAG"
 git checkout "$TAG"
 
+# ---------- Cập nhật KHO_VIET_VERSION ----------
+
+ENV_FILE="$ROOT_DIR/.env"
+KHO_VIET_VERSION="${TAG#v}"
+
+if [ -f "$ENV_FILE" ]; then
+  if grep -q '^KHO_VIET_VERSION=' "$ENV_FILE"; then
+    sed -i "s|^KHO_VIET_VERSION=.*|KHO_VIET_VERSION=${KHO_VIET_VERSION}|" "$ENV_FILE"
+  else
+    echo "KHO_VIET_VERSION=${KHO_VIET_VERSION}" >> "$ENV_FILE"
+  fi
+  echo "   ✅ KHO_VIET_VERSION=${KHO_VIET_VERSION}"
+fi
+
+# ---------- Pull hoặc build ----------
+
 echo ""
-echo "🐳 Rebuild và khởi động containers..."
-docker compose up -d --build
+echo "🐳 Khởi động containers..."
+
+if docker compose pull api web 2>/dev/null; then
+  echo "   ✅ Đã tải image dựng sẵn."
+  docker compose up -d --no-build
+else
+  echo "   ⚠️  Không tải được image dựng sẵn, chuyển sang tự build (lâu hơn)..."
+  docker compose up -d --build
+fi
 
 # ---------- Chờ health ----------
 
 echo ""
 echo "⏳ Chờ hệ thống sẵn sàng (tối đa 180s)..."
 
-ENV_FILE="$ROOT_DIR/.env"
 CURRENT_PORT=$(grep -E '^HTTP_PORT=' "$ENV_FILE" 2>/dev/null | cut -d= -f2)
 CURRENT_PORT="${CURRENT_PORT:-8080}"
 

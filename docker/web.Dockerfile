@@ -22,6 +22,7 @@ RUN npm run build -w @wms/web
 
 # ---------- nginx stage ----------
 FROM nginx:alpine
+LABEL org.opencontainers.image.source=https://github.com/dangbt/warehouse-management
 
 # Remove default config
 RUN rm /etc/nginx/conf.d/default.conf

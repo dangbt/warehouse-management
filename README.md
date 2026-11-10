@@ -61,7 +61,7 @@ git clone https://github.com/dangbt/warehouse-management.git
 cd warehouse-management
 git checkout "$(git tag -l 'v*' --sort=-version:refname | head -n 1)"
 
-# 2. Chạy script cài đặt
+# 2. Chạy script cài đặt (tự tải image dựng sẵn; nếu không tải được sẽ tự build 5–15 phút)
 ./scripts/install.sh --profile=FNB --port=8080
 
 # 3. Mở trình duyệt → http://localhost:8080 → hoàn tất wizard cài đặt
