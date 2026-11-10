@@ -42,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     # Tạm thời cho phép fail — spec có thể phụ thuộc dữ liệu/cổng không có trong Docker stack
     continue-on-error: true
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
