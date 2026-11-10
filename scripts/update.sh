@@ -3,17 +3,24 @@ set -euo pipefail
 
 # ===== Kho Việt — Update =====
 
+# Tính ROOT_DIR từ vị trí script thật TRƯỚC khi re-exec
+# (sau re-exec BASH_SOURCE[0] trỏ vào /tmp nên không dùng được)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # --- Re-exec từ bản copy tạm để tránh git checkout ghi đè script đang chạy ---
 if [ -z "${KHO_VIET_UPDATE_REEXEC:-}" ]; then
   TMPSCRIPT="$(mktemp)"
   cp "$0" "$TMPSCRIPT"
   chmod +x "$TMPSCRIPT"
   export KHO_VIET_UPDATE_REEXEC=1
+  export KHO_VIET_ROOT="$ROOT_DIR"
   exec "$TMPSCRIPT" "$@"
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Sau re-exec: dùng ROOT_DIR đã export, xoá file tạm khi kết thúc
+ROOT_DIR="${KHO_VIET_ROOT}"
+trap 'rm -f "$0"' EXIT
 
 cd "$ROOT_DIR"
 
@@ -33,7 +40,7 @@ fi
 # ---------- Backup trước ----------
 
 echo "📦 Backup trước khi update..."
-if ! bash scripts/backup.sh; then
+if ! bash "$ROOT_DIR/scripts/backup.sh"; then
   echo "❌ Backup thất bại. Huỷ update." >&2
   exit 1
 fi
