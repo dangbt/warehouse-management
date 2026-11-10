@@ -26,7 +26,8 @@ export function createApiClient(baseUrl: string, getToken: TokenGetter, onUnauth
 
   return {
     get: (path: string) => request(path),
-    post: (path: string, body: unknown) => request(path, { method: 'POST', body: JSON.stringify(body) }),
+    post: (path: string, body: unknown, headers?: Record<string, string>) =>
+      request(path, { method: 'POST', body: JSON.stringify(body), ...(headers ? { headers } : {}) }),
     put: (path: string, body: unknown) => request(path, { method: 'PUT', body: JSON.stringify(body) }),
     delete: (path: string) => request(path, { method: 'DELETE' }),
   }

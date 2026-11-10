@@ -25,7 +25,7 @@ export default defineConfig({
       timeout: 30000,
       env: {
         ...(process.env.DATABASE_URL ? { DATABASE_URL: process.env.DATABASE_URL } : {}),
-        JWT_SECRET: process.env.JWT_SECRET ?? 'wms-super-secret-key-2026',
+        JWT_SECRET: process.env.JWT_SECRET ?? 'e2e-local-test-secret-0123456789abcdef0123456789',
         CORS_ORIGINS: process.env.CORS_ORIGINS ?? 'http://localhost:5173',
       },
     },

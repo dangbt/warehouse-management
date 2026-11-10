@@ -2,8 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { applyBodyLimit } from './body-limit';
+import { assertEnv } from './config/env';
 
 async function bootstrap() {
+  assertEnv(process.env);
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   applyBodyLimit(app);
   app.set('trust proxy', true);
