@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> **Dành cho developer.** Trợ lý AI cài đặt cho người dùng → xem [AGENTS.md](AGENTS.md).
+
 Hướng dẫn cho mọi AI agent làm việc trên repo này.
 
 ## ⛔ RULES (bắt buộc)
