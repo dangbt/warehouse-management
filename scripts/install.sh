@@ -127,6 +127,9 @@ cd "$ROOT_DIR"
 if [ "$FORCE_BUILD" = true ]; then
   echo "   🔨 Chế độ --build: tự build image (5–15 phút)..."
   docker compose up -d --build
+elif ! git describe --tags --exact-match >/dev/null 2>&1; then
+  echo "   ℹ️  Mã nguồn không ở tag release, tự build từ mã nguồn hiện tại…"
+  docker compose up -d --build
 elif docker compose pull api web 2>/dev/null; then
   echo "   ✅ Đã tải image dựng sẵn."
   docker compose up -d --no-build
