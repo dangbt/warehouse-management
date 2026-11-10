@@ -14,6 +14,7 @@ import type { TermKey } from '@/utils/terms'
 import { now } from '@wms/shared'
 import { NavIcon } from '@/components/nav-icons'
 import { BrandMark } from '@/components/brand-mark'
+import { PoweredBy } from '@/components/powered-by'
 import { useApplyBranding } from '@/data/use-branding'
 import type { TreeNode } from '@wms/ui-winforms'
 
@@ -451,6 +452,7 @@ export function AppLayout() {
         <WinStatusBar.Section>Role: {user?.roles?.[0] ?? '-'}</WinStatusBar.Section>
         <WinStatusBar.Section>{now()}</WinStatusBar.Section>
         <WinStatusBar.Section>v{__APP_VERSION__}</WinStatusBar.Section>
+        <WinStatusBar.Section><PoweredBy /></WinStatusBar.Section>
         <div className="flex-1" />
         <SupportWidget />
         <ShortcutHelp />

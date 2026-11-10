@@ -7,6 +7,7 @@ import { api } from '@/services/api'
 import { queryClient } from '@/data/query-client'
 import { PROFILE_OPTIONS, REGIME_OPTIONS, setupSchema, toPayload } from './setup-schema'
 import type { SetupForm } from './setup-schema'
+import { PoweredBy } from '@/components/powered-by'
 
 const INPUT = 'w-full border border-win-input-border h-10 px-2 text-[14px] outline-none focus:border-win-input-focus bg-white'
 
@@ -54,7 +55,7 @@ export function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-auto flex items-center justify-center bg-win-control py-6">
+    <div className="min-h-screen overflow-auto flex flex-col items-center justify-center bg-win-control py-6">
       <form onSubmit={handleSubmit(onSubmit)} data-testid="setup-form" className="w-[480px] bg-white border border-win-grid-border shadow-md">
         <div className="px-4 py-3 border-b border-win-grid-border font-semibold">Cài đặt lần đầu</div>
         <div className="p-5 space-y-3">
@@ -110,6 +111,7 @@ export function SetupPage() {
           </button>
         </div>
       </form>
+      <PoweredBy />
     </div>
   )
 }

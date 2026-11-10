@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { api } from '@/services/api'
 import { queryClient } from '@/data/query-client'
 import { useApplyBranding } from '@/data/use-branding'
+import { PoweredBy } from '@/components/powered-by'
 
 const schema = z.object({
   email: z.string().min(1, 'Vui lòng nhập email').email('Email không hợp lệ'),
@@ -47,7 +48,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-win-control">
+    <div className="h-screen flex flex-col items-center justify-center bg-win-control">
       <form
         onSubmit={handleSubmit(onSubmit)}
         data-testid="login-form"
@@ -95,6 +96,7 @@ export function LoginPage() {
           </button>
         </div>
       </form>
+      <PoweredBy />
     </div>
   )
 }

@@ -85,3 +85,10 @@ describe('LoginPage', () => {
     })
   })
 })
+
+describe('LoginPage — AGPL attribution', () => {
+  it('shows the Powered by notice', () => {
+    render(<LoginPage />)
+    expect(screen.getByTestId('powered-by')).toHaveTextContent(/Powered by/)
+  })
+})
