@@ -2,7 +2,7 @@ import { ChefHat, Lightbulb, TriangleAlert } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback, useLayoutEffect } from 'react'
 import { WarehouseSelect } from '@/components/warehouse-select'
 import { useWarehouseChoice } from '@/hooks/use-warehouse-choice'
 import { VoucherFields } from '@/components/voucher-fields'
@@ -82,7 +82,7 @@ export function ProcessingForm({ open, onClose, onSave }: Props) {
 
   const [resetKey, setResetKey] = useState(0)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (open) {
       setSubmitError('')
       reset({ source_ingredient_id: '', source_qty: 0, output_ingredient_id: '', output_qty: undefined, note: '' })

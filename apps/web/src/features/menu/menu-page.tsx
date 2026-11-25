@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { CircleCheck, Lightbulb, Plus, RefreshCw, Settings, Settings2, TriangleAlert } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput, WinSearchSelect, WinSelect } from '@wms/ui-winforms'
@@ -109,10 +109,10 @@ export function MenuPage() {
   const cfgForm = useForm<ConfigForm>()
   const cfgMode = cfgForm.watch('inventory_mode')
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (addOpen) addForm.reset({ name: '', price: 0, category: 'Món chính' })
   }, [addOpen, addForm])
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (cfgOpen && selected)
       cfgForm.reset({
         inventory_mode: selected.inventoryMode ?? '',

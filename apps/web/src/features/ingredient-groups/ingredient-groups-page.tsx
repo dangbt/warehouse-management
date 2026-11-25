@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Package, Pencil, Plus, RefreshCw } from 'lucide-react'
 import { WinToolbar, WinDataGrid, WinDialog, WinGroupBox, WinInput } from '@wms/ui-winforms'
@@ -112,7 +112,7 @@ export function IngredientGroupsPage() {
     formState: { errors, isSubmitting },
   } = useForm<GroupForm>()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (formOpen) {
       reset(
         mode === 'edit' && selected
