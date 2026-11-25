@@ -71,11 +71,11 @@ ENV_FILE="$ROOT_DIR/.env"
 KHO_VIET_VERSION="${TAG#v}"
 
 if [ -f "$ENV_FILE" ]; then
-  if grep -q '^KHO_VIET_VERSION=' "$ENV_FILE"; then
-    sed -i "s|^KHO_VIET_VERSION=.*|KHO_VIET_VERSION=${KHO_VIET_VERSION}|" "$ENV_FILE"
-  else
-    echo "KHO_VIET_VERSION=${KHO_VIET_VERSION}" >> "$ENV_FILE"
-  fi
+  # Không dùng `sed -i` (GNU vs BSD/macOS khác cú pháp) — ghi qua file tạm.
+  TMP_ENV="$(mktemp "${ENV_FILE}.XXXXXX")"
+  grep -v '^KHO_VIET_VERSION=' "$ENV_FILE" > "$TMP_ENV" || true
+  echo "KHO_VIET_VERSION=${KHO_VIET_VERSION}" >> "$TMP_ENV"
+  mv "$TMP_ENV" "$ENV_FILE"
   echo "   ✅ KHO_VIET_VERSION=${KHO_VIET_VERSION}"
 fi
 
