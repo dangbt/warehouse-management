@@ -42,4 +42,5 @@ jobs:
 
       - run: npx turbo lint
 
-      - run: npx turbo test
+      # E2E cần Postgres + stack đang chạy → chạy ở workflow selfhost.yml (Docker stack).
+      - run: npx turbo test --filter=!@wms/e2e

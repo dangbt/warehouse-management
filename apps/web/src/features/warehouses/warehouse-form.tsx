@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { WinDialog, WinGroupBox, WinInput } from '@wms/ui-winforms'
 import type { Warehouse, WarehouseInput } from '@/data/use-warehouses'
@@ -27,7 +27,9 @@ export function WarehouseForm({ open, mode, data, onClose, onSave }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>()
 
-  useEffect(() => {
+  // useLayoutEffect: reset trước khi trình duyệt vẽ input của dialog — nếu dùng
+  // useEffect, người gõ nhanh (hoặc quét mã vạch) ngay khi mở sẽ bị reset xoá mất chữ.
+  useLayoutEffect(() => {
     if (!open) return
     reset(
       mode === 'edit' && data

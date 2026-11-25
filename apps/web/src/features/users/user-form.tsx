@@ -2,7 +2,7 @@ import { Pencil, Plus, TriangleAlert } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { WinDialog, WinGroupBox, WinInput, WinSelect } from '@wms/ui-winforms'
 import { api } from '@/services/api'
 
@@ -45,7 +45,9 @@ export function UserForm({ open, mode, data, onClose, onSave }: Props) {
   const [roles, setRoles] = useState<{ value: string; label: string }[]>([])
   const [submitError, setSubmitError] = useState('')
 
-  useEffect(() => {
+  // useLayoutEffect: reset trước khi trình duyệt vẽ input của dialog — nếu dùng
+  // useEffect, người gõ nhanh (hoặc quét mã vạch) ngay khi mở sẽ bị reset xoá mất chữ.
+  useLayoutEffect(() => {
     if (open) {
       setSubmitError('')
       reset(

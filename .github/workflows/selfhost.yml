@@ -40,8 +40,6 @@ jobs:
     name: E2E Playwright on Docker stack
     needs: smoke
     runs-on: ubuntu-latest
-    # Tạm thời cho phép fail — spec có thể phụ thuộc dữ liệu/cổng không có trong Docker stack
-    continue-on-error: true
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +48,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      # Một số spec API gọi thẳng http://localhost:3000/api/v1 → mở cổng API (chỉ trong CI).
+      - name: Expose API port for API specs
+        run: |
+          cat > docker-compose.override.yml <<'YAML'
+          services:
+            api:
+              ports:
+                - "3000:3000"
+          YAML
 
       - name: Install & start stack
         run: ./scripts/install.sh --profile=FNB --port=8080

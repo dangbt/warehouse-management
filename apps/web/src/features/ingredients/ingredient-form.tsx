@@ -2,7 +2,7 @@ import { Pencil, Plus, TriangleAlert, Wand2 } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useEffect, useState, useCallback } from 'react'
+import { useLayoutEffect, useState, useCallback } from 'react'
 import { useFormHotkeys } from '@/hooks/use-form-hotkeys'
 import { WinDialog, WinGroupBox, WinInput, WinSelect, WinSearchSelect } from '@wms/ui-winforms'
 import { UNIT_OPTIONS } from '@wms/shared'
@@ -111,7 +111,9 @@ export function IngredientForm({ open, mode, data, onClose, onSave }: Props) {
 
   const [resetKey, setResetKey] = useState(0)
 
-  useEffect(() => {
+  // useLayoutEffect: reset trước khi trình duyệt vẽ input của dialog — nếu dùng
+  // useEffect, người gõ nhanh (hoặc quét mã vạch) ngay khi mở sẽ bị reset xoá mất chữ.
+  useLayoutEffect(() => {
     if (open) {
       setSubmitError('')
       reset(
