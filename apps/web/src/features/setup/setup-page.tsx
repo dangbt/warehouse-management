@@ -14,8 +14,11 @@ const INPUT = 'w-full border border-win-input-border h-10 px-2 text-[14px] outli
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs block mb-1">{label}</label>
-      {children}
+      {/* Bọc input trong <label> để gắn nhãn (a11y + trình duyệt không autofill nhầm ô). */}
+      <label className="block">
+        <span className="text-xs block mb-1">{label}</span>
+        {children}
+      </label>
       {error && <p className="text-win-xs text-win-error mt-0.5">{error}</p>}
     </div>
   )
@@ -70,6 +73,7 @@ export function SetupPage() {
               <input
                 data-testid="setup-token-input"
                 type="password"
+                autoComplete="off"
                 value={setupToken}
                 onChange={(e) => setSetupToken(e.target.value)}
                 className={INPUT}
@@ -88,13 +92,13 @@ export function SetupPage() {
             </select>
           </Field>
           <Field label="Tên doanh nghiệp (hiển thị trên app & chứng từ):" error={errors.companyName?.message}>
-            <input {...register('companyName')} className={INPUT} />
+            <input {...register('companyName')} autoComplete="organization" className={INPUT} />
           </Field>
           <Field label="Mã số thuế:" error={errors.taxCode?.message}>
             <input {...register('taxCode')} className={INPUT} placeholder="10 hoặc 13 chữ số" />
           </Field>
           <Field label="Địa chỉ:">
-            <input {...register('address')} className={INPUT} />
+            <input {...register('address')} autoComplete="street-address" className={INPUT} />
           </Field>
           <Field label="Chế độ thuế:">
             <select {...register('taxRegime')} className={INPUT}>
@@ -110,13 +114,13 @@ export function SetupPage() {
           </Field>
           <div className="border-t border-win-grid-border pt-3 text-xs font-semibold">Tài khoản quản trị</div>
           <Field label="Họ tên:" error={errors.fullName?.message}>
-            <input {...register('fullName')} className={INPUT} />
+            <input {...register('fullName')} autoComplete="name" className={INPUT} />
           </Field>
           <Field label="Email:" error={errors.email?.message}>
-            <input {...register('email')} className={INPUT} />
+            <input {...register('email')} autoComplete="username" className={INPUT} />
           </Field>
           <Field label="Mật khẩu:" error={errors.password?.message}>
-            <input type="password" {...register('password')} className={INPUT} />
+            <input type="password" {...register('password')} autoComplete="new-password" className={INPUT} />
           </Field>
           {error && <p className="text-win-xs text-win-error">{error}</p>}
         </div>

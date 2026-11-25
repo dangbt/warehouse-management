@@ -20,6 +20,24 @@ rand_hex() {
   fi
 }
 
+# Ghi/ghi đè KEY=VALUE trong .env. Không dùng `sed -i` vì cú pháp khác nhau
+# giữa GNU sed (Linux) và BSD sed (macOS).
+set_env() {
+  local key="$1" value="$2" tmp
+  tmp="$(mktemp "${ENV_FILE}.XXXXXX")"
+  if grep -q "^${key}=" "$ENV_FILE"; then
+    awk -v k="$key" -v v="$value" 'index($0, k "=") == 1 { print k "=" v; next } { print }' "$ENV_FILE" > "$tmp"
+  else
+    cat "$ENV_FILE" > "$tmp"
+    printf '%s=%s\n' "$key" "$value" >> "$tmp"
+  fi
+  mv "$tmp" "$ENV_FILE"
+}
+
+get_env() {
+  grep -E "^$1=" "$ENV_FILE" 2>/dev/null | head -n 1 | cut -d= -f2- || true
+}
+
 check_docker() {
   command -v docker >/dev/null 2>&1 || die "Docker chưa được cài. Hãy cài Docker trước: https://docs.docker.com/get-docker/"
   docker compose version >/dev/null 2>&1 || die "Docker Compose (v2 plugin) chưa được cài."
@@ -66,23 +84,23 @@ if [ ! -f "$ENV_FILE" ]; then
   if [ ! -f "$ENV_EXAMPLE" ]; then
     die "Không tìm thấy $ENV_EXAMPLE"
   fi
-
   echo "📝 Tạo .env từ .env.example..."
   cp "$ENV_EXAMPLE" "$ENV_FILE"
-
-  # Sinh secret ngẫu nhiên
-  JWT_SECRET="$(rand_hex)"
-  POSTGRES_PASSWORD="$(rand_hex)"
-  SETUP_TOKEN="$(rand_hex)"
-
-  # Ghi vào .env
-  sed -i "s|^JWT_SECRET=.*|JWT_SECRET=${JWT_SECRET}|" "$ENV_FILE"
-  sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=${POSTGRES_PASSWORD}|" "$ENV_FILE"
-  sed -i "s|^SETUP_TOKEN=.*|SETUP_TOKEN=${SETUP_TOKEN}|" "$ENV_FILE"
-
-  echo "   ✅ Đã sinh JWT_SECRET, POSTGRES_PASSWORD, SETUP_TOKEN ngẫu nhiên."
 else
-  echo "📝 .env đã tồn tại, giữ nguyên."
+  echo "📝 .env đã tồn tại, giữ nguyên giá trị đã có."
+fi
+
+# Sinh secret ngẫu nhiên cho mọi secret còn trống (kể cả khi lần cài trước
+# bị dừng giữa chừng). Không bao giờ ghi đè secret đã có.
+GENERATED=""
+for key in JWT_SECRET POSTGRES_PASSWORD SETUP_TOKEN; do
+  if [ -z "$(get_env "$key")" ]; then
+    set_env "$key" "$(rand_hex)"
+    GENERATED="${GENERATED} ${key}"
+  fi
+done
+if [ -n "$GENERATED" ]; then
+  echo "   ✅ Đã sinh ngẫu nhiên:${GENERATED}"
 fi
 
 # Áp dụng --profile nếu được chỉ định
@@ -91,13 +109,13 @@ if [ -n "$PROFILE" ]; then
     FNB|FASHION|RETAIL) ;;
     *) die "Profile không hợp lệ: $PROFILE. Chọn FNB, FASHION, hoặc RETAIL." ;;
   esac
-  sed -i "s|^BUSINESS_PROFILE=.*|BUSINESS_PROFILE=${PROFILE}|" "$ENV_FILE"
+  set_env BUSINESS_PROFILE "$PROFILE"
   echo "   ✅ BUSINESS_PROFILE=${PROFILE}"
 fi
 
 # Áp dụng --port nếu được chỉ định
 if [ -n "$PORT" ]; then
-  sed -i "s|^HTTP_PORT=.*|HTTP_PORT=${PORT}|" "$ENV_FILE"
+  set_env HTTP_PORT "$PORT"
   echo "   ✅ HTTP_PORT=${PORT}"
 fi
 
@@ -108,15 +126,11 @@ if TAG="$(git describe --tags --exact-match 2>/dev/null)"; then
 fi
 
 # Ghi KHO_VIET_VERSION vào .env
-if grep -q '^KHO_VIET_VERSION=' "$ENV_FILE"; then
-  sed -i "s|^KHO_VIET_VERSION=.*|KHO_VIET_VERSION=${KHO_VIET_VERSION}|" "$ENV_FILE"
-else
-  echo "KHO_VIET_VERSION=${KHO_VIET_VERSION}" >> "$ENV_FILE"
-fi
+set_env KHO_VIET_VERSION "$KHO_VIET_VERSION"
 echo "   ✅ KHO_VIET_VERSION=${KHO_VIET_VERSION}"
 
 # Đọc port hiện tại từ .env
-CURRENT_PORT=$(grep -E '^HTTP_PORT=' "$ENV_FILE" | cut -d= -f2)
+CURRENT_PORT="$(get_env HTTP_PORT)"
 CURRENT_PORT="${CURRENT_PORT:-8080}"
 
 echo ""
@@ -162,7 +176,7 @@ echo ""
 
 if [ "$HEALTHY" = true ]; then
   # Đọc SETUP_TOKEN từ .env
-  CURRENT_SETUP_TOKEN=$(grep -E '^SETUP_TOKEN=' "$ENV_FILE" | cut -d= -f2)
+  CURRENT_SETUP_TOKEN="$(get_env SETUP_TOKEN)"
 
   echo "✅ Kho Việt đã chạy thành công!"
   echo ""

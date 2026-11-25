@@ -1,7 +1,6 @@
 # ---------- build stage ----------
 # Always build on the host arch — Vite output is static HTML/JS/CSS,
-# no native binaries. This avoids the rolldown arm64-musl binding issue
-# when the lockfile was created on x86_64.
+# no native binaries, so one build stage serves every target platform.
 ARG BUILDPLATFORM
 FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 
@@ -15,6 +14,11 @@ COPY packages/ui-winforms/package.json packages/ui-winforms/
 
 # Install web workspace + workspace deps
 RUN npm ci -w @wms/web -w @wms/shared -w @wms/ui-winforms --include-workspace-root
+
+# Lockfile chỉ chứa native binding của máy sinh ra nó (npm/cli#4828) → build
+# trên arm64 (Apple Silicon, ARM VPS) thiếu rolldown/lightningcss/oxide binding.
+COPY docker/ensure-native-bindings.mjs /tmp/ensure-native-bindings.mjs
+RUN node /tmp/ensure-native-bindings.mjs /app
 
 # Copy source for packages (web imports them as TS)
 COPY packages/shared packages/shared
